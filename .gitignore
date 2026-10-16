@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env
+*.sqlite
+*.db
+.DS_Store
+.obsidian/workspace*.json
