@@ -112,6 +112,26 @@ export interface SimConfig {
     stressRiseH: number;
     stressRecoveryH: number;
   };
+  /** Root/Oxygen model เชิงการสอน (ARCHITECTURE § 11.4), ไม่มี DO Sensor */
+  root: {
+    /** Oxygen เริ่มต้น / ดุลยภาพเมื่อ Pump ON / OFF (ดัชนีไร้หน่วย [0,1]) */
+    initialOxygen: number;
+    oxygenOnTarget: number;
+    oxygenOffTarget: number;
+    /** อุณหภูมิอ้างอิง / ช่วงที่ Oxygen capacity ลดจนศูนย์ (°C), span > 0 */
+    oxygenTempRefC: number;
+    oxygenTempSpanC: number;
+    /** ระดับน้ำขั้นต่ำที่ Air Pump ให้ผลเต็มตาม Model (%, > 0 ถึง 100) */
+    oxygenMinLevelPct: number;
+    /** Time constant Oxygen เพิ่ม / ลด (h, > 0) */
+    oxygenRiseH: number;
+    oxygenFallH: number;
+    /** Oxygen ที่ไม่จำกัด Root Health (ดัชนีไร้หน่วย (0,1]) */
+    healthyOxygen: number;
+    /** Time constant Root Health เสื่อม / ฟื้น (h, > 0) */
+    healthDeclineH: number;
+    healthRecoveryH: number;
+  };
   power: {
     ledW: number;
     fanW: number;
@@ -237,6 +257,19 @@ export const DEFAULT_CONFIG: SimConfig = {
     phCardinal: [4, 5.5, 6.8, 9],
     stressRiseH: 6,
     stressRecoveryH: 12,
+  },
+  root: {
+    initialOxygen: 0.95,
+    oxygenOnTarget: 0.95,
+    oxygenOffTarget: 0.2,
+    oxygenTempRefC: 24,
+    oxygenTempSpanC: 16,
+    oxygenMinLevelPct: 10,
+    oxygenRiseH: 2,
+    oxygenFallH: 2,
+    healthyOxygen: 0.6,
+    healthDeclineH: 12,
+    healthRecoveryH: 6,
   },
   power: { ledW: 120, fanW: 15, humidifierW: 25, refillPumpW: 18, nutrientPumpW: 5, airPumpW: 5 },
   noise: { airTempC: 0.1, rhPct: 0.5, ppfd: 2, waterTempC: 0.05, ph: 0.01, ecMsCm: 0.01, waterLevelPct: 0.2 },

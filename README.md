@@ -212,7 +212,8 @@ Green_oak_plan/
 
 **สถานะระหว่างพัฒนา M2 (ดู Phase ที่เสร็จล่าสุดใน PHASES)**
 - ใช้ **Mock PLC** เท่านั้น ยังไม่ต่อ FX5U จริง
-- P9/P10: Light และ Nutrient Stress สะสมตามเวลาจำลองและลด Growth แล้ว; Root Model, การรวม Damage/Health และ Diagnostics/Visual เพิ่มตาม Phase ถัดไป
+- P9–P11: Light และ Nutrient Stress สะสมตามเวลาจำลองและลด Growth แล้ว; Air Pump/Water Temperature/Water Level ส่งผลต่อ Estimated Oxygen Status และ Root Health ซึ่งจำกัดการดูดน้ำ
+- Damage/Health ยังใช้ Water Stress ตาม M1; การรวม Stress ทั้งหมดเป็นงาน P12 ส่วน Oxygen ใน Dashboard, Timeline และ Curl เพิ่มใน P13/P14 ภาพ 3D ยังไม่ใช่รูปลักษณ์ Final
 - pH ใช้ Empirical equilibrium (ค่าเริ่มต้น 6.2, time constant 2 วัน) พร้อมผล Refill/Dosing; ไม่ใช่เคมีกรด–ด่าง และไม่ได้ทำนายว่า pH ของจริงจะฟื้นเองโดยไม่ปรับสารละลาย
 - ยังไม่มี Login, Teacher Dashboard และการบันทึกลงฐานข้อมูล (ข้อมูลอยู่ในหน่วยความจำ Reset เมื่อปิด Server)
 

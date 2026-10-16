@@ -2,7 +2,7 @@
 title: Green Oak Virtual Plant Lab — Architecture
 version: 1.0
 status: approved 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 tags: [green-oak, architecture]
 ---
 
@@ -585,3 +585,14 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Growth คูณ Nutrient factor; Salt mass balance ไม่เปลี่ยน; ถ้า EC = 0 และไม่มีการเติมสารละลาย มวลเกลือยังเป็น 0 แม้มี Stress
 - `stepPh` ใช้ `phEquilibrium`/`phTauDays` แทน `phDriftPerDay`; Test M1 ที่คาด 6.1 หลัง 1 วันเปลี่ยนเป็น 6.0786939 ตาม Contract ที่กำหนดก่อนแก้โค้ด
 - AC-19…21 ใน `test/nutrientStress.test.ts` ครอบคลุม EC/pH ผิดช่วงทั้งสองด้าน, ฟื้น 48 h, Salt flows, Noise isolation และ pH 30 วันทั้งแยกกลไก/Simulation ที่ dt 1 s; tests 118/118 และ typecheck ผ่าน
+
+### 11.9 Implementation Notes (P11)
+
+- `environment/oxygen.ts` คำนวณ Oxygen target และ exponential response; Environment เริ่ม Oxygen 0.95 เมื่อมีน้ำ/0 เมื่อแห้ง แล้วใช้ Water Temperature และระดับน้ำหลัง Water balance ใน Step นั้น
+- `plant/root.ts` ปรับ Root Health จาก Oxygen ก่อน Step และ Root access; `plantWaterRequest` คูณ Root Health ก่อนขอน้ำจากถัง และ `tankFactor` จำกัดให้ตรงปริมาณที่ถังจ่ายจริง
+- `rootSubmergedFraction` จำกัดความลึกรากที่พื้นถังเพื่อไม่ให้รากยาวเข้าถึงน้ำใต้พื้นเมื่อถังแห้ง; ความยาวรากใน PlantState ยังเท่าเดิม ไม่ตัดรากสั้นลง
+- แก้ `tank.roots_exposed/covered` ให้ตรวจ Root access ทางเรขาคณิต แทน Supply ratio ที่อาจลดจาก Oxygen ต่ำ ไม่ให้สอนสาเหตุผิด
+- AC-22…24 อยู่ใน `test/rootStress.test.ts`: Oxygen OFF/ON, น้ำร้อน/น้ำต่ำ, Root Health และ Uptake, ถังแห้ง/รากยาว, ปริมาณที่จ่ายจริง และ Reset; tests รวม 126/126 และ typecheck ผ่าน รวม Regression เดิม
+- Shared PlantState มี lightStress/nutrientStress/rootHealth อยู่แล้วจึงส่งค่าปัจจุบันผ่าน Snapshot เดิมได้; Estimated Oxygen ยังอยู่ใน Simulation Environment รอเพิ่ม LabSnapshot/History/UI ใน P13/P14 ไม่เพิ่ม PLC register
+- ปรับข้อความท้าย Plant panel ให้ตรงสถานะ Model ปัจจุบัน; ไม่เปลี่ยน Visual mapping หรือเพิ่ม Dashboard controls
+- **ส่งต่อ:** หยุดหลัง P11 ตามคำสั่งผู้ใช้; P12 ยังไม่เริ่ม ต้องรวม Damage/Health และตรวจ Healthy growth 30 วัน/หลาย Stress ตาม AC-25…26 ก่อนทำ Data/UI ใน P13/P14

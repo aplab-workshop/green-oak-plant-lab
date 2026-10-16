@@ -95,7 +95,7 @@ export function PlantDetail() {
             <Row label="DLI today / yesterday" value={`${fmt(p.dliToday, 1)} / ${fmt(p.dliYesterday, 1)}`} />
             <Row label="Water demand" value={`${fmt(p.demandLPerDay, 2)} L/day`} />
           </div>
-          <p className="text-[10px] leading-snug text-slate-400">Light / Nutrient / Root stress จะเพิ่มใน Milestone 2</p>
+          <p className="text-[10px] leading-snug text-slate-400">แสง ธาตุอาหาร และสภาพรากมีผลต่อ Growth; Health score และ Damage ในรุ่นนี้ประเมินจาก Water stress</p>
         </div>
       )}
     </Panel>

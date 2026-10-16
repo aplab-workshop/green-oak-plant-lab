@@ -6,6 +6,7 @@ import { dliIncrement, positionFactor, ppfdAt } from '../environment/light';
 import { morphology, stepBiomass } from './growth';
 import { stepLightStress } from './light';
 import { stepNutrientStress } from './nutrient';
+import { stepRootHealth } from './root';
 import {
   rootSubmergedFraction,
   rootSupplyRatio,
@@ -29,6 +30,8 @@ export interface PlantEnvironment {
   /** ค่าจริงจาก Environment ก่อน Step (ไม่ผ่าน Sensor noise) */
   ecMsCm: number;
   ph: number;
+  /** Estimated Oxygen Status [0,1] ของถังก่อน Step */
+  estimatedOxygen: number;
 }
 
 export function createPlant(id: number, position: number, biomassG: number, simTimeS: number, cfg: SimConfig): PlantState {
@@ -74,7 +77,7 @@ export function plantWaterRequest(p: PlantState, e: PlantEnvironment, cfg: SimCo
   return {
     demandLPerDay: waterDemandLPerDay(p.leafAreaCm2, factor, cfg),
     rootSubmerged,
-    supplyRatio: rootSupplyRatio(rootSubmerged, cfg),
+    supplyRatio: rootSupplyRatio(rootSubmerged, cfg) * clamp(p.rootHealth, 0, 1),
     factor,
     ppfd,
   };
@@ -102,6 +105,7 @@ export function stepPlant(
   const damage = stepDamage(p.damage, stress, dtS, cfg);
   const lightStress = stepLightStress(p.lightStress, req.ppfd, e.airTempC, hydration, dtS, cfg);
   const nutrientStress = stepNutrientStress(p.nutrientStress, e.ecMsCm, e.ph, dtS, cfg);
+  const rootHealth = stepRootHealth(p.rootHealth, e.estimatedOxygen, req.rootSubmerged, dtS, cfg);
   const biomassG = stepBiomass(
     p.biomassG,
     { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, nutrientStress, damage },
@@ -127,6 +131,7 @@ export function stepPlant(
     waterStress: stress,
     lightStress,
     nutrientStress,
+    rootHealth,
     damage,
     health: healthScore(damage, stress),
     rootSubmerged: req.rootSubmerged,

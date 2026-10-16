@@ -1,6 +1,6 @@
 ---
 title: Development Phases
-updated: 2026-10-16
+updated: 2026-10-17
 tags: [green-oak, roadmap]
 ---
 
@@ -83,15 +83,15 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-16: P8–P10 เสร็จ — ผู้ใช้อนุมัติให้ทำ P8–P11 ต่อเนื่อง โดยตรวจและ commit แยก Phase; หยุดตรวจเมื่อจบ P11**
+> **สถานะ 2026-10-17: P8–P11 เสร็จตามคำสั่งผู้ใช้ — หยุดให้ตรวจแล้ว; งานถัดไป P12 ยังไม่เริ่ม**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
-### ขอบเขตและข้อเสนอสำหรับอนุมัติ
+### ขอบเขตที่ใช้ดำเนินงาน (อนุมัติ P8–P11 แล้ว)
 
 - ครอบคลุม FR-09, FR-25, FR-26, FR-43 และ FR-53: Light/Low Light, Nutrient, Root Stress, Estimated Oxygen Status, Growth/Recovery, Timeline และ Curl
 - คง Fixed step, Pure TypeScript, Seeded randomness, Water/Salt mass balance และกฎ Gateway เดิม พารามิเตอร์ Model ทุกตัวต้องมีหน่วยและคำอธิบายใน `defaultConfig.ts`
-- **ข้อเสนอ pH:** ปรับ Empirical Drift ให้มีสมดุลและอัตราเข้าใกล้สมดุลที่กำหนดใน Config แทน drift บวกคงที่ไม่สิ้นสุด โดยยังมีผลของ Refill/Dosing และยังจำลอง pH นอกช่วงได้ผ่าน Initial conditions ใน Test ไม่เพิ่ม pH actuator หรือ PLC address ใน M2 และไม่อ้างว่า A/B ควบคุม pH ได้แม่นยำ ต้องกำหนดสูตรและข้อจำกัดใน P8 ก่อนลงมือ P10
+- **แนวทาง pH (ทำแล้วใน P10):** ปรับ Empirical Drift ให้มีสมดุลและอัตราเข้าใกล้สมดุลที่กำหนดใน Config แทน drift บวกคงที่ไม่สิ้นสุด โดยยังมีผลของ Refill/Dosing และยังจำลอง pH นอกช่วงได้ผ่าน Initial conditions ใน Test ไม่เพิ่ม pH actuator หรือ PLC address ใน M2 และไม่อ้างว่า A/B ควบคุม pH ได้แม่นยำ ต้องกำหนดสูตรและข้อจำกัดใน P8 ก่อนลงมือ P10
 - **Estimated Oxygen Status:** ดัชนีไร้หน่วย 0–1 จาก Model ไม่ใช่ค่าจาก DO Sensor และไม่อ้างเป็น mg/L ส่งให้ Browser ผ่าน Snapshot โดยไม่เพิ่ม Sensor Register
 - **Low Light:** ลด Growth ตามแสงที่ได้รับ ไม่ทำให้เกิด Water Stress หรือเหี่ยวทันที ช่วงมืดตาม Photoperiod ต้องไม่ถูกตีความเป็นความเสียหายโดยอัตโนมัติ
 - **Timeline:** ดูแนวโน้มและ Event ย้อนหลังในหน่วยเวลาจำลองจาก History ใน Memory เลือกช่วงเวลาและต้นได้ ไม่รวมการย้อน Simulation, Replay 3D หรือ Persistence
@@ -130,12 +130,15 @@ tags: [green-oak, roadmap]
 
 - **ผลตรวจ:** AC-19…21 ผ่าน; tests 118/118 และ typecheck ผ่าน; รัน 30 วันจำลองที่ dt 1 s ทั้ง pH แยกกลไกและ Simulation พร้อมการดูแล
 
-### P11 — Root Stress & Estimated Oxygen Status
+### P11 — Root Stress & Estimated Oxygen Status ✅
 
-- [ ] เพิ่ม Oxygen Model จาก Air Pump, Water Temperature และ Water Level ตาม P8
-- [ ] คำนวณ Root Stress/Root Health และผลต่อ Water uptake โดยใช้ Root access และน้ำที่ถังจ่ายได้จริงร่วมกัน
-- [ ] เพิ่ม Config และ Unit tests รวมกรณีถังแห้ง น้ำร้อน เปิด/ปิด Air Pump และรากยาวต่างกัน
+- [x] เพิ่ม Oxygen Model จาก Air Pump, Water Temperature และ Water Level ตาม P8
+- [x] คำนวณ Root Stress/Root Health และผลต่อ Water uptake โดยใช้ Root access และน้ำที่ถังจ่ายได้จริงร่วมกัน
+- [x] เพิ่ม Config และ Unit tests รวมกรณีถังแห้ง น้ำร้อน เปิด/ปิด Air Pump และรากยาวต่างกัน
 - **ผ่านเมื่อ:** ปิด Air Pump ต่อเนื่องในสภาวะทดสอบทำให้ Oxygen/Root Health ลดและ Uptake ลด แม้น้ำยังถึงราก; เปิดใหม่แล้วค่อยฟื้น; อุณหภูมิน้ำมีผลตามทิศทางที่กำหนด; ปั๊มอากาศไม่แก้อาการรากพ้นน้ำ; ไม่มี NaN/Infinity เมื่อถังแห้ง และ Uptake รวมไม่เกินน้ำที่มีให้ใช้
+
+- **ผลตรวจ:** AC-22…24 ผ่าน; tests 126/126 และ typecheck ผ่าน; ตรวจ Uptake ตรงกับน้ำที่ถังจ่ายจริง, Reset, รากยาว/ถังแห้ง และ Regression M1
+- **เหลือตามแผน:** P12 รวม Stress เข้า Damage/Health; P13 ต่อ Oxygen/History/Events; P14 Diagnostics/Curl; หยุดให้ผู้ใช้ตรวจหลัง P11
 
 ### P12 — Integrated Growth, Damage & Recovery
 
@@ -173,7 +176,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P10 เสร็จ; งานถัดไป P11 ตามคำสั่งผู้ใช้ แล้วหยุดตรวจ; P12–P15 ยังไม่เริ่ม
+- P8–P11 เสร็จและหยุดให้ผู้ใช้ตรวจตามคำสั่ง; งานถัดไป **P12** โดย P12–P15 ยังไม่เริ่ม และยังไม่ tag m2
 
 ---
 

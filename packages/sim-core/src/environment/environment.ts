@@ -6,7 +6,8 @@ import { stepAir, stepWaterTemp, roomTempC } from './air';
 import { dliIncrement, ppfdAt } from './light';
 import { ecFrom, stepPh, stepSalt } from './nutrient';
 import { powerW } from './power';
-import { evaporationL, stepTank } from './tank';
+import { evaporationL, levelPct, stepTank } from './tank';
+import { stepOxygen } from './oxygen';
 
 /** State ของสภาพแวดล้อมในถังและห้องปลูก (ค่าจริงของ Model ไม่มี Noise) */
 export interface EnvironmentState {
@@ -17,6 +18,8 @@ export interface EnvironmentState {
   airTempC: number;
   rhPct: number;
   waterTempC: number;
+  /** Estimated Oxygen Status [0,1] ไร้หน่วย ไม่ใช่ Sensor DO */
+  estimatedOxygen: number;
   /** LED ที่ใช้จริงใน step ล่าสุด (%) */
   ledPct: number;
   /** PPFD ที่ตำแหน่ง Sensor (กลางถัง) */
@@ -60,6 +63,7 @@ export function initialEnvironment(cfg: SimConfig, simTimeS: number): Environmen
     airTempC: tRoom,
     rhPct: cfg.room.rhPct,
     waterTempC: tRoom - 2,
+    estimatedOxygen: volume > 0 ? cfg.root.initialOxygen : 0,
     ledPct: 0,
     ppfd: 0,
     dliToday: 0,
@@ -115,6 +119,7 @@ export function stepEnvironment(
 
   // --- Water temperature ---
   const waterTempC = stepWaterTemp(s.waterTempC, air.airTempC, s.waterVolumeL, refillInL, dtS, cfg);
+  const estimatedOxygen = stepOxygen(s.estimatedOxygen, cmd.airPump, waterTempC, levelPct(tank.volumeL, cfg), dtS, cfg);
 
   // --- Light & DLI (reset ตอนข้ามเที่ยงคืนเวลาจำลอง) ---
   const ppfd = ppfdAt(ledPct, 1, cfg);
@@ -138,6 +143,7 @@ export function stepEnvironment(
       airTempC: air.airTempC,
       rhPct: air.rhPct,
       waterTempC,
+      estimatedOxygen,
       ledPct,
       ppfd,
       dliToday,

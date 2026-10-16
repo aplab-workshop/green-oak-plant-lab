@@ -8,13 +8,16 @@ import { clamp } from '../math';
 
 /**
  * สัดส่วนความยาวรากที่แช่น้ำ (FR-22)
- *   h_tip = h_pot − RootLength,  f_sub = clamp((h_w − h_tip) / (h_pot − h_tip), 0, 1)
+ *   ความลึกแนวดิ่งจำกัดที่พื้นถัง; ความยาวส่วนเกินถือว่าโค้ง ไม่วางปลายรากใต้พื้น
  */
 export function rootSubmergedFraction(waterHeightCm: number, rootLengthCm: number, cfg: SimConfig): number {
   const pot = cfg.tank.potBottomCm;
+  if (waterHeightCm <= 0) return 0;
   if (rootLengthCm <= 0) return waterHeightCm >= pot ? 1 : 0;
-  const tip = pot - rootLengthCm;
-  return clamp((waterHeightCm - tip) / rootLengthCm, 0, 1);
+  const depth = Math.min(rootLengthCm, pot);
+  if (depth <= 0) return 0;
+  const tip = pot - depth;
+  return clamp((waterHeightCm - tip) / depth, 0, 1);
 }
 
 /** ความสามารถดูดน้ำ r = min(1, f_sub / f_crit) */

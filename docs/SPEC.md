@@ -2,7 +2,7 @@
 title: Green Oak Virtual Plant Lab — Specification
 version: 1.0
 status: approved 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 tags: [green-oak, spec]
 ---
 
@@ -48,7 +48,7 @@ tags: [green-oak, spec]
 | Milestone | เนื้อหา | สถานะ |
 |---|---|---|
 | **M1** Functional 3D Virtual Plant | Web App, 3D DWC 6 ต้น, Sensor Dashboard, Mock Actuator, Water Balance, Water Shortage Behavior, ทำงานโดยไม่มี PLC | ✅ เสร็จ 2026-10-16 |
-| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **กำลังทำ P8–P11 ตามคำสั่งผู้ใช้** |
+| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P11 เสร็จ; รอตรวจ ก่อน P12** |
 | M3 One Real FX5U | SLMP 3E Gateway, Communication Monitor, PLC-in-the-Loop กับเครื่องจริง 1 เครื่อง | |
 | M4 Multi-Lab Classroom | 10 PLC, 10 Lab, Student/Teacher Dashboard, Concurrent Test | |
 | M5 Advanced | Scenario Management, Data Logging, Performance Evaluation, Real Sensor Architecture | |
@@ -211,9 +211,9 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-19 🧪 **P10 / FR-25, FR-26:** EC 1.2/pH 6 เป็น Control; แยก EC 0/3.2 ที่ pH 6 และ pH 4/9 ที่ EC 1.2 ใน Plant fixture 24 h: Nutrient Stress > 0.95 เทียบ Control = 0 และ Biomass ต่ำกว่า Control; กลับสู่ EC 1.2/pH 6 ต่อ 48 h แล้ว Stress < 0.02 โดยไม่กระโดดเป็นศูนย์
 - [x] AC-20 🧪 **P10 / FR-09:** pH เริ่ม 6 ไม่มี Refill/Dose หลัง 1 วัน = 6.0786939 ± 1e-6 และ 30 วัน = 6.2 ± 1e-6; เริ่ม pH 4/9 ต้องเข้าใกล้ 6.2 จากคนละด้าน; Refill 10 L ลงใน 20 L ดึง pH ไปทาง 7.2, Dose A/B ลด pH ตาม Config และอยู่ใน [4,9]; รัน Simulation 30 วันด้วยการดูแลตามด้านล่าง pH อยู่ใน [5.5,6.8]
 - [x] AC-21 🧪 **P10 / FR-08, FR-26:** Simulation แยก Initial EC/pH แล้ว Stress แตกต่างภายใน 24 h; ไม่มีการแก้ Salt mass เพื่อดึง EC เข้าช่วง; ทดสอบ Evaporation, Uptake, Refill และ Dose ยังคงผ่าน และ Model ได้ EC/pH จาก Environment จริง ไม่ใช่ Sensor noise
-- [ ] AC-22 🧪 **P11 / FR-26:** ถัง 85%, Water 24 °C, Oxygen เริ่ม 0.95; ปิด Air Pump 12 h แล้ว Oxygen < 0.21 เทียบ ON = 0.95; เปิดใหม่ 6 h แล้ว > 0.9; 32 °C ให้ค่าต่ำกว่า 24 °C และแต่ละ Step เปลี่ยน < 0.001
-- [ ] AC-23 🧪 **P11 / FR-22, FR-26:** Simulation ห้อง 24 °C คงที่ ไม่มี LED heat, LED 60%, น้ำ 85% เปรียบเทียบ Air Pump OFF/ON 24 h: OFF มี Root Health < 0.6, Supply ratio ต่ำกว่า ON, น้ำยังถึงราก; เปิดใหม่ 24 h Root Health > 0.9; Pump ON ไม่ช่วยรากที่พ้นน้ำให้ดูดน้ำได้
-- [ ] AC-24 🧪 **P11 / FR-03, FR-22, FR-26:** ถังแห้ง, ถัง 1%, รากสั้น/ยาว: State ทุกค่าต้อง finite, Oxygen/Root Health/Supply อยู่ใน [0,1], น้ำไม่ติดลบ; Uptake สะสมไม่เกินน้ำเริ่มต้น + น้ำเติม (tolerance 1e-9 L); ถังแห้งให้ Oxygen target และ Root access = 0 รวมรากยาวเกินความสูง Net Pot; Reset คืน State เดิมตาม seed
+- [x] AC-22 🧪 **P11 / FR-26:** ถัง 85%, Water 24 °C, Oxygen เริ่ม 0.95; ปิด Air Pump 12 h แล้ว Oxygen < 0.21 เทียบ ON = 0.95; เปิดใหม่ 6 h แล้ว > 0.9; 32 °C ให้ค่าต่ำกว่า 24 °C และแต่ละ Step เปลี่ยน < 0.001
+- [x] AC-23 🧪 **P11 / FR-22, FR-26:** Simulation ห้อง 24 °C คงที่ ไม่มี LED heat, LED 60%, น้ำ 85% เปรียบเทียบ Air Pump OFF/ON 24 h: OFF มี Root Health < 0.6, Supply ratio ต่ำกว่า ON, น้ำยังถึงราก; เปิดใหม่ 24 h Root Health > 0.9; Pump ON ไม่ช่วยรากที่พ้นน้ำให้ดูดน้ำได้
+- [x] AC-24 🧪 **P11 / FR-03, FR-22, FR-26:** ถังแห้ง, ถัง 1%, รากสั้น/ยาว: State ทุกค่าต้อง finite, Oxygen/Root Health/Supply อยู่ใน [0,1], น้ำไม่ติดลบ; Uptake สะสมไม่เกินน้ำเริ่มต้น + น้ำเติม (tolerance 1e-9 L); ถังแห้งให้ Oxygen target และ Root access = 0 รวมรากยาวเกินความสูง Net Pot; Reset คืน State เดิมตาม seed
 - [ ] AC-25 🧪 **P12 / FR-24, FR-25:** Healthy reference 30 วัน (LED 80% 06–22, Refill <70%, Fan >25 °C, A+B เมื่อ EC <1.0, Air Pump ON) Biomass เฉลี่ย 70–150 g, Damage <0.01; หลาย Stress โตช้ากว่า Control; Stress สูง 1.5 h แล้วแก้ทันมี Damage <0.01, ปล่อย 24 h มี Damage >0 และไม่ลดตลอด Recovery 48 h; Health ≤ 100·(1−Damage)
 - [ ] AC-26 🧪 **P12 / FR-01, FR-02:** Seed/Command schedule ตามเวลาจำลองเดียวกัน 24 h ที่ 1x/60x/360x และแบ่ง Tick ต่างกันให้ State เท่ากัน ±1e-9; Pause 10 s จริงไม่เปลี่ยน Model; Reset คืนค่าเริ่มต้น
 - [ ] AC-27 🧪 **P13 / FR-40–FR-43:** Snapshot/History ตรง State ณ เวลาบันทึก ±1e-9, ทดสอบสอง Lab 24 h ไม่ปะปน; Stress ข้าม 0.3/0.15 ให้ Event อย่างละหนึ่งครั้ง; History เก็บทุก 600 s สูงสุด 2016 จุด (14 วัน), รัน 15 วันไม่เกินเพดาน; Pause ไม่เพิ่ม sample, Reset ล้างรอบเก่า; PLC guard และ Fail-safe ผ่าน

@@ -12,6 +12,7 @@ import {
 } from './environment/environment';
 import { levelPct, waterHeightCm } from './environment/tank';
 import { createPlant, plantWaterRequest, stepPlant, type PlantEnvironment, type PlantState } from './plant/plant';
+import { rootSupplyRatio } from './plant/water';
 import { readSensors, readSimInfo } from './sensors';
 
 export interface Disturbance {
@@ -122,6 +123,7 @@ export class Simulation {
       vpdKPa: vpdKPa(env.airTempC, env.rhPct),
       ecMsCm: envEc(env),
       ph: env.ph,
+      estimatedOxygen: env.estimatedOxygen,
     };
 
     // 1) พืชขอน้ำตามความต้องการและรากที่แช่น้ำ
@@ -209,7 +211,8 @@ export class Simulation {
       }
     });
 
-    const exposed = this._plants.some((p) => p.supplyRatio < 1);
+    // Root Health ต่ำทำให้ Uptake ลดได้ทั้งที่น้ำถึงราก จึงตรวจเฉพาะเรขาคณิต
+    const exposed = this._plants.some((p) => rootSupplyRatio(p.rootSubmerged, cfg) < 1);
     if (exposed && !this.rootsExposed) {
       this.emit({ kind: 'tank.roots_exposed', severity: 'warning', message: `ระดับน้ำ ${levelPct(after.waterVolumeL, cfg).toFixed(0)}%: รากบางต้นพ้นน้ำ` });
     } else if (!exposed && this.rootsExposed) {
