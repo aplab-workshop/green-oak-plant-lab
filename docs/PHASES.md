@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-16: ร่างแผน รอผู้ใช้อนุมัติ ยังไม่เริ่ม P8 และยังไม่มีการแก้โค้ด M2**
+> **สถานะ 2026-10-16: P8 เสร็จ — ผู้ใช้อนุมัติให้ทำ P8–P11 ต่อเนื่อง โดยตรวจและ commit แยก Phase; หยุดตรวจเมื่อจบ P11**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -98,16 +98,18 @@ tags: [green-oak, roadmap]
 - ไม่รวม SLMP, Teacher Dashboard, Auth, ฐานข้อมูล หรือ Scenario Library 10 บท ใช้ Test fixtures และขั้นตอนทดลองสำหรับตรวจรับ M2
 - ค่า Threshold, Time constant และช่วงเวลาคาดหวังเป็นพารามิเตอร์เพื่อการสอน ต้องกำหนดและบันทึกก่อน Implementation ไม่ถือเป็นค่าชีววิทยาที่ผ่านการปรับเทียบ
 
-### P8 — M2 Specification & Model Contract
+### P8 — M2 Specification & Model Contract ✅
 
-- [ ] แก้ `SPEC.md` เพิ่มขอบเขต M2 และ AC-16 เป็นต้นไป พร้อม Traceability ไป FR และ Phase ที่ตรวจรับ
-- [ ] เพิ่ม Design ใน `ARCHITECTURE.md`: State/หน่วย/ช่วงค่า, สูตร Stress/Growth/Recovery, ลำดับ Step และความสัมพันธ์กับ Water/Salt balance
-- [ ] กำหนด Light exposure, Low Light, EC/pH response, Oxygen/Root Health, การรวม Stress และ Damage โดยหลีกเลี่ยงการนับผลซ้ำ
-- [ ] สรุปแนวทาง pH ข้างต้น รวม Initial conditions และสภาวะอ้างอิงที่พืชเติบโตได้ระยะยาว
-- [ ] กำหนด Data contract สำหรับ Snapshot/History/Events, ความหมาย Timeline, ขอบเขตการเก็บข้อมูล และการ Reset
-- [ ] จัด Test matrix: สภาวะเหมาะสม, Stress แยกชนิด, หลาย Stress พร้อมกัน, ฟื้นทัน/ฟื้นช้า, ข้ามเที่ยงคืน, ถังแห้ง, Pause/Reset และ Determinism
-- **ผ่านเมื่อ:** แต่ละ AC มี Setup, Input, ระยะเวลาจำลอง, Expected result และ tolerance เชิงตัวเลข; แต่ละพารามิเตอร์มีหน่วย/ช่วง/เหตุผล; ประเด็น pH และ Timeline มีข้อสรุป; ผู้ใช้ตรวจ Spec ก่อน P9
+- [x] แก้ `SPEC.md` เพิ่มขอบเขต M2 และ AC-16 เป็นต้นไป พร้อม Traceability ไป FR และ Phase ที่ตรวจรับ
+- [x] เพิ่ม Design ใน `ARCHITECTURE.md`: State/หน่วย/ช่วงค่า, สูตร Stress/Growth/Recovery, ลำดับ Step และความสัมพันธ์กับ Water/Salt balance
+- [x] กำหนด Light exposure, Low Light, EC/pH response, Oxygen/Root Health, การรวม Stress และ Damage โดยหลีกเลี่ยงการนับผลซ้ำ
+- [x] สรุปแนวทาง pH ข้างต้น รวม Initial conditions และสภาวะอ้างอิงที่พืชเติบโตได้ระยะยาว
+- [x] กำหนด Data contract สำหรับ Snapshot/History/Events, ความหมาย Timeline, ขอบเขตการเก็บข้อมูล และการ Reset
+- [x] จัด Test matrix: สภาวะเหมาะสม, Stress แยกชนิด, หลาย Stress พร้อมกัน, ฟื้นทัน/ฟื้นช้า, ข้ามเที่ยงคืน, ถังแห้ง, Pause/Reset และ Determinism
+- **ผ่านเมื่อ:** แต่ละ AC มี Setup, Input, ระยะเวลาจำลอง, Expected result และ tolerance เชิงตัวเลข; แต่ละพารามิเตอร์มีหน่วย/ช่วง/เหตุผล; ประเด็น pH และ Timeline มีข้อสรุป; ดำเนินต่อ P9 ตามคำสั่งผู้ใช้ที่อนุมัติ P8–P11 ต่อเนื่อง
 - **ขอบเขต:** เอกสารเท่านั้น ไม่แก้ Runtime ใน Phase นี้
+
+- **ผลตรวจ:** Baseline tests 100/100 และ typecheck ผ่าน (WebSocket tests ต้องรันนอก sandbox ที่บล็อก localhost); ไม่มีการแก้ Runtime
 
 ### P9 — Light Stress & Low Light
 
@@ -167,7 +169,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- ขณะนี้เสร็จเฉพาะ **ร่างแผน**; งานถัดไปคือผู้ใช้ตรวจขอบเขตและข้อเสนอ pH/Timeline แล้วจึงเริ่ม **P8 (เอกสาร)**
+- P8 เสร็จ; งานถัดไป P9 → P10 → P11 ตามคำสั่งผู้ใช้ แล้วหยุดตรวจ; P12–P15 ยังไม่เริ่ม
 
 ---
 

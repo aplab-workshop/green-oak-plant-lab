@@ -486,3 +486,87 @@ Air pump: ON ตลอด
 | Real Sensor (Phase 2) | `RealSensorProvider` implements `SensorProvider` |
 | MQTT / InfluxDB | Sink ที่ subscribe Event/Snapshot จาก `LabSession` |
 | AI / RL | `observe()` / `act()` บน `LabSession` |
+
+## 11. M2 Model Contract (P8)
+
+ส่วนนี้แทนที่สูตร M1 เฉพาะกลไกที่ระบุเมื่อ Phase นั้นเสร็จ ค่าเป็น Educational parameters ไม่ใช่ผลวิจัยหรือเคมี/สรีรวิทยาที่ผ่านการปรับเทียบ คง Runtime fixed step 1 s และไม่ใช้เวลาจริงใน Model
+
+### 11.1 State และลำดับ Step
+
+| State/Input | หน่วย / ช่วง | เจ้าของ / เริ่มต้น |
+|---|---|---|
+| `lightStress`, `nutrientStress` | ไร้หน่วย [0,1] | PlantState / 0; ใช้ State เดิมเป็น exposure memory |
+| `rootHealth` | ไร้หน่วย [0,1] | PlantState / 1; Root Stress = 1 − rootHealth ไม่เก็บค่าซ้ำ |
+| `estimatedOxygen` | ไร้หน่วย [0,1] | EnvironmentState / 0.95 เมื่อมีน้ำ, 0 เมื่อถังแห้ง |
+| EC / pH | mS/cm ≥0 / pH [4,9] | จาก Environment ก่อน Step ไม่มี Sensor noise |
+| Hydration / Damage / Growth | ตาม M1 | Damage เพิ่มได้อย่างเดียว; รูปร่างคำนวณจาก Biomass |
+
+ลำดับ P9–P11: (1) สร้าง PlantEnvironment จากค่าจริงก่อน Step → (2) คำนวณ Root access และ Request โดยใช้ Root Health ก่อน Step → (3) Environment จ่ายน้ำจริงและอัปเดต Salt/pH/Air/Water/Oxygen → (4) Plant อัปเดต Hydration, Light/Nutrient Stress, Root Health โดยใช้ Environment ก่อน Step และน้ำที่จ่ายจริง → (5) Growth/Morphology/DLI และ Events เดิม จากนั้นเลื่อนเวลาหนึ่ง Step
+
+การหน่วงหนึ่ง Step ของ Root/Oxygen เป็นแบบ explicit และเหมือนกันทุกต้น; คำสั่ง Air Pump กระทบ Oxygen ใน Step นี้แล้วมีผลต่อ Root Health ใน Step ถัดไป ไม่มีวงจรคำนวณซ้ำภายใน Step; `tank.roots_exposed` ต้องดู Root access ทางเรขาคณิต ไม่ใช่ Supply ที่ลดจาก Root Health
+
+### 11.2 Light (P9)
+
+ให้ `C(x)=clamp(x,0,1)`, `E=C((PPFD−start)/(full−start))`, `T=C((airTemp−heatStart)/heatSpan)`
+
+`target = C(E · (1 + heatGain·T + waterGain·(1−Hydration)))`
+
+`S_next = target + (S−target)·exp(−dt/tau)` ใช้ tauRise เมื่อ target > S มิฉะนั้น tauRecovery; หน่วย dt/tau ต้องเป็นวินาทีตรงกัน
+
+| Config ใน `light` | Default / ช่วงที่ใช้ได้ | เหตุผล |
+|---|---|---|
+| stressStartPpfd / stressFullPpfd | 350 / 650 µmol/m²/s; 0 ≤ start < full | ให้ Default LED 80% ไม่สะสม Light Stress |
+| stressHeatStartC / stressHeatSpanC | 28 °C / 8 °C; span >0 | เพิ่มผลเมื่ออากาศร้อน |
+| stressHeatGain / stressWaterGain | 1 / 1; ≥0 ไร้หน่วย | ความร้อน/ขาดน้ำขยาย exposure |
+| stressRiseH / stressRecoveryH | 2 / 4 h; >0 | ต้องสะสมและฟื้นแบบค่อยเป็นค่อยไป |
+
+Growth ใช้ Light factor แบบ saturating เดิม × `(1−lightStress)`; ไม่มีการหัก Hydration จาก Light Stress โดยตรง (ผลแสงต่อ Transpiration ยังเป็น M1) Low Light/Photoperiod ใช้ PPFD ตามเวลาจริงของ Simulation; DLI เป็น Diagnostic ไม่คูณ Growth ซ้ำ และไม่ประเมินวันแรกที่มีข้อมูลแค่บางวันว่าเสียหาย
+
+### 11.3 Nutrient และ pH (P10)
+
+Trapezoid suitability = 0 นอก [min,max], 1 ใน [optLow,optHigh], linear ระหว่างขอบ; `targetStress = 1−min(suitabilityEC, suitabilityPh)` ใช้ปัจจัยจำกัดที่แย่กว่าแทนบวก Stress สองครั้ง
+
+| Config ใน `nutrient` | Default / ช่วงที่ใช้ได้ | เหตุผล |
+|---|---|---|
+| ecCardinalMsCm | [0, 0.8, 1.6, 3.2] mS/cm, เรียงเพิ่ม | ความเข้มข้นต่ำ/สูงจำกัดการโต |
+| phCardinal | [4, 5.5, 6.8, 9] pH, เรียงเพิ่ม | pH ผิดช่วงลดการใช้ธาตุ |
+| stressRiseH / stressRecoveryH | 6 / 12 h; >0 | Nutrient Stress สะสม/ฟื้นช้ากว่า Light |
+| phEquilibrium / phTauDays | 6.2 pH / 2 day; equilibrium อยู่ [phMin,phMax], tau >0 | สภาวะดุลยภาพสมมติเพื่อการสอน แทน `phDriftPerDay` |
+
+Stress ใช้ exponential response เช่น Light; Growth คูณ `(1−nutrientStress)`; ไม่เปลี่ยน Salt mass เพื่อดึง EC เข้าช่วงเหมาะสม และไม่จำลอง osmotic uptake แยกใน M2
+
+pH: `p = equilibrium + (pH−equilibrium)·exp(−dt/(tauDays·86400)) − phDropPerDoseMin·doseMinutes` แล้วผสมกับ tapPh ตามปริมาตร Refill แบบเดิม และ clamp [4,9] ค่าเริ่มต้นเดิม 6 ให้ความชันเริ่มต้น 0.1 pH/day แต่ค่อยช้าลง; เป็น Empirical balance ไม่ใช่การแอบสั่งปั๊ม pH และไม่อ้างว่า pH ของจริงจะฟื้นได้เองเช่นนี้
+
+### 11.4 Oxygen และ Root Health (P11)
+
+`O_target = (pumpOn ? onTarget : offTarget) · C(1−max(0,Twater−tempRef)/tempSpan) · C(levelPct/minLevelPct)`
+
+Oxygen เข้าหา target แบบ exponential ตาม tau เติมอากาศ/สูญเสีย; น้ำแห้งมี target 0 ไม่มี DO sensor ใหม่
+
+`access = rootSupplyRatio(rootSubmerged)`; `rootTarget = min(access, C(O/healthyOxygen))`; Root Health เข้าหา target แบบ exponential ตามเวลาเสื่อม/ฟื้น
+
+`requestSupplyRatio = access · rootHealth`; `actualSupplyRatio = requestSupplyRatio · tankFactor` และ `Uptake = Demand · actualSupplyRatio` ทำให้ไม่เกินน้ำที่ Environment จ่ายจริง ปั๊มอากาศทดแทนน้ำที่รากเข้าไม่ถึงไม่ได้
+
+| Config ใน `root` | Default / ช่วงที่ใช้ได้ | เหตุผล |
+|---|---|---|
+| initialOxygen / oxygenOnTarget / oxygenOffTarget | 0.95 / 0.95 / 0.2; [0,1] | เริ่มพร้อมปลูก, เปิดปั๊มเทียบ passive aeration |
+| oxygenTempRefC / oxygenTempSpanC | 24 °C / 16 °C; span >0 | น้ำร้อนลด Oxygen capacity ในแบบจำลอง |
+| oxygenMinLevelPct | 10%; (0,100] | น้ำเกือบแห้งจำกัดผลของ Air Pump |
+| oxygenRiseH / oxygenFallH | 2 / 2 h; >0 | ไม่เปลี่ยน Oxygen ทันทีเมื่อสั่งปั๊ม |
+| healthyOxygen | 0.6; (0,1] | เหนือค่านี้ไม่จำกัด Root Health |
+| healthDeclineH / healthRecoveryH | 12 / 6 h; >0 | ผลสะสมของรากและฟื้นหลังเติมอากาศ |
+
+Root ยาวเกินก้นถัง: ความยาวรากที่ใช้คำนวณแนวดิ่งจำกัดที่ความสูงก้น Net Pot; ถ้า waterHeight ≤0 ให้ access=0 เสมอ ความยาว State ยังไม่ถูกตัด/หด (รากจริงอาจโค้งในถัง)
+
+### 11.5 การรวมผล และ Data Contract ที่ทำต่อ (P12–P14)
+
+- P9–P11 ต่อ Growth Light/Nutrient และ Root→Water แล้ว แต่ `damage`/`health` ยังเป็นสูตร M1 จนถึง P12 เพื่อไม่รวม Phase เกินขอบเขต
+- P12 ใช้ `effectiveWaterRoot = max(waterStress, 1−rootHealth)` และ Growth factor `(1−effectiveWaterRoot)·(1−lightStress)·(1−nutrientStress)·(1−damage)` ร่วม Light/Temperature factor เดิม ไม่คูณ Root ซ้ำกับ Water; Damage driven by `max(effectiveWaterRoot, lightStress, nutrientStress)` ด้วย Threshold/rate เดิม; Health = `100·(1−damage)·(1−0.5·maxStress)`
+- P13: PlantState ใช้ field เดิม; `LabSnapshot.tank.estimatedOxygen` เพิ่มจาก Environment; `HistorySample` เพิ่ม Oxygen และ `plants[]` มี id, biomassG, hydration, waterStress, lightStress, nutrientStress, rootHealth, damage, health; เวลา sample ทุก 600 s สูงสุด 2016 จุด, Event log สูงสุด 1000 รายการต่อ Lab; Reset ล้างทั้งคู่; Snapshot เป็นค่าปัจจุบัน ไม่ดัดแปลง History ด้วย Noise
+- Events ใหม่ `plant.light_stress`, `plant.nutrient_stress`, `plant.root_stress` และ suffix `_cleared`: on ≥0.3/off ≤0.15, ต่อ Lab/Plant พร้อมเวลาจำลอง; ย้าย threshold ไป Config เมื่อทำ P13
+- P14: Timeline เลือกต้น/ช่วง 6 h, 24 h, 14 วันจาก Server History; ข้อมูลก่อนเริ่มไม่มีให้แสดงเป็นว่าง ไม่สร้างข้อมูลย้อนหลัง; ไม่ Replay 3D/ย้อน Clock; Curl = Light Stress ผ่าน mapping, Droop ยึด Water Stress/Damage
+- Test matrix: AC-16…24 แยกสาเหตุและ recovery ของแต่ละกลไก; AC-25…26 รวมหลาย Stress, Healthy 30 วัน, Time/Reset; AC-27 Data flow; AC-28 Browser; AC-29 ตรวจรับ ดู Setup และ tolerance ใน SPEC § 8.1
+
+### 11.6 Implementation Notes (P8)
+
+เอกสารอย่างเดียว: ยืนยันขอบเขต pH/Timeline, สูตร/หน่วย/ลำดับ Step และ AC-16…29 แล้วตามคำสั่งให้ดำเนิน P8–P11 ต่อเนื่อง; ยังไม่มีการเปลี่ยน Runtime ณ commit P8
