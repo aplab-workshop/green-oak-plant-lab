@@ -570,3 +570,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 ### 11.6 Implementation Notes (P8)
 
 เอกสารอย่างเดียว: ยืนยันขอบเขต pH/Timeline, สูตร/หน่วย/ลำดับ Step และ AC-16…29 แล้วตามคำสั่งให้ดำเนิน P8–P11 ต่อเนื่อง; ยังไม่มีการเปลี่ยน Runtime ณ commit P8
+
+### 11.7 Implementation Notes (P9)
+
+- `plant/light.ts` คำนวณ target และใช้ `plant/stress.ts` สำหรับ exponential accumulation/recovery; `stepPlant` อัปเดต `lightStress` แล้วส่งเข้า Growth เท่านั้น ไม่เปลี่ยน Hydration โดยตรง
+- Low Light ใช้ Light factor เดิมซึ่งทดสอบด้วย Environment คงที่; DLI ยังคงเป็น Diagnostic รายต้นและไม่ Reset Stress ตอนเที่ยงคืน
+- AC-16…18 อยู่ใน `test/lightStress.test.ts`: 6 cases รวม Photoperiod 3 วันและ Simulation ตำแหน่งกลาง/มุม; tests รวม 106/106 และ typecheck ผ่าน
+- Damage/Health รวมทุก Stress และ Curl ยังรอ P12/P14 ตามแผน

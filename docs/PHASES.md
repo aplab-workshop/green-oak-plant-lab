@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-16: P8 เสร็จ — ผู้ใช้อนุมัติให้ทำ P8–P11 ต่อเนื่อง โดยตรวจและ commit แยก Phase; หยุดตรวจเมื่อจบ P11**
+> **สถานะ 2026-10-16: P8–P9 เสร็จ — ผู้ใช้อนุมัติให้ทำ P8–P11 ต่อเนื่อง โดยตรวจและ commit แยก Phase; หยุดตรวจเมื่อจบ P11**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -111,12 +111,14 @@ tags: [green-oak, roadmap]
 
 - **ผลตรวจ:** Baseline tests 100/100 และ typecheck ผ่าน (WebSocket tests ต้องรันนอก sandbox ที่บล็อก localhost); ไม่มีการแก้ Runtime
 
-### P9 — Light Stress & Low Light
+### P9 — Light Stress & Low Light ✅
 
-- [ ] เพิ่มการสะสมและลด Light Stress ตาม PPFD รายต้น ความร้อน และสถานะน้ำ ด้วยเวลาจำลอง
-- [ ] ปรับ Light growth factor และ Low Light ตาม Contract ใน P8 รวมพฤติกรรม DLI ที่เปลี่ยนวัน
-- [ ] เพิ่ม Config และ Unit tests ของกลไกแสง โดยแยกตัวแปรน้ำ/อุณหภูมิในการเปรียบเทียบ
+- [x] เพิ่มการสะสมและลด Light Stress ตาม PPFD รายต้น ความร้อน และสถานะน้ำ ด้วยเวลาจำลอง
+- [x] ปรับ Light growth factor และ Low Light ตาม Contract ใน P8 รวมพฤติกรรม DLI ที่เปลี่ยนวัน
+- [x] เพิ่ม Config และ Unit tests ของกลไกแสง โดยแยกตัวแปรน้ำ/อุณหภูมิในการเปรียบเทียบ
 - **ผ่านเมื่อ:** PPFD สูงช่วงสั้นไม่ทำให้ Hydration/ภาพเหี่ยวกระโดด; Exposure ต่อเนื่องเพิ่ม Light Stress; ลดแสงแล้ว Stress ค่อยลด; Low Light ให้ Biomass เพิ่มน้อยกว่ากลุ่มควบคุมในเวลาเท่ากัน; Photoperiod ปกติไม่เกิด Damage เพียงเพราะกลางคืน; ค่าทั้งหมดอยู่ในช่วงที่กำหนด
+
+- **ผลตรวจ:** AC-16…18 ผ่าน; tests 106/106 และ typecheck ผ่าน; ยังไม่เปลี่ยน Damage/Health รวมและ Visual mapping (P12/P14)
 
 ### P10 — Nutrient Stress & pH Behavior
 
@@ -169,7 +171,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8 เสร็จ; งานถัดไป P9 → P10 → P11 ตามคำสั่งผู้ใช้ แล้วหยุดตรวจ; P12–P15 ยังไม่เริ่ม
+- P8–P9 เสร็จ; งานถัดไป P10 → P11 ตามคำสั่งผู้ใช้ แล้วหยุดตรวจ; P12–P15 ยังไม่เริ่ม
 
 ---
 

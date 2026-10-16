@@ -205,9 +205,9 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 
 ทุกการทดสอบ Model ใช้ Seed 7, ไม่มี Sensor noise เข้ามาคำนวณ, Fixed step 1 s เว้นแต่ระบุ; เปรียบเทียบค่าคงที่ด้วย absolute tolerance 1e-9, ผลสมการต่อเนื่อง 1e-6 และใช้ช่วงตัวเลขด้านล่างสำหรับพฤติกรรมสะสม
 
-- [ ] AC-16 🧪 **P9 / FR-26:** ต้นเริ่ม Hydration 1, Damage 0, น้ำถึงราก, PPFD 650, Air 24 °C, VPD 1; หลัง 1 s Light Stress < 0.001 และ Hydration = 1; หลัง 6 h Stress > 0.9; เปลี่ยนเป็น PPFD 250 ต่อ 12 h แล้ว Stress < 0.05
-- [ ] AC-17 🧪 **P9 / FR-21, FR-25, FR-26:** PPFD 400 ที่ 32 °C หรือ Hydration 0.4 มี Light Stress มากกว่า 24 °C/Hydration 1 หลัง 2 h; ต้นกลางได้รับ Stress มากกว่าต้นมุมเมื่อ LED 100%; PPFD 50 ให้ Biomass น้อยกว่า 250 หลัง 3 วัน ที่น้ำ/อุณหภูมิเท่ากัน
-- [ ] AC-18 🧪 **P9 / FR-05, FR-26:** Photoperiod PPFD 250 เวลา 06–22 นาน 3 วัน ให้ Damage/Light Stress = 0 เมื่อไม่มี Stress อื่น; PPFD 0 นาน 8 h ไม่เพิ่ม Biomass หรือ DLI; ข้ามเที่ยงคืน 1 s ย้าย DLI วันนี้ไปเมื่อวาน และ Light Stress ไม่ถูก Reset
+- [x] AC-16 🧪 **P9 / FR-26:** ต้นเริ่ม Hydration 1, Damage 0, น้ำถึงราก, PPFD 650, Air 24 °C, VPD 1; หลัง 1 s Light Stress < 0.001 และ Hydration = 1; หลัง 6 h Stress > 0.9; เปลี่ยนเป็น PPFD 250 ต่อ 12 h แล้ว Stress < 0.05
+- [x] AC-17 🧪 **P9 / FR-21, FR-25, FR-26:** PPFD 400 ที่ 32 °C หรือ Hydration 0.4 มี Light Stress มากกว่า 24 °C/Hydration 1 หลัง 2 h; ต้นกลางได้รับ Stress มากกว่าต้นมุมเมื่อ LED 100%; PPFD 50 ให้ Biomass น้อยกว่า 250 หลัง 3 วัน ที่น้ำ/อุณหภูมิเท่ากัน
+- [x] AC-18 🧪 **P9 / FR-05, FR-26:** Photoperiod PPFD 250 เวลา 06–22 นาน 3 วัน ให้ Damage/Light Stress = 0 เมื่อไม่มี Stress อื่น; PPFD 0 นาน 8 h ไม่เพิ่ม Biomass หรือ DLI; ข้ามเที่ยงคืน 1 s ย้าย DLI วันนี้ไปเมื่อวาน และ Light Stress ไม่ถูก Reset
 - [ ] AC-19 🧪 **P10 / FR-25, FR-26:** EC 1.2/pH 6 เป็น Control; แยก EC 0/3.2 ที่ pH 6 และ pH 4/9 ที่ EC 1.2 ใน Plant fixture 24 h: Nutrient Stress > 0.95 เทียบ Control = 0 และ Biomass ต่ำกว่า Control; กลับสู่ EC 1.2/pH 6 ต่อ 48 h แล้ว Stress < 0.02 โดยไม่กระโดดเป็นศูนย์
 - [ ] AC-20 🧪 **P10 / FR-09:** pH เริ่ม 6 ไม่มี Refill/Dose หลัง 1 วัน = 6.0786939 ± 1e-6 และ 30 วัน = 6.2 ± 1e-6; เริ่ม pH 4/9 ต้องเข้าใกล้ 6.2 จากคนละด้าน; Refill 10 L ลงใน 20 L ดึง pH ไปทาง 7.2, Dose A/B ลด pH ตาม Config และอยู่ใน [4,9]; รัน Simulation 30 วันด้วยการดูแลตามด้านล่าง pH อยู่ใน [5.5,6.8]
 - [ ] AC-21 🧪 **P10 / FR-08, FR-26:** Simulation แยก Initial EC/pH แล้ว Stress แตกต่างภายใน 24 h; ไม่มีการแก้ Salt mass เพื่อดึง EC เข้าช่วง; ทดสอบ Evaporation, Uptake, Refill และ Dose ยังคงผ่าน และ Model ได้ EC/pH จาก Environment จริง ไม่ใช่ Sensor noise

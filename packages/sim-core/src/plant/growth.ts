@@ -3,8 +3,8 @@ import type { SimConfig } from '../config/defaultConfig';
 import { clamp } from '../math';
 
 /**
- * Growth baseline (ARCHITECTURE.md § 7.5) — M1 เป็น Logistic อย่างง่าย, M2 จะปรับปรุง
- *   dB/dt = μ·B·(1 − B/B_max)·f_light·f_temp·(1 − S_w)·(1 − Damage)
+ * Growth (ARCHITECTURE.md § 7.5, § 11) — Low Light ผ่าน f_light, Exposure ผ่าน S_light
+ *   dB/dt = μ·B·(1 − B/B_max)·f_light·f_temp·(1 − S_w)·(1 − S_light)·(1 − Damage)
  */
 
 export type { GrowthStage };
@@ -29,6 +29,7 @@ export interface GrowthInput {
   ppfd: number;
   airTempC: number;
   waterStress: number;
+  lightStress: number;
   damage: number;
 }
 
@@ -42,6 +43,7 @@ export function stepBiomass(biomassG: number, u: GrowthInput, dtS: number, cfg: 
     lightFactor(u.ppfd, cfg) *
     temperatureFactor(u.airTempC, cfg) *
     (1 - clamp(u.waterStress, 0, 1)) *
+    (1 - clamp(u.lightStress, 0, 1)) *
     (1 - clamp(u.damage, 0, 1));
   return biomassG + rate * (dtS / 86_400);
 }

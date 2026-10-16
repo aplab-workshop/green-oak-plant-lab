@@ -13,5 +13,6 @@ export * from './sensors';
 export * from './events';
 export * from './plant/water';
 export * from './plant/growth';
+export * from './plant/light';
 export * from './plant/plant';
 export * from './simulation';

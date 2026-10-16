@@ -4,6 +4,7 @@ import { SECONDS_PER_DAY } from '../clock';
 import { clamp } from '../math';
 import { dliIncrement, positionFactor, ppfdAt } from '../environment/light';
 import { morphology, stepBiomass } from './growth';
+import { stepLightStress } from './light';
 import {
   rootSubmergedFraction,
   rootSupplyRatio,
@@ -95,9 +96,10 @@ export function stepPlant(
   const hydration = stepHydration(p.hydration, supplyRatio, req.factor, p.damage, dtS, cfg);
   const stress = waterStress(hydration, cfg);
   const damage = stepDamage(p.damage, stress, dtS, cfg);
+  const lightStress = stepLightStress(p.lightStress, req.ppfd, e.airTempC, hydration, dtS, cfg);
   const biomassG = stepBiomass(
     p.biomassG,
-    { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, damage },
+    { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, damage },
     dtS,
     cfg,
   );
@@ -118,6 +120,7 @@ export function stepPlant(
     rootLengthCm: Math.max(p.rootLengthCm, m.rootLengthCm),
     hydration,
     waterStress: stress,
+    lightStress,
     damage,
     health: healthScore(damage, stress),
     rootSubmerged: req.rootSubmerged,

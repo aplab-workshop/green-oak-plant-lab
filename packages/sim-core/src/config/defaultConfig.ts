@@ -68,6 +68,18 @@ export interface SimConfig {
     ppfdMax: number;
     /** สัดส่วนแสงตามตำแหน่งต้น (index = ตำแหน่ง Net Pot) */
     positionFactors: number[];
+    /** PPFD เริ่มสะสม / เต็มระดับ (µmol/m²/s), 0 ≤ start < full */
+    stressStartPpfd: number;
+    stressFullPpfd: number;
+    /** อุณหภูมิเริ่มขยาย Stress / ช่วงเพิ่มจนเต็ม (°C), span > 0 */
+    stressHeatStartC: number;
+    stressHeatSpanC: number;
+    /** ตัวขยายจากความร้อน / ขาดน้ำ (ไร้หน่วย ≥ 0) */
+    stressHeatGain: number;
+    stressWaterGain: number;
+    /** Time constant สะสม / ฟื้น Light Stress (h, > 0) */
+    stressRiseH: number;
+    stressRecoveryH: number;
   };
   nutrient: {
     /** EC เริ่มต้น (mS/cm) */
@@ -190,6 +202,14 @@ export const DEFAULT_CONFIG: SimConfig = {
     ppfdMax: 400,
     // Net Pot 2 แถว × 3 คอลัมน์: คอลัมน์กลางได้แสงเต็ม มุมได้ 85%
     positionFactors: [0.85, 1.0, 0.85, 0.85, 1.0, 0.85],
+    stressStartPpfd: 350,
+    stressFullPpfd: 650,
+    stressHeatStartC: 28,
+    stressHeatSpanC: 8,
+    stressHeatGain: 1,
+    stressWaterGain: 1,
+    stressRiseH: 2,
+    stressRecoveryH: 4,
   },
   nutrient: {
     initialEc: 1.2,
