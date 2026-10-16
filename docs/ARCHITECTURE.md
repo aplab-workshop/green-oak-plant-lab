@@ -358,6 +358,18 @@ Noise แบบ Gaussian ขนาดเล็ก (เช่น ±0.1 °C, ±0.5
 
 Sim start = **Day 14 หลังเพาะ (ย้ายลงถัง), 06:00**, LED 0%, ทุก Actuator OFF ยกเว้น Air Pump และระดับน้ำ 85%
 
+### 7.10 Implementation Notes (P2)
+
+รายละเอียดที่ตัดสินใจตอนเขียนโค้ด (`packages/sim-core/src/environment/`)
+
+- **First-order response** ใช้สูตร Exact `x ← x_eq + (x − x_eq)·e^(−dt/τ)` แทน Euler จึงเสถียรทุกค่า dt และไม่ overshoot
+- **น้ำไม่พอ:** ถ้า Uptake + Evaporation มากกว่าน้ำที่มี จะแบ่งน้ำตามสัดส่วนความต้องการ และ `stepEnvironment` คืนค่า `uptakeL` ที่ได้จริงให้ Plant model ใช้ (P3)
+- **น้ำล้น:** ส่วนที่เกิน `V_max` ถือว่าล้นออกและพาเกลือออกไปตาม EC ปัจจุบัน
+- **DLI** ใน Environment คิดที่ตำแหน่ง Sensor (`pos = 1`) ส่วน DLI รายต้นคำนวณใน Plant model ด้วย `positionFactor(i)`
+- **Humidifier** ใช้น้ำจากถังแยก ไม่ลดน้ำในถังปลูก
+- **Room temperature** เป็น cosine รายวัน `T_mean + A·cos(2π(h − h_peak)/24)` ร้อนสุด 15:00
+- **Sensor readout** (`readSensors`) คำนวณ VPD จากค่าจริงของอากาศ (ไม่ใส่ Noise ซ้ำซ้อน) และ `readSimInfo` ให้ค่า D111/D112
+
 ## 8. Mock PLC
 
 `MockPlcAdapter` จำลอง **Device Memory จริง** (`D[0..7999]` เป็น Int16, `M[0..7679]` เป็น bit) ทำให้ Data Path เหมือน M3 ทุกประการ คือเขียน D แบบ Scaled Integer แล้วอ่าน M/D กลับ

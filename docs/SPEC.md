@@ -173,13 +173,13 @@ PLC จริงนับ Timer (T/ST) ตาม **เวลาจริง** �
 
 M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้อที่มี 🧪 ต้องเป็น Automated Test)
 
-- [ ] AC-01 🧪 ระดับน้ำลดลงตามเวลาเมื่อ Refill OFF (FR-03)
-- [ ] AC-02 🧪 Refill Pump ON ทำให้ระดับน้ำเพิ่มขึ้นและไม่เกิน 100% (FR-03, FR-04)
+- [x] AC-01 🧪 ระดับน้ำลดลงตามเวลาเมื่อ Refill OFF (FR-03)
+- [x] AC-02 🧪 Refill Pump ON ทำให้ระดับน้ำเพิ่มขึ้นและไม่เกิน 100% (FR-03, FR-04)
 - [ ] AC-03 🧪 เมื่อรากขาดน้ำนานพอ Water Stress เพิ่มขึ้นและ Hydration ลดลง (FR-22, FR-23)
 - [ ] AC-04 🧪 เมื่อเติมน้ำทันเวลา Water Stress ลดลงและ Damage ≈ 0 (FR-23)
 - [ ] AC-05 🧪 เมื่อขาดน้ำนานเกิน Threshold Damage > 0 และหลังเติมน้ำแล้ว Damage ไม่ลดลง (FR-24)
-- [ ] AC-06 🧪 LED Brightness มีผลต่อ PPFD และ DLI (0% → PPFD 0, DLI ไม่เพิ่ม) (FR-05)
-- [ ] AC-07 🧪 ผลลัพธ์เท่ากัน (ภายใน tolerance) ไม่ว่าจะเดิน 3600 step ทีละ 1 หรือแบ่งเป็นหลาย Tick (FR-01)
+- [x] AC-06 🧪 LED Brightness มีผลต่อ PPFD และ DLI (0% → PPFD 0, DLI ไม่เพิ่ม) (FR-05)
+- [x] AC-07 🧪 ผลลัพธ์เท่ากัน (ภายใน tolerance) ไม่ว่าจะเดิน 3600 step ทีละ 1 หรือแบ่งเป็นหลาย Tick (FR-01)
 - [ ] AC-08 🧪 Lab 01 เปลี่ยนแปลงหรือ Reset แล้ว State ของ Lab 02 ไม่เปลี่ยน (FR-40, FR-42)
 - [ ] AC-09 🧪 Integration: Sim → MockPlc(auto) → Sim รักษาระดับน้ำอยู่ในช่วง Hysteresis ได้ใน 3 วันจำลอง
 - [ ] AC-10 🧪 Command หมดอายุ → Fail-safe ทำงานและ Simulation ยังเดินต่อ (FR-32)

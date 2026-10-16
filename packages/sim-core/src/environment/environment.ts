@@ -1,0 +1,150 @@
+import type { ActuatorCommands } from '@gol/shared';
+import type { SimConfig } from '../config/defaultConfig';
+import { SECONDS_PER_DAY } from '../clock';
+import { clamp, vpdKPa } from '../math';
+import { stepAir, stepWaterTemp, roomTempC } from './air';
+import { dliIncrement, ppfdAt } from './light';
+import { ecFrom, stepPh, stepSalt } from './nutrient';
+import { powerW } from './power';
+import { evaporationL, stepTank } from './tank';
+
+/** State ของสภาพแวดล้อมในถังและห้องปลูก (ค่าจริงของ Model ไม่มี Noise) */
+export interface EnvironmentState {
+  waterVolumeL: number;
+  /** มวลเกลือรวม (mS/cm·L) → EC = saltMass / volume */
+  saltMass: number;
+  ph: number;
+  airTempC: number;
+  rhPct: number;
+  waterTempC: number;
+  /** LED ที่ใช้จริงใน step ล่าสุด (%) */
+  ledPct: number;
+  /** PPFD ที่ตำแหน่ง Sensor (กลางถัง) */
+  ppfd: number;
+  /** DLI สะสมตั้งแต่ 00:00 เวลาจำลอง ที่ตำแหน่ง Sensor */
+  dliToday: number;
+  dliYesterday: number;
+  /** อัตราไหล Refill ล่าสุด (L/min) */
+  refillFlowLpm: number;
+  powerW: number;
+  /** สะสมเพื่อสถิติ (L) */
+  totalRefillL: number;
+  totalUptakeL: number;
+  totalOverflowL: number;
+}
+
+export interface EnvironmentInput {
+  cmd: ActuatorCommands;
+  /** เวลาจำลองตอนเริ่ม step (s) */
+  simTimeS: number;
+  /** น้ำที่พืชทั้งหมดต้องการใน step นี้ (L) — มาจาก Plant model (P3) */
+  plantUptakeDemandL: number;
+}
+
+export interface EnvironmentStepResult {
+  state: EnvironmentState;
+  /** น้ำที่พืชได้จริง (L) — อาจน้อยกว่าที่ขอถ้าน้ำในถังไม่พอ */
+  uptakeL: number;
+}
+
+export function initialEnvironment(cfg: SimConfig, simTimeS: number): EnvironmentState {
+  const volume = (cfg.tank.initialLevelPct / 100) * cfg.tank.capacityL;
+  const tRoom = roomTempC(simTimeS, cfg);
+  return {
+    waterVolumeL: volume,
+    saltMass: cfg.nutrient.initialEc * volume,
+    ph: cfg.nutrient.initialPh,
+    airTempC: tRoom,
+    rhPct: cfg.room.rhPct,
+    waterTempC: tRoom - 2,
+    ledPct: 0,
+    ppfd: 0,
+    dliToday: 0,
+    dliYesterday: 0,
+    refillFlowLpm: 0,
+    powerW: 0,
+    totalRefillL: 0,
+    totalUptakeL: 0,
+    totalOverflowL: 0,
+  };
+}
+
+/** เดิน Environment 1 step (Pure function) */
+export function stepEnvironment(
+  s: EnvironmentState,
+  u: EnvironmentInput,
+  dtS: number,
+  cfg: SimConfig,
+): EnvironmentStepResult {
+  const { cmd } = u;
+  const dtMin = dtS / 60;
+  const ledPct = clamp(Number.isFinite(cmd.ledPct) ? cmd.ledPct : 0, 0, 100);
+
+  // --- Air ---
+  const air = stepAir(s, { simTimeS: u.simTimeS, ledPct, fan: cmd.fan, humidifier: cmd.humidifier }, dtS, cfg);
+  const vpd = vpdKPa(air.airTempC, air.rhPct);
+
+  // --- Water balance ---
+  const refillInL = cmd.refillPump ? cfg.tank.refillFlowLpm * dtMin : 0;
+  const doseAL = cmd.nutrientA ? cfg.nutrient.doseFlowLpm * dtMin : 0;
+  const doseBL = cmd.nutrientB ? cfg.nutrient.doseFlowLpm * dtMin : 0;
+  const tank = stepTank(
+    s.waterVolumeL,
+    {
+      refillInL,
+      doseInL: doseAL + doseBL,
+      uptakeDemandL: Math.max(0, u.plantUptakeDemandL),
+      evapL: evaporationL(vpd, dtS, cfg),
+    },
+    cfg,
+  );
+
+  // --- Nutrient ---
+  const saltMass = stepSalt(
+    s.saltMass,
+    { volumeBeforeL: s.waterVolumeL, refillInL, doseAL, doseBL, uptakeL: tank.uptakeL, overflowL: tank.overflowL },
+    cfg,
+  );
+  const doseMinutes = ((cmd.nutrientA ? 1 : 0) + (cmd.nutrientB ? 1 : 0)) * dtMin;
+  const ph = stepPh(s.ph, { volumeBeforeL: s.waterVolumeL, refillInL, doseMinutes }, dtS, cfg);
+
+  // --- Water temperature ---
+  const waterTempC = stepWaterTemp(s.waterTempC, air.airTempC, s.waterVolumeL, refillInL, dtS, cfg);
+
+  // --- Light & DLI (reset ตอนข้ามเที่ยงคืนเวลาจำลอง) ---
+  const ppfd = ppfdAt(ledPct, 1, cfg);
+  let dliToday = s.dliToday;
+  let dliYesterday = s.dliYesterday;
+  const crossesMidnight =
+    Math.floor((u.simTimeS + dtS) / SECONDS_PER_DAY) !== Math.floor(u.simTimeS / SECONDS_PER_DAY);
+  if (crossesMidnight) {
+    dliYesterday = dliToday + dliIncrement(ppfd, dtS);
+    dliToday = 0;
+  } else {
+    dliToday += dliIncrement(ppfd, dtS);
+  }
+
+  return {
+    uptakeL: tank.uptakeL,
+    state: {
+      waterVolumeL: tank.volumeL,
+      saltMass,
+      ph,
+      airTempC: air.airTempC,
+      rhPct: air.rhPct,
+      waterTempC,
+      ledPct,
+      ppfd,
+      dliToday,
+      dliYesterday,
+      refillFlowLpm: cmd.refillPump ? cfg.tank.refillFlowLpm : 0,
+      powerW: powerW({ ...cmd, ledPct }, cfg),
+      totalRefillL: s.totalRefillL + refillInL,
+      totalUptakeL: s.totalUptakeL + tank.uptakeL,
+      totalOverflowL: s.totalOverflowL + tank.overflowL,
+    },
+  };
+}
+
+/** EC ปัจจุบันของ State */
+export const envEc = (s: EnvironmentState): number => ecFrom(s.saltMass, s.waterVolumeL);

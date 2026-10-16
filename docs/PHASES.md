@@ -31,12 +31,12 @@ tags: [green-oak, roadmap]
 - [x] Vite + React + Tailwind + R3F แสดงกล่อง 3D และสถานะ WS
 - **ผ่านเมื่อ:** `npm run dev` แล้วหน้าเว็บแสดง "Connected" + heartbeat และ `npm test` ผ่าน
 
-### P2 — Environment Model (`sim-core`)
-- [ ] `SimClock` (dt คงที่, speed, pause, accumulator)
-- [ ] Tank water balance, Refill, Evaporation
-- [ ] LED → PPFD (position factor), DLI
-- [ ] Air temp / RH / Water temp / VPD, EC (salt mass), pH drift, Power
-- [ ] `defaultConfig.ts` พร้อมหน่วยและคำอธิบาย
+### P2 — Environment Model (`sim-core`) ✅
+- [x] `SimClock` (dt คงที่, speed, pause, accumulator)
+- [x] Tank water balance, Refill, Evaporation
+- [x] LED → PPFD (position factor), DLI
+- [x] Air temp / RH / Water temp / VPD, EC (salt mass), pH drift, Power
+- [x] `defaultConfig.ts` พร้อมหน่วยและคำอธิบาย
 - **ผ่านเมื่อ:** Unit tests AC-01, AC-02, AC-06, AC-07
 
 ### P3 — Plant Model: Water (`sim-core`)
