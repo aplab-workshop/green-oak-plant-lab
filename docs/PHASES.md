@@ -47,11 +47,12 @@ tags: [green-oak, roadmap]
 - [x] Leak disturbance + Event detection
 - **ผ่านเมื่อ:** Unit tests AC-03, AC-04, AC-05
 
-### P4 — Server, Lab Session, Mock PLC
-- [ ] `PlcAdapter` interface + write guard, `MockPlcAdapter` (manual / auto / offline)
-- [ ] `SensorProvider` + `SimulatedSensorProvider`
-- [ ] `LabSession`, `LabManager`, `EventLog`, `History`
-- [ ] REST routes + WebSocket snapshot stream
+### P4 — Server, Lab Session, Mock PLC ✅
+- [x] `PlcAdapter` interface + write guard, `MockPlcAdapter` (manual / auto / offline)
+- [x] `SensorProvider` + `SimulatedSensorProvider`
+- [x] `LabSession`, `LabManager`, `EventLog`, `History`
+- [x] REST routes + WebSocket snapshot stream
+- [x] Scenario `water-shortage` (ระดับน้ำ 65% + รั่ว 1.5 L/h)
 - **ผ่านเมื่อ:** Integration tests AC-08, AC-09, AC-10, AC-11
 
 ### P5 — Student Dashboard

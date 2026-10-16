@@ -1,3 +1,4 @@
+import type { GrowthStage } from '@gol/shared';
 import type { SimConfig } from '../config/defaultConfig';
 import { clamp } from '../math';
 
@@ -6,7 +7,7 @@ import { clamp } from '../math';
  *   dB/dt = μ·B·(1 − B/B_max)·f_light·f_temp·(1 − S_w)·(1 − Damage)
  */
 
-export type GrowthStage = 'seedling' | 'vegetative' | 'harvest';
+export type { GrowthStage };
 
 /** f_light = (P/(P+K)) / (P_ref/(P_ref+K)), clamp 0…max */
 export function lightFactor(ppfd: number, cfg: SimConfig): number {

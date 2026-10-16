@@ -180,10 +180,10 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-05 🧪 เมื่อขาดน้ำนานเกิน Threshold Damage > 0 และหลังเติมน้ำแล้ว Damage ไม่ลดลง (FR-24)
 - [x] AC-06 🧪 LED Brightness มีผลต่อ PPFD และ DLI (0% → PPFD 0, DLI ไม่เพิ่ม) (FR-05)
 - [x] AC-07 🧪 ผลลัพธ์เท่ากัน (ภายใน tolerance) ไม่ว่าจะเดิน 3600 step ทีละ 1 หรือแบ่งเป็นหลาย Tick (FR-01)
-- [ ] AC-08 🧪 Lab 01 เปลี่ยนแปลงหรือ Reset แล้ว State ของ Lab 02 ไม่เปลี่ยน (FR-40, FR-42)
-- [ ] AC-09 🧪 Integration: Sim → MockPlc(auto) → Sim รักษาระดับน้ำอยู่ในช่วง Hysteresis ได้ใน 3 วันจำลอง
-- [ ] AC-10 🧪 Command หมดอายุ → Fail-safe ทำงานและ Simulation ยังเดินต่อ (FR-32)
-- [ ] AC-11 🧪 Adapter ไม่มีทางเขียน M Device (Type-level และ Runtime guard) (FR-31)
+- [x] AC-08 🧪 Lab 01 เปลี่ยนแปลงหรือ Reset แล้ว State ของ Lab 02 ไม่เปลี่ยน (FR-40, FR-42)
+- [x] AC-09 🧪 Integration: Sim → MockPlc(auto) → Sim รักษาระดับน้ำอยู่ในช่วง Hysteresis ได้ใน 3 วันจำลอง
+- [x] AC-10 🧪 Command หมดอายุ → Fail-safe ทำงานและ Simulation ยังเดินต่อ (FR-32)
+- [x] AC-11 🧪 Adapter ไม่มีทางเขียน M Device (Type-level และ Runtime guard) (FR-31)
 - [ ] AC-12 เปิดเว็บแล้วเห็น 3D ถัง + ผัก 6 ต้น และค่า Sensor อัปเดต Real-time
 - [ ] AC-13 ปิด Refill และเร่ง 360x แล้วเห็นน้ำลด ใบตก จนเหี่ยว จากนั้นเปิด Refill แล้วเห็นใบฟื้น (ต้นที่เสียหายมากฟื้นไม่เต็ม)
 - [ ] AC-14 Interaction ครบตาม FR-51, FR-52 และไม่มีปุ่ม Placeholder

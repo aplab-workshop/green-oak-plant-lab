@@ -34,3 +34,43 @@ export interface ActuatorCommands {
 }
 
 export type ActuatorKey = keyof ActuatorCommands;
+
+export type GrowthStage = 'seedling' | 'vegetative' | 'harvest';
+
+/** State ของผักแต่ละต้น (FR-20) */
+export interface PlantState {
+  id: number;
+  /** ตำแหน่ง Net Pot (index ใน cfg.light.positionFactors) */
+  position: number;
+  ageDays: number;
+  stage: GrowthStage;
+  /** Fresh weight โดยประมาณ (g) */
+  biomassG: number;
+  leafCount: number;
+  leafAreaCm2: number;
+  rootLengthCm: number;
+  /** 0 = แห้งสนิท, 1 = เต็มที่ */
+  hydration: number;
+  /** 0–1 */
+  waterStress: number;
+  /** 0–1 (M2) */
+  lightStress: number;
+  /** 0–1 (M2) */
+  nutrientStress: number;
+  /** 0–1, 1 = ปกติ (M2) */
+  rootHealth: number;
+  /** ความเสียหายถาวร 0–1 */
+  damage: number;
+  /** 0–100 */
+  health: number;
+  // --- ค่าวินิจฉัย (ใช้แสดงผลและอธิบาย) ---
+  /** สัดส่วนรากที่แช่น้ำ 0–1 */
+  rootSubmerged: number;
+  /** ความสามารถดูดน้ำเทียบความต้องการ 0–1 */
+  supplyRatio: number;
+  /** ความต้องการน้ำปัจจุบัน (L/day) */
+  demandLPerDay: number;
+  ppfd: number;
+  dliToday: number;
+  dliYesterday: number;
+}

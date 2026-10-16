@@ -1,4 +1,4 @@
-export type EventSeverity = 'info' | 'warning' | 'critical';
+import type { EventSeverity } from '@gol/shared';
 
 /** เหตุการณ์ที่ Simulation ตรวจพบ (FR-43) — ใช้ใน Event Log */
 export interface SimEvent {

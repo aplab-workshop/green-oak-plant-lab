@@ -154,7 +154,7 @@ sequenceDiagram
 
 | Parameter | Default | Env |
 |---|---|---|
-| Fixed step `dt` | 1 s (sim) | `SIM_DT_S` |
+| Fixed step `dt` | 1 s (sim) | — (`defaultConfig.ts`) |
 | Server tick | 100 ms | `SIM_TICK_MS` |
 | Max steps / tick | 5000 | — (ป้องกัน spiral of death) |
 | PLC poll | 500 ms | `PLC_POLL_MS` |
@@ -210,12 +210,25 @@ export interface SensorProvider {
 | GET | `/api/labs` | รายการ Lab + สรุปสถานะ |
 | GET | `/api/labs/:labId` | Snapshot ปัจจุบัน |
 | GET | `/api/labs/:labId/history` | ข้อมูลย้อนหลังสำหรับกราฟ |
-| GET | `/api/labs/:labId/events` | Event Log |
-| POST | `/api/labs/:labId/commands` | `setSpeed`, `pause`, `resume`, `reset`, `setPlcMode` (`manual`/`auto`), `setManualActuator`, `applyScenario` |
+| GET | `/api/labs/:labId/events?limit=` | Event Log |
+| GET | `/api/scenarios` | รายการ Scenario |
+| POST | `/api/labs/:labId/commands` | ดูตารางคำสั่งด้านล่าง ตอบกลับเป็น Snapshot ใหม่ |
+
+| Command (`type`) | Field | หมายเหตุ |
+|---|---|---|
+| `setSpeed` | `speed`: 1 / 60 / 360 | |
+| `pause`, `resume` | — | |
+| `reset` | — | เริ่มใหม่ ใช้ Scenario เดิมถ้ามี |
+| `applyScenario` | `scenarioId` | Reset แล้วตั้ง Initial conditions + Disturbance |
+| `clearScenario` | — | Reset แบบไม่มี Scenario |
+| `setPlcMode` | `mode`: manual / auto / offline | Mock PLC เท่านั้น (409 ถ้าไม่ใช่ Mock) |
+| `setManualBit` | `key`, `value` | เฉพาะ manual mode (409 ถ้าไม่ใช่) |
+| `setManualLed` | `value` 0–100 | เฉพาะ manual mode |
 
 **WebSocket** `/ws`
 - Client → `{ type: "subscribe", labId }`
-- Server → `{ type: "snapshot", labId, data: LabSnapshot }` (~5 Hz) และ `{ type: "event", labId, event }`
+- Client → `{ type: "ping", t }`
+- Server → `hello` (พร้อม `labIds`), `heartbeat`, `pong`, `{ type: "snapshot", labId, data: LabSnapshot }` (~5 Hz, ส่งทันทีตอน subscribe) และ `{ type: "event", labId, event }`
 
 ทุกข้อความผ่าน zod validation ส่วน Auth/สิทธิ์ (Student เห็นเฉพาะ Lab ตัวเอง) เพิ่มใน M4
 
@@ -406,6 +419,18 @@ Air pump: ON ตลอด
 ```
 
 > หมายเหตุ: Mock program **ไม่ได้เขียน M Device ผ่าน Gateway** เพราะมันจำลอง "Ladder ใน PLC" และเขียน Memory ภายใน Mock เอง ส่วน Gateway ยังอ่านอย่างเดียวตาม FR-31
+
+### 8.1 Implementation Notes (P4)
+
+- **ไฟล์:** `apps/server/src/plc/` (PlcAdapter, DeviceMemory, MockPlcAdapter, mockPrograms, failsafe), `lab/` (LabSession, LabManager, EventLog, History), `sensors/SensorProvider.ts`, `scenarios/scenarios.ts`
+- **เริ่มต้นใน Fail-safe** จนกว่าจะอ่าน Command จาก PLC สำเร็จครั้งแรก (ไม่ใช้ค่าที่ยังไม่รู้)
+- **Write guard 2 ชั้น:** `encodeSensorWrite` สร้าง Payload จาก Device map เท่านั้น และเรียก `assertWritable('D', addr)` ทุก Word ก่อนเขียน ส่วน `PlcAdapter` ไม่มีเมธอดเขียน Address อิสระ
+- **Manual mode** สั่งผ่าน `MockPlcAdapter.setManualBit/Led` ซึ่งเขียน Memory ภายใน "PLC" (แทนนักเรียนกดสวิตช์) ไม่ใช่ผ่าน Gateway และหลังสั่งจะ Poll ทันทีเพื่อให้ UI ตอบสนองเร็ว
+- **เปลี่ยน manual ↔ auto** จะล้างคำสั่งใน PLC (คง Air Pump ไว้)
+- **Event ที่ Server เพิ่ม:** `actuator.change` (พร้อม Address เช่น "Water Refill Pump (M102): ON"), `plc.commands_active`, `plc.failsafe`, `plc.comm_error`, `plc.comm_restored`, `sensor.out_of_range`, `command.out_of_range`, `sim.speed/pause/resume`, `lab.reset`, `sim.lagged` (จำกัดความถี่ 10 วินาที)
+- **Lab แยกอิสระ:** แต่ละ Lab มี Simulation, Clock, Adapter, EventLog, History ของตัวเอง และใช้ seed ต่างกัน (`lab01` = seed 1) ส่วน Error ของ Lab หนึ่งในรอบ tick จะไม่หยุด Lab อื่น
+- **Scenario `water-shortage`:** ระดับน้ำเริ่ม 65% + รั่ว 1.5 L/h ถ้าไม่เติม ต้นกล้าเริ่ม Water stress ภายใน ~6–8 ชั่วโมงจำลอง (~1–1.5 นาทีจริงที่ 360x)
+- **ผลของการเร่งเวลา (ยืนยันจาก AC-09):** Poll ทุก 500 ms จริงที่ 360x = 3 นาทีจำลอง Refill จึงเติมได้ ~6 L (15%) ต่อรอบ ระดับน้ำจึงเกินช่วง Hysteresis ได้ ซึ่งเป็นข้อจำกัดที่ระบุใน SPEC § 7
 
 ## 9. Frontend
 

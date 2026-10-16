@@ -2,7 +2,7 @@
 
 ห้องปฏิบัติการเสมือนสำหรับฝึกเขียน PLC **Mitsubishi FX5U** เพื่อควบคุมระบบปลูกผักสลัด Green Oak แบบ Hydroponics **Deep Water Culture (DWC)** ด้วย Simulation และโมเดล 3D แบบ Interactive
 
-> **สถานะ:** P3 — Plant Model เสร็จ (Hydration, Water stress, Damage, Recovery, Growth + Unit tests)
+> **สถานะ:** P4 — Server + Mock PLC เสร็จ (LabSession, PLC-in-the-loop, Fail-safe, REST/WebSocket + Integration tests)
 
 ## เอกสาร
 
