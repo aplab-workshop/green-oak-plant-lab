@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-17: P8–P11 เสร็จตามคำสั่งผู้ใช้ — หยุดให้ตรวจแล้ว; งานถัดไป P12 ยังไม่เริ่ม**
+> **สถานะ 2026-10-17: P8–P12 เสร็จ — ผู้ใช้อนุมัติทำ P12–P15 ต่อเนื่อง แล้วหยุดก่อนปรับรูปลักษณ์ 3D**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -140,13 +140,15 @@ tags: [green-oak, roadmap]
 - **ผลตรวจ:** AC-22…24 ผ่าน; tests 126/126 และ typecheck ผ่าน; ตรวจ Uptake ตรงกับน้ำที่ถังจ่ายจริง, Reset, รากยาว/ถังแห้ง และ Regression M1
 - **เหลือตามแผน:** P12 รวม Stress เข้า Damage/Health; P13 ต่อ Oxygen/History/Events; P14 Diagnostics/Curl; หยุดให้ผู้ใช้ตรวจหลัง P11
 
-### P12 — Integrated Growth, Damage & Recovery
+### P12 — Integrated Growth, Damage & Recovery ✅
 
-- [ ] รวม Water/Light/Nutrient/Root effects เข้า Growth และ Health ในจุดเดียวตามสูตร P8
-- [ ] รวมการสะสม Damage ถาวรและข้อจำกัดในการฟื้น; จัดลำดับ Step ให้ผลระหว่าง Environment/Plants สอดคล้องกัน
-- [ ] เพิ่ม Test แบบหลาย Stress, Recovery ทันเวลา/ล่าช้า และ Healthy reference 30 วัน
-- [ ] ตรวจ Determinism ด้วย Seed และ Command schedule ตามเวลาจำลองเดียวกัน แบ่ง Tick ต่างกันที่ 1x/60x/360x โดยควบคุม Noise
+- [x] รวม Water/Light/Nutrient/Root effects เข้า Growth และ Health ในจุดเดียวตามสูตร P8
+- [x] รวมการสะสม Damage ถาวรและข้อจำกัดในการฟื้น; จัดลำดับ Step ให้ผลระหว่าง Environment/Plants สอดคล้องกัน
+- [x] เพิ่ม Test แบบหลาย Stress, Recovery ทันเวลา/ล่าช้า และ Healthy reference 30 วัน
+- [x] ตรวจ Determinism ด้วย Seed และ Command schedule ตามเวลาจำลองเดียวกัน แบ่ง Tick ต่างกันที่ 1x/60x/360x โดยควบคุม Noise
 - **ผ่านเมื่อ:** กลุ่ม Healthy เติบโตตามช่วงที่ P8 กำหนด; กลุ่ม Stress โตช้ากว่า; ฟื้นทันมี Damage ใกล้ศูนย์ตาม tolerance; ฟื้นช้า Damage ไม่ลดและเพดาน Health/Growth ต่ำลง; ทุก State มีขอบเขตและไม่มีค่าผิดปกติ; ผลไม่เปลี่ยนเพราะการแบ่ง Tick; M1 regression ผ่าน
+
+- **ผลตรวจ:** AC-25/26 ผ่าน; tests 131/131 + typecheck ผ่าน; ตรวจ Healthy reference 30 วัน, หลาย Stress และ Recovery 48 h
 
 ### P13 — Server Data Flow, Events & History
 
@@ -176,7 +178,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P11 เสร็จและหยุดให้ผู้ใช้ตรวจตามคำสั่ง; งานถัดไป **P12** โดย P12–P15 ยังไม่เริ่ม และยังไม่ tag m2
+- P8–P12 เสร็จ; งานถัดไป **P13 → P14 → P15** ตามคำสั่งล่าสุด; หลัง P15 หยุดให้ตรวจและค่อยปรับรูปลักษณ์ Model; tag m2 หลังผู้ใช้ตรวจรับ
 
 ---
 

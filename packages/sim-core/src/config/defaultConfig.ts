@@ -189,7 +189,7 @@ export interface SimConfig {
     hydrationRecoveryPerH: number;
     /** Hydration ที่ถือว่าเหี่ยวเต็มที่ (Water stress = 1) */
     wiltHydration: number;
-    /** Water stress ที่เริ่มเกิด Damage ถาวร */
+    /** max(Water/Root/Light/Nutrient Stress) ที่เริ่มเกิด Damage ถาวร (0–1) */
     damageStressThreshold: number;
     /** อัตราเกิด Damage ต่อ Stress ส่วนเกิน (1/h) */
     damagePerH: number;

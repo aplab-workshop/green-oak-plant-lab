@@ -69,7 +69,7 @@ export const waterStress = (hydration: number, cfg: SimConfig): number =>
 
 /**
  * Accumulated damage (FR-24) — เพิ่มอย่างเดียว ไม่มีเทอมลด
- *   dD/dt = k_dmg · max(0, S_w − S_threshold)
+ *   dD/dt = k_dmg · max(0, maxStress − S_threshold) (P12 รวมทุก Stress)
  */
 export function stepDamage(damage: number, stress: number, dtS: number, cfg: SimConfig): number {
   const p = cfg.plant;

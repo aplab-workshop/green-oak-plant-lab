@@ -13,7 +13,9 @@ describe('Light Stress / Low Light — P9', () => {
     expect(f.plant.waterStress).toBe(0);
     f.runHours(6);
     expect(f.plant.lightStress).toBeGreaterThan(0.9);
-    expect(f.plant.hydration).toBe(1);
+    // P12: Exposure นานสร้าง Damage และจำกัด Hydration ได้ แต่ไม่เหี่ยวทันทีตอนเปิดไฟ
+    expect(f.plant.damage).toBeGreaterThan(0);
+    expect(f.plant.hydration).toBeGreaterThan(0.9);
     const stressed = f.plant.lightStress;
     f.env.ledPct = 100 * 250 / 650;
     f.step();

@@ -86,6 +86,7 @@ describe('Plant water stress — AC-03 / AC-04 / AC-05', () => {
     sim.setWaterLevelPct(30);
     run(sim, 1.5, { ledPct: 80 });
     const stressed = sim.plants.map((p) => p.waterStress);
+    const healthBeforeRefill = sim.plants.map((p) => p.health);
     expect(avg(stressed)).toBeGreaterThan(0.3);
 
     // เปิด Refill Pump 12 นาที (+24 L → 90 %)
@@ -94,10 +95,12 @@ describe('Plant water stress — AC-03 / AC-04 / AC-05', () => {
     const recovery = run(sim, 6, { ledPct: 80 });
     const events = [...refill.events, ...recovery.events];
 
-    for (const p of sim.plants) {
+    for (const [i, p] of sim.plants.entries()) {
       expect(p.waterStress).toBeLessThan(0.1);
       expect(p.damage).toBe(0);
-      expect(p.health).toBeGreaterThan(95);
+      // P12 รวม Nutrient Stress: เติมน้ำประปามากทำให้ EC เจือจาง แม้ Water Stress ฟื้นแล้ว
+      expect(p.health).toBeGreaterThan(healthBeforeRefill[i]!);
+      expect(p.nutrientStress).toBeGreaterThan(0);
     }
     expect(events.some((e) => e.kind === 'plant.water_stress_cleared')).toBe(true);
     expect(events.some((e) => e.kind === 'tank.roots_covered')).toBe(true);

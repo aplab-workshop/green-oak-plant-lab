@@ -48,7 +48,7 @@ tags: [green-oak, spec]
 | Milestone | เนื้อหา | สถานะ |
 |---|---|---|
 | **M1** Functional 3D Virtual Plant | Web App, 3D DWC 6 ต้น, Sensor Dashboard, Mock Actuator, Water Balance, Water Shortage Behavior, ทำงานโดยไม่มี PLC | ✅ เสร็จ 2026-10-16 |
-| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P11 เสร็จ; รอตรวจ ก่อน P12** |
+| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P12 เสร็จ; กำลังทำ P13–P15** |
 | M3 One Real FX5U | SLMP 3E Gateway, Communication Monitor, PLC-in-the-Loop กับเครื่องจริง 1 เครื่อง | |
 | M4 Multi-Lab Classroom | 10 PLC, 10 Lab, Student/Teacher Dashboard, Concurrent Test | |
 | M5 Advanced | Scenario Management, Data Logging, Performance Evaluation, Real Sensor Architecture | |
@@ -81,12 +81,13 @@ tags: [green-oak, spec]
 
 ### 4.3 M2 — Model Contract (P8, 2026-10-16)
 
-ผู้ใช้อนุมัติให้ดำเนิน P8 → P9 → P10 → P11 ต่อเนื่อง โดย commit และตรวจ tests/typecheck แยก Phase แล้วหยุดที่ P11; P12–P15 ยังต้องรอตรวจงานก่อนเริ่ม
+ผู้ใช้อนุมัติให้ดำเนิน P8 → P9 → P10 → P11 ต่อเนื่อง และวันที่ 2026-10-17 สั่งทำ P12 → P13 → P14 → P15 ต่อเนื่อง โดย commit และตรวจ tests/typecheck แยก Phase แล้วหยุดก่อนงานปรับรูปลักษณ์ Model 3D; tag m2 หลังผู้ใช้ตรวจรับ
 
 - P9: Light Stress สะสมจาก PPFD เกินเกณฑ์ โดยความร้อน/ขาดน้ำเพิ่มผล; Low Light ลด Growth ผ่าน Light factor เดิม ไม่สร้าง Stress จากความมืดหรือ DLI ของวันที่ยังไม่ครบ
 - P10: EC/pH นอกช่วงทำให้ Nutrient Stress สะสมและลด Growth; pH เป็น Empirical relaxation เข้าสู่ดุลยภาพ 6.2 ด้วย time constant 2 วัน พร้อมผล Refill/Dosing ไม่ใช่เคมีกรด–ด่างหรือระบบปรับ pH อัตโนมัติจริง
 - P11: Estimated Oxygen Status เป็นดัชนีไร้หน่วย 0–1 ในถัง ไม่ใช่ DO (mg/L) ขึ้นกับ Air Pump, Water Temperature และปริมาณน้ำ; Root Health สะสมผลจาก Oxygen และ Root access แล้วจำกัด Uptake
 - P12: รวม Stress เข้า Damage ถาวรและ Health; ระหว่าง P9–P11 Damage/Health ยังใช้ Water Stress ตาม M1 ส่วน Growth รับ Light/Nutrient และผล Root ผ่านการดูดน้ำแล้ว
+  - AC-04 ยังต้องฟื้น Water Stress <0.1 และไม่มี Damage เมื่อเติมทัน แต่ Refill น้ำประปาทำให้ EC เจือจาง จึงไม่รับประกัน Health >95 หากยังมี Nutrient Stress; ตรวจว่า Health ดีขึ้นจากก่อนเติม และตรวจ Stress อื่นแยกตาม M2
 - P13: ขยาย Snapshot/History/Events; P14: Diagnostics, Timeline, Growth chart และ Curl; P15: ตรวจรับ M2 ทั้งหมด
 - คง Device map เดิม, ไม่เพิ่มปั๊ม pH, ไม่จำลองธาตุเฉพาะชนิดหรือ A/B imbalance; ค่าเชิงการสอนและสูตรอยู่ใน ARCHITECTURE § 11
 - Visual Reference โรงเรือนจากผู้ใช้ใช้ประกอบการออกแบบใน P14; การทำภาพ Final ทั้งฉากเป็นข้อเสนอ P16 แยกต่างหาก ยังไม่ใช่งานใน P8–P11
@@ -214,8 +215,8 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-22 🧪 **P11 / FR-26:** ถัง 85%, Water 24 °C, Oxygen เริ่ม 0.95; ปิด Air Pump 12 h แล้ว Oxygen < 0.21 เทียบ ON = 0.95; เปิดใหม่ 6 h แล้ว > 0.9; 32 °C ให้ค่าต่ำกว่า 24 °C และแต่ละ Step เปลี่ยน < 0.001
 - [x] AC-23 🧪 **P11 / FR-22, FR-26:** Simulation ห้อง 24 °C คงที่ ไม่มี LED heat, LED 60%, น้ำ 85% เปรียบเทียบ Air Pump OFF/ON 24 h: OFF มี Root Health < 0.6, Supply ratio ต่ำกว่า ON, น้ำยังถึงราก; เปิดใหม่ 24 h Root Health > 0.9; Pump ON ไม่ช่วยรากที่พ้นน้ำให้ดูดน้ำได้
 - [x] AC-24 🧪 **P11 / FR-03, FR-22, FR-26:** ถังแห้ง, ถัง 1%, รากสั้น/ยาว: State ทุกค่าต้อง finite, Oxygen/Root Health/Supply อยู่ใน [0,1], น้ำไม่ติดลบ; Uptake สะสมไม่เกินน้ำเริ่มต้น + น้ำเติม (tolerance 1e-9 L); ถังแห้งให้ Oxygen target และ Root access = 0 รวมรากยาวเกินความสูง Net Pot; Reset คืน State เดิมตาม seed
-- [ ] AC-25 🧪 **P12 / FR-24, FR-25:** Healthy reference 30 วัน (LED 80% 06–22, Refill <70%, Fan >25 °C, A+B เมื่อ EC <1.0, Air Pump ON) Biomass เฉลี่ย 70–150 g, Damage <0.01; หลาย Stress โตช้ากว่า Control; Stress สูง 1.5 h แล้วแก้ทันมี Damage <0.01, ปล่อย 24 h มี Damage >0 และไม่ลดตลอด Recovery 48 h; Health ≤ 100·(1−Damage)
-- [ ] AC-26 🧪 **P12 / FR-01, FR-02:** Seed/Command schedule ตามเวลาจำลองเดียวกัน 24 h ที่ 1x/60x/360x และแบ่ง Tick ต่างกันให้ State เท่ากัน ±1e-9; Pause 10 s จริงไม่เปลี่ยน Model; Reset คืนค่าเริ่มต้น
+- [x] AC-25 🧪 **P12 / FR-24, FR-25:** Healthy reference 30 วัน (LED 80% 06–22, Refill <70%, Fan >25 °C, A+B เมื่อ EC <1.0, Air Pump ON) Biomass เฉลี่ย 70–150 g, Damage <0.01; หลาย Stress โตช้ากว่า Control; Plant fixture PPFD 650 ที่ 24 °C/น้ำพอ 1.5 h แล้วลดเป็น 250 มี Damage <0.01, ปล่อย 24 h มี Damage >0 และไม่ลดตลอด Recovery 48 h; Health ≤ 100·(1−Damage) ทุกกรณี; Stress รุนแรงต่อเนื่องอาจทำให้ Hydration ลดภายหลังผ่าน Damage cap แม้น้ำพอ (AC-16 ห้ามเหี่ยวทันที ไม่ได้ห้ามผลเสียระยะยาว)
+- [x] AC-26 🧪 **P12 / FR-01, FR-02:** Seed/Command schedule ตามเวลาจำลองเดียวกัน 24 h ที่ 1x/60x/360x และแบ่ง Tick ต่างกันให้ State เท่ากัน ±1e-9; Pause 10 s จริงไม่เปลี่ยน Model; Reset คืนค่าเริ่มต้น
 - [ ] AC-27 🧪 **P13 / FR-40–FR-43:** Snapshot/History ตรง State ณ เวลาบันทึก ±1e-9, ทดสอบสอง Lab 24 h ไม่ปะปน; Stress ข้าม 0.3/0.15 ให้ Event อย่างละหนึ่งครั้ง; History เก็บทุก 600 s สูงสุด 2016 จุด (14 วัน), รัน 15 วันไม่เกินเพดาน; Pause ไม่เพิ่ม sample, Reset ล้างรอบเก่า; PLC guard และ Fail-safe ผ่าน
 - [ ] AC-28 **P14 / FR-53, FR-55:** Browser แสดง 6 ต้นและเลือกต้น/ช่วง 6 h, 24 h, 14 วันได้; กราฟและ Diagnostics ตรง Payload ตามความละเอียดที่แสดง; Curl จาก Light Stress 0 → 1 เพิ่มตาม Mapping test ขณะที่ Droop ไม่เปลี่ยนเมื่อ Hydration/Damage คงเดิม; ตรวจ 3D/2D/Low/Reset/ข้อมูลว่าง/สลับ Lab ทุก Control ทำงาน
 - [ ] AC-29 **P15 / NFR-06, NFR-07:** AC-16…28 ผ่าน, tests/typecheck/build ผ่าน และทำตามคู่มือการทดลองทุกกลไกได้ในโหมดห้องเรียนบน Windows; บันทึก Browser checks และข้อจำกัดก่อน tag m2

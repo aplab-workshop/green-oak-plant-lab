@@ -98,7 +98,7 @@ describe('Empirical pH equilibrium — P10 / AC-20', () => {
     expect(stepPh(6, { volumeBeforeL: 0, refillInL: 2, doseMinutes: 0 }, 60, cfg)).toBe(7.2);
   });
 
-  it('stays in the teaching range throughout a managed 30-day Simulation', () => {
+  it('AC-20 / AC-25: healthy plants grow within bounds during a managed 30-day Simulation', () => {
     const sim = new Simulation({ seed: 7 });
     let minimum = sim.env.ph;
     let maximum = sim.env.ph;
@@ -114,5 +114,12 @@ describe('Empirical pH equilibrium — P10 / AC-20', () => {
     }
     expect(minimum).toBeGreaterThanOrEqual(5.5);
     expect(maximum).toBeLessThanOrEqual(6.8);
-  }, 30000);
+    const avgBiomass = sim.plants.reduce((sum, p) => sum + p.biomassG, 0) / sim.plants.length;
+    expect(avgBiomass).toBeGreaterThanOrEqual(70);
+    expect(avgBiomass).toBeLessThanOrEqual(150);
+    for (const p of sim.plants) {
+      expect(p.damage).toBeLessThan(0.01);
+      expect(p.health).toBeLessThanOrEqual(100 * (1 - p.damage));
+    }
+  }, 60000);
 });

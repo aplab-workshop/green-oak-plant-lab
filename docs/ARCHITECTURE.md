@@ -596,3 +596,11 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Shared PlantState มี lightStress/nutrientStress/rootHealth อยู่แล้วจึงส่งค่าปัจจุบันผ่าน Snapshot เดิมได้; Estimated Oxygen ยังอยู่ใน Simulation Environment รอเพิ่ม LabSnapshot/History/UI ใน P13/P14 ไม่เพิ่ม PLC register
 - ปรับข้อความท้าย Plant panel ให้ตรงสถานะ Model ปัจจุบัน; ไม่เปลี่ยน Visual mapping หรือเพิ่ม Dashboard controls
 - **ส่งต่อ:** หยุดหลัง P11 ตามคำสั่งผู้ใช้; P12 ยังไม่เริ่ม ต้องรวม Damage/Health และตรวจ Healthy growth 30 วัน/หลาย Stress ตาม AC-25…26 ก่อนทำ Data/UI ใน P13/P14
+
+### 11.10 Implementation Notes (P12)
+
+- `combinedStress()` รวม Water/Root ด้วย max และให้ Growth ใช้ผลคูณกับ Light/Nutrient; Damage/Health ใช้ maximum ของทุก Stress ตาม § 11.5
+- Hydration ใช้ Damage ก่อน Step แล้ว Stress ปัจจุบันสร้าง Damage ใหม่; Damage cap มีผลใน Step ถัดไป ไม่เกิดวงจรคำนวณซ้ำ
+- Healthy reference 30 วันใช้ test เดียวร่วม AC-20/25; Tests ครอบคลุมหลาย Stress, Exposure 1.5/24 h ตามด้วย Recovery 48 h, และ Clock 1x/60x/360x ที่ Command schedule ตาม simulated time เดียวกันให้ Snapshot เท่ากัน
+- ปรับ assertion M1 AC-04 จาก Health >95 เป็น Health ดีขึ้นจากก่อนเติม โดย Water Stress <0.1 และ Damage =0 ยังคงเดิม: Refill 24 L ลงน้ำเดิม 12 L เจือจาง EC จึงมี Nutrient Stress ที่ Health ของ M2 ต้องสะท้อน ไม่ปรับ Model ให้มองข้ามผลนี้
+- Tests 131/131 และ typecheck ผ่าน; ผู้ใช้สั่งให้ดำเนินต่อ P13–P15 โดย commit แยก Phase

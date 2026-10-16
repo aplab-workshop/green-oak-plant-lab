@@ -7,6 +7,7 @@ import { morphology, stepBiomass } from './growth';
 import { stepLightStress } from './light';
 import { stepNutrientStress } from './nutrient';
 import { stepRootHealth } from './root';
+import { combinedStress } from './stress';
 import {
   rootSubmergedFraction,
   rootSupplyRatio,
@@ -83,7 +84,7 @@ export function plantWaterRequest(p: PlantState, e: PlantEnvironment, cfg: SimCo
   };
 }
 
-/** Health = 100 · (1 − Damage) · (1 − 0.5·S_w) — M2 จะรวม Stress อื่น */
+/** Health = 100 · (1 − Damage) · (1 − 0.5·maxStress) */
 export const healthScore = (damage: number, stress: number): number =>
   100 * (1 - clamp(damage, 0, 1)) * (1 - 0.5 * clamp(stress, 0, 1));
 
@@ -102,13 +103,14 @@ export function stepPlant(
   const supplyRatio = req.supplyRatio * clamp(tankFactor, 0, 1);
   const hydration = stepHydration(p.hydration, supplyRatio, req.factor, p.damage, dtS, cfg);
   const stress = waterStress(hydration, cfg);
-  const damage = stepDamage(p.damage, stress, dtS, cfg);
   const lightStress = stepLightStress(p.lightStress, req.ppfd, e.airTempC, hydration, dtS, cfg);
   const nutrientStress = stepNutrientStress(p.nutrientStress, e.ecMsCm, e.ph, dtS, cfg);
   const rootHealth = stepRootHealth(p.rootHealth, e.estimatedOxygen, req.rootSubmerged, dtS, cfg);
+  const maximum = combinedStress(stress, lightStress, nutrientStress, rootHealth).maximum;
+  const damage = stepDamage(p.damage, maximum, dtS, cfg);
   const biomassG = stepBiomass(
     p.biomassG,
-    { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, nutrientStress, damage },
+    { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, nutrientStress, rootHealth, damage },
     dtS,
     cfg,
   );
@@ -133,7 +135,7 @@ export function stepPlant(
     nutrientStress,
     rootHealth,
     damage,
-    health: healthScore(damage, stress),
+    health: healthScore(damage, maximum),
     rootSubmerged: req.rootSubmerged,
     supplyRatio,
     demandLPerDay: req.demandLPerDay,
