@@ -47,8 +47,8 @@ tags: [green-oak, spec]
 
 | Milestone | เนื้อหา | สถานะ |
 |---|---|---|
-| **M1** Functional 3D Virtual Plant | Web App, 3D DWC 6 ต้น, Sensor Dashboard, Mock Actuator, Water Balance, Water Shortage Behavior, ทำงานโดยไม่มี PLC | **รอบนี้** |
-| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | ถัดไป |
+| **M1** Functional 3D Virtual Plant | Web App, 3D DWC 6 ต้น, Sensor Dashboard, Mock Actuator, Water Balance, Water Shortage Behavior, ทำงานโดยไม่มี PLC | ✅ เสร็จ 2026-10-16 |
+| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **ถัดไป** |
 | M3 One Real FX5U | SLMP 3E Gateway, Communication Monitor, PLC-in-the-Loop กับเครื่องจริง 1 เครื่อง | |
 | M4 Multi-Lab Classroom | 10 PLC, 10 Lab, Student/Teacher Dashboard, Concurrent Test | |
 | M5 Advanced | Scenario Management, Data Logging, Performance Evaluation, Real Sensor Architecture | |
@@ -187,7 +187,7 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-12 เปิดเว็บแล้วเห็น 3D ถัง + ผัก 6 ต้น และค่า Sensor อัปเดต Real-time
 - [x] AC-13 ปิด Refill และเร่ง 360x แล้วเห็นน้ำลด ใบตก จนเหี่ยว จากนั้นเปิด Refill แล้วเห็นใบฟื้น (ต้นที่เสียหายมากฟื้นไม่เต็ม)
 - [x] AC-14 Interaction ครบตาม FR-51, FR-52 และไม่มีปุ่ม Placeholder
-- [ ] AC-15 `npm install` → `npm run dev` ตาม README ภาษาไทยได้บนเครื่อง Windows สะอาด
+- [x] AC-15 `npm install` → `npm run dev` ตาม README ภาษาไทยได้บนเครื่อง Windows สะอาด
 
 ## 9. Assumptions
 

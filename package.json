@@ -17,7 +17,8 @@
     "start": "npm run start -w @gol/server",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "serve": "npm run build && npm run start"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

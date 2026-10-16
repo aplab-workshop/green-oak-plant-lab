@@ -71,10 +71,13 @@ tags: [green-oak, roadmap]
 - [x] ดับเบิลคลิกต้นเพื่อซูม, ใบที่เหี่ยวนอนบนฝา, ป้ายชื่ออุปกรณ์, WebGL fallback เป็น 2D
 - **ผ่านเมื่อ:** AC-12, AC-13, AC-14
 
-### P7 — M1 Acceptance
-- [ ] README ภาษาไทย (ติดตั้ง, รัน, ใช้ผ่าน LAN, ทดสอบ)
-- [ ] Scenario `water-shortage` ทดสอบครบวงจร
-- [ ] ตรวจ AC-01 … AC-15 ครบ แล้ว Tag `m1`
+### P7 — M1 Acceptance ✅
+- [x] README ภาษาไทย (ติดตั้ง, รัน, ใช้ผ่าน LAN, ทดสอบ, แก้ปัญหา)
+- [x] โหมด LAN: Server เสิร์ฟหน้าเว็บที่ build แล้วบนพอร์ตเดียว (`npm run serve`) และแสดง URL ของเครื่อง
+- [x] Scenario `water-shortage` ทดสอบครบวงจร (Integration test + Browser)
+- [x] ตรวจ AC-01 … AC-15 ครบ (Clean install จากสำเนาที่ไม่มี node_modules: `npm ci` → test 100/100 → build → เปิดผ่าน IP ใน LAN) แล้ว Tag `m1`
+
+> **Milestone 1 เสร็จ 2026-10-16**
 
 ---
 

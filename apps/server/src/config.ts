@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import type { MockPlcMode } from '@gol/shared';
 
 /** อ่านค่าจาก Environment (ดู .env.example) */
@@ -9,6 +10,9 @@ function num(name: string, fallback: number): number {
   if (!Number.isFinite(n)) throw new Error(`Invalid number for ${name}: ${raw}`);
   return n;
 }
+
+/** โฟลเดอร์หน้าเว็บที่ build แล้ว (ค่าเริ่มต้น apps/web/dist) */
+const DEFAULT_WEB_DIST = fileURLToPath(new URL('../../web/dist', import.meta.url));
 
 function mockMode(): MockPlcMode {
   const raw = process.env.MOCK_PLC_MODE ?? 'auto';
@@ -27,6 +31,8 @@ export interface ServerConfig {
   broadcastMs: number;
   commandTimeoutMs: number;
   mockMode: MockPlcMode;
+  /** โฟลเดอร์หน้าเว็บที่จะเสิร์ฟ (ถ้ามี) */
+  webDist?: string;
 }
 
 export function loadConfig(): ServerConfig {
@@ -40,5 +46,6 @@ export function loadConfig(): ServerConfig {
     broadcastMs: num('WS_BROADCAST_MS', 200),
     commandTimeoutMs: num('PLC_COMMAND_TIMEOUT_MS', 3000),
     mockMode: mockMode(),
+    webDist: process.env.WEB_DIST || DEFAULT_WEB_DIST,
   };
 }

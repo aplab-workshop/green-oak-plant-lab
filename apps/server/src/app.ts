@@ -1,5 +1,7 @@
+import { existsSync } from 'node:fs';
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
 import websocket from '@fastify/websocket';
 import type { ServerConfig } from './config';
 import { registerRoutes } from './api/routes';
@@ -31,6 +33,11 @@ export async function buildApp(
   await app.register(websocket);
   registerRoutes(app);
   registerWs(app, config);
+
+  // โหมดใช้งานจริงใน LAN: Server เสิร์ฟหน้าเว็บที่ build แล้ว (apps/web/dist) บนพอร์ตเดียวกัน
+  if (config.webDist && existsSync(config.webDist)) {
+    await app.register(fastifyStatic, { root: config.webDist });
+  }
 
   if (opts.startLabs ?? true) {
     app.addHook('onReady', () => labs.start());
