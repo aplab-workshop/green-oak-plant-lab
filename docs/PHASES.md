@@ -55,11 +55,12 @@ tags: [green-oak, roadmap]
 - [x] Scenario `water-shortage` (ระดับน้ำ 65% + รั่ว 1.5 L/h)
 - **ผ่านเมื่อ:** Integration tests AC-08, AC-09, AC-10, AC-11
 
-### P5 — Student Dashboard
-- [ ] Layout 5 ส่วน (FR-50), Zustand store + WS client
-- [ ] Sensor panel, Actuator panel (manual control / auto mode), Plant detail
-- [ ] Speed / Pause / Reset, กราฟ (Water level, Hydration, Stress), Event log
-- [ ] Disclaimer "Educational Simulation"
+### P5 — Student Dashboard ✅
+- [x] Layout 5 ส่วน (FR-50), Zustand store + WS client
+- [x] Sensor panel, Actuator panel (manual control / auto mode), Plant detail
+- [x] Speed / Pause / Reset, กราฟ (Water level, Hydration, Stress), Event log
+- [x] Disclaimer "Educational Simulation"
+- [x] Tank cross-section 2D (ระดับน้ำเทียบปลายราก, คลิกเลือกต้น), Scenario panel, Lab selector
 - **ผ่านเมื่อ:** ค่าทุกช่องมาจาก Server และทุกปุ่มทำงาน (ตรวจด้วย Browser)
 
 ### P6 — 3D DWC Scene

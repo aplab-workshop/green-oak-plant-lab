@@ -445,6 +445,20 @@ Air pump: ON ตลอด
 - **Procedural Green Oak:** Rosette ของใบ, แต่ละใบเป็น Shape ขอบหยักแบบ Oak (lobes ด้วย sine บน outline) → `ShapeGeometry` subdivided และ Deform vertex ตาม droop/curl พร้อมแยก Component ให้เปลี่ยนเป็น GLTF ภายหลังได้
 - **Low Graphics Mode:** ลด segment ของใบ, ปิด shadow, `dpr = 1`, ลดจำนวนฟองอากาศ และจำค่าไว้ใน `localStorage`
 
+### 9.1 Implementation Notes (P5)
+
+- **โครงหน้าจอ** (`apps/web/src/app/App.tsx`): จอ ≥ 1024px เป็น Grid 3 คอลัมน์ × 2 แถว (ออกแบบที่ 1366×768) ส่วนจอแคบซ้อนแนวตั้งและเลื่อนทั้งหน้า
+  - ซ้าย: Sensors → PLC (D100–D110 พร้อมจุดสีเทียบช่วงอ้างอิง) + Scenario
+  - กลาง: Plant View (ตอนนี้เป็นภาพตัดขวาง 2D) + Trends + Event Log
+  - ขวา: Actuators ← PLC (โหมด Mock: Auto / Manual / Offline, สวิตช์ M100–M105, LED slider D200) + Plant detail
+- **Data flow:** WS `hello` → เลือก Lab (`?lab=` ใน URL) → `subscribe` → Snapshot ~5 Hz เข้า `labStore` ส่วน History ดึงทาง REST ทุก 3 วินาที และ Event รับทาง WS (โหลดย้อนหลังทาง REST ตอนเลือก Lab)
+- **คำสั่ง** ส่งผ่าน `POST /commands` แล้วใช้ Snapshot ที่ตอบกลับทันที (UI ไม่ต้องรอรอบ WS)
+- **ช่วงอ้างอิงของ Sensor** (`dashboard/sensorMeta.ts`) เป็นค่าเชิงการสอนสำหรับผักสลัด DWC
+- **`plantVisuals()`** (`scene/plantVisuals.ts`) ใช้ทั้งภาพตัดขวาง 2D และ 3D (P6): `droop = max(S_w, 0.8·Damage)`, `wilted = droop > 0.6`, สี Emerald → Yellow-green → Brown, `scale = ∛(B/5 g)`
+- **ภาพตัดขวาง 2D** วาดระดับน้ำ ก้น Net Pot และความยาวรากตามสัดส่วนจริง (1 cm = 10 หน่วย SVG) จะคงไว้เป็นมุมมองเสริมคู่กับ 3D ใน P6 เพราะเห็นความสัมพันธ์ "น้ำ vs ปลายราก" ชัดที่สุด
+- **ข้อควรระวัง Zustand:** selector ห้ามคืน object/array ใหม่ทุกครั้ง (เช่น `?? []`) ให้ใช้ค่าคงที่แทน ไม่งั้น React render วนไม่รู้จบ
+- **Build:** bundle ~> 500 kB (Recharts) ยอมรับได้สำหรับ LAN แต่จะพิจารณา code-split ตอนเพิ่ม 3D
+
 ## 10. Extension Points (ยังไม่ทำใน M1)
 
 | อนาคต | จุดต่อ |

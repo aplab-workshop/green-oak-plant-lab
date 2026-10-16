@@ -1,23 +1,65 @@
-import { Leaf } from 'lucide-react';
-import { ConnectionBadge } from './ConnectionBadge';
-import { ScaffoldScene } from '../scene/ScaffoldScene';
+import type { ReactNode } from 'react';
+import { Box } from 'lucide-react';
+import { Header } from './Header';
+import { SensorPanel } from '../dashboard/SensorPanel';
+import { ActuatorPanel } from '../dashboard/ActuatorPanel';
+import { PlantDetail } from '../dashboard/PlantDetail';
+import { SimControls } from '../dashboard/SimControls';
+import { ScenarioPanel } from '../dashboard/ScenarioPanel';
+import { TrendChart } from '../dashboard/TrendChart';
+import { EventLog } from '../dashboard/EventLog';
+import { TankCrossSection } from '../dashboard/TankCrossSection';
+import { Panel } from '../dashboard/Panel';
 
+const Cell = ({ className = '', children }: { className?: string; children: ReactNode }) => (
+  // จอแคบ: ซ้อนแนวตั้งและเลื่อนทั้งหน้า (ไม่หด) / จอกว้าง (lg): Grid เต็มจอ
+  <div className={`flex shrink-0 flex-col gap-2 lg:min-h-0 lg:shrink ${className}`}>{children}</div>
+);
+
+/**
+ * Student Dashboard (FR-50)
+ *   Header / Left: Sensors + Scenario / Center: Plant view + Trends + Log / Right: Actuators + Plant health
+ */
 export function App() {
   return (
     <div className="flex h-full flex-col">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-2">
-        <div className="flex items-center gap-2">
-          <Leaf className="h-5 w-5 text-emerald-600" />
-          <h1 className="font-semibold text-slate-800">Green Oak Virtual Plant Lab</h1>
-          <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-500">P1 Scaffold</span>
-        </div>
-        <ConnectionBadge />
-      </header>
-      <main className="relative flex-1">
-        <ScaffoldScene />
-        <p className="pointer-events-none absolute bottom-3 left-3 rounded bg-white/80 px-2 py-1 text-xs text-slate-500">
-          ฉากทดสอบระบบ 3D — จะถูกแทนด้วย DWC Scene ใน P6
-        </p>
+      <Header />
+      <main className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-2 lg:grid lg:grid-cols-[250px_minmax(0,1fr)_300px] lg:grid-rows-[minmax(0,1fr)_250px] lg:overflow-hidden">
+        <Cell className="lg:row-span-1">
+          <SensorPanel />
+        </Cell>
+
+        <Cell className="min-h-[420px] lg:min-h-0">
+          <Panel title="Plant View" icon={<Box className="h-3.5 w-3.5" />} right={<SimControls />} className="flex-1">
+            <div className="flex h-full flex-col">
+              <div className="min-h-0 flex-1 p-2">
+                <TankCrossSection />
+              </div>
+              <p className="border-t border-slate-100 px-3 py-1 text-[10px] text-slate-400">
+                Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ ·
+                ภาพตัดขวาง 2D (3D DWC Scene จะเพิ่มใน P6)
+              </p>
+            </div>
+          </Panel>
+        </Cell>
+
+        <Cell className="lg:row-span-2">
+          <div className="flex min-h-0 flex-col lg:max-h-[52%]">
+            <ActuatorPanel />
+          </div>
+          <div className="flex min-h-0 flex-1 flex-col">
+            <PlantDetail />
+          </div>
+        </Cell>
+
+        <Cell>
+          <ScenarioPanel />
+        </Cell>
+
+        <Cell className="min-h-[250px] lg:grid lg:min-h-0 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          <TrendChart />
+          <EventLog />
+        </Cell>
       </main>
     </div>
   );
