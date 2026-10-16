@@ -396,6 +396,7 @@ Sim start = **Day 14 หลังเพาะ (ย้ายลงถัง), 06:
 - **Events (FR-43):** `plant.water_stress` (S_w ≥ 0.3, cleared ≤ 0.15), `plant.wilting` (S_w ≥ 0.7), `plant.damage` (ข้าม 1%, 25%, 50%), `tank.roots_exposed/covered`, `tank.overflow`, `tank.empty`
 - **ผลตรวจ 30 วัน (Refill 70/90, LED 80% 06–22, Fan > 25 °C):** Biomass 4.9 g (Day 14) → 110 g (Day 44, Stage harvest), ใช้น้ำ 26 L, Performance ~600k steps/s
 - **ประเด็นสำหรับ M2:** pH drift ขึ้นถึง ~8.4 ใน 30 วัน เพราะไม่มี Actuator ปรับ pH ควรพิจารณาเพิ่ม pH-down pump หรือปรับ Model
+  - **แก้แล้วใน P10:** ใช้ Empirical equilibrium ตาม § 11.3 แทน drift คงที่; สูตรและผล 30 วันข้างบนเป็นประวัติ M1
 
 ## 8. Mock PLC
 
@@ -577,3 +578,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Low Light ใช้ Light factor เดิมซึ่งทดสอบด้วย Environment คงที่; DLI ยังคงเป็น Diagnostic รายต้นและไม่ Reset Stress ตอนเที่ยงคืน
 - AC-16…18 อยู่ใน `test/lightStress.test.ts`: 6 cases รวม Photoperiod 3 วันและ Simulation ตำแหน่งกลาง/มุม; tests รวม 106/106 และ typecheck ผ่าน
 - Damage/Health รวมทุก Stress และ Curl ยังรอ P12/P14 ตามแผน
+
+### 11.8 Implementation Notes (P10)
+
+- `plant/nutrient.ts` คำนวณ suitability ของ EC/pH และสะสม Stress; `Simulation` ส่ง `envEc(env)` และ `env.ph` ก่อน Step ให้ Plant โดยตรง ไม่ผ่าน Sensor noise
+- Growth คูณ Nutrient factor; Salt mass balance ไม่เปลี่ยน; ถ้า EC = 0 และไม่มีการเติมสารละลาย มวลเกลือยังเป็น 0 แม้มี Stress
+- `stepPh` ใช้ `phEquilibrium`/`phTauDays` แทน `phDriftPerDay`; Test M1 ที่คาด 6.1 หลัง 1 วันเปลี่ยนเป็น 6.0786939 ตาม Contract ที่กำหนดก่อนแก้โค้ด
+- AC-19…21 ใน `test/nutrientStress.test.ts` ครอบคลุม EC/pH ผิดช่วงทั้งสองด้าน, ฟื้น 48 h, Salt flows, Noise isolation และ pH 30 วันทั้งแยกกลไก/Simulation ที่ dt 1 s; tests 118/118 และ typecheck ผ่าน

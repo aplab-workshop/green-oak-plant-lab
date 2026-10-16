@@ -131,7 +131,7 @@ describe('Nutrient (EC / pH)', () => {
   it('pH drifts slowly, stays in bounds, and refill pulls it toward tap pH', () => {
     const cfg = flatRoomConfig();
     const day = runEnv({ cfg, cmd: {}, hours: 24 }).env.ph;
-    expect(day).toBeCloseTo(6.1, 2);
+    expect(day).toBeCloseTo(6.0786939, 6); // P10: Empirical equilibrium (AC-20)
     const base = { ...initialEnvironment(cfg, simTimeFrom(14, 6)), waterVolumeL: 20, saltMass: 24 };
     const refilled = runEnv({ cfg, cmd: { refillPump: true }, hours: 5 / 60, env: base }).env.ph;
     expect(refilled).toBeGreaterThan(6.2);

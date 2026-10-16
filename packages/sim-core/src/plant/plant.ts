@@ -5,6 +5,7 @@ import { clamp } from '../math';
 import { dliIncrement, positionFactor, ppfdAt } from '../environment/light';
 import { morphology, stepBiomass } from './growth';
 import { stepLightStress } from './light';
+import { stepNutrientStress } from './nutrient';
 import {
   rootSubmergedFraction,
   rootSupplyRatio,
@@ -25,6 +26,9 @@ export interface PlantEnvironment {
   ledPct: number;
   airTempC: number;
   vpdKPa: number;
+  /** ค่าจริงจาก Environment ก่อน Step (ไม่ผ่าน Sensor noise) */
+  ecMsCm: number;
+  ph: number;
 }
 
 export function createPlant(id: number, position: number, biomassG: number, simTimeS: number, cfg: SimConfig): PlantState {
@@ -97,9 +101,10 @@ export function stepPlant(
   const stress = waterStress(hydration, cfg);
   const damage = stepDamage(p.damage, stress, dtS, cfg);
   const lightStress = stepLightStress(p.lightStress, req.ppfd, e.airTempC, hydration, dtS, cfg);
+  const nutrientStress = stepNutrientStress(p.nutrientStress, e.ecMsCm, e.ph, dtS, cfg);
   const biomassG = stepBiomass(
     p.biomassG,
-    { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, damage },
+    { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, nutrientStress, damage },
     dtS,
     cfg,
   );
@@ -121,6 +126,7 @@ export function stepPlant(
     hydration,
     waterStress: stress,
     lightStress,
+    nutrientStress,
     damage,
     health: healthScore(damage, stress),
     rootSubmerged: req.rootSubmerged,

@@ -96,12 +96,21 @@ export interface SimConfig {
     initialPh: number;
     /** pH น้ำประปา */
     tapPh: number;
-    /** pH drift ขึ้นจากการดูดธาตุ (pH/day) — Empirical */
-    phDriftPerDay: number;
+    /** ดุลยภาพสมมติของ pH [phMin, phMax] — Empirical ไม่ใช่ปั๊มปรับ pH */
+    phEquilibrium: number;
+    /** Time constant เข้าสู่ดุลยภาพ pH (day, > 0) */
+    phTauDays: number;
     /** pH ลดลงต่อการเปิดปั๊ม Nutrient 1 ตัว 1 นาที — Empirical */
     phDropPerDoseMin: number;
     phMin: number;
     phMax: number;
+    /** Suitability [min, optLow, optHigh, max] เรียงเพิ่ม (mS/cm) */
+    ecCardinalMsCm: [number, number, number, number];
+    /** Suitability [min, optLow, optHigh, max] เรียงเพิ่ม (pH) */
+    phCardinal: [number, number, number, number];
+    /** Time constant สะสม / ฟื้น Nutrient Stress (h, > 0) */
+    stressRiseH: number;
+    stressRecoveryH: number;
   };
   power: {
     ledW: number;
@@ -219,10 +228,15 @@ export const DEFAULT_CONFIG: SimConfig = {
     uptakeSaltRatio: 0.8,
     initialPh: 6.0,
     tapPh: 7.2,
-    phDriftPerDay: 0.1,
+    phEquilibrium: 6.2,
+    phTauDays: 2,
     phDropPerDoseMin: 0.02,
     phMin: 4,
     phMax: 9,
+    ecCardinalMsCm: [0, 0.8, 1.6, 3.2],
+    phCardinal: [4, 5.5, 6.8, 9],
+    stressRiseH: 6,
+    stressRecoveryH: 12,
   },
   power: { ledW: 120, fanW: 15, humidifierW: 25, refillPumpW: 18, nutrientPumpW: 5, airPumpW: 5 },
   noise: { airTempC: 0.1, rhPct: 0.5, ppfd: 2, waterTempC: 0.05, ph: 0.01, ecMsCm: 0.01, waterLevelPct: 0.2 },

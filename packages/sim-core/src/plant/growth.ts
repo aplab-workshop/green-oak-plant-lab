@@ -4,7 +4,7 @@ import { clamp } from '../math';
 
 /**
  * Growth (ARCHITECTURE.md § 7.5, § 11) — Low Light ผ่าน f_light, Exposure ผ่าน S_light
- *   dB/dt = μ·B·(1 − B/B_max)·f_light·f_temp·(1 − S_w)·(1 − S_light)·(1 − Damage)
+ *   dB/dt = μ·B·(1 − B/B_max)·f_light·f_temp·(1 − S_w)·(1 − S_light)·(1 − S_nutrient)·(1 − Damage)
  */
 
 export type { GrowthStage };
@@ -30,6 +30,7 @@ export interface GrowthInput {
   airTempC: number;
   waterStress: number;
   lightStress: number;
+  nutrientStress: number;
   damage: number;
 }
 
@@ -44,6 +45,7 @@ export function stepBiomass(biomassG: number, u: GrowthInput, dtS: number, cfg: 
     temperatureFactor(u.airTempC, cfg) *
     (1 - clamp(u.waterStress, 0, 1)) *
     (1 - clamp(u.lightStress, 0, 1)) *
+    (1 - clamp(u.nutrientStress, 0, 1)) *
     (1 - clamp(u.damage, 0, 1));
   return biomassG + rate * (dtS / 86_400);
 }

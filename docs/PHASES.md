@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-16: P8–P9 เสร็จ — ผู้ใช้อนุมัติให้ทำ P8–P11 ต่อเนื่อง โดยตรวจและ commit แยก Phase; หยุดตรวจเมื่อจบ P11**
+> **สถานะ 2026-10-16: P8–P10 เสร็จ — ผู้ใช้อนุมัติให้ทำ P8–P11 ต่อเนื่อง โดยตรวจและ commit แยก Phase; หยุดตรวจเมื่อจบ P11**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -120,13 +120,15 @@ tags: [green-oak, roadmap]
 
 - **ผลตรวจ:** AC-16…18 ผ่าน; tests 106/106 และ typecheck ผ่าน; ยังไม่เปลี่ยน Damage/Health รวมและ Visual mapping (P12/P14)
 
-### P10 — Nutrient Stress & pH Behavior
+### P10 — Nutrient Stress & pH Behavior ✅
 
-- [ ] ปรับ pH Model ตาม Spec ที่ผ่านการตรวจใน P8 พร้อมทดสอบระยะยาว
-- [ ] คำนวณ Nutrient Stress จาก EC ต่ำ/สูงและ pH นอกช่วง รวมเวลาสะสมและการฟื้น
-- [ ] นำ Nutrient factor เข้า Growth ตาม Contract โดยคง Salt mass balance และข้อจำกัด A/B
-- [ ] เพิ่ม Config และ Unit tests แยก EC/pH เพื่อยืนยันสาเหตุ
+- [x] ปรับ pH Model ตาม Spec ที่ผ่านการตรวจใน P8 พร้อมทดสอบระยะยาว
+- [x] คำนวณ Nutrient Stress จาก EC ต่ำ/สูงและ pH นอกช่วง รวมเวลาสะสมและการฟื้น
+- [x] นำ Nutrient factor เข้า Growth ตาม Contract โดยคง Salt mass balance และข้อจำกัด A/B
+- [x] เพิ่ม Config และ Unit tests แยก EC/pH เพื่อยืนยันสาเหตุ
 - **ผ่านเมื่อ:** EC/pH ที่เหมาะสมมี Stress ต่ำกว่ากรณีผิดช่วง; Stress ทำให้ Growth ลดและค่อยฟื้นเมื่อสภาพดีขึ้น; Default pH ไม่ drift ไปชน Clamp โดยไม่มีสมดุลในรัน 30 วัน; Refill/Dosing มีผลตาม Spec และไม่มีการเพิ่มหรือลดเกลือเพื่อบังคับ EC ให้เหมาะสมเอง
+
+- **ผลตรวจ:** AC-19…21 ผ่าน; tests 118/118 และ typecheck ผ่าน; รัน 30 วันจำลองที่ dt 1 s ทั้ง pH แยกกลไกและ Simulation พร้อมการดูแล
 
 ### P11 — Root Stress & Estimated Oxygen Status
 
@@ -171,7 +173,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P9 เสร็จ; งานถัดไป P10 → P11 ตามคำสั่งผู้ใช้ แล้วหยุดตรวจ; P12–P15 ยังไม่เริ่ม
+- P8–P10 เสร็จ; งานถัดไป P11 ตามคำสั่งผู้ใช้ แล้วหยุดตรวจ; P12–P15 ยังไม่เริ่ม
 
 ---
 

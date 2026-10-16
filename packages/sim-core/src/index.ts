@@ -14,5 +14,6 @@ export * from './events';
 export * from './plant/water';
 export * from './plant/growth';
 export * from './plant/light';
+export * from './plant/nutrient';
 export * from './plant/plant';
 export * from './simulation';

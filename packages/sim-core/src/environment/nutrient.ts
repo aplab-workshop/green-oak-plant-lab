@@ -1,5 +1,5 @@
 import type { SimConfig } from '../config/defaultConfig';
-import { clamp } from '../math';
+import { approach, clamp } from '../math';
 
 /** ปริมาตรขั้นต่ำที่ใช้คำนวณ EC เพื่อกันหารด้วยศูนย์ (L) */
 const MIN_VOLUME_FOR_EC_L = 0.5;
@@ -43,12 +43,13 @@ export interface PhFlows {
 
 /**
  * pH แบบ Empirical (FR-09) — เป็นค่าประมาณเพื่อการสอนเท่านั้น
- *   drift ขึ้นช้า ๆ จากการดูดธาตุ, ลดเล็กน้อยเมื่อเติมสารละลาย, ผสมกับน้ำประปาตามปริมาตร
+ *   ค่อยเข้าใกล้ดุลยภาพสมมติ, ลดเมื่อเติมสารละลาย, ผสมกับน้ำประปาตามปริมาตร
+ * ไม่ใช่เคมีกรด–ด่างหรือการทำนายว่า pH ของจริงจะฟื้นได้เอง (ARCHITECTURE § 11.3)
  * ปั๊ม A/B ไม่ได้ถูกออกแบบให้ใช้ควบคุม pH
  */
 export function stepPh(ph: number, f: PhFlows, dtS: number, cfg: SimConfig): number {
   const n = cfg.nutrient;
-  let next = ph + n.phDriftPerDay * (dtS / 86_400) - n.phDropPerDoseMin * f.doseMinutes;
+  let next = approach(ph, n.phEquilibrium, dtS, n.phTauDays * 86_400) - n.phDropPerDoseMin * f.doseMinutes;
   const total = f.volumeBeforeL + f.refillInL;
   if (f.refillInL > 0 && total > 0) next = (next * f.volumeBeforeL + n.tapPh * f.refillInL) / total;
   return clamp(next, n.phMin, n.phMax);

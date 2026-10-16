@@ -120,6 +120,8 @@ export class Simulation {
       ledPct,
       airTempC: env.airTempC,
       vpdKPa: vpdKPa(env.airTempC, env.rhPct),
+      ecMsCm: envEc(env),
+      ph: env.ph,
     };
 
     // 1) พืชขอน้ำตามความต้องการและรากที่แช่น้ำ
