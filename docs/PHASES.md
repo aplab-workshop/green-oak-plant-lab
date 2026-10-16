@@ -17,18 +17,18 @@ tags: [green-oak, roadmap]
 
 ## Milestone 1 — Functional 3D Virtual Plant
 
-### P0 — Specification ✅ (รออนุมัติ)
+### P0 — Specification ✅
 - [x] `docs/SPEC.md` ข้อกำหนด + Acceptance Criteria
 - [x] `docs/ARCHITECTURE.md` โครงสร้าง, Runtime Loop, Simulation Model
 - [x] `docs/DEVICE-MAP.md` Mapping + Access Rules + Fail-safe
 - [x] `docs/PHASES.md` (ไฟล์นี้)
-- [ ] **ผู้ใช้อนุมัติ Spec** และตัดสินใจเรื่อง D111/D112/D120
+- [x] **ผู้ใช้อนุมัติ Spec** และรับ D111/D112/D120 (2026-10-16)
 
-### P1 — Scaffold
-- [ ] npm workspaces: `packages/shared`, `packages/sim-core`, `apps/server`, `apps/web`
-- [ ] TypeScript strict, Vitest, `.gitignore`, `.env.example`
-- [ ] Fastify `/api/health` + WebSocket heartbeat
-- [ ] Vite + React + Tailwind + R3F แสดงกล่อง 3D และสถานะ WS
+### P1 — Scaffold ✅
+- [x] npm workspaces: `packages/shared`, `packages/sim-core`, `apps/server`, `apps/web`
+- [x] TypeScript strict, Vitest, `.gitignore`, `.env.example`
+- [x] Fastify `/api/health` + WebSocket heartbeat
+- [x] Vite + React + Tailwind + R3F แสดงกล่อง 3D และสถานะ WS
 - **ผ่านเมื่อ:** `npm run dev` แล้วหน้าเว็บแสดง "Connected" + heartbeat และ `npm test` ผ่าน
 
 ### P2 — Environment Model (`sim-core`)

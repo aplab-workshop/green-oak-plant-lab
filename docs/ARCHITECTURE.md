@@ -1,7 +1,7 @@
 ---
 title: Green Oak Virtual Plant Lab — Architecture
-version: 0.1 (P0 draft)
-status: draft — รอผู้ใช้อนุมัติ
+version: 1.0
+status: approved 2026-10-16
 updated: 2026-10-16
 tags: [green-oak, architecture]
 ---
@@ -140,7 +140,7 @@ sequenceDiagram
   end
   loop ทุก pollInterval (500 ms real)
     L->>A: writeSensors(S.sensors())
-    A->>P: write D100–D110 (batch)
+    A->>P: write D100–D112, D120 (batch)
     P-->>P: scan Ladder
     L->>A: readCommands()
     A->>P: read M100–M105, D200 (batch)
@@ -184,7 +184,7 @@ export interface PlcAdapter {
   readonly kind: 'mock' | 'slmp';
   connect(): Promise<void>;
   close(): Promise<void>;
-  writeSensors(r: SensorReadings): Promise<void>;          // เขียน D100–D110 เท่านั้น
+  writeSensors(r: SensorReadings, sim: SimInfo): Promise<void>; // เขียน D100–D112, D120 เท่านั้น
   readCommands(): Promise<{ commands: ActuatorCommands; at: number }>;
   status(): PlcStatus;   // connected | connecting | offline | error, lastOkAt, errorCount, latencyMs
 }
@@ -196,7 +196,7 @@ export interface SensorProvider {
 }
 ```
 
-**Write guard (FR-31):** `writeSensors` สร้าง Payload จาก `deviceMap.sensors` เท่านั้น และ Low-level writer ตรวจซ้ำว่า Device เป็น `D` ในช่วง D100–D110 ถ้าไม่ใช่ให้ `throw` ส่วน M Device ไม่มี path เขียนเลย
+**Write guard (FR-31):** `writeSensors` สร้าง Payload จาก `deviceMap.sensors` เท่านั้น และ Low-level writer ตรวจซ้ำว่า Device อยู่ใน Allowlist (D100–D112, D120) ถ้าไม่ใช่ให้ `throw` ส่วน M Device ไม่มี path เขียนเลย
 
 **AI / RL hook (อนาคต):** `LabSession` มีเมธอด `observe(): LabSnapshot` และ `act(cmd: ActuatorCommands)` ซึ่งเป็นรูปแบบเดียวกับ PLC Adapter ทำให้ภายหลังเพิ่ม `AgentAdapter` ได้โดยไม่แก้ Simulation
 

@@ -1,7 +1,7 @@
 ---
 title: Green Oak Virtual Plant Lab — Specification
-version: 0.1 (P0 draft)
-status: draft — รอผู้ใช้อนุมัติ
+version: 1.0
+status: approved 2026-10-16
 updated: 2026-10-16
 tags: [green-oak, spec]
 ---
@@ -117,7 +117,7 @@ tags: [green-oak, spec]
 | ID | Requirement | M |
 |---|---|---|
 | FR-30 | `PlcAdapter` interface เดียวสำหรับ Mock และ SLMP ประกอบด้วย `connect`, `writeSensors`, `readCommands`, `status` | M1 (interface + mock) |
-| FR-31 | Gateway **เขียน**เฉพาะ Sensor Registers (D100–D110) และ**อ่าน**เฉพาะ Command Devices (M100–M105, D200) **ห้ามเขียน M Device เด็ดขาด** | M1 (บังคับใน interface) / M3 |
+| FR-31 | Gateway **เขียน**เฉพาะ Sensor Registers (D100–D112, D120) และ**อ่าน**เฉพาะ Command Devices (M100–M105, D200) **ห้ามเขียน M Device เด็ดขาด** | M1 (บังคับใน interface) / M3 |
 | FR-32 | Command ที่อ่านได้ต้องมี Timestamp หาก Command เก่ากว่า `COMMAND_TIMEOUT` ให้ Simulation เข้า **Fail-safe** (Actuator ทั้งหมด OFF ยกเว้น Air Pump ON) และบันทึก Event | M1 (logic) / M3 |
 | FR-33 | ตรวจ Range ของค่าก่อนเขียน (Clamp ใน INT16) และตรวจ Range ของ D200 (0–100) ที่อ่านกลับ | M1 |
 | FR-34 | SLMP 3E Frame (Binary) ผ่าน TCP, Batch Read/Write, Timeout, Auto-Reconnect, Heartbeat, Poll 500 ms (ปรับได้) | M3 |

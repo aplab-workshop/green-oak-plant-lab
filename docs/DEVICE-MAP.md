@@ -1,6 +1,6 @@
 ---
 title: PLC Device Mapping — FX5U
-version: 0.1 (P0 draft)
+version: 1.0
 status: draft — ต้องทดสอบกับ FX5U จริงใน M3 ก่อนใช้ในห้องเรียน
 updated: 2026-10-16
 tags: [green-oak, plc, fx5u, slmp]
@@ -58,7 +58,7 @@ tags: [green-oak, plc, fx5u, slmp]
 
 | Operation | Allowed devices |
 |---|---|
-| **Write** | D100–D110 (+ D111–D112, D120 หากอนุมัติ § 4) |
+| **Write** | D100–D110, D111–D112, D120 |
 | **Read** | M100–M105, D200 |
 | **ห้ามเด็ดขาด** | เขียน M Device ใด ๆ, เขียน D200, เขียนนอกช่วงที่ระบุ |
 
@@ -66,9 +66,9 @@ Software บังคับใช้ 2 ชั้น
 1. **Type-level:** ฟังก์ชันเขียนรับเฉพาะ `SensorReadings` ไม่มี API รับ Address อิสระ
 2. **Runtime guard:** Low-level writer ตรวจ Address ก่อนส่ง Frame ถ้าไม่อยู่ใน Allowlist ให้ `throw` (มี Unit Test, AC-11)
 
-## 4. ข้อเสนอเพิ่มเติม (รออนุมัติ)
+## 4. Register เสริม (อนุมัติแล้ว 2026-10-16)
 
-Register เสริมเหล่านี้ช่วยแก้ปัญหาการเร่งเวลา และใช้สอน Sensor Fault Detection ได้
+Gateway เขียน Register เหล่านี้พร้อม Sensor ทุกรอบ ช่วยแก้ปัญหาการเร่งเวลา และใช้สอน Sensor Fault Detection ได้
 
 | Address | Parameter | Scaling | ประโยชน์ |
 |---|---|---|---|

@@ -2,7 +2,7 @@
 
 ห้องปฏิบัติการเสมือนสำหรับฝึกเขียน PLC **Mitsubishi FX5U** เพื่อควบคุมระบบปลูกผักสลัด Green Oak แบบ Hydroponics **Deep Water Culture (DWC)** ด้วย Simulation และโมเดล 3D แบบ Interactive
 
-> **สถานะ:** P0 — Specification (ยังไม่มีโค้ด)
+> **สถานะ:** P1 — Scaffold เสร็จ (โครงโปรเจกต์ + Server/Web เชื่อมกันผ่าน WebSocket)
 
 ## เอกสาร
 
@@ -14,3 +14,12 @@
 | [docs/PHASES.md](docs/PHASES.md) | Roadmap แบ่ง Phase พร้อม Checklist |
 
 วิธีติดตั้งและใช้งานจะเพิ่มใน Phase P7
+
+## รันระหว่างพัฒนา (ชั่วคราว)
+
+```bash
+npm install
+npm run dev      # Server :3001 + Web :5173 → เปิด http://localhost:5173
+npm test         # Unit / Integration tests
+npm run typecheck
+```
