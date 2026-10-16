@@ -459,6 +459,22 @@ Air pump: ON ตลอด
 - **ข้อควรระวัง Zustand:** selector ห้ามคืน object/array ใหม่ทุกครั้ง (เช่น `?? []`) ให้ใช้ค่าคงที่แทน ไม่งั้น React render วนไม่รู้จบ
 - **Build:** bundle ~> 500 kB (Recharts) ยอมรับได้สำหรับ LAN แต่จะพิจารณา code-split ตอนเพิ่ม 3D
 
+### 9.2 Implementation Notes (P6)
+
+- **ไฟล์:** `apps/web/src/scene/` — `Scene3D` (Canvas, แสงกลางวัน/กลางคืน, กล้อง), `Lettuce`, `leafGeometry`, `leafLayout`, `Tank`, `Actuators`, `Sensors`, `Clickable`, `DeviceInfo`, `SceneToolbar`, `PlantView`, `sceneStore`, `layout`, `devices`
+- **หน่วยในฉาก = เมตร** ตรงกับ Config (ถัง 50×40×20 cm, ก้น Net Pot 15 cm) ระดับน้ำ, ความยาวราก และทุ่นวัดระดับน้ำจึงตรงกับ Simulation ตามสัดส่วนจริง
+- **ใบ Green Oak (Procedural):** Grid ยาวตามแกน +Z ขอบหยักแบบใบโอ๊ค `w(t) = envelope(t)·(0.7 + 0.3·cos(2π·4.5·t))` และขอบเป็นคลื่น เป็น `InstancedMesh` 1 draw call ต่อต้น
+- **จัดใบเป็นพุ่ม** (`leafLayout`): Golden angle, ใบนอกใหญ่และเอนต่ำ ใบในเล็กและตั้งชัน, ใบตก (droop) ลดมุมเงยของทุกใบ ใบนอกลดมากกว่า
+- **Vertex shader ของใบ:** `uBend` (ปลายใบโค้งลง), `uWilt` (ใบแคบและขอบห่อลง), `uCurl` (M2 Light stress) และ `uFloorY` ทำให้ส่วนที่ตกต่ำกว่าผิวฝานอนราบบนฝา (ไม่ทะลุลงไป)
+- **Animation ลื่นแต่ไม่หลอก:** ทุกค่า (droop, สี, ขนาด, ราก, ระดับน้ำ, ความเร็ว Fan, ความสว่าง LED, ฟองอากาศ, สายน้ำ Refill, หมอก Humidifier) `damp` เข้าหาค่าจาก Snapshot ของ Server ใน `useFrame` โดยอ่านผ่าน `getState()` เพื่อไม่ให้ React re-render 5 ครั้ง/วินาที
+- **Interaction:** Orbit/Zoom/Pan, คลิกต้น = เลือก (ซิงก์กับ Plant panel), ดับเบิลคลิก = ซูมเข้าหาต้น, คลิกอุปกรณ์ = การ์ดข้อมูล (สถานะ + Address PLC + คำอธิบาย) และป้ายชื่อเมื่อชี้ (`Html` ของ Drei ไม่ต้องโหลดฟอนต์จาก Internet)
+- **Toolbar:** 3D / 2D, Roots, Tank (Transparent → Cutaway → Opaque), Day/Night, Low, Reset camera และจำค่าไว้ใน `localStorage` (มี try/catch)
+- **Low Graphics:** สร้าง Canvas ใหม่แบบไม่มี antialias, `dpr = 1`, ไม่มีเงา, ใบ 14×2 segment, ใบสูงสุด 16 ใบ, รากน้อยลง, ฟองอากาศน้อยลง, ไม่มีหมอก
+- **ไม่ใช้ทรัพยากรจาก Internet** (ไม่มี HDR environment หรือฟอนต์ CDN) จึงใช้ใน LAN ที่ไม่มี Internet ได้
+- **WebGL fallback:** ถ้าสร้าง 3D ไม่ได้ จะแสดงภาพตัดขวาง 2D แทนอัตโนมัติ
+- **Code split:** Three.js อยู่ใน chunk `Scene3D` แยก (~255 kB gzip) โหลดเมื่อเปิดมุมมอง 3D
+- **ทดสอบใน Browser (AC-13):** Scenario ขาดน้ำ + LED 80% ที่ 360x → ใบยุบนอนบนฝาเป็นสีเหลืองน้ำตาล → เติมน้ำทันเวลาภายใน ~1 นาทีจริง ใบกลับมาตั้งเป็นพุ่มสีเขียว (Stress 0.06–0.12) ส่วนต้นที่ขาดน้ำนาน (Damage ~0.48) ใบยังนอนและเป็นสีน้ำตาลหลังเติมน้ำ
+
 ## 10. Extension Points (ยังไม่ทำใน M1)
 
 | อนาคต | จุดต่อ |

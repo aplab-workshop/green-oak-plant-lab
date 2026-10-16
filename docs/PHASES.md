@@ -63,11 +63,12 @@ tags: [green-oak, roadmap]
 - [x] Tank cross-section 2D (ระดับน้ำเทียบปลายราก, คลิกเลือกต้น), Scenario panel, Lab selector
 - **ผ่านเมื่อ:** ค่าทุกช่องมาจาก Server และทุกปุ่มทำงาน (ตรวจด้วย Browser)
 
-### P6 — 3D DWC Scene
-- [ ] Tank + lid + water (level จริง) + net pots 6 ใบ + pipes + sensor probes
-- [ ] Procedural Green Oak + roots + `plantVisuals()` (unit test)
-- [ ] Actuators: LED (dimmable), Fan (หมุน), Humidifier (หมอก), Pumps, Air bubbles
-- [ ] Orbit/Zoom/Pan, select plant, click actuator, roots toggle, cutaway, day/night, low graphics
+### P6 — 3D DWC Scene ✅
+- [x] Tank + lid + water (level จริง) + net pots 6 ใบ + pipes + sensor probes
+- [x] Procedural Green Oak + roots + `plantVisuals()` (unit test)
+- [x] Actuators: LED (dimmable), Fan (หมุน), Humidifier (หมอก), Pumps, Air bubbles
+- [x] Orbit/Zoom/Pan, select plant, click actuator, roots toggle, cutaway, day/night, low graphics
+- [x] ดับเบิลคลิกต้นเพื่อซูม, ใบที่เหี่ยวนอนบนฝา, ป้ายชื่ออุปกรณ์, WebGL fallback เป็น 2D
 - **ผ่านเมื่อ:** AC-12, AC-13, AC-14
 
 ### P7 — M1 Acceptance

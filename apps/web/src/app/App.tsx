@@ -8,7 +8,7 @@ import { SimControls } from '../dashboard/SimControls';
 import { ScenarioPanel } from '../dashboard/ScenarioPanel';
 import { TrendChart } from '../dashboard/TrendChart';
 import { EventLog } from '../dashboard/EventLog';
-import { TankCrossSection } from '../dashboard/TankCrossSection';
+import { PlantView } from '../scene/PlantView';
 import { Panel } from '../dashboard/Panel';
 
 const Cell = ({ className = '', children }: { className?: string; children: ReactNode }) => (
@@ -32,12 +32,11 @@ export function App() {
         <Cell className="min-h-[420px] lg:min-h-0">
           <Panel title="Plant View" icon={<Box className="h-3.5 w-3.5" />} right={<SimControls />} className="flex-1">
             <div className="flex h-full flex-col">
-              <div className="min-h-0 flex-1 p-2">
-                <TankCrossSection />
+              <div className="min-h-0 flex-1">
+                <PlantView />
               </div>
               <p className="border-t border-slate-100 px-3 py-1 text-[10px] text-slate-400">
-                Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ ·
-                ภาพตัดขวาง 2D (3D DWC Scene จะเพิ่มใน P6)
+                Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ
               </p>
             </div>
           </Panel>

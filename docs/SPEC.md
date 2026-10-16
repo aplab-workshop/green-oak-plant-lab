@@ -184,9 +184,9 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-09 🧪 Integration: Sim → MockPlc(auto) → Sim รักษาระดับน้ำอยู่ในช่วง Hysteresis ได้ใน 3 วันจำลอง
 - [x] AC-10 🧪 Command หมดอายุ → Fail-safe ทำงานและ Simulation ยังเดินต่อ (FR-32)
 - [x] AC-11 🧪 Adapter ไม่มีทางเขียน M Device (Type-level และ Runtime guard) (FR-31)
-- [ ] AC-12 เปิดเว็บแล้วเห็น 3D ถัง + ผัก 6 ต้น และค่า Sensor อัปเดต Real-time
-- [ ] AC-13 ปิด Refill และเร่ง 360x แล้วเห็นน้ำลด ใบตก จนเหี่ยว จากนั้นเปิด Refill แล้วเห็นใบฟื้น (ต้นที่เสียหายมากฟื้นไม่เต็ม)
-- [ ] AC-14 Interaction ครบตาม FR-51, FR-52 และไม่มีปุ่ม Placeholder
+- [x] AC-12 เปิดเว็บแล้วเห็น 3D ถัง + ผัก 6 ต้น และค่า Sensor อัปเดต Real-time
+- [x] AC-13 ปิด Refill และเร่ง 360x แล้วเห็นน้ำลด ใบตก จนเหี่ยว จากนั้นเปิด Refill แล้วเห็นใบฟื้น (ต้นที่เสียหายมากฟื้นไม่เต็ม)
+- [x] AC-14 Interaction ครบตาม FR-51, FR-52 และไม่มีปุ่ม Placeholder
 - [ ] AC-15 `npm install` → `npm run dev` ตาม README ภาษาไทยได้บนเครื่อง Windows สะอาด
 
 ## 9. Assumptions
