@@ -10,6 +10,8 @@ export interface TankFlows {
   uptakeDemandL: number;
   /** น้ำระเหยใน step นี้ (L) */
   evapL: number;
+  /** น้ำรั่วออกใน step นี้ (L) — Scenario disturbance */
+  leakL?: number;
 }
 
 export interface TankResult {
@@ -17,25 +19,28 @@ export interface TankResult {
   /** น้ำที่พืชได้จริง (ถูกจำกัดด้วยน้ำที่มีอยู่) */
   uptakeL: number;
   evapL: number;
+  leakL: number;
   /** น้ำที่ล้นถังเมื่อเติมเกิน (L) */
   overflowL: number;
 }
 
 /**
  * Water Mass Balance (FR-03)
- *   dV/dt = Q_refill + Q_nutrient − ΣU − E_evap,  V ∈ [0, V_max]
+ *   dV/dt = Q_refill + Q_nutrient − ΣU − E_evap − Q_leak,  V ∈ [0, V_max]
  */
 export function stepTank(volumeL: number, f: TankFlows, cfg: SimConfig): TankResult {
   const vMax = cfg.tank.capacityL;
   const available = volumeL + f.refillInL + f.doseInL;
-  const losses = f.uptakeDemandL + f.evapL;
+  const leakDemandL = Math.max(0, f.leakL ?? 0);
+  const losses = f.uptakeDemandL + f.evapL + leakDemandL;
   // ถ้าน้ำไม่พอ แบ่งน้ำที่มีตามสัดส่วนความต้องการ
   const scale = losses > available && losses > 0 ? available / losses : 1;
   const uptakeL = f.uptakeDemandL * scale;
   const evapL = f.evapL * scale;
-  const raw = available - uptakeL - evapL;
+  const leakL = leakDemandL * scale;
+  const raw = available - uptakeL - evapL - leakL;
   const overflowL = Math.max(0, raw - vMax);
-  return { volumeL: clamp(raw, 0, vMax), uptakeL, evapL, overflowL };
+  return { volumeL: clamp(raw, 0, vMax), uptakeL, evapL, leakL, overflowL };
 }
 
 /** น้ำระเหยจากผิวน้ำ (L) ใน dt — แปรตาม VPD */

@@ -39,11 +39,12 @@ tags: [green-oak, roadmap]
 - [x] `defaultConfig.ts` พร้อมหน่วยและคำอธิบาย
 - **ผ่านเมื่อ:** Unit tests AC-01, AC-02, AC-06, AC-07
 
-### P3 — Plant Model: Water (`sim-core`)
-- [ ] PlantState ครบทุก field (FR-20), Root access, Demand/Supply
-- [ ] Hydration, Water stress, Damage (ถาวร), Recovery, Health
-- [ ] Growth baseline (logistic) → LeafArea, LeafCount, RootLength, Stage
-- [ ] `Simulation.step()` รวม Environment + Plants + Sensors
+### P3 — Plant Model: Water (`sim-core`) ✅
+- [x] PlantState ครบทุก field (FR-20), Root access, Demand/Supply
+- [x] Hydration, Water stress, Damage (ถาวร), Recovery, Health
+- [x] Growth baseline (logistic) → LeafArea, LeafCount, RootLength, Stage
+- [x] `Simulation.step()` รวม Environment + Plants + Sensors
+- [x] Leak disturbance + Event detection
 - **ผ่านเมื่อ:** Unit tests AC-03, AC-04, AC-05
 
 ### P4 — Server, Lab Session, Mock PLC

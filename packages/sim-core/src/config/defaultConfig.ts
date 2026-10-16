@@ -109,6 +109,55 @@ export interface SimConfig {
     ecMsCm: number;
     waterLevelPct: number;
   };
+  /** Plant model (ARCHITECTURE.md § 7.4–7.5) */
+  plant: {
+    /** จำนวนต้นเริ่มต้น */
+    count: number;
+    /** Biomass (fresh weight) เริ่มต้นเฉลี่ย (g) */
+    initialBiomassG: number;
+    /** ความแปรปรวนของ Biomass เริ่มต้นระหว่างต้น (± สัดส่วน) */
+    initialBiomassSpread: number;
+    /** Biomass สูงสุด (g) */
+    maxBiomassG: number;
+    /** อัตราการเติบโตสูงสุด (1/day) */
+    growthRatePerDay: number;
+    /** PPFD ที่ให้ f_light = 0.5 ของค่าสูงสุดตามสมการ Michaelis–Menten (µmol/m²/s) */
+    lightHalfSatPpfd: number;
+    /** PPFD อ้างอิงที่ f_light = 1 */
+    lightRefPpfd: number;
+    lightFactorMax: number;
+    /** Trapezoid อุณหภูมิสำหรับการเติบโต [min, optLow, optHigh, max] (°C) */
+    tempCardinalC: [number, number, number, number];
+    /** พื้นที่ใบต่อ Biomass (cm²/g) */
+    leafAreaPerG: number;
+    /** รากเริ่มต้น / เพิ่มได้สูงสุด (cm) และ Biomass ที่รากโตได้ 63% (g) */
+    rootBaseCm: number;
+    rootGainCm: number;
+    rootBiomassScaleG: number;
+    /** Transpiration ต่อพื้นที่ใบที่ VPD 1 kPa และ PPFD อ้างอิง (L/m²/day) */
+    transpirationLPerM2Day: number;
+    /** PPFD อ้างอิงของ Transpiration */
+    transpirationRefPpfd: number;
+    /** สัดส่วน Transpiration ตอนมืด (Stomata ปิดบางส่วน) */
+    transpirationDarkFraction: number;
+    /** สัดส่วนรากที่ต้องแช่น้ำเพื่อดูดน้ำได้เต็มที่ */
+    rootCriticalFraction: number;
+    /** อัตราสูญเสีย Hydration เมื่อขาดน้ำสนิทที่สภาวะอ้างอิง (1/h) */
+    hydrationLossPerH: number;
+    /** อัตราฟื้น Hydration (1/h) */
+    hydrationRecoveryPerH: number;
+    /** Hydration ที่ถือว่าเหี่ยวเต็มที่ (Water stress = 1) */
+    wiltHydration: number;
+    /** Water stress ที่เริ่มเกิด Damage ถาวร */
+    damageStressThreshold: number;
+    /** อัตราเกิด Damage ต่อ Stress ส่วนเกิน (1/h) */
+    damagePerH: number;
+    /** Damage ลด Hydration สูงสุดที่ฟื้นได้: H_cap = 1 − k·Damage */
+    damageHydrationCapFactor: number;
+    /** Biomass ที่เปลี่ยน Growth stage (g) */
+    vegetativeAtG: number;
+    harvestAtG: number;
+  };
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
@@ -122,7 +171,8 @@ export const DEFAULT_CONFIG: SimConfig = {
     evapLPerDayAt1kPa: 0.05,
     supplyTempC: 27,
   },
-  room: { tempMeanC: 26, tempAmplitudeC: 2, tempPeakHour: 15, rhPct: 60 },
+  // ห้องเรียนมีเครื่องปรับอากาศ
+  room: { tempMeanC: 24, tempAmplitudeC: 2, tempPeakHour: 15, rhPct: 60 },
   air: {
     ledHeatC: 6,
     fanEfficiency: 0.7,
@@ -156,6 +206,33 @@ export const DEFAULT_CONFIG: SimConfig = {
   },
   power: { ledW: 120, fanW: 15, humidifierW: 25, refillPumpW: 18, nutrientPumpW: 5, airPumpW: 5 },
   noise: { airTempC: 0.1, rhPct: 0.5, ppfd: 2, waterTempC: 0.05, ph: 0.01, ecMsCm: 0.01, waterLevelPct: 0.2 },
+  plant: {
+    count: 6,
+    initialBiomassG: 5,
+    initialBiomassSpread: 0.15,
+    maxBiomassG: 150,
+    growthRatePerDay: 0.25,
+    lightHalfSatPpfd: 150,
+    lightRefPpfd: 250,
+    lightFactorMax: 1.2,
+    tempCardinalC: [4, 15, 25, 33],
+    leafAreaPerG: 10,
+    rootBaseCm: 4,
+    rootGainCm: 14,
+    rootBiomassScaleG: 40,
+    transpirationLPerM2Day: 3.3,
+    transpirationRefPpfd: 250,
+    transpirationDarkFraction: 0.3,
+    rootCriticalFraction: 0.3,
+    hydrationLossPerH: 0.12,
+    hydrationRecoveryPerH: 0.5,
+    wiltHydration: 0.4,
+    damageStressThreshold: 0.7,
+    damagePerH: 0.14,
+    damageHydrationCapFactor: 0.5,
+    vegetativeAtG: 15,
+    harvestAtG: 100,
+  },
 };
 
 type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? (T[K] extends unknown[] ? T[K] : DeepPartial<T[K]>) : T[K] };

@@ -15,12 +15,13 @@ export interface SaltFlows {
   /** สารละลาย B ที่เติม (L) */
   doseBL: number;
   uptakeL: number;
-  overflowL: number;
+  /** สารละลายที่ออกจากถังโดยตรง (ล้น + รั่ว) (L) */
+  drainL: number;
 }
 
 /**
  * Salt Mass Balance (FR-08) หน่วย mS/cm·L
- *   dM = EC_stock·(A + B) + EC_tap·Refill − c_up·U·EC − Overflow·EC
+ *   dM = EC_stock·(A + B) + EC_tap·Refill − c_up·U·EC − Drain·EC   (Drain = ล้น + รั่ว)
  * น้ำระเหยไม่พาเกลือออก จึงทำให้ EC สูงขึ้น ส่วน Refill เจือจาง
  *
  * หมายเหตุ M1: A และ B เพิ่ม EC เท่ากัน ยังไม่จำลองสัดส่วน A/B หรือธาตุเฉพาะชนิด
@@ -29,7 +30,7 @@ export function stepSalt(saltMass: number, f: SaltFlows, cfg: SimConfig): number
   const n = cfg.nutrient;
   const ec = ecFrom(saltMass, f.volumeBeforeL);
   const added = n.stockEc * (f.doseAL + f.doseBL) + n.tapEc * f.refillInL;
-  const removed = n.uptakeSaltRatio * f.uptakeL * ec + f.overflowL * ec;
+  const removed = n.uptakeSaltRatio * f.uptakeL * ec + f.drainL * ec;
   return Math.max(0, saltMass + added - removed);
 }
 

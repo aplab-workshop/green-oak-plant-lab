@@ -250,11 +250,11 @@ $$PPFD_i = PPFD_{max} \cdot \frac{LED\%}{100} \cdot pos_i \qquad DLI_i \mathrel{
 
 ### 7.3 Air, Water Temperature, VPD
 
-ห้องปลูกแลกเปลี่ยนอากาศกับห้องเรียน (Room) ซึ่งมีอุณหภูมิ `T_room = 26 ± 2 °C` แกว่งตามเวลาของวัน และ `RH_room = 60%`
+ห้องปลูกแลกเปลี่ยนอากาศกับห้องเรียน (Room) ซึ่งมีเครื่องปรับอากาศ อุณหภูมิ `T_room = 24 ± 2 °C` แกว่งตามเวลาของวัน (ร้อนสุด 15:00) และ `RH_room = 60%`
 
 $$T_{eq} = T_{room} + \Delta T_{LED}\cdot\frac{LED\%}{100}\cdot(1 - \eta_{fan}\cdot fan) \qquad \frac{dT}{dt} = \frac{T_{eq} - T}{\tau_T}$$
 
-- `ΔT_LED = 6 °C`, `η_fan = 0.7`, `τ_T = 20 min` → LED 100% และไม่เปิด Fan ≈ 32 °C, เปิด Fan ≈ 27.8 °C
+- `ΔT_LED = 6 °C`, `η_fan = 0.7`, `τ_T = 20 min` → ที่ห้อง 24 °C: LED 100% และไม่เปิด Fan ≈ 30 °C (เกิน optimum), เปิด Fan ≈ 25.8 °C
 - Fan ทำให้อุณหภูมิต่ำกว่า Room ไม่ได้ (สมจริง ใช้สอนข้อจำกัดของการระบายอากาศ)
 
 $$RH_{eq} = RH_{room} + 25\cdot hum\cdot(1 - 0.6\cdot fan) + 5\cdot(1-fan) - 2.5\cdot(T - T_{room}) \qquad \frac{dRH}{dt} = \frac{RH_{eq}-RH}{\tau_{RH}}$$
@@ -314,7 +314,7 @@ $$\frac{dB}{dt} = \mu_{max}\,B\left(1 - \frac{B}{B_{max}}\right) f_{light}\,f_{t
 | `B_max` | 150 g |
 | `μ_max` | 0.25 /day |
 | `f_light` | `(PPFD/(PPFD+150)) / (250/(250+150))`, clamp 0–1.2 |
-| `f_temp` | Trapezoid: 0 ที่ 5 °C, 1 ที่ 15–24 °C, 0 ที่ 32 °C |
+| `f_temp` | Trapezoid: 0 ที่ 4 °C, 1 ที่ 15–25 °C, 0 ที่ 33 °C |
 
 ความสัมพันธ์ที่ได้จาก Biomass:
 - `LeafArea (cm²) = 10 · B`
@@ -370,6 +370,20 @@ Sim start = **Day 14 หลังเพาะ (ย้ายลงถัง), 06:
 - **Room temperature** เป็น cosine รายวัน `T_mean + A·cos(2π(h − h_peak)/24)` ร้อนสุด 15:00
 - **Sensor readout** (`readSensors`) คำนวณ VPD จากค่าจริงของอากาศ (ไม่ใส่ Noise ซ้ำซ้อน) และ `readSimInfo` ให้ค่า D111/D112
 
+### 7.11 Implementation Notes (P3)
+
+รายละเอียดของ Plant model (`packages/sim-core/src/plant/`, `simulation.ts`)
+
+- **ลำดับใน 1 step:** (1) แต่ละต้นคำนวณ Demand และ Root access จาก State ก่อน step → (2) `stepEnvironment` ตัดสินว่าถังจ่ายได้จริงเท่าไร → (3) แต่ละต้นอัปเดตด้วย `supplyRatio × tankFactor`
+- **ผลของแสงต่อการเหี่ยว:** อัตราสูญเสีย Hydration คูณด้วย `transpirationFactor` (√VPD × แสง) ทำให้ขาดน้ำตอนแดดจัด/อากาศแห้งเหี่ยวเร็วกว่าตอนมืด (ตอนมืดใช้ 30%)
+- **ระยะเวลาที่ได้ (LED 80%, ห้อง ~24 °C):** รากพ้นน้ำ → Water stress > 0.3 ใน ~1 ชม., เริ่ม Damage ~2 ชม., ขาดน้ำ 12 ชม. → Damage ≈ 0.3–0.4
+- **ระดับน้ำที่ต้นกล้าเริ่มขาดน้ำ:** รากเริ่มต้น ~5.5 cm (ปลายรากที่ ~9.5 cm) ทำให้ Water stress เริ่มเมื่อระดับน้ำต่ำกว่า **~55%** และรากพ้นน้ำทั้งหมดที่ ~47% ส่วนต้นโตแล้วรากยาวกว่าจึงทนได้มากกว่า Auto program ตัวอย่างจึงเติมที่ 70%
+- **การใช้น้ำจริงช้า** (~0.1–0.4 L/ต้น/วัน) ถังจึงใช้เวลาหลายวันกว่าน้ำจะลดถึงราก Scenario `water-shortage` จึงใช้ **Leak disturbance** (`disturbance.leakLph`) หรือตั้งระดับน้ำเริ่มต้นต่ำ (`setWaterLevelPct`) ไม่ใช่ Animation ที่เล่นเอง
+- **ความแปรปรวนระหว่างต้น:** Biomass เริ่มต้น ±15% จาก Seeded PRNG (Deterministic ต่อ seed)
+- **Events (FR-43):** `plant.water_stress` (S_w ≥ 0.3, cleared ≤ 0.15), `plant.wilting` (S_w ≥ 0.7), `plant.damage` (ข้าม 1%, 25%, 50%), `tank.roots_exposed/covered`, `tank.overflow`, `tank.empty`
+- **ผลตรวจ 30 วัน (Refill 70/90, LED 80% 06–22, Fan > 25 °C):** Biomass 4.9 g (Day 14) → 110 g (Day 44, Stage harvest), ใช้น้ำ 26 L, Performance ~600k steps/s
+- **ประเด็นสำหรับ M2:** pH drift ขึ้นถึง ~8.4 ใน 30 วัน เพราะไม่มี Actuator ปรับ pH ควรพิจารณาเพิ่ม pH-down pump หรือปรับ Model
+
 ## 8. Mock PLC
 
 `MockPlcAdapter` จำลอง **Device Memory จริง** (`D[0..7999]` เป็น Int16, `M[0..7679]` เป็น bit) ทำให้ Data Path เหมือน M3 ทุกประการ คือเขียน D แบบ Scaled Integer แล้วอ่าน M/D กลับ
@@ -383,8 +397,8 @@ Sim start = **Day 14 หลังเพาะ (ย้ายลงถัง), 06:
 ตัวอย่าง Auto Program (ตรงกับ Ladder ที่นักเรียนจะเขียน):
 
 ```
-Refill  : ON  ถ้า D106 < 60   | OFF ถ้า D106 ≥ 90      (hysteresis)
-Fan     : ON  ถ้า D100 > 270  | OFF ถ้า D100 < 250
+Refill  : ON  ถ้า D106 < 70   | OFF ถ้า D106 ≥ 90      (hysteresis)
+Fan     : ON  ถ้า D100 > 255  | OFF ถ้า D100 < 245
 Humid.  : ON  ถ้า D101 < 550  | OFF ถ้า D101 > 700
 LED     : D200 = 80 ระหว่าง 06:00–22:00 (ใช้ D111 Sim Time — ดู DEVICE-MAP)
 Nutrient: A,B ON ถ้า D105 < 100 | OFF ถ้า D105 ≥ 120

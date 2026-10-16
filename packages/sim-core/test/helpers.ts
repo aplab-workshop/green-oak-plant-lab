@@ -19,7 +19,7 @@ export const OFF: ActuatorCommands = {
 };
 
 /** Config ที่อุณหภูมิห้องคงที่ 26 °C เพื่อให้คาดค่าได้ง่าย */
-export const flatRoomConfig = (): SimConfig => makeConfig({ room: { tempAmplitudeC: 0 } });
+export const flatRoomConfig = (): SimConfig => makeConfig({ room: { tempMeanC: 26, tempAmplitudeC: 0 } });
 
 export interface RunOptions {
   cfg: SimConfig;

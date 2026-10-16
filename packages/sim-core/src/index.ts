@@ -10,3 +10,8 @@ export * from './environment/air';
 export * from './environment/nutrient';
 export * from './environment/power';
 export * from './sensors';
+export * from './events';
+export * from './plant/water';
+export * from './plant/growth';
+export * from './plant/plant';
+export * from './simulation';

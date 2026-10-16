@@ -31,6 +31,7 @@ export interface EnvironmentState {
   totalRefillL: number;
   totalUptakeL: number;
   totalOverflowL: number;
+  totalLeakL: number;
 }
 
 export interface EnvironmentInput {
@@ -39,6 +40,8 @@ export interface EnvironmentInput {
   simTimeS: number;
   /** น้ำที่พืชทั้งหมดต้องการใน step นี้ (L) — มาจาก Plant model (P3) */
   plantUptakeDemandL: number;
+  /** น้ำรั่ว (L/h) — Scenario disturbance, ค่าเริ่มต้น 0 */
+  leakLph?: number;
 }
 
 export interface EnvironmentStepResult {
@@ -66,6 +69,7 @@ export function initialEnvironment(cfg: SimConfig, simTimeS: number): Environmen
     totalRefillL: 0,
     totalUptakeL: 0,
     totalOverflowL: 0,
+    totalLeakL: 0,
   };
 }
 
@@ -95,6 +99,7 @@ export function stepEnvironment(
       doseInL: doseAL + doseBL,
       uptakeDemandL: Math.max(0, u.plantUptakeDemandL),
       evapL: evaporationL(vpd, dtS, cfg),
+      leakL: ((u.leakLph ?? 0) * dtS) / 3600,
     },
     cfg,
   );
@@ -102,7 +107,7 @@ export function stepEnvironment(
   // --- Nutrient ---
   const saltMass = stepSalt(
     s.saltMass,
-    { volumeBeforeL: s.waterVolumeL, refillInL, doseAL, doseBL, uptakeL: tank.uptakeL, overflowL: tank.overflowL },
+    { volumeBeforeL: s.waterVolumeL, refillInL, doseAL, doseBL, uptakeL: tank.uptakeL, drainL: tank.overflowL + tank.leakL },
     cfg,
   );
   const doseMinutes = ((cmd.nutrientA ? 1 : 0) + (cmd.nutrientB ? 1 : 0)) * dtMin;
@@ -142,6 +147,7 @@ export function stepEnvironment(
       totalRefillL: s.totalRefillL + refillInL,
       totalUptakeL: s.totalUptakeL + tank.uptakeL,
       totalOverflowL: s.totalOverflowL + tank.overflowL,
+      totalLeakL: s.totalLeakL + tank.leakL,
     },
   };
 }
