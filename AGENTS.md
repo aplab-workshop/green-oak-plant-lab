@@ -17,7 +17,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ## 3. สถานะ (อัปเดตล่าสุด 2026-10-16)
 
 - **Milestone 1 เสร็จแล้ว** (git tag `m1`) — P0–P7 ผ่านครบ, เทสต์ 100/100
-- **งานถัดไป: Milestone 2 Plant Behavior Engine** ซึ่งยังไม่ได้แตก Phase ดูหัวข้อ M2 ใน `docs/PHASES.md`
+- **Milestone 2 Plant Behavior Engine:** แตกแผน P8–P15 แล้วใน `docs/PHASES.md` — **รอผู้ใช้อนุมัติแผน ยังไม่เริ่ม P8 และยังไม่เขียนโค้ด M2**; งานถัดไปหลังอนุมัติคือ P8 Specification & Model Contract (เอกสาร)
 - ประเด็นค้างที่บันทึกไว้: pH drift ขึ้นต่อเนื่องเพราะไม่มี Actuator ปรับ pH (ARCHITECTURE § 7.11)
 
 ## 4. วิธีทำงานที่เจ้าของโปรเจกต์ต้องการ (สำคัญ)
