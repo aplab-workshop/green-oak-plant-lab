@@ -122,11 +122,10 @@ export default function Scene3D() {
   const plantCount = useLabStore((s) => s.snapshot?.plants.length ?? 6);
   return (
     <Canvas
-      // เปลี่ยนโหมดกราฟิก = สร้าง Canvas ใหม่ (antialias ตั้งได้ตอนสร้างเท่านั้น)
-      key={low ? 'low' : 'high'}
+      // คง Canvas และ Html labels ไว้เมื่อสลับ Low; ลด DPR/เงา/Geometry แทน
       shadows={!low}
       dpr={low ? 1 : [1, 2]}
-      gl={{ antialias: !low, powerPreference: low ? 'low-power' : 'high-performance' }}
+      gl={{ antialias: true, powerPreference: 'high-performance' }}
       camera={{ position: CAMERA_POS, fov: 40, near: 0.01, far: 10 }}
       onPointerMissed={() => useSceneStore.getState().selectDevice(null)}
     >

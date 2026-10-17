@@ -20,6 +20,7 @@ import {
 import type { ActuatorCommands } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { Clickable } from './Clickable';
+import { VentFan } from './VentFan';
 import { LED_Y, cm } from './layout';
 import { useSceneStore } from './sceneStore';
 
@@ -106,44 +107,6 @@ function LedFixture({ x }: { x: number }) {
         target-position={[0, -1, 0]}
       />
     </Clickable>
-  );
-}
-
-/** Ventilation Fan (M100) */
-function VentFan({ x }: { x: number }) {
-  const blades = useRef<Group>(null);
-  const speed = useRef(0);
-  useFrame((_, dt) => {
-    const k = Math.min(dt, 0.1);
-    speed.current = MathUtils.damp(speed.current, commands()?.fan ? 22 : 0, 1.5, k);
-    if (blades.current) blades.current.rotation.x += speed.current * k;
-  });
-  return (
-    <group position={[x, 0.1, -0.21]}>
-      <Clickable device={{ kind: 'actuator', key: 'fan' }} position={[0, 0.34, 0]} labelOffset={[0, 0.09, 0]}>
-        {[-1, 1].map((s) => <group key={s}>
-          <mesh position={[0, s * 0.073, 0]}><boxGeometry args={[0.025, 0.014, 0.16]} /><meshStandardMaterial color="#354a46" metalness={0.4} /></mesh>
-          <mesh position={[0, 0, s * 0.073]}><boxGeometry args={[0.025, 0.16, 0.014]} /><meshStandardMaterial color="#354a46" metalness={0.4} /></mesh>
-        </group>)}
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <torusGeometry args={[0.065, 0.006, 8, 32]} />
-          <meshStandardMaterial color="#e2e8f0" />
-        </mesh>
-        <mesh rotation={[0, 0, Math.PI / 2]} position={[-0.02, 0, 0]}>
-          <cylinderGeometry args={[0.025, 0.025, 0.03, 16]} />
-          <meshStandardMaterial color="#cbd5e1" />
-        </mesh>
-        <group ref={blades}>
-          {[0, 1, 2, 3, 4].map((i) => (
-            <mesh key={i} rotation={[(i * Math.PI * 2) / 5, 0, 0]} position={[0.004, 0, 0]}>
-              <boxGeometry args={[0.003, 0.055, 0.022]} />
-              <meshStandardMaterial color="#425c54" metalness={0.25} />
-            </mesh>
-          ))}
-        </group>
-        <StatusLed bit="fan" position={[-0.03, -0.03, 0.02]} />
-      </Clickable>
-    </group>
   );
 }
 

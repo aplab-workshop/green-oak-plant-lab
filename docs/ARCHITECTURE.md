@@ -652,3 +652,12 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - LabSession เก็บ Best ของรอบที่จบใน Map ตาม Scenario; บันทึกรอบเก่าก่อนเปลี่ยน Scenario, Reset ไม่ล้าง Best แต่ล้าง CareGame, ทุก Snapshot คืนสำเนา; ไม่แชร์ข้าม Lab และไม่มี persistence ข้าม Server restart
 - Tests เพิ่ม 6 cases: สูตร/Partial death/Defeat latch/สำเนา, Duration weighting, Permanent death, Dry vs Healthy 36 h + Events + Reset, Tick split/Pause, Eligible Best/Scenario/Lab isolation; 160/160 tests (24 files), typecheck/build ผ่าน
 - Browser ตรวจ 1440×900 และ 390×844; แผงทั้ง 7, เลือก Plant 3, Manual Fan ON, กราฟที่มีข้อมูลจริง, 2D/3D, Keyboard; ถังแห้ง fixture บน Server แยก 3305 ตายครบที่ 1.17 วันและปลูกใหม่ได้ครบ 6 ต้นพร้อม Resume; Console ไม่มี error ตอนตรวจหน้าใหม่ ใช้งาน preview 3304 (Lab เดิม 3301 ไม่ถูก Reset)
+
+### 11.16 Implementation Notes (P18 — Ventilation Fan)
+
+- แยก `VentFan.tsx` จาก Actuators: กรอบ Extrude มุมมนเจาะช่องกลม, ใบโค้ง 5 ใบมี Pitch และขอบหนา, Motor cap, สกรูสองด้านและโครงยึดด้านหลัง; แก้ใบ Box เดิมที่อยู่ทับแกนจนเห็นเป็นก้อนกลางกรอบ
+- ทั้งสองตัวอยู่ตำแหน่งเดิม ใช้ M100/Clickable เดิมและหันด้านหน้าออกนอกโรงเรือน; หมุนแกน local Z ตาม Server command ด้วยการเร่ง/ผ่อนเดิม; ลูกศรลมคงที่แสดงเฉพาะ Fan ON ไม่มีการคำนวณ Environment เพิ่ม
+- Geometry ใช้ร่วมกันระหว่างใบในหนึ่งพัดลมและ Dispose เมื่อเปลี่ยน/Unmount; Low ลด curve segments โดยยังเห็นรูปทรงเดิม
+- ระหว่างตรวจพบ `removeChild` error เมื่อ Canvas remount ขณะมี Html labels; คง Canvas เมื่อสลับ High/Low เพื่อรักษากล้อง/ป้าย โดย Low ยังลด DPR, เงาและรายละเอียด Geometry แต่คง antialias/WebGL power preference ของ Canvas เดิม
+- Browser บน QA Server แยก 3306 ตรวจหน้า/หลัง ระยะใกล้/ไกล การคลิก M100, OFF → ON → OFF และ High/Low; หลังแก้ไม่มี console error ใหม่ในการสลับ Graphics ขณะเลือก Fan; ปิด QA Server หลังตรวจ ไม่ Reset หรือเปลี่ยน PLC ของ Lab ผู้ใช้
+- `npm test` รอบแรกที่รันพร้อม Build มี 2 timeouts (5000 ms); รันแยกผ่าน 160/160 โดยไม่เปลี่ยน Test หรือ Timeout; typecheck และ production build ผ่าน (ยังมี chunk-size warning เดิม)

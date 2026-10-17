@@ -48,7 +48,7 @@ tags: [green-oak, spec]
 | Milestone | เนื้อหา | สถานะ |
 |---|---|---|
 | **M1** Functional 3D Virtual Plant | Web App, 3D DWC 6 ต้น, Sensor Dashboard, Mock Actuator, Water Balance, Water Shortage Behavior, ทำงานโดยไม่มี PLC | ✅ เสร็จ 2026-10-16 |
-| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P15 และส่วนต่อ P16–P17 เสร็จ; รอตรวจรับ** |
+| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P15 และส่วนต่อ P16–P18 เสร็จ; รอตรวจรับ** |
 | M3 One Real FX5U | SLMP 3E Gateway, Communication Monitor, PLC-in-the-Loop กับเครื่องจริง 1 เครื่อง | |
 | M4 Multi-Lab Classroom | 10 PLC, 10 Lab, Student/Teacher Dashboard, Concurrent Test | |
 | M5 Advanced | Scenario Management, Data Logging, Performance Evaluation, Real Sensor Architecture | |
@@ -233,6 +233,8 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-29 **P15 / NFR-06, NFR-07:** AC-16…28 ผ่าน, tests/typecheck/build ผ่าน และทำตามคู่มือการทดลองทุกกลไกได้ในโหมดห้องเรียนบน Windows; บันทึก Browser checks และข้อจำกัดก่อน tag m2 — tests 154/154; ดู [หลักฐานและขั้นตอน](M2-ACCEPTANCE.md) ซึ่งแยก Browser กับ Controlled fixtures ชัดเจน; LAN ตรวจบนเครื่อง Server ผ่าน IP ตัวเอง ยังไม่ตรวจเครื่องนักเรียนอีกเครื่อง
 
 ### 8.2 Visual Polish หลัง M2
+
+- [x] AC-32 **P18:** พัดลมมีใบโค้งแผ่จากแกนถึงช่องกรอบดำ เห็นได้จากทั้งสองด้าน; ไม่มีวงแหวนสีขาวเดิม; การคลิกข้อมูลและคำสั่ง M100 เดิมทำงาน; ลูกศรลมเฉพาะ ON; ตรวจ High/Low และ regression
 
 - [x] AC-31 **P17:** HUD ย่อ/ขยายและ Controls ใช้ได้ทั้งจอกว้าง/แคบ; คะแนนจริงจาก Server ไม่เพิ่มเมื่อ Pause และไม่ขึ้นกับ Tick splitting; รอบดูแลดีได้คะแนนสูงกว่ากลุ่มขาดน้ำ; Damage 100% ตายถาวรและไม่ดูดน้ำ; ตายบางต้นยังเล่นได้ ตายครบ Game Over ครั้งเดียว; Reset/Scenario/Best แยก Lab ถูกต้อง; tests/typecheck/build และ Browser ผ่าน (160 tests; Browser 1440×900 / 390×844, Game Over → Timeline → ปลูกใหม่)
 

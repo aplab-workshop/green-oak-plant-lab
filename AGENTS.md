@@ -17,7 +17,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ## 3. สถานะ (อัปเดตล่าสุด 2026-10-17)
 
 - **Milestone 1 เสร็จแล้ว** (git tag `m1`) — P0–P7 ผ่านครบ, เทสต์ 100/100
-- **Milestone 2 Plant Behavior Engine:** **P8–P15 และส่วนต่อ P16–P17 เสร็จ (tests 160/160 + typecheck + build ผ่าน)**; P17 เปลี่ยน Dashboard เป็น HUD ย่อ/ขยาย เพิ่ม Care Score/Best และ Game Over เมื่อตายครบ; หยุดให้ผู้ใช้ตรวจรับก่อนงานถัดไปและก่อน tag `m2`; ยังไม่เริ่ม M3
+- **Milestone 2 Plant Behavior Engine:** **P8–P15 และส่วนต่อ P16–P18 เสร็จ (tests 160/160 + typecheck + build ผ่าน)**; P18 ปรับพัดลมกรอบดำ/ใบโค้งและลูกศรตาม M100 พร้อมแก้การสลับ Low ขณะเลือกอุปกรณ์; P17 เปลี่ยน Dashboard เป็น HUD ย่อ/ขยาย เพิ่ม Care Score/Best และ Game Over เมื่อตายครบ; หยุดให้ผู้ใช้ตรวจรับก่อนงานถัดไปและก่อน tag `m2`; ยังไม่เริ่ม M3
 - คะแนนอยู่ใน `sim-core/src/careGame.ts`; ตายเมื่อ Damage = 1 ไม่ฟื้น/ไม่ดูดน้ำ/ไม่โต; Best แยก Lab/Scenario อยู่ใน Memory ของ LabSession เท่านั้น (SPEC § 4.4)
 - คู่มือทดลอง/หลักฐานอยู่ที่ `docs/M2-ACCEPTANCE.md`; โหมดห้องเรียนตรวจผ่าน IP LAN บนเครื่อง Server แล้ว ยังไม่ได้ตรวจเครื่องนักเรียนอีกเครื่องหรือ PLC จริง
 - P10 แก้ pH drift เป็น Empirical equilibrium แล้ว (ARCHITECTURE § 11.3/11.8); ยังไม่ใช่ Model เคมีที่ปรับเทียบกับข้อมูลจริง

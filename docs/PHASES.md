@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-17: P8–P15 และส่วนต่อ P16–P17 เสร็จ — รอผู้ใช้ตรวจ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
+> **สถานะ 2026-10-17: P8–P15 และส่วนต่อ P16–P18 เสร็จ — รอผู้ใช้ตรวจ Fan และ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -185,7 +185,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P15 และส่วนต่อ P16–P17 เสร็จ; **หยุดให้ผู้ใช้ตรวจ Dashboard และระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
+- P8–P15 และส่วนต่อ P16–P18 เสร็จ; **หยุดให้ผู้ใช้ตรวจ Fan และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
 
 ---
 
@@ -212,6 +212,14 @@ tags: [green-oak, roadmap]
 - [x] Tests คะแนน/ตาย/Reset/แยก Lab และ Browser, typecheck/build; docs และ commit `phase(P17): ...`
 - **ผลตรวจ:** AC-31 ผ่าน; 160/160 tests (24 files), typecheck และ build ผ่าน; Browser 1440×900 / 390×844 ตรวจ HUD, แผง Sensors/Actuators/Plant/Scenario/Chart/Timeline/Score, Escape/คืน Focus, Manual Fan ON, 2D/3D และไม่มี console error; fixture ถังแห้งตายครบที่ 1.17 วัน → Game Over → Timeline → ปลูกใหม่ได้ 6 ต้นและ Resume
 - **ข้อจำกัด:** Best เป็นคะแนนรอบที่จบและมีอายุอย่างน้อย 24 h จำลองใน Memory ของ Server ควรเทียบรอบยาวเท่ากัน; Game Over ล็อกคะแนนแต่ยังตรวจ Environment/PLC ต่อได้; ไม่มี Leaderboard ข้ามผู้ใช้; เปิด preview ใหม่ที่พอร์ต 3304 โดยไม่หยุด Lab เดิม 3301
+
+## P18 — Ventilation Fan Visual Refinement ✅
+
+- [x] ปรับพัดลมตามภาพผู้ใช้: กรอบดำช่องกลม ใบพัดโค้ง 5 ใบแผ่ถึงขอบ ฝาครอบแกน สกรูและโครงยึดด้านหลัง
+- [x] คงตำแหน่ง/การคลิก/M100 เดิมทั้งสองตัว; ลูกศรบอกทิศลมแสดงเมื่อ Fan ON เท่านั้น
+- [x] ตรวจ Browser ใกล้/ไกล High/Low และ ON/OFF; tests/typecheck/build, docs และ commit `phase(P18): ...`
+
+- **ผลตรวจ:** AC-32 ผ่าน; tests 160/160 (24 files), typecheck และ production build ผ่าน; Fan ON/OFF, ลูกศรลม, การคลิก M100, มุมหน้า/หลังและ High/Low ผ่านบน Server ทดสอบแยกพอร์ต 3306; แก้ error จาก Canvas remount ตอนสลับ Graphics ขณะมีป้าย โดยคง Canvas/กล้องและลด DPR/เงา/รายละเอียดแทน; Lab ผู้ใช้ไม่ถูก Reset
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
