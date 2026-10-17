@@ -257,6 +257,7 @@ tags: [green-oak, roadmap]
 - [ ] ตรวจ Browser จอกว้าง/แคบ; tests/typecheck/build → commit `phase(P21): ...`
 
 ### P22 — Care Guide & Live Hints
+- เนื้อหาตั้งต้น: [[GAME-GUIDE]] (`docs/GAME-GUIDE.md` คู่มือระดับ ป.5 ที่ผู้ใช้ขอ 2026-10-18) — P22 นำเนื้อหานี้เข้าเกม
 - [ ] หน้า **วิธีดูแลผัก (Care Guide)**: ค่าที่ต้องดู (Water Level, EC, pH, Air Temp, RH/VPD, PPFD/DLI, Water Temp/O₂) พร้อมช่วงที่เหมาะสมจาก Config และตาราง "ถ้าเกิดแบบนี้ → ปรับอะไร" (เช่น น้ำต่ำ → Refill Pump, EC ต่ำ → Nutrient A+B, ร้อน → Fan, RH ต่ำ → Humidifier)
 - [ ] **Live Hints** ระหว่างเล่น: การ์ดเตือนเมื่อค่าออกนอกช่วงหรือ Stress สูง พร้อมคำแนะนำอุปกรณ์ที่ควรกด (อ่านจาก Snapshot ของ Server, ไม่คำนวณพืชใน Web)
 - [ ] เปิด Guide ได้จากหน้า Start, HUD และหน้า Game Over
