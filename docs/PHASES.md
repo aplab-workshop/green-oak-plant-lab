@@ -230,6 +230,7 @@ tags: [green-oak, roadmap]
 - ขอบเขต: ส่วนต่อ M2 ตามภาพผู้ใช้ ไม่เปลี่ยน Simulation/PLC mapping; ถังสำรองเป็นภาพประกอบ ไม่อ้างว่าจำลองปริมาณน้ำสำรอง; Air Pump ไม่บังคับ always ON นอก Fail-safe
 
 - **ผลตรวจ:** AC-33 ผ่าน; tests 160/160 (24 files), typecheck และ production build ผ่าน; Browser 1440×900, 1280×720 และ 390×844 ตรวจ Toggle/Expand/Escape, Plant 3/Chart คงค่า, หมอก ON/OFF/Low/Pause, อุปกรณ์ 4 จุดและค่า Power Meter ตรง Snapshot; ไม่มี Console error; หยุดรอผู้ใช้ตรวจรับ P19
+- **ตรวจรัน 2026-10-18 (หลัง commit P19):** `npm run dev` ขึ้นครบ — Server `http://127.0.0.1:3001` (lab01, Mock PLC: auto) และ Web `http://localhost:5173` ตอบ HTTP 200; tests 160/160 (24 files) และ typecheck ผ่านซ้ำ; รอบนี้ไม่ได้ตรวจภาพใน Browser (Chrome extension ไม่เชื่อมต่อ) — ยังรอผู้ใช้ตรวจรับ P16–P19 ก่อน tag `m2`
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
