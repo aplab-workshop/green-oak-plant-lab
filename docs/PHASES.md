@@ -1,6 +1,6 @@
 ---
 title: Development Phases
-updated: 2026-10-17
+updated: 2026-10-18
 tags: [green-oak, roadmap]
 ---
 
@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-17: P8–P15 และส่วนต่อ P16–P18 เสร็จ — รอผู้ใช้ตรวจ Fan และ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
+> **สถานะ 2026-10-18: P8–P15 และส่วนต่อ P16–P19 เสร็จ — รอผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -185,7 +185,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P15 และส่วนต่อ P16–P18 เสร็จ; **หยุดให้ผู้ใช้ตรวจ Fan และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
+- P8–P15 และส่วนต่อ P16–P19 เสร็จ; **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
 
 ---
 
@@ -220,6 +220,16 @@ tags: [green-oak, roadmap]
 - [x] ตรวจ Browser ใกล้/ไกล High/Low และ ON/OFF; tests/typecheck/build, docs และ commit `phase(P18): ...`
 
 - **ผลตรวจ:** AC-32 ผ่าน; tests 160/160 (24 files), typecheck และ production build ผ่าน; Fan ON/OFF, ลูกศรลม, การคลิก M100, มุมหน้า/หลังและ High/Low ผ่านบน Server ทดสอบแยกพอร์ต 3306; แก้ error จาก Canvas remount ตอนสลับ Graphics ขณะมีป้าย โดยคง Canvas/กล้องและลด DPR/เงา/รายละเอียดแทน; Lab ผู้ใช้ไม่ถูก Reset
+
+## P19 — Workspace Layout & Utility Equipment ✅
+
+- [x] จอกว้างเปิด Sensors/Plant ซ้าย, Actuators ขวา และกราฟขวาล่างพร้อมกันได้; ปิด/เปิดจาก Dock และขยายอ่านได้ จอเล็กใช้ Dialog
+- [x] Humidifier ตัวถังขาว/ฐานดำและละอองนุ่มคล้ายควัน ตาม Server command; Low ยังเห็นละออง
+- [x] ชุดถังสำรอง/Water Refill Pump/Flow Sensor เชื่อมด้วยท่อ, Air Pump ตัวถังดำ, Power Meter มีหน้าจอค่า W จาก Server; คลิกอุปกรณ์เดิมได้
+- [x] ตรวจ Browser จอกว้าง/แคบ, Panels, เลือกต้น, ON/OFF/Low และค่าจาก Server; tests/typecheck/build, docs และ commit `phase(P19): ...`
+- ขอบเขต: ส่วนต่อ M2 ตามภาพผู้ใช้ ไม่เปลี่ยน Simulation/PLC mapping; ถังสำรองเป็นภาพประกอบ ไม่อ้างว่าจำลองปริมาณน้ำสำรอง; Air Pump ไม่บังคับ always ON นอก Fail-safe
+
+- **ผลตรวจ:** AC-33 ผ่าน; tests 160/160 (24 files), typecheck และ production build ผ่าน; Browser 1440×900, 1280×720 และ 390×844 ตรวจ Toggle/Expand/Escape, Plant 3/Chart คงค่า, หมอก ON/OFF/Low/Pause, อุปกรณ์ 4 จุดและค่า Power Meter ตรง Snapshot; ไม่มี Console error; หยุดรอผู้ใช้ตรวจรับ P19
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 

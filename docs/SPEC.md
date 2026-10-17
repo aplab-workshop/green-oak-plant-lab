@@ -48,7 +48,7 @@ tags: [green-oak, spec]
 | Milestone | เนื้อหา | สถานะ |
 |---|---|---|
 | **M1** Functional 3D Virtual Plant | Web App, 3D DWC 6 ต้น, Sensor Dashboard, Mock Actuator, Water Balance, Water Shortage Behavior, ทำงานโดยไม่มี PLC | ✅ เสร็จ 2026-10-16 |
-| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P15 และส่วนต่อ P16–P18 เสร็จ; รอตรวจรับ** |
+| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P15 และส่วนต่อ P16–P19 เสร็จ; รอตรวจรับ** |
 | M3 One Real FX5U | SLMP 3E Gateway, Communication Monitor, PLC-in-the-Loop กับเครื่องจริง 1 เครื่อง | |
 | M4 Multi-Lab Classroom | 10 PLC, 10 Lab, Student/Teacher Dashboard, Concurrent Test | |
 | M5 Advanced | Scenario Management, Data Logging, Performance Evaluation, Real Sensor Architecture | |
@@ -260,3 +260,11 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 | SLMP | Seamless Message Protocol ของ Mitsubishi (MC Protocol) ใช้ 3E Frame |
 | Fail-safe | สถานะปลอดภัยเมื่อสื่อสารหลุด |
 | Fixed Time-Step | เดิน Simulation ทีละ dt คงที่ ไม่ขึ้นกับความเร็วเครื่อง |
+
+### 8.3 P19 — Workspace Layout & Utility Equipment
+
+- Desktop (≥1100 px): แผง Sensors/Plant ซ้าย, Actuators ขวา, Trends ขวาล่าง เปิดพร้อมกันโดยยังหมุน/คลิกฉากกลางได้; Dock เปิด/ปิดแต่ละแผง, X ปิด, Expand เปิด Dialog อ่านรายละเอียด; Scenario/Timeline/Score เปิด Dialog ตามเดิม
+- จอแคบใช้ Dialog ทีละแผงและคืน Focus เมื่อปิด; คง Controls, คะแนน/Game Over และ Server data เดิม
+- Humidifier มีละอองขอบนุ่มคล้ายควันตาม M101; ปิดแล้วหยุดปล่อย/จางหาย, Low ลดจำนวนละออง; เมื่อ Pause รูปลักษณ์ละอองหยุดเดินตามเวลาจำลอง
+- Water Refill Pump (M102), Flow Sensor (D107), Air Pump (M105), Power Meter (D108) ปรับรูปลักษณ์และตำแหน่งให้เห็นชัด มีท่อ/สายเชื่อมและคลิกได้; Meter แสดง W จริงจาก Snapshot ไม่สร้าง kWh หรือปริมาณน้ำสำรองจำลองเพิ่ม
+- [x] AC-33: Desktop เปิด/ปิด/ขยาย 4 แผงได้พร้อมกันและยังเลือกต้น/อุปกรณ์ได้; Mobile ไม่มีแผงทับฉากจนใช้ไม่ได้; Humidifier ON/OFF/Pause/Low ถูกต้อง; Utility devices คลิกข้อมูลตรง PLC และ Meter W ตรง Server; tests/typecheck/build และ Browser ผ่าน

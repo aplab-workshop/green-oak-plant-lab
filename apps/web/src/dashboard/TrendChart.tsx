@@ -49,13 +49,15 @@ const CHARTS: ChartDef[] = [
   ] },
 ];
 
-export function TrendChart() {
+export function TrendChart({ selectedChart, onChartChange }: { selectedChart?: string; onChartChange?: (id: string) => void } = {}) {
   const history = useLabStore((s) => s.history);
   const plantId = useLabStore((s) => s.selectedPlantId);
   const hours = useLabStore((s) => s.timelineHours);
   const setHours = useLabStore((s) => s.setTimelineHours);
   const endS = useLabStore((s) => s.snapshot?.simTimeS ?? 0);
-  const [chartId, setChartId] = useState('growth');
+  const [localChart, setLocalChart] = useState('growth');
+  const chartId = selectedChart ?? localChart;
+  const setChartId = onChartChange ?? setLocalChart;
   const chart = CHARTS.find((c) => c.id === chartId) ?? CHARTS[0]!;
   const data = useMemo(() => historyForPlant(history, plantId, endS, hours), [history, plantId, endS, hours]);
   const hasData = data.length >= 2 && data.some((row) => chart.series.some((s) => row[s.key] !== null));

@@ -105,25 +105,6 @@ export function Sensors() {
         </Clickable>
       </group>
 
-      {/* Flow sensor บนท่อ Refill */}
-      <Clickable device={{ kind: 'sensor', key: 'flowLpm' }} position={[-0.03, 0.15, -0.345]} labelOffset={[0, 0.04, 0]}>
-        <mesh rotation={[0.1, 0, 0]}>
-          <cylinderGeometry args={[0.011, 0.011, 0.03, 12]} />
-          <meshStandardMaterial color="#1d4ed8" />
-        </mesh>
-      </Clickable>
-
-      {/* Power meter ปลั๊กพ่วง */}
-      <Clickable device={{ kind: 'sensor', key: 'powerW' }} position={[-0.25, -0.187, 0.36]} labelOffset={[0, 0.05, 0]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.16, 0.024, 0.05]} />
-          <meshStandardMaterial color="#f8fafc" />
-        </mesh>
-        <mesh position={[-0.055, 0.0125, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.035, 0.02]} />
-          <meshStandardMaterial color="#064e3b" emissive="#10b981" emissiveIntensity={0.6} />
-        </mesh>
-      </Clickable>
     </group>
   );
 }

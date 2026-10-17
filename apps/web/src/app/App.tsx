@@ -13,6 +13,7 @@ import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 
 type Detail = 'sensors' | 'actuators' | 'plant' | 'scenario' | 'trends' | 'timeline' | 'score';
+const PINNABLE: Detail[] = ['sensors', 'plant', 'actuators', 'trends'];
 const ITEMS: { key: Detail; label: string; icon: ReactNode }[] = [
   { key: 'sensors', label: 'Sensors', icon: <Activity /> },
   { key: 'actuators', label: 'ควบคุม', icon: <SlidersHorizontal /> },
@@ -67,6 +68,15 @@ export function App() {
   const selected = useLabStore((s) => s.selectedPlantId);
   const error = useLabStore((s) => s.commandError);
   const [detail, setDetail] = useState<Detail | null>(null);
+  const [wide, setWide] = useState(() => window.matchMedia('(min-width: 1100px)').matches);
+  const [panels, setPanels] = useState<Detail[]>(PINNABLE);
+  const [chart, setChart] = useState('growth');
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 1100px)');
+    const update = () => setWide(query.matches);
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
   const [seenLoss, setSeenLoss] = useState('');
   const [resetting, setResetting] = useState(false);
   const game = snap?.game;
@@ -76,6 +86,28 @@ export function App() {
   const showLoss = lost && seenLoss !== round;
   const closeDetail = () => setDetail(null);
   const open = (key: Detail) => setDetail(key);
+  const toggle = (key: Detail) => {
+    if (!wide || !PINNABLE.includes(key)) return open(key);
+    setPanels((current) => current.includes(key) ? current.filter((p) => p !== key) : [...current, key]);
+  };
+  const content = (key: Detail) => {
+    switch (key) {
+      case 'sensors': return <SensorPanel />;
+      case 'actuators': return <ActuatorPanel />;
+      case 'plant': return <PlantDetail />;
+      case 'scenario': return <ScenarioPanel />;
+      case 'trends': return <TrendChart selectedChart={chart} onChartChange={setChart} />;
+      case 'timeline': return <EventLog />;
+      case 'score': return <ScoreDetail />;
+    }
+  };
+  const pinned = (key: Detail) => panels.includes(key) && <aside className={`workspace-panel workspace-${key}`} aria-label={`แผง${ITEMS.find((i) => i.key === key)!.label}`}>
+    <header className="workspace-heading"><strong>{ITEMS.find((i) => i.key === key)!.label}</strong><div>
+      <button aria-label={`ขยายแผง${key}`} title="ขยายรายละเอียด" onClick={() => open(key)}><Maximize2 size={14} /></button>
+      <button aria-label={`ปิดแผง${key}`} title="ปิดแผง" onClick={() => toggle(key)}><X size={15} /></button>
+    </div></header>
+    <div className="workspace-content">{detail !== key && content(key)}</div>
+  </aside>;
   return <div className="game-app">
     <Header />
     <main className="game-main">
@@ -84,7 +116,7 @@ export function App() {
         <SimControls />
       </div>
       <div className="garden-stage">
-        <PlantView />
+        <div className="scene-window"><PlantView /></div>
         <div className="garden-hud">
           <button className="hud-card score-card" onClick={() => open('score')} aria-label="ขยายคะแนนการดูแล">
             <span className="flex items-center justify-between text-xs text-emerald-800"><span className="flex items-center gap-2"><Trophy size={16} className="text-amber-500" /> CARE SCORE</span><Maximize2 size={13} /></span>
@@ -106,9 +138,11 @@ export function App() {
             <span><span className="block text-sm font-semibold">Plant {plant?.id ?? '—'} {plant && game?.deadPlantIds.includes(plant.id) ? '· ตายแล้ว' : ''}</span><span className="text-xs text-slate-500">Health {plant?.health.toFixed(0) ?? '—'}% · {plant?.biomassG.toFixed(1) ?? '—'} g</span></span><ChevronRight size={18} />
           </button>
         </aside>
+        {wide && <><div className="workspace-left">{pinned('sensors')}{pinned('plant')}</div>
+          <div className="workspace-right">{pinned('actuators')}</div>{pinned('trends')}</>}
         {lost && <button className="loss-banner" onClick={() => setSeenLoss('')}>Game Over · ต้นไม้ตายหมด — ดูผลรอบนี้</button>}
         <nav className="garden-dock" aria-label="รายละเอียดสวน">
-          {ITEMS.map((item) => <button key={item.key} onClick={() => open(item.key)} aria-label={`เปิด${item.label}`}>
+          {ITEMS.map((item) => <button key={item.key} onClick={() => toggle(item.key)} aria-pressed={wide && panels.includes(item.key)} aria-label={`เปิด${item.label}`}>
             {item.icon}<span>{item.label}</span>
           </button>)}
         </nav>
@@ -118,9 +152,7 @@ export function App() {
       <footer className="px-3 py-1 text-[10px] text-slate-500">Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ</footer>
     </main>
     {detail && !showLoss && <DetailDialog title={detail === 'score' ? 'คะแนนการดูแล' : ITEMS.find((x) => x.key === detail)!.label} close={closeDetail}>
-      {detail === 'sensors' && <SensorPanel />}{detail === 'actuators' && <ActuatorPanel />}
-      {detail === 'plant' && <PlantDetail />}{detail === 'scenario' && <ScenarioPanel />}
-      {detail === 'trends' && <TrendChart />}{detail === 'timeline' && <EventLog />}{detail === 'score' && <ScoreDetail />}
+      {content(detail)}
     </DetailDialog>}
     {showLoss && <DetailDialog title="Game Over — ต้นไม้ตายหมด" close={() => setSeenLoss(round)}>
       <div className="p-6 text-center"><Sprout className="mx-auto mb-3 text-rose-500" size={48} />

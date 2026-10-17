@@ -661,3 +661,15 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - ระหว่างตรวจพบ `removeChild` error เมื่อ Canvas remount ขณะมี Html labels; คง Canvas เมื่อสลับ High/Low เพื่อรักษากล้อง/ป้าย โดย Low ยังลด DPR, เงาและรายละเอียด Geometry แต่คง antialias/WebGL power preference ของ Canvas เดิม
 - Browser บน QA Server แยก 3306 ตรวจหน้า/หลัง ระยะใกล้/ไกล การคลิก M100, OFF → ON → OFF และ High/Low; หลังแก้ไม่มี console error ใหม่ในการสลับ Graphics ขณะเลือก Fan; ปิด QA Server หลังตรวจ ไม่ Reset หรือเปลี่ยน PLC ของ Lab ผู้ใช้
 - `npm test` รอบแรกที่รันพร้อม Build มี 2 timeouts (5000 ms); รันแยกผ่าน 160/160 โดยไม่เปลี่ยน Test หรือ Timeout; typecheck และ production build ผ่าน (ยังมี chunk-size warning เดิม)
+
+### 11.17 Implementation Notes (P19 — Workspace & Utility Equipment)
+
+- Desktop ≥1100 px เปิด Sensors/Plant ทางซ้าย, Actuators ทางขวาและ Trends ขวาล่าง; Dock เป็น Toggle ของ 4 แผงและแสดง Active state, ปุ่ม Expand เปิด native Dialog เดิม; จอแคบเปิด Dialog ทีละแผง; แผงเลื่อนข้อมูลได้โดยไม่บัง Controls ของฉากทั้งหมด
+- ประเภทกราฟเก็บที่ App และส่งให้ TrendChart เพื่อคง Chart/ต้นที่เลือกเมื่อขยาย ย่อหรือปิดเปิดแผง; ไม่เปลี่ยน History/คะแนน/Game Over หรือ Command API
+- `UtilityEquipment.tsx`: ชุดถังสำรองฝาขาว/น้ำสีฟ้า, Pump สีดำมีครีบ Motor/ฐานยึด, Flow Sensor บนท่อสีน้ำเงิน, Air Pump ตัวถังมุมมนมีช่องระบายและขารอง, Power Meter มีปุ่ม/สายและ CanvasTexture ที่แสดง `snapshot.sensors.powerW` เป็น W; Texture/Geometry Dispose เมื่อเลิกใช้
+- ย้ายอุปกรณ์ไปด้านหน้าขวาและวางมิเตอร์พ้นเสาบัง; Flow Sensor/Power Meter เดิมใน Sensors.tsx ถูกย้ายมาอยู่ในชุดเดียวกัน ไม่เพิ่ม PLC address; Reservoir เป็นภาพประกอบระดับคงที่ ไม่ได้คำนวณน้ำสำรอง
+- Humidifier ตัวถังขาวยึดฐานดำมีหัวจ่ายด้านล่าง; หมอกเป็น Soft point sprites ขอบ Gaussian/fade (High 72 / Low 26) ไม่มี Asset ภายนอก; Phase ใช้ simTimeS จึงหยุดเมื่อ Pause, intensity ผ่อนตาม M101 และหายเมื่อ OFF; ใช้ Shader uniforms จาก Material จริงเพื่อให้ค่า opacity/viewport อัปเดต
+- Refill stream อ่าน M102 และ waterHeightCm; Air Pump อ่าน M105 ผ่านไฟสถานะและฟองเดิมของ Tank; ข้อความ always ON ในภาพอ้างอิงไม่ถูกใช้บังคับคำสั่งใหม่
+- Browser บน QA Server 3306: 1440×900, 1280×720, 390×844; เปิด/ปิด/ขยาย, Escape, Plant 3 และ Water & Stress คงหลังขยาย, กราฟมีข้อมูล, Humidifier/Refill/Air ON/OFF, Low; คลิกอุปกรณ์ตรง D107/M102/M105/D108, Meter แสดง 48 W ตรง Snapshot และหลัง Resume เปลี่ยนเป็น 25 W; ค่า Sensor ขณะ Pause ยังคงค่ารอบ Model ล่าสุดตามระบบเดิม
+- ไม่มี Console error ระหว่างตรวจ; Build ยังมี chunk-size warning เดิม; ไม่แก้ sim-core, Server หรือ Shared และไม่ Reset Lab ผู้ใช้
+- Final regression: 160/160 tests (24 files), typecheck และ production build ผ่าน
