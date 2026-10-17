@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-18: P8–P15 และส่วนต่อ P16–P19 เสร็จ — รอผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
+> **สถานะ 2026-10-18: P8–P15 และส่วนต่อ P16–P20 เสร็จ (P21–P22 Garden Game ยังไม่เริ่ม) — รอผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -185,7 +185,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P15 และส่วนต่อ P16–P19 เสร็จ; **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
+- P8–P15 และส่วนต่อ P16–P20 เสร็จ; ถัดไป P21 Game Screens → P22 Care Guide; **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
 
 ---
 
@@ -231,6 +231,36 @@ tags: [green-oak, roadmap]
 
 - **ผลตรวจ:** AC-33 ผ่าน; tests 160/160 (24 files), typecheck และ production build ผ่าน; Browser 1440×900, 1280×720 และ 390×844 ตรวจ Toggle/Expand/Escape, Plant 3/Chart คงค่า, หมอก ON/OFF/Low/Pause, อุปกรณ์ 4 จุดและค่า Power Meter ตรง Snapshot; ไม่มี Console error; หยุดรอผู้ใช้ตรวจรับ P19
 - **ตรวจรัน 2026-10-18 (หลัง commit P19):** `npm run dev` ขึ้นครบ — Server `http://127.0.0.1:3001` (lab01, Mock PLC: auto) และ Web `http://localhost:5173` ตอบ HTTP 200; tests 160/160 (24 files) และ typecheck ผ่านซ้ำ; รอบนี้ไม่ได้ตรวจภาพใน Browser (Chrome extension ไม่เชื่อมต่อ) — ยังรอผู้ใช้ตรวจรับ P16–P19 ก่อน tag `m2`
+
+## P20–P22 — Garden Game Mode (ส่วนต่อ M2 ตามคำสั่งผู้ใช้)
+
+> **ผู้ใช้อนุมัติ 2026-10-18:** Speed เพิ่ม 1440x และ 3600x; ชนะเมื่อต้นที่รอดทุกต้นถึง 100 g (มีต้นตายระหว่างทางยังชนะได้แต่คะแนนลด); Auto ยังเปิดใช้ใน UI จนกว่าโปรเจกต์เสร็จ (ค่อยปิดภายหลัง) แต่รอบที่ใช้ Auto ไม่นับ Best
+
+> เป้าหมาย: ทำให้ Lab เล่นเหมือนเกมปลูกผัก เข้าใจง่าย — **Game Start → ดูแลด้วย Manual → เก็บเกี่ยว = ชนะ / ตายหมด = Game Over**, มี Score ระหว่างทางและหน้าแนะนำการดูแล; Auto ใช้เพื่อ Test เท่านั้น
+> ไม่เปลี่ยน Model พืช/สมการ และไม่เปลี่ยน PLC mapping (D100–D112, D120, M100–M105, D200)
+
+### P20 — Game Flow & Win Condition (sim-core + server) ✅
+- [x] SPEC § 4.5: State machine `ready → playing → won | lost`; ก่อนกด Start เวลาจำลองไม่เดิน (paused); Reset กลับ `ready`
+- [x] คำสั่ง WS `startGame` และ `harvest`; Harvest ได้เมื่อต้นที่รอดทุกต้นถึง `harvestAtG` (100 g) และรอดอย่างน้อย 1 ต้น → `won`
+- [x] คะแนนสุดท้ายเมื่อชนะ = Care Score + Harvest Bonus ตามผลผลิต (Biomass รวมของต้นที่รอด) — สูตรและน้ำหนักอยู่ใน `defaultConfig.ts`
+- [x] ถ้ารอบนั้นเคยใช้ Auto → ติดป้าย `testRun` ไม่นับ Best score; รอบเกมเริ่มที่ Manual เสมอ
+- [x] เพิ่ม Speed 1440x และ 3600x เพื่อให้รอบ ~25–30 วันจำลองจบใน ~30 / ~12 นาทีจริง
+- [x] Unit tests: state transitions, harvest guard, bonus, testRun, Reset/Best; `npm test` + typecheck → commit `phase(P20): ...`
+
+- **ผลตรวจ:** AC-34 ผ่าน; tests 169/169 (26 files), typecheck และ build ผ่าน; ตรวจ REST บน Dev server: Lab ใหม่ `ready`/paused/manual, `resume` และ `harvest` → 409, `startGame` → playing, Speed 3600x รับได้; Web มีปุ่มเริ่มปลูก/เก็บเกี่ยวขั้นต่ำ (หน้าจอเต็มทำใน P21); ยังไม่ตรวจภาพใน Browser (Chrome extension ไม่เชื่อมต่อ); หยุดรอผู้ใช้ตรวจ P20
+
+### P21 — Game Screens & Layout (web)
+- [ ] หน้า **Game Start**: ชื่อเกม เป้าหมาย กติกาสั้น ๆ ปุ่ม "เริ่มปลูก" และลิงก์ไปหน้าวิธีดูแล
+- [ ] HUD ระหว่างเล่น: Score, วันที่ปลูก/ความคืบหน้าสู่เก็บเกี่ยว (%), ต้นรอด, ปุ่ม **เก็บเกี่ยว** (เปิดเมื่อพร้อม)
+- [ ] หน้า **Harvest / You Win**: ผลผลิตรายต้น คะแนน เกรด (เช่น A–D) เวลาที่ใช้ และปุ่มเล่นใหม่; ปรับหน้า **Game Over** ให้สอดคล้อง (สาเหตุหลัก + เล่นใหม่)
+- [ ] Actuator panel เริ่มที่ Manual; Auto/Offline ยังกดได้ (ติดป้าย Test) และแสดงป้ายบน HUD ว่ารอบนี้เป็น Test ไม่นับ Best
+- [ ] ตรวจ Browser จอกว้าง/แคบ; tests/typecheck/build → commit `phase(P21): ...`
+
+### P22 — Care Guide & Live Hints
+- [ ] หน้า **วิธีดูแลผัก (Care Guide)**: ค่าที่ต้องดู (Water Level, EC, pH, Air Temp, RH/VPD, PPFD/DLI, Water Temp/O₂) พร้อมช่วงที่เหมาะสมจาก Config และตาราง "ถ้าเกิดแบบนี้ → ปรับอะไร" (เช่น น้ำต่ำ → Refill Pump, EC ต่ำ → Nutrient A+B, ร้อน → Fan, RH ต่ำ → Humidifier)
+- [ ] **Live Hints** ระหว่างเล่น: การ์ดเตือนเมื่อค่าออกนอกช่วงหรือ Stress สูง พร้อมคำแนะนำอุปกรณ์ที่ควรกด (อ่านจาก Snapshot ของ Server, ไม่คำนวณพืชใน Web)
+- [ ] เปิด Guide ได้จากหน้า Start, HUD และหน้า Game Over
+- [ ] tests (กฎ Hint) + typecheck + build, ตรวจ Browser, อัปเดต SPEC/ARCHITECTURE/M2-ACCEPTANCE → commit `phase(P22): ...`
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 

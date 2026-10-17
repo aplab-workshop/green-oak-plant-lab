@@ -26,6 +26,8 @@ export interface LabSessionOptions {
   sensorNoise?: boolean;
   /** นาฬิกาเวลาจริง (inject ได้สำหรับ Test) */
   now?: () => number;
+  /** true = ข้ามหน้า Ready และเริ่มรอบทันทีทุกครั้งที่ Reset (ใช้ใน Test/สคริปต์) */
+  autoStart?: boolean;
 }
 
 export class LabCommandError extends Error {
@@ -72,9 +74,11 @@ export class LabSession {
   private scenario: Scenario | null = null;
   private lastLagLogAt = -Infinity;
   private readonly bestByScenario = new Map<string, CareRecord>();
+  private readonly autoStart: boolean;
 
   private saveRecord(): void {
     const game = this.sim.game;
+    if (game.testRun) return;
     const key = this.scenario?.id ?? 'free';
     const best = this.bestByScenario.get(key);
     if (game.elapsedS >= this.sim.cfg.game.recordMinS && (!best || game.score > best.score)) {
@@ -87,6 +91,7 @@ export class LabSession {
     this.adapter = opts.adapter;
     this.now = opts.now ?? Date.now;
     this.commandTimeoutMs = opts.commandTimeoutMs ?? 3000;
+    this.autoStart = opts.autoStart ?? false;
     this.sim = new Simulation(opts.sim);
     this.clock = new SimClock({
       startS: this.sim.startTimeS,
@@ -96,11 +101,25 @@ export class LabSession {
     this.provider = new SimulatedSensorProvider(this.sim, opts.sensorNoise ?? true);
     this.lastSensors = this.provider.read();
     this.history.maybeSample(this.sim);
+    this.enterRound();
+  }
+
+  /** รอบใหม่: autoStart เริ่มทันที มิฉะนั้นรอ startGame โดยหยุดเวลาไว้ (SPEC § 4.5) */
+  private enterRound(): void {
+    if (this.autoStart) {
+      this.sim.startGame();
+      this.clock.resume();
+    } else this.clock.pause();
+  }
+
+  private get usingAuto(): boolean {
+    return this.adapter instanceof MockPlcAdapter && this.adapter.mode === 'auto';
   }
 
   /** เดินเวลาจำลองตามเวลาจริงที่ผ่านไป */
   tick(realElapsedMs: number): void {
     this.updateCommandState();
+    if (this.usingAuto) this.sim.markTestRun();
     const cmd = this.applied;
     const result = this.clock.advance(realElapsedMs, (dt) => {
       this.sim.step(dt, cmd);
@@ -110,8 +129,12 @@ export class LabSession {
       this.lastLagLogAt = this.now();
       this.log('sim.lagged', 'warning', 'Server คำนวณไม่ทัน เวลาจำลองช้ากว่าที่ตั้งไว้');
     }
+    this.drainSimEvents();
+  }
+
+  private drainSimEvents(): void {
     for (const e of this.sim.drainEvents()) {
-      if (e.kind === 'game.over') this.saveRecord();
+      if (e.kind === 'game.over' || e.kind === 'game.won') this.saveRecord();
       this.events.add({ at: this.now(), ...e });
     }
   }
@@ -206,9 +229,24 @@ export class LabSession {
         this.clock.pause();
         this.log('sim.pause', 'info', 'หยุด Simulation ชั่วคราว');
         return;
-      case 'resume':
+      case 'resume': {
+        const status = this.sim.game.status;
+        if (status === 'ready') throw new LabCommandError('กด Start เพื่อเริ่มรอบก่อน', 409);
+        if (status === 'won') throw new LabCommandError('เก็บเกี่ยวแล้ว — Reset เพื่อเริ่มรอบใหม่', 409);
         this.clock.resume();
         this.log('sim.resume', 'info', 'เดิน Simulation ต่อ');
+        return;
+      }
+      case 'startGame':
+        if (!this.sim.startGame()) throw new LabCommandError('เริ่มได้เฉพาะรอบที่ยังไม่เริ่ม — Reset เพื่อเริ่มรอบใหม่', 409);
+        if (this.usingAuto) this.sim.markTestRun();
+        this.clock.resume();
+        this.log('game.start', 'info', 'เริ่มปลูก — ดูแลผักให้โตจนเก็บเกี่ยวได้');
+        return;
+      case 'harvest':
+        if (!this.sim.harvest()) throw new LabCommandError('ยังเก็บเกี่ยวไม่ได้ — ต้นที่รอดทุกต้นต้องโตถึงน้ำหนักเก็บเกี่ยว', 409);
+        this.clock.pause();
+        this.drainSimEvents();
         return;
       case 'reset':
         this.reset();
@@ -253,6 +291,7 @@ export class LabSession {
     this.sim.drainEvents();
     this.lastSensors = this.provider.read();
     this.history.maybeSample(this.sim);
+    this.enterRound();
     this.log('lab.reset', 'info', this.scenario ? `Reset Lab และเริ่ม Scenario: ${this.scenario.title}` : 'Reset Lab สู่สภาวะเริ่มต้น');
   }
 

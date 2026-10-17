@@ -117,7 +117,7 @@ npm run dev
 | `SERVER_HOST` | `127.0.0.1` | `0.0.0.0` = เปิดให้เครื่องใน LAN เข้าได้ |
 | `SERVER_PORT` | `3001` | พอร์ตของ Server |
 | `LAB_COUNT` | `1` | จำนวน Lab (แต่ละ Lab แยกอิสระ) |
-| `MOCK_PLC_MODE` | `auto` | โหมดเริ่มต้นของ Mock PLC: `auto` / `manual` / `offline` |
+| `MOCK_PLC_MODE` | `manual` | โหมดเริ่มต้นของ Mock PLC: `manual` (ผู้เล่น) / `auto` (Test เท่านั้น, ไม่นับ Best) / `offline` |
 | `SIM_TICK_MS` | `100` | รอบการเดิน Simulation (ms เวลาจริง) |
 | `PLC_POLL_MS` | `500` | รอบการสื่อสารกับ PLC |
 | `PLC_COMMAND_TIMEOUT_MS` | `3000` | ไม่ได้รับคำสั่งนานเกินนี้ → Fail-safe |

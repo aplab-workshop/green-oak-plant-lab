@@ -1,4 +1,4 @@
-import { Clock, Pause, Play, RotateCcw } from 'lucide-react';
+import { Clock, Pause, Play, RotateCcw, Sprout } from 'lucide-react';
 import { SPEED_VALUES } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
@@ -7,7 +7,7 @@ import { formatClock } from '../lib/format';
 export function SimControls() {
   const snap = useLabStore((s) => s.snapshot);
   if (!snap) return null;
-  const { sim, speed, paused, plc } = snap;
+  const { sim, speed, paused, plc, game } = snap;
   const timerWarning = speed > 1 && plc.kind === 'slmp';
 
   return (
@@ -37,14 +37,21 @@ export function SimControls() {
         ))}
       </div>
 
-      <button
+      {game.status === 'ready' ? <button
         type="button"
+        onClick={() => void sendCommand({ type: 'startGame' })}
+        className="flex items-center gap-1 rounded-md bg-emerald-700 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-800"
+      >
+        <Sprout className="h-3.5 w-3.5" /> เริ่มปลูก
+      </button> : <button
+        type="button"
+        disabled={game.status === 'won'}
         onClick={() => void sendCommand({ type: paused ? 'resume' : 'pause' })}
-        className="flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+        className="flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
       >
         {paused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
         {paused ? 'Resume' : 'Pause'}
-      </button>
+      </button>}
 
       <button
         type="button"

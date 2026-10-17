@@ -71,9 +71,20 @@ export interface CareProgress {
   growthProgress: number;
   deadPlantIds: number[];
   totalPlants: number;
-  status: 'playing' | 'lost';
+  /** ready = รอกด Start, playing = กำลังดูแล, won = เก็บเกี่ยวแล้ว, lost = ตายครบ (SPEC § 4.5) */
+  status: GameStatus;
   endedAtS: number | null;
+  /** ต้นที่รอดทุกต้นถึง harvestAtG และรอดอย่างน้อย 1 ต้น */
+  canHarvest: boolean;
+  /** โบนัสเก็บเกี่ยว (points) — 0 จนกว่าจะชนะ */
+  harvestBonus: number;
+  /** Biomass รวมของต้นที่รอด ณ ตอนเก็บเกี่ยว (g) */
+  yieldG: number | null;
+  /** รอบนี้เคยใช้ Mock PLC Auto ขณะเล่น → เป็นรอบ Test ไม่นับ Best */
+  testRun: boolean;
 }
+
+export type GameStatus = 'ready' | 'playing' | 'won' | 'lost';
 
 export interface CareRecord { score: number; elapsedS: number }
 
@@ -109,16 +120,18 @@ export interface LabSnapshot {
   disturbance: { leakLph: number };
 }
 
-export const SPEED_VALUES = [1, 60, 360] as const;
+export const SPEED_VALUES = [1, 60, 360, 1440, 3600] as const;
 
 const ActuatorBitKey = z.enum(['fan', 'humidifier', 'refillPump', 'nutrientA', 'nutrientB', 'airPump']);
 
 /** คำสั่งที่ Client ส่งมาที่ POST /api/labs/:labId/commands */
 export const LabCommand = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('setSpeed'), speed: z.union([z.literal(1), z.literal(60), z.literal(360)]) }),
+  z.object({ type: z.literal('setSpeed'), speed: z.union([z.literal(1), z.literal(60), z.literal(360), z.literal(1440), z.literal(3600)]) }),
   z.object({ type: z.literal('pause') }),
   z.object({ type: z.literal('resume') }),
   z.object({ type: z.literal('reset') }),
+  z.object({ type: z.literal('startGame') }),
+  z.object({ type: z.literal('harvest') }),
   z.object({ type: z.literal('setPlcMode'), mode: z.enum(['manual', 'auto', 'offline']) }),
   z.object({ type: z.literal('setManualBit'), key: ActuatorBitKey, value: z.boolean() }),
   z.object({ type: z.literal('setManualLed'), value: z.number().int().min(0).max(100) }),

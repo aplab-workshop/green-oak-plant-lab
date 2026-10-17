@@ -9,6 +9,7 @@ describe('Care score and permanent death — P17', () => {
     const cfg = makeConfig();
     const plants = [createPlant(1, 0, 5, 0, cfg), createPlant(2, 1, 5, 0, cfg)];
     const good = new CareGame(plants, cfg), poor = new CareGame(plants, cfg);
+    good.start(); poor.start();
     expect(good.snapshot().score).toBe(0);
     const mature = plants.map((p) => ({ ...p, biomassG: 100 }));
     good.step(mature, 3600, 3600);
@@ -30,7 +31,7 @@ describe('Care score and permanent death — P17', () => {
 
   it('uses simulated duration when averaging health', () => {
     const cfg = makeConfig(); const p = createPlant(1, 0, 5, 0, cfg);
-    const game = new CareGame([p], cfg);
+    const game = new CareGame([p], cfg); game.start();
     game.step([p], 10, 10);
     game.step([{ ...p, health: 50 }], 30, 40);
     expect(game.snapshot().averageHealth).toBe(62.5);
@@ -51,7 +52,7 @@ describe('Care score and permanent death — P17', () => {
   it('dry-tank simulation reaches defeat once, while healthy control scores higher; reset restores plants', () => {
     const cfg = makeConfig({ plant: { initialBiomassSpread: 0 } });
     const dry = new Simulation({ cfg }), healthy = new Simulation({ cfg });
-    dry.setWaterLevelPct(0);
+    dry.setWaterLevelPct(0); dry.startGame(); healthy.startGame();
     const cmd = { ...OFF, ledPct: 60, fan: true };
     for (let i = 0; i < 36 * 3600; i++) { dry.step(1, cmd); healthy.step(1, cmd); }
     expect(dry.game.status).toBe('lost');
@@ -63,7 +64,7 @@ describe('Care score and permanent death — P17', () => {
     dry.setWaterLevelPct(85); dry.step(3600, cmd);
     expect(dry.game).toEqual(frozen);
     dry.reset();
-    expect(dry.game).toMatchObject({ status: 'playing', score: 0, elapsedS: 0, deadPlantIds: [] });
+    expect(dry.game).toMatchObject({ status: 'ready', score: 0, elapsedS: 0, deadPlantIds: [] });
     expect(dry.plants.every((p) => p.damage === 0)).toBe(true);
   });
 });

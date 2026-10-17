@@ -22,6 +22,7 @@ body {
 .garden-hud { position: absolute; top: 16px; left: 16px; width: 214px; display: grid; gap: 12px; pointer-events: none; }
 .hud-card { border: 1px solid #ffffffcf; border-radius: 20px; background: #fffffff0; box-shadow: 0 6px 24px #23493412; padding: 16px; text-align: left; pointer-events: auto; backdrop-filter: blur(12px); }
 button.hud-card:hover { background: white; box-shadow: 0 8px 26px #23493425; }
+.harvest-card { border-color: #86efac; background: #ecfdf5f2; }
 .sensor-values { display: flex; gap: 16px; font-size: 11px; color: #64748b; }
 .sensor-values b { display: block; font-size: 16px; color: #1e4038; font-variant-numeric: tabular-nums; }
 .sensor-values small { display: block; font-weight: normal; font-size: 9px; }

@@ -29,10 +29,10 @@ export interface TestLab {
   clock: FakeClock;
 }
 
-export function makeLab(labId = 'lab01', mode: MockPlcMode = 'auto', seed = 1, simOptions: SimulationOptions = {}): TestLab {
+export function makeLab(labId = 'lab01', mode: MockPlcMode = 'auto', seed = 1, simOptions: SimulationOptions = {}, autoStart = true): TestLab {
   const clock = new FakeClock();
   const mock = new MockPlcAdapter(mode, clock.now);
-  const lab = new LabSession({ labId, adapter: mock, now: clock.now, sim: { ...simOptions, seed }, sensorNoise: false });
+  const lab = new LabSession({ labId, adapter: mock, now: clock.now, sim: { ...simOptions, seed }, sensorNoise: false, autoStart });
   return { lab, mock, clock };
 }
 

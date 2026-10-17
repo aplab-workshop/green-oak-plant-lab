@@ -103,6 +103,18 @@ tags: [green-oak, spec]
 - Best score เก็บเฉพาะรอบที่จบด้วย Reset/เปลี่ยน Scenario/Game Over และมีเวลาจำลองอย่างน้อย 24 h; เก็บคะแนนพร้อมระยะรอบใน Memory ของ Server แยก Lab และ Scenario (ไม่ใช่ Leaderboard ถาวร); รีเฟรช Browser ไม่ล้างคะแนน Reset เริ่มรอบใหม่แต่คง Best; Server restart ล้างทั้งหมด
 - ไม่เพิ่ม PLC addresses หรือระบบ Login/แข่งขันข้ามผู้ใช้
 
+### 4.5 P20 — Garden Game Flow Contract (2026-10-18)
+
+- สถานะรอบ (`game.status`): `ready → playing → won | lost`; Lab ใหม่/Reset/เปลี่ยน Scenario เริ่มที่ `ready` โดยเวลาจำลองหยุดไว้ (paused) และคำสั่ง `resume` ถูกปฏิเสธ (409) จนกดคำสั่ง `startGame`
+- `startGame` ใช้ได้เฉพาะ `ready` → `playing` และเดินเวลาจำลองต่อ; Speed เปลี่ยนได้ทุกสถานะ
+- **เก็บเกี่ยว (Win):** `game.canHarvest = true` เมื่อมีต้นรอดอย่างน้อย 1 ต้นและต้นที่รอดทุกต้นมี Biomass ≥ `harvestAtG` (100 g); คำสั่ง `harvest` ใช้ได้เฉพาะตอน `playing` และ `canHarvest` (มิฉะนั้น 409) → `won`, เวลาจำลองหยุดและ `resume` ถูกปฏิเสธจน Reset
+- คะแนนสุดท้ายเมื่อชนะ = Care Score (§ 4.4) + Harvest Bonus; `harvestBonus = round(500 × aliveFraction × timeAverageHealth/100)` (ค่าใน Config `game.harvestBonus`); เก็บ `yieldG` = Biomass รวมของต้นที่รอด ณ ตอนเก็บ; คะแนนสูงสุด 1500
+- `lost` คงตาม § 4.4 (ตายครบ, คะแนน 0, Simulation ตรวจต่อได้)
+- **Auto = Test เท่านั้น:** ถ้า Mock PLC อยู่โหมด `auto` ขณะ `playing` แม้ครั้งเดียว → `game.testRun = true` จนจบรอบ; รอบ Test ไม่บันทึก Best; ปุ่ม Auto ยังเปิดใช้ใน UI จนกว่าโปรเจกต์เสร็จ; ค่าเริ่มต้น `MOCK_PLC_MODE` ของ Server เปลี่ยนเป็น `manual`
+- Best บันทึกเมื่อจบรอบด้วย `won` (คะแนนสุดท้าย) หรือ Reset/Scenario/Game Over ตามเงื่อนไข § 4.4 และไม่ใช่ `testRun`
+- Speed ที่รองรับ: 1x / 60x / 360x / 1440x / 3600x (FR-02) — รอบ 25–30 วันจำลองใช้ ~30 / ~12 นาทีจริงที่ 1440x / 3600x; ที่ Speed สูง 1 วินาทีจริง = 24–60 นาทีจำลอง ผู้เล่นควรลด Speed ก่อนสั่ง Refill/Nutrient
+- ไม่เพิ่ม PLC addresses และไม่เปลี่ยนสมการพืช
+
 ## 5. Functional Requirements
 
 รหัส `FR-xx` ใช้อ้างอิงใน Test และ Commit, คอลัมน์ **M** = Milestone ที่ต้องทำเสร็จ
@@ -112,7 +124,7 @@ tags: [green-oak, spec]
 | ID | Requirement | M |
 |---|---|---|
 | FR-01 | Simulation ใช้ **Fixed Time-Step** (ค่าเริ่มต้น `dt = 1 s` เวลาจำลอง) และผลลัพธ์ไม่ขึ้นกับ FPS ของ Browser หรือ Tick Rate ของ Server | M1 |
-| FR-02 | แยก **Real Time** กับ **Simulated Time** และรองรับ Speed 1x / 60x / 360x, Pause, Resume, Reset | M1 |
+| FR-02 | แยก **Real Time** กับ **Simulated Time** และรองรับ Speed 1x / 60x / 360x / 1440x / 3600x (P20), Pause, Resume, Reset | M1 |
 | FR-03 | **Water Mass Balance**: `dV/dt = Q_refill − ΣT_plant − E_evap` และ Volume ต้องอยู่ในช่วง `[0, V_max]` (น้ำเกินถือว่าล้น) | M1 |
 | FR-04 | Refill Pump ON แล้วระดับน้ำเพิ่มขึ้นและ Water Flow > 0 ส่วนปั๊ม OFF แล้ว Flow = 0 | M1 |
 | FR-05 | LED Brightness 0–100% ควบคุม PPFD ของแต่ละต้นตามตำแหน่ง (Position Factor) และ **DLI** สะสมจาก PPFD ตามเวลาจำลอง (Reset ตอนเที่ยงคืนเวลาจำลอง) | M1 |
@@ -267,4 +279,6 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - จอแคบใช้ Dialog ทีละแผงและคืน Focus เมื่อปิด; คง Controls, คะแนน/Game Over และ Server data เดิม
 - Humidifier มีละอองขอบนุ่มคล้ายควันตาม M101; ปิดแล้วหยุดปล่อย/จางหาย, Low ลดจำนวนละออง; เมื่อ Pause รูปลักษณ์ละอองหยุดเดินตามเวลาจำลอง
 - Water Refill Pump (M102), Flow Sensor (D107), Air Pump (M105), Power Meter (D108) ปรับรูปลักษณ์และตำแหน่งให้เห็นชัด มีท่อ/สายเชื่อมและคลิกได้; Meter แสดง W จริงจาก Snapshot ไม่สร้าง kWh หรือปริมาณน้ำสำรองจำลองเพิ่ม
+- [x] AC-34 **P20:** รอบใหม่อยู่ `ready` เวลาไม่เดินจน `startGame`; `harvest` ถูกปฏิเสธก่อนพร้อม และเมื่อต้นที่รอดทุกต้นถึง 100 g → `won` พร้อม Bonus/yield และเวลาหยุด; ใช้ Auto ระหว่างเล่น → `testRun` ไม่นับ Best; Speed 1440x/3600x ใช้ได้; tests/typecheck ผ่าน
+
 - [x] AC-33: Desktop เปิด/ปิด/ขยาย 4 แผงได้พร้อมกันและยังเลือกต้น/อุปกรณ์ได้; Mobile ไม่มีแผงทับฉากจนใช้ไม่ได้; Humidifier ON/OFF/Pause/Low ถูกต้อง; Utility devices คลิกข้อมูลตรง PLC และ Meter W ตรง Server; tests/typecheck/build และ Browser ผ่าน

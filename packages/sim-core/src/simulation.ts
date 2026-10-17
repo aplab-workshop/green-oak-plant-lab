@@ -106,6 +106,26 @@ export class Simulation {
     this.disturbance = { leakLph: 0 };
   }
 
+  /** เริ่มรอบเกม ready → playing (SPEC § 4.5) */
+  startGame(): boolean {
+    return this.care.start();
+  }
+
+  /** เก็บเกี่ยว playing → won เมื่อต้นที่รอดทุกต้นถึง harvestAtG */
+  harvest(): boolean {
+    const ok = this.care.harvest(this._plants, this._simTimeS);
+    if (ok) {
+      const g = this.care.snapshot();
+      this.emit({ kind: 'game.won', severity: 'info', message: `เก็บเกี่ยวสำเร็จ — ผลผลิต ${g.yieldG!.toFixed(0)} g, คะแนน ${g.score} (โบนัส ${g.harvestBonus})` });
+    }
+    return ok;
+  }
+
+  /** ติดป้ายรอบ Test (Auto ถูกใช้ขณะเล่น) */
+  markTestRun(): void {
+    this.care.markTestRun();
+  }
+
   /** ตั้งระดับน้ำ (Initial condition ของ Scenario) โดยคง EC เดิม */
   setWaterLevelPct(pct: number): void {
     const ec = envEc(this._env);

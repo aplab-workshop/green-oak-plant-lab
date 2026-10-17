@@ -5,7 +5,7 @@
  * ตามเวลาจำลองที่ค้างอยู่ โดย dt คงที่เสมอ ผลลัพธ์จึงไม่ขึ้นกับความถี่ของ tick หรือ FPS
  */
 
-export const SIM_SPEEDS = [1, 60, 360] as const;
+export const SIM_SPEEDS = [1, 60, 360, 1440, 3600] as const;
 export type SimSpeed = (typeof SIM_SPEEDS)[number];
 
 export const SECONDS_PER_DAY = 86_400;

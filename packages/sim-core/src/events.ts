@@ -5,6 +5,7 @@ export interface SimEvent {
   simTimeS: number;
   kind:
     | 'game.over'
+    | 'game.won'
     | 'plant.died'
     | 'plant.water_stress'
     | 'plant.water_stress_cleared'

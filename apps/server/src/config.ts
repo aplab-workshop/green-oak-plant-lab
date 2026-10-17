@@ -15,7 +15,7 @@ function num(name: string, fallback: number): number {
 const DEFAULT_WEB_DIST = fileURLToPath(new URL('../../web/dist', import.meta.url));
 
 function mockMode(): MockPlcMode {
-  const raw = process.env.MOCK_PLC_MODE ?? 'auto';
+  const raw = process.env.MOCK_PLC_MODE ?? 'manual';
   if (raw === 'manual' || raw === 'auto' || raw === 'offline') return raw;
   throw new Error(`Invalid MOCK_PLC_MODE: ${raw}`);
 }

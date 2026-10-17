@@ -12,6 +12,8 @@ export interface SimConfig {
     maxScore: number;
     /** ระยะรอบขั้นต่ำเพื่อบันทึก Best (s จำลอง) */
     recordMinS: number;
+    /** โบนัสเก็บเกี่ยวสูงสุด (points) × aliveFraction × สุขภาพเฉลี่ย/100 (P20) */
+    harvestBonus: number;
   };
   time: {
     /** Fixed time-step (s, เวลาจำลอง) */
@@ -217,7 +219,7 @@ export interface SimConfig {
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
-  game: { healthWeight: 0.8, maxScore: 1000, recordMinS: 86_400 },
+  game: { healthWeight: 0.8, maxScore: 1000, recordMinS: 86_400, harvestBonus: 500 },
   time: { dtS: 1, startDay: 14, startHour: 6, maxStepsPerTick: 5000 },
   tank: {
     capacityL: 40,

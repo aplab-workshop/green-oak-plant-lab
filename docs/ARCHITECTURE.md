@@ -673,3 +673,12 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Browser บน QA Server 3306: 1440×900, 1280×720, 390×844; เปิด/ปิด/ขยาย, Escape, Plant 3 และ Water & Stress คงหลังขยาย, กราฟมีข้อมูล, Humidifier/Refill/Air ON/OFF, Low; คลิกอุปกรณ์ตรง D107/M102/M105/D108, Meter แสดง 48 W ตรง Snapshot และหลัง Resume เปลี่ยนเป็น 25 W; ค่า Sensor ขณะ Pause ยังคงค่ารอบ Model ล่าสุดตามระบบเดิม
 - ไม่มี Console error ระหว่างตรวจ; Build ยังมี chunk-size warning เดิม; ไม่แก้ sim-core, Server หรือ Shared และไม่ Reset Lab ผู้ใช้
 - Final regression: 160/160 tests (24 files), typecheck และ production build ผ่าน
+
+### 11.18 Implementation Notes (P20 — Garden Game Flow)
+
+- `CareGame` (`sim-core/src/careGame.ts`) เป็น State machine `ready → playing → won | lost`; `step()` ไม่คิดคะแนนนอก `playing`; `canHarvest` คำนวณทุก step (รอด ≥ 1 ต้น และต้นที่รอดทุกต้น ≥ `plant.harvestAtG`); `harvest()` เพิ่ม `harvestBonus = round(game.harvestBonus × aliveFraction × averageHealth/100)` และบันทึก `yieldG`; `Simulation.startGame()/harvest()/markTestRun()` เป็น API ที่ Server เรียก และ `harvest()` ส่ง Event `game.won`
+- `LabSession.enterRound()` ถูกเรียกตอนสร้างและทุก Reset/Scenario: ถ้าไม่ใช่ `autoStart` จะ `clock.pause()` รอ `startGame`; `resume` ตอบ 409 ระหว่าง `ready`/`won`; `harvest` สำเร็จแล้ว Pause และบันทึก Best ผ่าน `drainSimEvents()`
+- Test run: ทุก `tick()` และตอน `startGame` ถ้า Mock PLC อยู่ `auto` → `sim.markTestRun()` (ติดถาวรจนจบรอบ); `saveRecord()` ข้ามรอบ Test
+- `LabSessionOptions.autoStart` ใช้กับ Test/สคริปต์ที่ต้องการให้เวลาเดินทันที (`apps/server/test/helpers.ts` ตั้งค่าเริ่มต้นเป็น true); Server จริงเริ่มที่ `ready` เสมอ; `MOCK_PLC_MODE` ค่าเริ่มต้นเปลี่ยนเป็น `manual`
+- Speed เพิ่ม 1440x/3600x (`SIM_SPEEDS`, `SPEED_VALUES`, zod) — ที่ Tick 100 ms คือ 144/360 steps ต่อ Tick ต่ำกว่า `maxStepsPerTick` 5000; ข้อจำกัด: PLC poll 500 ms = 12–30 นาทีจำลองต่อรอบ ทำให้ Refill/Nutrient แบบกดเองหยาบมากที่ Speed สูง (แนะนำลด Speed ก่อนสั่ง — จะอธิบายใน Care Guide P22)
+- Web (ขั้นต่ำเพื่อให้เล่นได้ก่อน P21): ปุ่ม "เริ่มปลูก" แทน Resume ตอน `ready`, การ์ด "เก็บเกี่ยว" เมื่อ `canHarvest`, การ์ดผลชนะ, ป้าย TEST; Game Over "ปลูกใหม่" = reset + startGame; หน้า Start/Win/Guide เต็มรูปแบบอยู่ใน P21–P22

@@ -16,7 +16,7 @@ describe('Care score lifecycle — P17', () => {
 
   it('records only eligible completed rounds, keeps best through resets, isolates labs and scenarios', async () => {
     expect(makeConfig().game.recordMinS).toBe(86400);
-    const a = makeLab('lab01', 'auto', 1, { cfg: makeConfig({ game: { recordMinS: 10 } }) });
+    const a = makeLab('lab01', 'manual', 1, { cfg: makeConfig({ game: { recordMinS: 10 } }) });
     const b = makeLab('lab02');
     await a.lab.poll(); await runReal(a, 5000);
     a.lab.reset(); expect(a.lab.snapshot().game.best).toBeNull();

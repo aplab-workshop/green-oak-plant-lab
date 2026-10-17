@@ -50,15 +50,15 @@ function ScoreDetail() {
   return <div className="space-y-5 p-6">
     <div className="rounded-2xl bg-emerald-50 p-6 text-center">
       <Trophy className="mx-auto mb-2 text-amber-500" size={32} />
-      <p className="text-sm text-emerald-800">{game.status === 'lost' ? 'คะแนนสุดท้าย' : 'คะแนนการดูแล'}</p>
-      <p className="text-5xl font-bold text-emerald-900">{game.score}<span className="text-lg font-normal"> / 1,000</span></p>
+      <p className="text-sm text-emerald-800">{game.status === 'lost' || game.status === 'won' ? 'คะแนนสุดท้าย' : 'คะแนนการดูแล'}</p>
+      <p className="text-5xl font-bold text-emerald-900">{game.score}<span className="text-lg font-normal"> / 1,500</span></p>
       <p className="mt-2 text-sm text-slate-600">ดูแลมา {(game.elapsedS / 86400).toFixed(2)} วันจำลอง · รอด {game.totalPlants - game.deadPlantIds.length}/{game.totalPlants} ต้น</p>
     </div>
     <div className="grid grid-cols-2 gap-3 text-sm">
       <p>สุขภาพเฉลี่ยตลอดรอบ <b className="block text-xl">{game.averageHealth.toFixed(1)}%</b></p>
       <p>ความคืบหน้าการเติบโต <b className="block text-xl">{Math.round(game.growthProgress * 100)}%</b></p>
     </div>
-    <p className="text-sm leading-relaxed text-slate-600">คะแนนคิดจากสุขภาพเฉลี่ยตลอดรอบ 80% และการเติบโตสู่ระยะเก็บเกี่ยว 20% แล้วคูณสัดส่วนต้นที่ยังรอด ดูแลให้สุขภาพดีต่อเนื่องและเติบโตจึงได้คะแนนสูง การ Pause ไม่เพิ่มคะแนน</p>
+    <p className="text-sm leading-relaxed text-slate-600">คะแนนคิดจากสุขภาพเฉลี่ยตลอดรอบ 80% และการเติบโตสู่ระยะเก็บเกี่ยว 20% แล้วคูณสัดส่วนต้นที่ยังรอด (เต็ม 1,000) เมื่อเก็บเกี่ยวได้รับโบนัสสูงสุด 500 ตามต้นที่รอดและสุขภาพเฉลี่ย ดูแลให้สุขภาพดีต่อเนื่องและเติบโตจึงได้คะแนนสูง การ Pause ไม่เพิ่มคะแนน</p>
     <p className="rounded-xl bg-slate-50 p-4 text-sm">Best: {game.best ? `${game.best.score} คะแนน · รอบ ${(game.best.elapsedS / 86400).toFixed(2)} วัน` : 'ยังไม่มีรอบที่เข้าเกณฑ์'}<br /><span className="text-xs text-slate-500">บันทึกเมื่อจบรอบที่เล่นอย่างน้อย 24 ชั่วโมงจำลอง แยกตาม Lab/ภารกิจ เก็บจนปิด Server; ควรเทียบรอบที่มีระยะเวลาเท่ากัน</span></p>
   </div>;
 }
@@ -120,9 +120,17 @@ export function App() {
         <div className="garden-hud">
           <button className="hud-card score-card" onClick={() => open('score')} aria-label="ขยายคะแนนการดูแล">
             <span className="flex items-center justify-between text-xs text-emerald-800"><span className="flex items-center gap-2"><Trophy size={16} className="text-amber-500" /> CARE SCORE</span><Maximize2 size={13} /></span>
-            <span className="mt-1 block text-3xl font-bold text-emerald-950">{game && game.elapsedS > 0 ? game.score : '—'} <span className="text-xs font-normal text-slate-500">/ 1,000</span></span>
+            <span className="mt-1 block text-3xl font-bold text-emerald-950">{game && game.elapsedS > 0 ? game.score : '—'} <span className="text-xs font-normal text-slate-500">/ 1,500</span></span>
             <span className="mt-1 block text-xs text-slate-600">{game ? `รอด ${game.totalPlants - game.deadPlantIds.length}/${game.totalPlants} ต้น` : 'รอ Server'} · Best {game?.best?.score ?? '—'}</span>
+            {game?.testRun && <span className="mt-1 block text-[11px] font-semibold text-amber-700">TEST · ใช้ Auto ระหว่างรอบ ไม่นับ Best</span>}
           </button>
+          {game?.canHarvest && <button className="hud-card harvest-card" onClick={() => void sendCommand({ type: 'harvest' })}>
+            <span className="flex items-center gap-2 text-sm font-bold text-emerald-900"><Sprout size={18} /> ผักโตเต็มที่ — เก็บเกี่ยว!</span>
+          </button>}
+          {game?.status === 'won' && <button className="hud-card harvest-card" onClick={() => open('score')}>
+            <span className="block text-sm font-bold text-emerald-900">🎉 เก็บเกี่ยวสำเร็จ · {game.yieldG?.toFixed(0)} g</span>
+            <span className="block text-xs text-slate-600">คะแนน {game.score} (โบนัส +{game.harvestBonus}) · Reset เพื่อเล่นใหม่</span>
+          </button>}
           <button className="hud-card sensor-card" onClick={() => open('sensors')} aria-label="ขยาย Sensors">
             <span className="mb-3 flex items-center justify-between text-xs font-semibold text-slate-500"><span className="flex items-center gap-2"><Droplets size={15} /> สภาพแวดล้อม</span><Maximize2 size={13} /></span>
             <span className="sensor-values">
@@ -164,7 +172,7 @@ export function App() {
           <button disabled={resetting} className="rounded-xl bg-emerald-700 px-5 py-2 text-sm font-semibold text-white disabled:opacity-50" onClick={async () => {
             setResetting(true);
             const ok = await sendCommand({ type: 'reset' });
-            if (ok) { setDetail(null); await sendCommand({ type: 'resume' }); }
+            if (ok) { setDetail(null); await sendCommand({ type: 'startGame' }); }
             setResetting(false);
           }}>{resetting ? 'กำลังเริ่ม…' : 'ปลูกใหม่'}</button>
         </div>{error && <p role="alert" className="mt-3 text-sm text-rose-600">{error}</p>}
