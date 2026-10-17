@@ -604,3 +604,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Healthy reference 30 วันใช้ test เดียวร่วม AC-20/25; Tests ครอบคลุมหลาย Stress, Exposure 1.5/24 h ตามด้วย Recovery 48 h, และ Clock 1x/60x/360x ที่ Command schedule ตาม simulated time เดียวกันให้ Snapshot เท่ากัน
 - ปรับ assertion M1 AC-04 จาก Health >95 เป็น Health ดีขึ้นจากก่อนเติม โดย Water Stress <0.1 และ Damage =0 ยังคงเดิม: Refill 24 L ลงน้ำเดิม 12 L เจือจาง EC จึงมี Nutrient Stress ที่ Health ของ M2 ต้องสะท้อน ไม่ปรับ Model ให้มองข้ามผลนี้
 - Tests 131/131 และ typecheck ผ่าน; ผู้ใช้สั่งให้ดำเนินต่อ P13–P15 โดย commit แยก Phase
+
+### 11.11 Implementation Notes (P13)
+
+- Snapshot เพิ่ม `tank.estimatedOxygen`; History เพิ่ม Oxygen และ PlantHistorySample รายต้นทุก 600 s สูงสุด 2016 จุด เก็บค่าจริงของ Model ไม่ใช่ Sensor noise และคืนสำเนาลึก
+- Stress Events Light/Nutrient/Root ใช้ threshold `cfg.events.stressOn=0.3` / `stressOff=0.15`; Damage Event levels ย้ายเข้า Config; Root Stress ใช้ `1−rootHealth`; ทดสอบหนึ่ง start/clear ต่อ Exposure และไม่ Spam
+- EventLog เพิ่ม capacity เป็น 1000; `runId` เพิ่มเมื่อ clear/reset และใส่ใน Snapshot/Event พร้อม Header `X-Lab-Run-Id` ของ REST History/Events (รูปแบบ body ยังเป็น array) เพื่อให้ P14 ป้องกันข้อมูลย้อนจากรอบเก่า
+- AC-27 ครอบคลุม History 15 วัน, สำเนาที่แก้ต้นฉบับไม่ได้, Lab แยก 24 h, Pause/Reset, REST/WS และ Regression PLC guard/Fail-safe; tests 139/139 และ typecheck ผ่าน

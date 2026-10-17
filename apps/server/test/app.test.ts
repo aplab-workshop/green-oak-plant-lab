@@ -129,4 +129,24 @@ describe('WebSocket', () => {
     );
     expect(msgs.filter((m) => m.type === 'error')).toHaveLength(2);
   });
+
+  it('AC-27: REST/WS preserve oxygen, per-plant history and reset generation', async () => {
+    await post('lab02', { type: 'pause' });
+    await post('lab02', { type: 'reset' });
+    const lab = app.labs.get('lab02')!;
+    const expected = lab.snapshot();
+    const rest = (await app.inject({ method: 'GET', url: '/api/labs/lab02' })).json() as LabSnapshot;
+    expect(rest.tank.estimatedOxygen).toBe(lab.sim.env.estimatedOxygen);
+    expect(rest.plants).toEqual(expected.plants);
+    const history = await app.inject({ method: 'GET', url: '/api/labs/lab02/history' });
+    expect(history.headers['x-lab-run-id']).toBe(String(expected.runId));
+    expect(history.json()[0].plants[0]).toMatchObject({ lightStress: 0, nutrientStress: 0, rootHealth: 1 });
+    const msgs = await wsCollect(
+      (ws) => ws.send(JSON.stringify({ type: 'subscribe', labId: 'lab02' })),
+      (m) => m.some((x) => x.type === 'snapshot'),
+    );
+    const snap = msgs.find((m) => m.type === 'snapshot');
+    expect(snap?.type === 'snapshot' && snap.data.tank).toEqual(expected.tank);
+    expect(snap?.type === 'snapshot' && snap.data.runId).toBe(expected.runId);
+  });
 });

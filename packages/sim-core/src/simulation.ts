@@ -33,15 +33,13 @@ export interface SimulationSnapshot {
   disturbance: Disturbance;
 }
 
-// Threshold ของ Event (มี hysteresis กันข้อความถี่เกินไป)
-const STRESS_ON = 0.3;
-const STRESS_OFF = 0.15;
-const DAMAGE_LEVELS = [0.01, 0.25, 0.5] as const;
-
 interface PlantFlags {
   stressed: boolean;
   wilting: boolean;
   damageLevel: number;
+  light: boolean;
+  nutrient: boolean;
+  root: boolean;
 }
 
 /**
@@ -95,7 +93,7 @@ export class Simulation {
       const variation = 1 + initialBiomassSpread * (2 * growthRng.next() - 1);
       return createPlant(i + 1, i, initialBiomassG * variation, this._simTimeS, cfg);
     });
-    this.flags = this._plants.map(() => ({ stressed: false, wilting: false, damageLevel: 0 }));
+    this.flags = this._plants.map(() => ({ stressed: false, wilting: false, damageLevel: 0, light: false, nutrient: false, root: false }));
     this.rootsExposed = false;
     this.overflowing = false;
     this.empty = false;
@@ -182,7 +180,7 @@ export class Simulation {
     this._plants.forEach((p, i) => {
       const f = this.flags[i]!;
       const name = `Plant ${p.id}`;
-      if (!f.stressed && p.waterStress >= STRESS_ON) {
+      if (!f.stressed && p.waterStress >= cfg.events.stressOn) {
         f.stressed = true;
         this.emit({
           kind: 'plant.water_stress',
@@ -190,7 +188,7 @@ export class Simulation {
           plantId: p.id,
           message: `${name}: เกิด Water stress (รากแช่น้ำ ${Math.round(p.rootSubmerged * 100)}%)`,
         });
-      } else if (f.stressed && p.waterStress <= STRESS_OFF) {
+      } else if (f.stressed && p.waterStress <= cfg.events.stressOff) {
         f.stressed = false;
         this.emit({ kind: 'plant.water_stress_cleared', severity: 'info', plantId: p.id, message: `${name}: Water stress ลดลง ฟื้นตัวแล้ว` });
       }
@@ -199,7 +197,20 @@ export class Simulation {
         this.emit({ kind: 'plant.wilting', severity: 'critical', plantId: p.id, message: `${name}: ใบเหี่ยว เริ่มเกิดความเสียหายถาวร` });
       }
       f.wilting = wilting;
-      const level = DAMAGE_LEVELS.filter((d) => p.damage >= d).length;
+      for (const [key, stress, label] of [
+        ['light', p.lightStress, 'Light'], ['nutrient', p.nutrientStress, 'Nutrient'], ['root', 1 - p.rootHealth, 'Root'],
+      ] as const) {
+        if (!f[key] && stress >= cfg.events.stressOn) {
+          f[key] = true;
+          this.emit({ kind: `plant.${key}_stress`, severity: 'warning', plantId: p.id,
+            message: `${name}: ${label} stress เกินเกณฑ์ (${Math.round(stress * 100)}%)` });
+        } else if (f[key] && stress <= cfg.events.stressOff) {
+          f[key] = false;
+          this.emit({ kind: `plant.${key}_stress_cleared`, severity: 'info', plantId: p.id,
+            message: `${name}: ${label} stress ลดลง (${Math.round(stress * 100)}%)` });
+        }
+      }
+      const level = cfg.events.damageLevels.filter((d) => p.damage >= d).length;
       if (level > f.damageLevel) {
         f.damageLevel = level;
         this.emit({

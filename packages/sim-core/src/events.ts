@@ -6,6 +6,8 @@ export interface SimEvent {
   kind:
     | 'plant.water_stress'
     | 'plant.water_stress_cleared'
+    | `plant.${'light' | 'nutrient' | 'root'}_stress`
+    | `plant.${'light' | 'nutrient' | 'root'}_stress_cleared`
     | 'plant.wilting'
     | 'plant.damage'
     | 'tank.roots_exposed'

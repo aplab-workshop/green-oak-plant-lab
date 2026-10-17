@@ -30,12 +30,15 @@ export class History {
       avgWaterStress: avg((p) => p.waterStress),
       avgHealth: avg((p) => p.health),
       avgBiomassG: avg((p) => p.biomassG),
+      estimatedOxygen: env.estimatedOxygen,
+      plants: plants.map(({ id, biomassG, hydration, waterStress, lightStress, nutrientStress, rootHealth, damage, health }) =>
+        ({ id, biomassG, hydration, waterStress, lightStress, nutrientStress, rootHealth, damage, health })),
     });
     if (this.samples.length > this.capacity) this.samples.splice(0, this.samples.length - this.capacity);
   }
 
   list(): HistorySample[] {
-    return this.samples.slice();
+    return this.samples.map((sample) => ({ ...sample, plants: sample.plants.map((p) => ({ ...p })) }));
   }
 
   clear(): void {

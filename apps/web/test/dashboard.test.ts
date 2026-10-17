@@ -77,7 +77,7 @@ describe('plantVisuals', () => {
 });
 
 describe('store helpers', () => {
-  const ev = (id: number): EventEntry => ({ id, at: 0, simTimeS: 0, kind: 'k', severity: 'info', message: String(id) });
+  const ev = (id: number): EventEntry => ({ id, runId: 0, at: 0, simTimeS: 0, kind: 'k', severity: 'info', message: String(id) });
 
   it('merges events without duplicates in id order', () => {
     expect(mergeEvents([ev(1), ev(2)], [ev(2), ev(4), ev(3)]).map((e) => e.id)).toEqual([1, 2, 3, 4]);

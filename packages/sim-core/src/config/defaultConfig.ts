@@ -132,6 +132,13 @@ export interface SimConfig {
     healthDeclineH: number;
     healthRecoveryH: number;
   };
+  events: {
+    /** Threshold เริ่ม / คลาย Stress Event (ไร้หน่วย, 0 ≤ off < on ≤ 1) */
+    stressOn: number;
+    stressOff: number;
+    /** ระดับ Damage ถาวรที่แจ้ง Event (0–1 เรียงเพิ่ม) */
+    damageLevels: number[];
+  };
   power: {
     ledW: number;
     fanW: number;
@@ -271,6 +278,7 @@ export const DEFAULT_CONFIG: SimConfig = {
     healthDeclineH: 12,
     healthRecoveryH: 6,
   },
+  events: { stressOn: 0.3, stressOff: 0.15, damageLevels: [0.01, 0.25, 0.5] },
   power: { ledW: 120, fanW: 15, humidifierW: 25, refillPumpW: 18, nutrientPumpW: 5, airPumpW: 5 },
   noise: { airTempC: 0.1, rhPct: 0.5, ppfd: 2, waterTempC: 0.05, ph: 0.01, ecMsCm: 0.01, waterLevelPct: 0.2 },
   plant: {

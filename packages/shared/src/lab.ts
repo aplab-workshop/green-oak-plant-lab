@@ -25,6 +25,8 @@ export type EventSeverity = 'info' | 'warning' | 'critical';
 /** รายการใน Event Log ของ Lab */
 export interface EventEntry {
   id: number;
+  /** รอบการทดลอง เพิ่มเมื่อ Reset */
+  runId: number;
   /** เวลาจริง (ms epoch) */
   at: number;
   simTimeS: number;
@@ -35,6 +37,9 @@ export interface EventEntry {
 }
 
 /** ข้อมูลย้อนหลังสำหรับกราฟ (สุ่มเก็บทุก 10 นาทีจำลอง) */
+export type PlantHistorySample = Pick<PlantState,
+  'id' | 'biomassG' | 'hydration' | 'waterStress' | 'lightStress' | 'nutrientStress' | 'rootHealth' | 'damage' | 'health'>;
+
 export interface HistorySample {
   simTimeS: number;
   waterLevelPct: number;
@@ -47,6 +52,9 @@ export interface HistorySample {
   avgWaterStress: number;
   avgHealth: number;
   avgBiomassG: number;
+  /** Estimated Oxygen Status [0,1] ไม่ใช่ DO */
+  estimatedOxygen: number;
+  plants: PlantHistorySample[];
 }
 
 export interface ScenarioInfo {
@@ -58,6 +66,7 @@ export interface ScenarioInfo {
 
 export interface LabSnapshot {
   labId: string;
+  runId: number;
   /** เวลาจริงที่สร้าง Snapshot (ms epoch) */
   at: number;
   simTimeS: number;
@@ -78,6 +87,8 @@ export interface LabSnapshot {
     capacityL: number;
     heightCm: number;
     potBottomCm: number;
+    /** Estimated Oxygen Status [0,1] ไร้หน่วย ไม่ใช่ Sensor DO */
+    estimatedOxygen: number;
   };
   plants: PlantState[];
   scenario: ScenarioInfo | null;

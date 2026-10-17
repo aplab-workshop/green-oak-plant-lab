@@ -264,6 +264,7 @@ export class LabSession {
     const cfg = this.sim.cfg;
     return {
       labId: this.labId,
+      runId: this.events.runId,
       at: this.now(),
       simTimeS: s.simTimeS,
       sim: this.sim.readSimInfo(),
@@ -280,6 +281,7 @@ export class LabSession {
         capacityL: cfg.tank.capacityL,
         heightCm: cfg.tank.heightCm,
         potBottomCm: cfg.tank.potBottomCm,
+        estimatedOxygen: s.env.estimatedOxygen,
       },
       plants: s.plants,
       scenario: this.scenario

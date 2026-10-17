@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-17: P8–P12 เสร็จ — ผู้ใช้อนุมัติทำ P12–P15 ต่อเนื่อง แล้วหยุดก่อนปรับรูปลักษณ์ 3D**
+> **สถานะ 2026-10-17: P8–P13 เสร็จ — ผู้ใช้อนุมัติทำ P12–P15 ต่อเนื่อง แล้วหยุดก่อนปรับรูปลักษณ์ 3D**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -150,13 +150,15 @@ tags: [green-oak, roadmap]
 
 - **ผลตรวจ:** AC-25/26 ผ่าน; tests 131/131 + typecheck ผ่าน; ตรวจ Healthy reference 30 วัน, หลาย Stress และ Recovery 48 h
 
-### P13 — Server Data Flow, Events & History
+### P13 — Server Data Flow, Events & History ✅
 
-- [ ] ส่ง State/Diagnostics ใหม่ผ่าน Shared types และ Snapshot ไป Browser โดย Calculation ยังอยู่ใน `sim-core`
-- [ ] เพิ่ม Event เริ่ม/คลาย Stress แต่ละชนิดพร้อม Hysteresis ป้องกัน Event ซ้ำทุก Step
-- [ ] ขยาย History สำหรับ Growth/Stress รายต้นและ Oxygen ตาม Contract โดยจำกัดจำนวนข้อมูลใน Memory
-- [ ] Integration tests: Sim → LabSession → REST/WS/History, Reset, สลับ/แยก Lab, Pause และ Fail-safe
+- [x] ส่ง State/Diagnostics ใหม่ผ่าน Shared types และ Snapshot ไป Browser โดย Calculation ยังอยู่ใน `sim-core`
+- [x] เพิ่ม Event เริ่ม/คลาย Stress แต่ละชนิดพร้อม Hysteresis ป้องกัน Event ซ้ำทุก Step
+- [x] ขยาย History สำหรับ Growth/Stress รายต้นและ Oxygen ตาม Contract โดยจำกัดจำนวนข้อมูลใน Memory
+- [x] Integration tests: Sim → LabSession → REST/WS/History, Reset, สลับ/แยก Lab, Pause และ Fail-safe
 - **ผ่านเมื่อ:** Snapshot/History ตรงกับ State ของต้นและเวลาจำลองที่บันทึก; Event เกิดเมื่อข้าม Threshold และไม่ Spam; Pause ไม่สร้างความคืบหน้าของ Model/History; Reset ล้างข้อมูลรอบเก่า; Lab ไม่ปะปน; PLC Allowlist และ Fail-safe เดิมยังผ่าน
+
+- **ผลตรวจ:** AC-27 ผ่าน; tests 139/139 + typecheck ผ่าน; History 15 วัน, Lab isolation 24 h, Pause/Reset และ REST/WS
 
 ### P14 — Plant Diagnostics, Timeline, Growth Chart & Curl
 
@@ -178,7 +180,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P12 เสร็จ; งานถัดไป **P13 → P14 → P15** ตามคำสั่งล่าสุด; หลัง P15 หยุดให้ตรวจและค่อยปรับรูปลักษณ์ Model; tag m2 หลังผู้ใช้ตรวจรับ
+- P8–P13 เสร็จ; งานถัดไป **P14 → P15** ตามคำสั่งล่าสุด; หลัง P15 หยุดให้ตรวจและค่อยปรับรูปลักษณ์ Model; tag m2 หลังผู้ใช้ตรวจรับ
 
 ---
 

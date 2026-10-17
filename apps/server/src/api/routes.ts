@@ -43,11 +43,19 @@ export function registerRoutes(app: FastifyInstance): void {
 
   app.get<LabParams>('/api/labs/:labId', async (req, reply) => findLab(req.params.labId, reply)?.snapshot());
 
-  app.get<LabParams>('/api/labs/:labId/history', async (req, reply) => findLab(req.params.labId, reply)?.history.list());
+  app.get<LabParams>('/api/labs/:labId/history', async (req, reply) => {
+    const lab = findLab(req.params.labId, reply);
+    if (!lab) return;
+    reply.header('X-Lab-Run-Id', lab.events.runId);
+    return lab.history.list();
+  });
 
   app.get<LabParams & { Querystring: { limit?: string } }>('/api/labs/:labId/events', async (req, reply) => {
-    const limit = Math.min(500, Math.max(1, Number(req.query.limit ?? 200) || 200));
-    return findLab(req.params.labId, reply)?.events.list(limit);
+    const limit = Math.min(1000, Math.max(1, Number(req.query.limit ?? 1000) || 1000));
+    const lab = findLab(req.params.labId, reply);
+    if (!lab) return;
+    reply.header('X-Lab-Run-Id', lab.events.runId);
+    return lab.events.list(limit);
   });
 
   app.post<LabParams>('/api/labs/:labId/commands', async (req, reply) => {
