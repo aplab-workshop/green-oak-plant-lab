@@ -48,7 +48,7 @@ tags: [green-oak, spec]
 | Milestone | เนื้อหา | สถานะ |
 |---|---|---|
 | **M1** Functional 3D Virtual Plant | Web App, 3D DWC 6 ต้น, Sensor Dashboard, Mock Actuator, Water Balance, Water Shortage Behavior, ทำงานโดยไม่มี PLC | ✅ เสร็จ 2026-10-16 |
-| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P13 เสร็จ; กำลังทำ P14–P15** |
+| M2 Plant Behavior Engine | Growth Model เต็ม, Light/Nutrient/Root Stress, Recovery, Timeline, Unit Tests | **P8–P15 และส่วนต่อ P16–P17 เสร็จ; รอตรวจรับ** |
 | M3 One Real FX5U | SLMP 3E Gateway, Communication Monitor, PLC-in-the-Loop กับเครื่องจริง 1 เครื่อง | |
 | M4 Multi-Lab Classroom | 10 PLC, 10 Lab, Student/Teacher Dashboard, Concurrent Test | |
 | M5 Advanced | Scenario Management, Data Logging, Performance Evaluation, Real Sensor Architecture | |
@@ -93,6 +93,15 @@ tags: [green-oak, spec]
   - P14: กราฟและ Timeline ใช้ต้นที่เลือกเดียวกับ Plant panel, ช่วง 6 h/24 h/14 วันสิ้นสุดที่เวลาจำลองปัจจุบัน; Event แสดงของต้นนั้นและ Event ระดับ Lab; ถ้าไม่มีข้อมูลรายต้นให้เว้นว่าง ไม่แทนด้วยค่าเฉลี่ย; Reset จาก Browser อื่นต้องล้างข้อมูลเก่าด้วย runId และไม่รับ REST response ที่ค้างจาก Lab/รอบก่อน
 - คง Device map เดิม, ไม่เพิ่มปั๊ม pH, ไม่จำลองธาตุเฉพาะชนิดหรือ A/B imbalance; ค่าเชิงการสอนและสูตรอยู่ใน ARCHITECTURE § 11
 - Visual Reference โรงเรือนจากผู้ใช้ใช้ประกอบการออกแบบใน P14; การทำภาพ Final ทั้งฉากเป็นข้อเสนอ P16 แยกต่างหาก ยังไม่ใช่งานใน P8–P11
+
+### 4.4 P17 — Game Dashboard Contract
+
+- ฉาก 3D/2D เป็นพื้นที่หลัก แสดงคะแนน ต้นที่รอด Water Level/EC/pH และต้นที่เลือกแบบย่อ; Sensors/Actuators/Plant/Scenario/Trends/Timeline เปิดรายละเอียดทีละแผง กดปิดหรือ Escape ได้; Controls เดิมยังใช้ได้
+- นิยามตาย: Damage สะสมถึง 1 (100%) ตาม Model เดิม ไม่ใช้ Health ต่ำชั่วคราว; ต้นที่ตายคงรูปร่าง ณ ตอนตาย หยุดโต/ดูดน้ำและไม่ฟื้นจน Reset; Web อ่าน deadPlantIds จาก Server
+- Care Score 0–1000 คำนวณใน sim-core ทุก Fixed Step: `1000 × aliveFraction × (0.8 × timeAverageHealth/100 + 0.2 × growthProgress)`; growthProgress เป็นค่าเฉลี่ยรายต้นของ Biomass ที่เพิ่มจากต้นรอบเทียบระยะถึง harvestAtG โดย Clamp 0–1; เวลาเริ่มต้น 0 คะแนนและแสดงรอข้อมูล ไม่ให้คะแนนจาก FPS หรือเวลาที่ Pause
+- ทุกต้นตาย → Game Over แบบถาวรจน Reset, คะแนนสุดท้าย 0, เก็บเวลาที่แพ้; Simulation/กราฟยังตรวจสอบต่อได้ ไม่มีการปิด PLC commands อัตโนมัติ; UI มีปุ่มดูสาเหตุและเริ่มรอบใหม่
+- Best score เก็บเฉพาะรอบที่จบด้วย Reset/เปลี่ยน Scenario/Game Over และมีเวลาจำลองอย่างน้อย 24 h; เก็บคะแนนพร้อมระยะรอบใน Memory ของ Server แยก Lab และ Scenario (ไม่ใช่ Leaderboard ถาวร); รีเฟรช Browser ไม่ล้างคะแนน Reset เริ่มรอบใหม่แต่คง Best; Server restart ล้างทั้งหมด
+- ไม่เพิ่ม PLC addresses หรือระบบ Login/แข่งขันข้ามผู้ใช้
 
 ## 5. Functional Requirements
 
@@ -151,7 +160,7 @@ tags: [green-oak, spec]
 
 | ID | Requirement | M |
 |---|---|---|
-| FR-50 | Student Dashboard Layout: Header / Left Sensor / Center 3D / Right Actuator + Plant Detail / Bottom Timeline + Chart + Log | M1 |
+| FR-50 | Student Dashboard: Header + ฉาก 3D/2D เป็นพื้นที่หลัก, HUD คะแนน/สภาพแวดล้อม/ต้นที่เลือก; เปิดรายละเอียด Sensors, Actuators, Plant, Scenario, Timeline และ Chart ทีละแผงได้ (ปรับ Layout ตาม P17) | M1/P17 |
 | FR-51 | 3D Viewer: Orbit 360°, Zoom, Pan, คลิกเลือกต้น, คลิก Actuator ดูสถานะและ Address PLC | M1 |
 | FR-52 | Toggle Roots, Cutaway/Transparent Tank, Day/Night, Low Graphics Mode | M1 |
 | FR-53 | Visual ของพืชมาจาก State ผ่าน Mapping Function: Droop, Curl, Color, Scale, Root Length, Wilt/Recovery แบบ Interpolate ลื่นไหล | M1 (droop/wilt/color/size/root) / M2 (curl) |
@@ -224,6 +233,8 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-29 **P15 / NFR-06, NFR-07:** AC-16…28 ผ่าน, tests/typecheck/build ผ่าน และทำตามคู่มือการทดลองทุกกลไกได้ในโหมดห้องเรียนบน Windows; บันทึก Browser checks และข้อจำกัดก่อน tag m2 — tests 154/154; ดู [หลักฐานและขั้นตอน](M2-ACCEPTANCE.md) ซึ่งแยก Browser กับ Controlled fixtures ชัดเจน; LAN ตรวจบนเครื่อง Server ผ่าน IP ตัวเอง ยังไม่ตรวจเครื่องนักเรียนอีกเครื่อง
 
 ### 8.2 Visual Polish หลัง M2
+
+- [x] AC-31 **P17:** HUD ย่อ/ขยายและ Controls ใช้ได้ทั้งจอกว้าง/แคบ; คะแนนจริงจาก Server ไม่เพิ่มเมื่อ Pause และไม่ขึ้นกับ Tick splitting; รอบดูแลดีได้คะแนนสูงกว่ากลุ่มขาดน้ำ; Damage 100% ตายถาวรและไม่ดูดน้ำ; ตายบางต้นยังเล่นได้ ตายครบ Game Over ครั้งเดียว; Reset/Scenario/Best แยก Lab ถูกต้อง; tests/typecheck/build และ Browser ผ่าน (160 tests; Browser 1440×900 / 390×844, Game Over → Timeline → ปลูกใหม่)
 
 - [x] AC-30 **P16:** ฉากโรงเรือนสไตล์เกมปลูกผักตามภาพอ้างอิง มีผัก 6 ต้น ฝาขาว ถังใส ราก โครงโรงเรือน และอุปกรณ์ที่คลิกได้; ภาพโต/เหี่ยว/Curl/น้ำ/Actuator ยังอ่าน Server State เดิม; ไม่มีการแก้ sim-core, Server, Shared protocol หรือ PLC addresses; ตรวจ High/Low, เลือกต้น/อุปกรณ์, กล้อง, Roots/Cutaway, 2D และ regression tests (154/154 + typecheck + build; Browser fixtures 5/80 g และถังแห้ง 12 h; รอผู้ใช้ตรวจความพอใจด้านรูปลักษณ์)
 

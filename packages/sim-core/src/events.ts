@@ -4,6 +4,8 @@ import type { EventSeverity } from '@gol/shared';
 export interface SimEvent {
   simTimeS: number;
   kind:
+    | 'game.over'
+    | 'plant.died'
     | 'plant.water_stress'
     | 'plant.water_stress_cleared'
     | `plant.${'light' | 'nutrient' | 'root'}_stress`

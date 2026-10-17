@@ -2,7 +2,7 @@
 
 ห้องปฏิบัติการเสมือนสำหรับฝึกเขียน PLC **Mitsubishi FX5U** เพื่อควบคุมระบบปลูกผักสลัด Green Oak แบบ Hydroponics **Deep Water Culture (DWC)** ด้วย Simulation และโมเดล 3D แบบ Interactive
 
-> **สถานะ:** Milestone 2 P8–P15 และ P16 Greenhouse Visual Polish เสร็จ พร้อมให้ผู้ใช้ตรวจรับ — Plant Behavior Engine ใช้ Mock PLC; ภาพโรงเรือนสไตล์เกมขับด้วย Simulation เดิม
+> **สถานะ:** Milestone 2 P8–P15 และส่วนต่อ P16–P17 เสร็จ พร้อมให้ผู้ใช้ตรวจรับ — โรงเรือนสไตล์เกม, Dashboard ย่อ/ขยาย, Care Score และ Game Over ใช้ Mock PLC
 >
 > **Educational Simulation:** แบบจำลองพืชใช้สมการที่อธิบายได้เพื่อการเรียนการสอน **ไม่ใช่**โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ
 
@@ -223,8 +223,11 @@ Green_oak_plan/
 
 ## 11. ข้อจำกัดและแผนถัดไป
 
-**สถานะหลัง P16**
+**สถานะหลัง P17**
 - ใช้ **Mock PLC** เท่านั้น ยังไม่ต่อ FX5U จริง
+- หน้าหลักแสดงฉากและ HUD ย่อ กดเมนูด้านล่างหรือการ์ดเพื่อเปิดรายละเอียด กด X/Escape เพื่อปิด; คะแนนคำนวณที่ Server และไม่เพิ่มเมื่อ Pause
+- Care Score เต็ม 1,000: สุขภาพเฉลี่ยตลอดรอบ 80% + การเติบโต 20% คูณสัดส่วนต้นที่รอด; Best บันทึกเมื่อจบรอบที่เล่นอย่างน้อย 24 h จำลอง แยก Lab/Scenario และล้างเมื่อปิด Server ควรเทียบรอบระยะเวลาเท่ากัน
+- Damage 100% = ตายถาวร หยุดโต/ดูดน้ำ; ตายครบทุกต้น = Game Over พร้อมดู Timeline และกด **ปลูกใหม่** (Reset + Resume); คะแนนรอบที่แพ้คงที่ 0 แต่ยังเปิดดู Simulation/PLC ได้
 - Light/Nutrient/Root Stress รวมใน Growth, Damage และ Health แล้ว; Air Pump/Water Temperature/Water Level ส่งผลต่อ Estimated Oxygen และ Root Health ซึ่งจำกัดการดูดน้ำ
 - Dashboard/Timeline/Curl ทำงานแล้ว; P16 ปรับภาพโรงเรือนสไตล์เกมตามภาพอ้างอิงแล้ว พร้อมให้ตรวจรูปลักษณ์; เป็น Procedural stylized model ไม่ใช่ภาพ Photorealistic
 - pH ใช้ Empirical equilibrium (ค่าเริ่มต้น 6.2, time constant 2 วัน) พร้อมผล Refill/Dosing; ไม่ใช่เคมีกรด–ด่าง และไม่ได้ทำนายว่า pH ของจริงจะฟื้นเองโดยไม่ปรับสารละลาย
@@ -234,7 +237,7 @@ Green_oak_plan/
 
 | Milestone | เนื้อหา |
 |---|---|
-| M2 | P8–P15 และส่วนต่อ P16 Visual Polish เสร็จ รอผู้ใช้ตรวจภาพและตรวจรับก่อน tag `m2` |
+| M2 | P8–P15 และส่วนต่อ P16–P17 เสร็จ รอผู้ใช้ตรวจ Dashboard/คะแนน/Game Over ก่อน tag `m2` |
 | M3 | เชื่อม FX5U จริง 1 เครื่องผ่าน SLMP 3E, Communication monitor |
 | M4 | 10 Lab, 10 PLC, Teacher Dashboard, Login, SQLite |
 | M5 | Scenario 10 บท, Data logging, Performance evaluation, Real sensor architecture |

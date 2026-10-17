@@ -641,3 +641,14 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - ปรับแสง วัสดุ และกล้องให้เหมือนเกมปลูกผัก; Double-click focus ใช้ขนาดจาก Biomass เพื่อไม่ให้กล้องเข้าไปในพุ่มต้นโต; Low ลดรายละเอียดใบ/ราก ตัดกอหญ้าและเงาตามโหมดเดิม
 - AC-30: Browser ใช้ Server fixture แยกพอร์ต 3303 ตรวจ 5 g/80 g และถังแห้ง 12 h ผ่าน Model จริง (Hydration 0%, Water stress 100%, Health 31 → ภาพเหี่ยวแบน/เหลือง); ตรวจเลือกต้น/ซูม/คืนกล้อง คลิกพัดลม High/Low/Roots/โหมดถัง/2D และไม่มี console error หลังตรวจ; ไม่แก้ State ของ Lab ผู้ใช้
 - Final regression: 154/154 tests (22 files), typecheck และ production build ผ่าน; ไม่มี diff ใน sim-core, Server หรือ Shared; ยังมี chunk-size warning เดิม จึงยังไม่อ้างผล FPS บนเครื่องนักเรียน รูปลักษณ์เป็น Procedural stylized model และรอผู้ใช้ตรวจรับ
+
+### 11.15 Implementation Notes (P17 — Game Dashboard)
+
+- App ใช้ฉากเต็มพื้นที่ + HUD คะแนน, Water/EC/pH และต้นที่เลือก; เมนูด้านล่างเปิด native `<dialog>` ทีละแผง มี Focus trap, Escape, คืน Focus และ Scroll; Panel/Command/History เดิมยังใช้ต่อ ปรับความสูงแผงให้ Recharts วัดพื้นที่ได้จริง
+- กล้องภาพรวมปรับระยะตาม Aspect ratio บนจอแคบ; HUD เรียงข้างกันบนมือถือ ไม่เพิ่มการคำนวณพืชใน Web
+- `CareGame` อยู่ใน sim-core คำนวณหลังแต่ละ Fixed Step เก็บ Health × seconds ตั้งแต่ต้นรอบและ Biomass เริ่มต้นรายต้น; Snapshot ส่ง `game` พร้อม Score, Average health, Growth progress, elapsedS, deadPlantIds, status และ endedAtS; ฝั่ง Web แสดงผลเท่านั้น
+- สูตรใน SPEC § 4.4; healthWeight=0.8, maxScore=1000, recordMinS=86400 อยู่ใน defaultConfig พร้อมหน่วย; การเริ่มต้นไม่มีระยะเวลาจึง 0 คะแนน (HUD แสดง —) หลัง Step แรกสภาพดีเริ่มใกล้ 800 และเพิ่มจาก Growth
+- ต้น Damage ≥1 คืน Water request =0 และคง PlantState ไม่มีการฟื้น/โต; emit `plant.died` ครั้งเดียวต่อต้น และ `game.over` ครั้งเดียวเมื่อไม่มีต้นรอด; Game Over คงคะแนน/elapsed/endedAtS จน Reset แต่ยังเดิน Environment เพื่อตรวจการควบคุมได้ ไม่เขียนหรือเปลี่ยน PLC commands อัตโนมัติ
+- LabSession เก็บ Best ของรอบที่จบใน Map ตาม Scenario; บันทึกรอบเก่าก่อนเปลี่ยน Scenario, Reset ไม่ล้าง Best แต่ล้าง CareGame, ทุก Snapshot คืนสำเนา; ไม่แชร์ข้าม Lab และไม่มี persistence ข้าม Server restart
+- Tests เพิ่ม 6 cases: สูตร/Partial death/Defeat latch/สำเนา, Duration weighting, Permanent death, Dry vs Healthy 36 h + Events + Reset, Tick split/Pause, Eligible Best/Scenario/Lab isolation; 160/160 tests (24 files), typecheck/build ผ่าน
+- Browser ตรวจ 1440×900 และ 390×844; แผงทั้ง 7, เลือก Plant 3, Manual Fan ON, กราฟที่มีข้อมูลจริง, 2D/3D, Keyboard; ถังแห้ง fixture บน Server แยก 3305 ตายครบที่ 1.17 วันและปลูกใหม่ได้ครบ 6 ต้นพร้อม Resume; Console ไม่มี error ตอนตรวจหน้าใหม่ ใช้งาน preview 3304 (Lab เดิม 3301 ไม่ถูก Reset)

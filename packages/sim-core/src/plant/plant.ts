@@ -72,6 +72,7 @@ export interface PlantWaterRequest {
 }
 
 export function plantWaterRequest(p: PlantState, e: PlantEnvironment, cfg: SimConfig): PlantWaterRequest {
+  if (p.damage >= 1) return { demandLPerDay: 0, rootSubmerged: p.rootSubmerged, supplyRatio: 0, factor: 0, ppfd: 0 };
   const ppfd = ppfdAt(e.ledPct, positionFactor(p.position, cfg), cfg);
   const factor = transpirationFactor(e.vpdKPa, ppfd, cfg);
   const rootSubmerged = rootSubmergedFraction(e.waterHeightCm, p.rootLengthCm, cfg);
@@ -100,6 +101,7 @@ export function stepPlant(
   dtS: number,
   cfg: SimConfig,
 ): PlantState {
+  if (p.damage >= 1) return { ...p, health: 0, demandLPerDay: 0, supplyRatio: 0 };
   const supplyRatio = req.supplyRatio * clamp(tankFactor, 0, 1);
   const hydration = stepHydration(p.hydration, supplyRatio, req.factor, p.damage, dtS, cfg);
   const stress = waterStress(hydration, cfg);
@@ -138,7 +140,7 @@ export function stepPlant(
     health: healthScore(damage, maximum),
     rootSubmerged: req.rootSubmerged,
     supplyRatio,
-    demandLPerDay: req.demandLPerDay,
+    demandLPerDay: damage >= 1 ? 0 : req.demandLPerDay,
     ppfd: req.ppfd,
     dliToday: crossesMidnight ? 0 : p.dliToday + inc,
     dliYesterday: crossesMidnight ? p.dliToday + inc : p.dliYesterday,

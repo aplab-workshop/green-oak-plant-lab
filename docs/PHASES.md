@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-17: P8–P15 และ P16 Visual Polish เสร็จ — รอผู้ใช้ตรวจภาพและตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
+> **สถานะ 2026-10-17: P8–P15 และส่วนต่อ P16–P17 เสร็จ — รอผู้ใช้ตรวจ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -185,7 +185,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P15 และส่วนต่อ P16 เสร็จ; **หยุดให้ผู้ใช้ตรวจรูปลักษณ์** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
+- P8–P15 และส่วนต่อ P16–P17 เสร็จ; **หยุดให้ผู้ใช้ตรวจ Dashboard และระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
 
 ---
 
@@ -201,6 +201,17 @@ tags: [green-oak, roadmap]
 - **ผ่านเมื่อ:** AC-30; commit แยก `phase(P16): ...` แล้วหยุดให้ตรวจ
 - **ผลตรวจ:** tests 154/154 (22 files), typecheck และ production build ผ่าน; Browser ตรวจต้น 5/80 g, ถังแห้ง 12 h (Hydration 0%, Water stress 100%, Health 31 → ใบตกและเปลี่ยนสี), High/Low, Roots, Transparent → Cutaway → Opaque → Transparent, เลือกต้น/ซูม/คืนกล้อง, คลิกพัดลม และ 2D; ไม่พบ console error หลังตรวจ
 - **ขอบเขต:** แก้เฉพาะ `apps/web/src/scene` และเอกสาร; ใช้ fixture Server แยกสำหรับตรวจภาพแล้วนำออก ไม่ Reset หรือเปลี่ยนคำสั่งใน Lab ผู้ใช้; รูปแบบ Stylized ยังรอผู้ใช้ตรวจความพอใจ
+
+## P17 — Game Dashboard, Care Score & Game Over ✅
+
+ผู้ใช้สั่งปรับ Dashboard ตามภาพตัวอย่าง ให้ฉากเป็นพื้นที่หลักและกดขยายข้อมูลได้ พร้อมคะแนนการดูแลและแพ้เมื่อต้นไม้ตายหมด เป็นส่วนต่อของ Lab เดิม ไม่เริ่ม M3
+
+- [x] Dashboard แบบฉากเต็มพื้นที่ พร้อม HUD ย่อและแผงรายละเอียดที่เปิด/ปิดได้ รองรับจอแคบและ Keyboard
+- [x] คะแนนจาก Server ตาม Contract ใน SPEC; Best ของรอบที่จบแยกตาม Lab/Scenario ใน Memory
+- [x] ต้นตายเมื่อ Damage = 1; ไม่ดูดน้ำ/ไม่ฟื้น/ไม่โต; ทุกต้นตาย → Game Over พร้อมเริ่มรอบใหม่
+- [x] Tests คะแนน/ตาย/Reset/แยก Lab และ Browser, typecheck/build; docs และ commit `phase(P17): ...`
+- **ผลตรวจ:** AC-31 ผ่าน; 160/160 tests (24 files), typecheck และ build ผ่าน; Browser 1440×900 / 390×844 ตรวจ HUD, แผง Sensors/Actuators/Plant/Scenario/Chart/Timeline/Score, Escape/คืน Focus, Manual Fan ON, 2D/3D และไม่มี console error; fixture ถังแห้งตายครบที่ 1.17 วัน → Game Over → Timeline → ปลูกใหม่ได้ 6 ต้นและ Resume
+- **ข้อจำกัด:** Best เป็นคะแนนรอบที่จบและมีอายุอย่างน้อย 24 h จำลองใน Memory ของ Server ควรเทียบรอบยาวเท่ากัน; Game Over ล็อกคะแนนแต่ยังตรวจ Environment/PLC ต่อได้; ไม่มี Leaderboard ข้ามผู้ใช้; เปิด preview ใหม่ที่พอร์ต 3304 โดยไม่หยุด Lab เดิม 3301
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 

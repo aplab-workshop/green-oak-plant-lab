@@ -5,6 +5,14 @@
  * ยังไม่ได้ปรับเทียบกับข้อมูลจริง — แก้ค่าที่นี่ที่เดียวเมื่อมีข้อมูลปรับเทียบ
  */
 export interface SimConfig {
+  game: {
+    /** น้ำหนักสุขภาพเฉลี่ยตลอดรอบ [0,1]; ส่วนที่เหลือเป็น Growth */
+    healthWeight: number;
+    /** คะแนนเต็ม (points) */
+    maxScore: number;
+    /** ระยะรอบขั้นต่ำเพื่อบันทึก Best (s จำลอง) */
+    recordMinS: number;
+  };
   time: {
     /** Fixed time-step (s, เวลาจำลอง) */
     dtS: number;
@@ -209,6 +217,7 @@ export interface SimConfig {
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
+  game: { healthWeight: 0.8, maxScore: 1000, recordMinS: 86_400 },
   time: { dtS: 1, startDay: 14, startHour: 6, maxStepsPerTick: 5000 },
   tank: {
     capacityL: 40,

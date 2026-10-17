@@ -65,6 +65,7 @@ export function PlantDetail() {
   const oxygen = useLabStore((s) => s.snapshot?.tank.estimatedOxygen);
   const selected = useLabStore((s) => s.selectedPlantId);
   const p = plants?.find((x) => x.id === selected) ?? plants?.[0];
+  const dead = useLabStore((s) => p ? s.snapshot?.game?.deadPlantIds.includes(p.id) : false);
 
   return (
     <Panel title="Plant" icon={<Sprout className="h-3.5 w-3.5" />} right={<PlantSelector />}>
@@ -73,7 +74,7 @@ export function PlantDetail() {
           <div className="flex items-baseline justify-between">
             <div>
               <div className="text-sm font-semibold text-slate-800">Plant {p.id}</div>
-              <div className="text-[11px] text-slate-500">{STAGE_LABEL[p.stage]}</div>
+              <div className={`text-[11px] ${dead ? 'text-rose-600' : 'text-slate-500'}`}>{dead ? 'ตายแล้ว · เริ่มรอบใหม่เพื่อปลูกอีกครั้ง' : STAGE_LABEL[p.stage]}</div>
             </div>
             <div className="text-right">
               <div className="font-mono text-2xl font-bold" style={{ color: healthColor(p.health) }}>

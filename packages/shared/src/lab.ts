@@ -64,7 +64,21 @@ export interface ScenarioInfo {
   description: string;
 }
 
+export interface CareProgress {
+  score: number;
+  elapsedS: number;
+  averageHealth: number;
+  growthProgress: number;
+  deadPlantIds: number[];
+  totalPlants: number;
+  status: 'playing' | 'lost';
+  endedAtS: number | null;
+}
+
+export interface CareRecord { score: number; elapsedS: number }
+
 export interface LabSnapshot {
+  game: CareProgress & { best: CareRecord | null };
   labId: string;
   runId: number;
   /** เวลาจริงที่สร้าง Snapshot (ms epoch) */

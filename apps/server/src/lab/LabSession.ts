@@ -6,6 +6,7 @@ import {
   type LabCommand,
   type LabSnapshot,
   type SensorReadings,
+  type CareRecord,
 } from '@gol/shared';
 import { SimClock, Simulation, levelPct, waterHeightCm, type SimulationOptions } from '@gol/sim-core';
 import { FAILSAFE_COMMANDS } from '../plc/failsafe';
@@ -70,6 +71,16 @@ export class LabSession {
   private lastClampKey = '';
   private scenario: Scenario | null = null;
   private lastLagLogAt = -Infinity;
+  private readonly bestByScenario = new Map<string, CareRecord>();
+
+  private saveRecord(): void {
+    const game = this.sim.game;
+    const key = this.scenario?.id ?? 'free';
+    const best = this.bestByScenario.get(key);
+    if (game.elapsedS >= this.sim.cfg.game.recordMinS && (!best || game.score > best.score)) {
+      this.bestByScenario.set(key, { score: game.score, elapsedS: game.elapsedS });
+    }
+  }
 
   constructor(opts: LabSessionOptions) {
     this.labId = opts.labId;
@@ -100,6 +111,7 @@ export class LabSession {
       this.log('sim.lagged', 'warning', 'Server คำนวณไม่ทัน เวลาจำลองช้ากว่าที่ตั้งไว้');
     }
     for (const e of this.sim.drainEvents()) {
+      if (e.kind === 'game.over') this.saveRecord();
       this.events.add({ at: this.now(), ...e });
     }
   }
@@ -204,13 +216,15 @@ export class LabSession {
       case 'applyScenario': {
         const s = findScenario(cmd.scenarioId);
         if (!s) throw new LabCommandError(`ไม่พบ Scenario ${cmd.scenarioId}`, 404);
+        this.saveRecord();
         this.scenario = s;
-        this.reset();
+        this.reset(false);
         return;
       }
       case 'clearScenario':
+        this.saveRecord();
         this.scenario = null;
-        this.reset();
+        this.reset(false);
         return;
       case 'setPlcMode':
         this.mock().setMode(cmd.mode);
@@ -229,7 +243,8 @@ export class LabSession {
   }
 
   /** Reset Lab นี้ (FR-42) — ใช้ Scenario เดิมถ้ามี ไม่กระทบ Lab อื่น */
-  reset(): void {
+  reset(saveRecord = true): void {
+    if (saveRecord) this.saveRecord();
     this.sim.reset();
     this.clock.reset(this.sim.startTimeS);
     this.history.clear();
@@ -263,6 +278,8 @@ export class LabSession {
     const s = this.sim.snapshot();
     const cfg = this.sim.cfg;
     return {
+      game: { ...this.sim.game, best: this.bestByScenario.has(this.scenario?.id ?? 'free')
+        ? { ...this.bestByScenario.get(this.scenario?.id ?? 'free')! } : null },
       labId: this.labId,
       runId: this.events.runId,
       at: this.now(),

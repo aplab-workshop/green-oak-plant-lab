@@ -14,6 +14,7 @@ import { levelPct, waterHeightCm } from './environment/tank';
 import { createPlant, plantWaterRequest, stepPlant, type PlantEnvironment, type PlantState } from './plant/plant';
 import { rootSupplyRatio } from './plant/water';
 import { readSensors, readSimInfo } from './sensors';
+import { CareGame } from './careGame';
 
 export interface Disturbance {
   /** น้ำรั่วออกจากถัง (L/h) */
@@ -34,6 +35,7 @@ export interface SimulationSnapshot {
 }
 
 interface PlantFlags {
+  dead: boolean;
   stressed: boolean;
   wilting: boolean;
   damageLevel: number;
@@ -53,6 +55,8 @@ export class Simulation {
   private _simTimeS = 0;
   private _env!: EnvironmentState;
   private _plants: PlantState[] = [];
+  private care!: CareGame;
+  get game() { return this.care.snapshot(); }
   private flags: PlantFlags[] = [];
   private rootsExposed = false;
   private overflowing = false;
@@ -93,7 +97,8 @@ export class Simulation {
       const variation = 1 + initialBiomassSpread * (2 * growthRng.next() - 1);
       return createPlant(i + 1, i, initialBiomassG * variation, this._simTimeS, cfg);
     });
-    this.flags = this._plants.map(() => ({ stressed: false, wilting: false, damageLevel: 0, light: false, nutrient: false, root: false }));
+    this.flags = this._plants.map(() => ({ dead: false, stressed: false, wilting: false, damageLevel: 0, light: false, nutrient: false, root: false }));
+    this.care = new CareGame(this._plants, cfg);
     this.rootsExposed = false;
     this.overflowing = false;
     this.empty = false;
@@ -141,6 +146,11 @@ export class Simulation {
     this._plants = this._plants.map((p, i) => stepPlant(p, requests[i]!, plantEnv, tankFactor, dtS, cfg));
     this._env = result.state;
     this._simTimeS += dtS;
+    const wasLost = this.care.lost;
+    this.care.step(this._plants, dtS, this._simTimeS);
+    if (!wasLost && this.care.lost) {
+      this.emit({ kind: 'game.over', severity: 'critical', message: 'Game Over — ต้นไม้ตายครบทุกต้น เริ่มรอบใหม่เพื่อปลูกอีกครั้ง' });
+    }
 
     this.detectEvents(env, result.state);
   }
@@ -180,6 +190,10 @@ export class Simulation {
     this._plants.forEach((p, i) => {
       const f = this.flags[i]!;
       const name = `Plant ${p.id}`;
+      if (p.damage >= 1 && !f.dead) {
+        f.dead = true;
+        this.emit({ kind: 'plant.died', severity: 'critical', plantId: p.id, message: `${name}: ตายแล้ว (Damage 100%)` });
+      }
       if (!f.stressed && p.waterStress >= cfg.events.stressOn) {
         f.stressed = true;
         this.emit({

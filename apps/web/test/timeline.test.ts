@@ -14,6 +14,7 @@ const event = (id: number, plantId?: number, runId = 0): EventEntry => ({
   id, plantId, runId, at: 100, simTimeS: id * 3600, kind: 'test', severity: 'info', message: `Event ${id}`,
 });
 const snapshot = (runId = 0, at = 100, labId = 'lab01'): LabSnapshot => ({
+  game: { score: 0, elapsedS: 0, averageHealth: 100, growthProgress: 0, deadPlantIds: [], totalPlants: 0, status: 'playing', endedAtS: null, best: null },
   labId, runId, at, simTimeS: 36000, sim: { day: 0, minuteOfDay: 600 }, speed: 360, paused: false,
   plc: { kind: 'mock', mode: 'auto', connection: 'connected', lastOkAt: at, latencyMs: 0, errorCount: 0, lastError: null },
   failsafe: false, commands: { fan: false, humidifier: false, ledPct: 80, refillPump: false,

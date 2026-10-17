@@ -68,12 +68,14 @@ function Controls() {
   const seq = useSceneStore((s) => s.cameraResetSeq);
   const focus = useSceneStore((s) => s.focus);
   const camera = useThree((s) => s.camera);
+  const size = useThree((s) => s.size);
+  const fit = Math.max(1, Math.min(2.1, 1.1 / (size.width / size.height)));
   useEffect(() => {
-    if (seq === 0 || !ref.current) return;
-    camera.position.set(...CAMERA_POS);
+    if (!ref.current) return;
+    camera.position.set(...CAMERA_POS.map((v, i) => TARGET[i]! + (v - TARGET[i]!) * fit) as [number, number, number]);
     ref.current.target.set(...TARGET);
     ref.current.update();
-  }, [seq, camera]);
+  }, [seq, camera, fit]);
   useEffect(() => {
     if (!focus || !ref.current) return;
     const [x, y, z] = focus.point;
@@ -92,7 +94,7 @@ function Controls() {
       enablePan
       enableDamping
       minDistance={0.25}
-      maxDistance={3}
+      maxDistance={5}
       maxPolarAngle={Math.PI * 0.49}
     />
   );
