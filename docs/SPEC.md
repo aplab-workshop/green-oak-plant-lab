@@ -1,7 +1,7 @@
 ---
 title: Green Oak Virtual Plant Lab — Specification
-version: 1.0
-status: approved 2026-10-16
+version: 2.0
+status: M2 implemented — pending user acceptance
 updated: 2026-10-17
 tags: [green-oak, spec]
 ---
@@ -221,7 +221,7 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-26 🧪 **P12 / FR-01, FR-02:** Seed/Command schedule ตามเวลาจำลองเดียวกัน 24 h ที่ 1x/60x/360x และแบ่ง Tick ต่างกันให้ State เท่ากัน ±1e-9; Pause 10 s จริงไม่เปลี่ยน Model; Reset คืนค่าเริ่มต้น
 - [x] AC-27 🧪 **P13 / FR-40–FR-43:** Snapshot/History ตรง State ณ เวลาบันทึก ±1e-9, ทดสอบสอง Lab 24 h ไม่ปะปน; Stress ข้าม 0.3/0.15 ให้ Event อย่างละหนึ่งครั้ง; History เก็บทุก 600 s สูงสุด 2016 จุด (14 วัน), รัน 15 วันไม่เกินเพดาน; Pause ไม่เพิ่ม sample, Reset ล้างรอบเก่า; PLC guard และ Fail-safe ผ่าน
 - [x] AC-28 **P14 / FR-53, FR-55:** Browser แสดง 6 ต้นและเลือกต้น/ช่วง 6 h, 24 h, 14 วันได้; กราฟและ Diagnostics ตรง Payload ตามความละเอียดที่แสดง; Curl จาก Light Stress 0 → 1 เพิ่มตาม Mapping test ขณะที่ Droop ไม่เปลี่ยนเมื่อ Hydration/Damage คงเดิม; ตรวจ 3D/2D/Low/Reset/ข้อมูลว่าง/สลับ Lab ทุก Control ทำงาน
-- [ ] AC-29 **P15 / NFR-06, NFR-07:** AC-16…28 ผ่าน, tests/typecheck/build ผ่าน และทำตามคู่มือการทดลองทุกกลไกได้ในโหมดห้องเรียนบน Windows; บันทึก Browser checks และข้อจำกัดก่อน tag m2
+- [x] AC-29 **P15 / NFR-06, NFR-07:** AC-16…28 ผ่าน, tests/typecheck/build ผ่าน และทำตามคู่มือการทดลองทุกกลไกได้ในโหมดห้องเรียนบน Windows; บันทึก Browser checks และข้อจำกัดก่อน tag m2 — tests 154/154; ดู [หลักฐานและขั้นตอน](M2-ACCEPTANCE.md) ซึ่งแยก Browser กับ Controlled fixtures ชัดเจน; LAN ตรวจบนเครื่อง Server ผ่าน IP ตัวเอง ยังไม่ตรวจเครื่องนักเรียนอีกเครื่อง
 
 ## 9. Assumptions
 

@@ -621,3 +621,12 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Browser บน Windows ตรวจ 3D/Low/Roots/Cutaway, 2D, เลือกต้น, ทุกช่วงเวลา, Pause, สลับสอง Lab และ Reset จากอีกแท็บ; ตัวอย่าง Payload ขณะ Pause: Plant 3 biomass 5.105974 g → UI 5.1 g, Oxygen 0.95 → 95%, 8 history samples
 - WebGL unavailable ใช้ HTML fault fixture ชั่วคราวใน dist ที่คืน null จาก WebGL getContext ก่อนโหลด bundle; fallback ทำงานและเปลี่ยน toolbar เป็น 2D, ปุ่ม 3D disabled พร้อมคำอธิบาย; แก้ layout ไม่ให้ภาพล้น
 - Tests 148/148 + typecheck + build ผ่าน; Browser ปกติไม่มี console error, มี Three.js dependency deprecation warnings และ build chunk-size warning ที่ไม่ขวางการใช้งาน
+
+### 11.13 Implementation Notes (P15)
+
+- เพิ่ม `apps/server/test/m2Acceptance.test.ts` จำนวน 6 cases: High Light → Recovery, Initial EC 0/3.2 และ pH 4/9, Air Pump OFF 24 h → ON 24 h; ส่งคำสั่งผ่าน Mock PLC และเดิน tick/poll ด้วย FakeClock ไม่ข้าม Model steps; ทุกช่วงตรวจ History ตรง Snapshot และ Stress start/clear events
+- Healthy 30 วัน, Low Light, Recovery ทัน/ช้า, Dry tank และ M1 regression ใช้ tests เดิมที่ตรวจแยกสาเหตุ; ไม่ทำซ้ำ long-run tests โดยไม่จำเป็น
+- `docs/M2-ACCEPTANCE.md` ระบุคำสั่งทำซ้ำ, Setup, ระยะเวลา, Expected result และแยกข้อจำกัด Default UI จาก Controlled fixtures (เช่น Default PPFD สูงสุด 400 เทียบ fixture 650 และไม่มี pH actuator)
+- Final suite: 22 files / 154 tests ผ่าน; typecheck ผ่าน; `npm run serve` build ผ่านและเปิดหน้า/REST/WS บน IP LAN ของเครื่อง Server ที่พอร์ตทดสอบ 3302, 2 Labs; ยังไม่ได้ตรวจเครื่องนักเรียนอีกเครื่อง
+- Browser ทดลอง LED 100% + Air OFF แล้ว Air ON/LED 60%: ก่อนฟื้น Light Stress 26%, Root Health 65%, Oxygen 14%; หลังประมาณ 5 h จำลอง Light Stress 7%, Root Health 76%, Oxygen 62% (น้ำยังอุ่นประมาณ 28.5 °C จึงไม่คาดว่า Oxygen ต้องเป็น 95%); UI/กราฟ/Timeline ตอบสนองตาม Server
+- ไม่เพิ่ม Production model parameters, PLC addresses หรือ Scenario Library ใน Phase ตรวจรับ; หยุดก่อน Visual polish, รอผู้ใช้ตรวจรับก่อน tag `m2`

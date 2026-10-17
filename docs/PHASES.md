@@ -83,11 +83,11 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-17: P8–P14 เสร็จ — ผู้ใช้อนุมัติทำ P12–P15 ต่อเนื่อง แล้วหยุดก่อนปรับรูปลักษณ์ 3D**
+> **สถานะ 2026-10-17: P8–P15 เสร็จ — รอผู้ใช้ตรวจรับก่อน tag `m2`; หยุดก่อนปรับรูปลักษณ์ 3D ตามคำสั่ง**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
-### ขอบเขตที่ใช้ดำเนินงาน (อนุมัติ P8–P11 แล้ว)
+### ขอบเขตที่ใช้ดำเนินงาน (ผู้ใช้อนุมัติ P8–P11 และ P12–P15 ต่อเนื่อง)
 
 - ครอบคลุม FR-09, FR-25, FR-26, FR-43 และ FR-53: Light/Low Light, Nutrient, Root Stress, Estimated Oxygen Status, Growth/Recovery, Timeline และ Curl
 - คง Fixed step, Pure TypeScript, Seeded randomness, Water/Salt mass balance และกฎ Gateway เดิม พารามิเตอร์ Model ทุกตัวต้องมีหน่วยและคำอธิบายใน `defaultConfig.ts`
@@ -170,19 +170,22 @@ tags: [green-oak, roadmap]
 
 - **ผลตรวจ:** AC-28 ผ่าน; tests 148/148 + typecheck + build ผ่าน; Browser 3D/2D/Low/Cutaway/Roots, 6/24 h/14 วัน, เลือกต้น, สลับ Lab และ Reset จากอีกแท็บล้างกราฟ/Events; WebGL fault fixture ยืนยัน fallback และแก้ภาพล้น/ปุ่ม 3D ที่ใช้ไม่ได้
 
-### P15 — M2 Acceptance & Handoff
+### P15 — M2 Acceptance & Handoff ✅
 
-- [ ] ตรวจ AC ของ M2 ทุกข้อ พร้อมหลักฐาน Automated tests และ Browser checks ที่เหมาะสม
-- [ ] ตรวจครบวงจร: Healthy growth, High/Low Light, EC/pH ผิดช่วง, Air Pump OFF/ON, Water shortage และ Recovery ทัน/ล่าช้า โดยบันทึกวิธีตั้งสภาวะและผลที่คาดหวัง
-- [ ] รัน `npm test`, `npm run typecheck` และ `npm run build`; ตรวจรันโหมดห้องเรียนและ Regression ของ M1
-- [ ] อัปเดต README, SPEC checklist, ARCHITECTURE Implementation Notes, PHASES และสถานะ AGENTS พร้อมข้อจำกัดที่เหลือ
+- [x] ตรวจ AC ของ M2 ทุกข้อ พร้อมหลักฐาน Automated tests และ Browser checks ที่เหมาะสม
+- [x] ตรวจครบวงจร: Healthy growth, High/Low Light, EC/pH ผิดช่วง, Air Pump OFF/ON, Water shortage และ Recovery ทัน/ล่าช้า โดยบันทึกวิธีตั้งสภาวะและผลที่คาดหวัง
+- [x] รัน `npm test`, `npm run typecheck` และ `npm run build`; ตรวจรันโหมดห้องเรียนและ Regression ของ M1
+- [x] อัปเดต README, SPEC checklist, ARCHITECTURE Implementation Notes, PHASES และสถานะ AGENTS พร้อมข้อจำกัดที่เหลือ
 - **ผ่านเมื่อ:** AC ของ M2 ผ่านครบและ M1 ไม่ถดถอย; คู่มือทำซ้ำการทดลองได้; commit `phase(P15): ...`; หลังผู้ใช้ตรวจรับจึง tag `m2`
+
+- **ผลตรวจ:** AC-16…29 ผ่านตามหลักฐานใน [M2-ACCEPTANCE.md](M2-ACCEPTANCE.md); tests 154/154 (22 files) + typecheck + build ผ่าน; เพิ่ม Integration 6 cases ผ่าน PLC/Model/History/Events; Browser เปิด production ผ่าน IP LAN ของเครื่อง Server ได้ และตรวจ Light/Root/Oxygen recovery จริง
+- **ขอบเขตที่ยังไม่ตรวจ:** เครื่องนักเรียนอีกเครื่อง/Firewall ของห้องเรียน และ FX5U จริง; ยังไม่ tag `m2` และยังไม่เริ่ม Visual polish
 
 ### กติกาตรวจรับและงานถัดไป
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P14 เสร็จ; งานถัดไป **P15** ตามคำสั่งล่าสุด; หลัง P15 หยุดให้ตรวจและค่อยปรับรูปลักษณ์ Model; tag m2 หลังผู้ใช้ตรวจรับ
+- P8–P15 เสร็จ; **หยุดให้ผู้ใช้ตรวจ** แล้วค่อยวางแผน/ปรับรูปลักษณ์ Model ให้ใกล้ภาพโรงเรือนต้นแบบ; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
 
 ---
 

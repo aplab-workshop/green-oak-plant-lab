@@ -1,4 +1,5 @@
 import type { MockPlcMode } from '@gol/shared';
+import type { SimulationOptions } from '@gol/sim-core';
 import type { ServerConfig } from '../src/config';
 import { LabSession } from '../src/lab/LabSession';
 import { MockPlcAdapter } from '../src/plc/MockPlcAdapter';
@@ -28,10 +29,10 @@ export interface TestLab {
   clock: FakeClock;
 }
 
-export function makeLab(labId = 'lab01', mode: MockPlcMode = 'auto', seed = 1): TestLab {
+export function makeLab(labId = 'lab01', mode: MockPlcMode = 'auto', seed = 1, simOptions: SimulationOptions = {}): TestLab {
   const clock = new FakeClock();
   const mock = new MockPlcAdapter(mode, clock.now);
-  const lab = new LabSession({ labId, adapter: mock, now: clock.now, sim: { seed }, sensorNoise: false });
+  const lab = new LabSession({ labId, adapter: mock, now: clock.now, sim: { ...simOptions, seed }, sensorNoise: false });
   return { lab, mock, clock };
 }
 

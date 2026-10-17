@@ -2,7 +2,7 @@
 
 ห้องปฏิบัติการเสมือนสำหรับฝึกเขียน PLC **Mitsubishi FX5U** เพื่อควบคุมระบบปลูกผักสลัด Green Oak แบบ Hydroponics **Deep Water Culture (DWC)** ด้วย Simulation และโมเดล 3D แบบ Interactive
 
-> **สถานะ:** Milestone 1 เสร็จ — Functional 3D Virtual Plant (ทำงานได้โดยไม่ต้องมี PLC จริง ใช้ Mock PLC)
+> **สถานะ:** Milestone 2 P8–P15 เสร็จ พร้อมให้ผู้ใช้ตรวจรับ — Plant Behavior Engine ใช้ Mock PLC; รูปลักษณ์ Model 3D จะปรับในรอบถัดไป
 >
 > **Educational Simulation:** แบบจำลองพืชใช้สมการที่อธิบายได้เพื่อการเรียนการสอน **ไม่ใช่**โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ
 
@@ -10,7 +10,7 @@
 
 ## สารบัญ
 
-1. [ความสามารถใน Milestone 1](#1-ความสามารถใน-milestone-1)
+1. [ความสามารถใน Milestone 1–2](#1-ความสามารถใน-milestone-12)
 2. [สิ่งที่ต้องมี](#2-สิ่งที่ต้องมี)
 3. [ติดตั้ง](#3-ติดตั้ง)
 4. [รันระหว่างพัฒนา](#4-รันระหว่างพัฒนา-development)
@@ -24,15 +24,15 @@
 
 ---
 
-## 1. ความสามารถใน Milestone 1
+## 1. ความสามารถใน Milestone 1–2
 
 | ส่วน | รายละเอียด |
 |---|---|
 | **Simulation (Server)** | Fixed time-step, Speed 1x / 60x / 360x, Pause/Resume/Reset, Water mass balance, Refill, LED → PPFD/DLI, Air temp/RH/VPD, Water temp, EC (Salt mass balance), pH (Empirical), Power |
-| **Plant model** | ผัก 6 ต้นแยกสถานะ: Hydration, Water stress, Damage ถาวร, Recovery, Growth, Leaf count/area, Root length, Health score |
+| **Plant model** | ผัก 6 ต้นแยกสถานะ: Water/Light/Nutrient Stress, Root Health, Hydration, Damage ถาวร, Recovery, Growth, Leaf count/area, Root length, Health score รวม Stress |
 | **Mock PLC** | จำลอง Device memory ของ FX5U: `auto` (Ladder ตัวอย่าง), `manual` (กดสั่งเอง), `offline` (จำลองสายหลุด) และ Fail-safe เมื่อไม่ได้รับคำสั่ง |
-| **Student Dashboard** | Sensor → PLC (D100–D110), Actuator ← PLC (M100–M105, D200), Plant detail, Trends, Event log, Scenario |
-| **3D DWC Scene** | ผัก Green Oak แบบ Procedural ที่ใบตก/เหี่ยว/ฟื้นตาม Simulation, ราก, น้ำขึ้นลงจริง, LED, Fan, Humidifier, Pumps, ฟองอากาศ, Sensor probes ที่คลิกดูข้อมูลได้ |
+| **Student Dashboard** | Sensor → PLC (D100–D110), Actuator ← PLC (M100–M105, D200), Plant diagnostics + Estimated Oxygen, Growth/Stress chart รายต้น, Timeline 6 h/24 h/14 วัน, Scenario |
+| **3D DWC Scene** | ผัก Green Oak แบบ Procedural ที่ใบตก/เหี่ยว/ฟื้น/ม้วนตาม Simulation, ราก, น้ำขึ้นลงจริง, LED, Fan, Humidifier, Pumps, ฟองอากาศ, Sensor probes ที่คลิกดูข้อมูลได้ |
 | **Scenario** | `Water Shortage Simulation` (ระดับน้ำ 65% + รั่ว 1.5 L/h) |
 
 เอกสารออกแบบอยู่ใน `docs/` (เปิดด้วย Obsidian ได้)
@@ -43,6 +43,7 @@
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | โครงสร้าง Software, Data Flow, สมการ Simulation |
 | [docs/DEVICE-MAP.md](docs/DEVICE-MAP.md) | PLC Memory Mapping, Scaling, Fail-safe, ตัวอย่าง Ladder |
 | [docs/PHASES.md](docs/PHASES.md) | Roadmap แบ่ง Phase พร้อม Checklist |
+| [docs/M2-ACCEPTANCE.md](docs/M2-ACCEPTANCE.md) | คู่มือทดลอง M2, Test matrix, Browser checks และข้อจำกัด |
 
 ## 2. สิ่งที่ต้องมี
 
@@ -133,7 +134,7 @@ npm run dev
 |---|---|
 | บน | ชื่อ Lab, สถานะ Mock PLC (connected / FAIL-SAFE), สถานะการเชื่อมต่อ Server |
 | ซ้าย | **Sensors → PLC** ค่าที่ส่งเข้า D100–D110 (จุดเขียว/เหลือง/แดงเทียบช่วงแนะนำ) และ **Scenario** |
-| กลาง | **Plant View** (3D หรือ 2D), เวลาจำลอง, Speed, Pause, Reset, **Trends** และ **Event Log** |
+| กลาง | **Plant View** (3D หรือ 2D), เวลาจำลอง, Speed, Pause, Reset, **Trends** และ **Timeline** |
 | ขวา | **Actuators ← PLC** (M100–M105, D200 และโหมด Mock PLC) และ **Plant** รายละเอียดต้นที่เลือก |
 
 ### 7.2 มุมมอง 3D
@@ -157,6 +158,16 @@ npm run dev
 > [!note] เรื่องการเร่งเวลา
 > Timer ใน PLC จริงนับตามเวลาจริง ถ้าบทเรียนใช้ Timer ให้รันที่ **1x** ส่วนบทเรียนแบบ Threshold/Hysteresis เร่งเวลาได้ และใช้ D111 (นาทีของวันจำลอง) ทำ Photoperiod แทน Timer ได้ (ดู [DEVICE-MAP.md](docs/DEVICE-MAP.md))
 
+### 7.4 Plant diagnostics และ Timeline (M2)
+
+- เลือกต้น 1–6 ที่แผง Plant หรือฉาก; กราฟ Growth แสดง **Biomass ของต้นนั้น** กับ Health ส่วนกราฟอื่นแสดง Water, Stress, Root/Oxygen, Climate และ EC/pH
+- เลือกช่วง **6 h / 24 h / 14 days** เพื่อกรองทั้งกราฟและ Timeline จนถึงเวลาจำลองปัจจุบัน; Timeline รวม Event ของต้นที่เลือกกับ Global events
+- History เก็บทุก 10 นาทีจำลอง สูงสุด 2016 จุด; Event ล่าสุด 1000 รายการ; หลัง Reset ต้องรออย่างน้อย 2 samples จึงมีกราฟ ไม่มี Replay หรือการย้อนเวลา
+- Light Stress ทำให้ใบม้วน ส่วน Water Stress/Damage ทำให้ใบตก; การเปิด LED แรงไม่ทำให้เหี่ยวทันที
+- **Estimated Oxygen** แสดงดัชนี 0–100% จาก Model ไม่ใช่ DO Sensor หรือ mg/L; ดู Root Health ร่วมกับระดับน้ำและอุณหภูมิ
+- Reset จาก Browser ใด ๆ ล้าง History/Events ของ Lab นั้นทุกหน้าต่าง; ปิด Server แล้วข้อมูลใน Memory หาย
+- วิธีทดลอง High/Low Light, EC/pH, Air OFF/ON และ Recovery พร้อมเกณฑ์ตรวจรับอยู่ใน [คู่มือ M2](docs/M2-ACCEPTANCE.md)
+
 ## 8. ทดสอบ
 
 ```bash
@@ -169,9 +180,11 @@ npm run typecheck
 
 | กลุ่ม | ตัวอย่างที่ทดสอบ |
 |---|---|
-| `packages/sim-core` | น้ำลดตามเวลา, Refill ทำให้น้ำเพิ่ม, Water stress เพิ่มเมื่อรากขาดน้ำ, ลดลงเมื่อเติมทัน, Damage ไม่ลดลง, LED มีผลต่อ PPFD/DLI, ผลไม่ขึ้นกับการแบ่ง Tick |
-| `apps/server` | Lab 01 ไม่กระทบ Lab 02, Sim → Mock PLC → Sim รักษาระดับน้ำ 3 วัน, PLC Offline → Fail-safe และระบบยังทำงาน, Gateway เขียน M Device ไม่ได้, REST/WebSocket, โหมด LAN |
-| `apps/web` | การแปลง PlantState → ภาพ (ใบตก/สี/ขนาด), Geometry ใบหยัก, การจัดใบ, ช่วงค่า Sensor |
+| `packages/sim-core` | Water/Light/Nutrient/Root Stress, Recovery, Damage, Healthy growth/pH 30 วัน, Mass balance, DLI, Determinism |
+| `apps/server` | Mock PLC loop, Lab isolation, Fail-safe, Write guard, REST/WS, History/Events, Stress/Recovery ผ่าน LabSession, โหมด LAN |
+| `apps/web` | State → ภาพ/Curl, Geometry, Sensor ranges, กราฟรายต้น, Timeline, stale response หลัง Reset/สลับ Lab |
+
+ผลตรวจ P15: **154/154 tests**, TypeScript strict และ production build ผ่าน ดูหลักฐานและวิธีทำซ้ำใน [M2-ACCEPTANCE.md](docs/M2-ACCEPTANCE.md)
 
 ## 9. โครงสร้างโปรเจกต์
 
@@ -210,10 +223,10 @@ Green_oak_plan/
 
 ## 11. ข้อจำกัดและแผนถัดไป
 
-**สถานะระหว่างพัฒนา M2 (ดู Phase ที่เสร็จล่าสุดใน PHASES)**
+**สถานะหลัง P15**
 - ใช้ **Mock PLC** เท่านั้น ยังไม่ต่อ FX5U จริง
-- P9–P11: Light และ Nutrient Stress สะสมตามเวลาจำลองและลด Growth แล้ว; Air Pump/Water Temperature/Water Level ส่งผลต่อ Estimated Oxygen Status และ Root Health ซึ่งจำกัดการดูดน้ำ
-- Damage/Health ยังใช้ Water Stress ตาม M1; การรวม Stress ทั้งหมดเป็นงาน P12 ส่วน Oxygen ใน Dashboard, Timeline และ Curl เพิ่มใน P13/P14 ภาพ 3D ยังไม่ใช่รูปลักษณ์ Final
+- Light/Nutrient/Root Stress รวมใน Growth, Damage และ Health แล้ว; Air Pump/Water Temperature/Water Level ส่งผลต่อ Estimated Oxygen และ Root Health ซึ่งจำกัดการดูดน้ำ
+- Dashboard/Timeline/Curl ทำงานแล้ว; **ภาพ 3D ยังไม่ใช่รูปลักษณ์ Final** รอบถัดไปจึงค่อยปรับให้ใกล้ภาพโรงเรือนต้นแบบ
 - pH ใช้ Empirical equilibrium (ค่าเริ่มต้น 6.2, time constant 2 วัน) พร้อมผล Refill/Dosing; ไม่ใช่เคมีกรด–ด่าง และไม่ได้ทำนายว่า pH ของจริงจะฟื้นเองโดยไม่ปรับสารละลาย
 - ยังไม่มี Login, Teacher Dashboard และการบันทึกลงฐานข้อมูล (ข้อมูลอยู่ในหน่วยความจำ Reset เมื่อปิด Server)
 
@@ -221,7 +234,7 @@ Green_oak_plan/
 
 | Milestone | เนื้อหา |
 |---|---|
-| M2 | Plant Behavior Engine เต็ม: Light/Nutrient/Root stress, Recovery model, Timeline |
+| M2 | P8–P15 เสร็จ รอผู้ใช้ตรวจรับก่อน tag `m2`; ปรับรูปลักษณ์ Model หลังตรวจรอบนี้ |
 | M3 | เชื่อม FX5U จริง 1 เครื่องผ่าน SLMP 3E, Communication monitor |
 | M4 | 10 Lab, 10 PLC, Teacher Dashboard, Login, SQLite |
 | M5 | Scenario 10 บท, Data logging, Performance evaluation, Real sensor architecture |
