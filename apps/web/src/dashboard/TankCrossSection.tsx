@@ -43,7 +43,7 @@ function PlantGlyph({ p, x, potY, selected, onSelect }: { p: PlantState; x: numb
           cx={x + (Math.cos((l.angle * Math.PI) / 180) * l.len) / 2}
           cy={potY - 30 + (Math.sin((l.angle * Math.PI) / 180) * l.len) / 2}
           rx={l.len / 2}
-          ry={Math.max(3, l.len / 6)}
+          ry={Math.max(3, l.len / 6) * (1 - 0.4 * v.curl)}
           transform={`rotate(${l.angle} ${x + (Math.cos((l.angle * Math.PI) / 180) * l.len) / 2} ${potY - 30 + (Math.sin((l.angle * Math.PI) / 180) * l.len) / 2})`}
           fill={v.leafColor}
           stroke="#14532d"

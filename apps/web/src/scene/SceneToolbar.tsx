@@ -5,14 +5,15 @@ import { useSceneStore, type TankMode } from './sceneStore';
 const TANK_LABEL: Record<TankMode, string> = { transparent: 'Transparent', cutaway: 'Cutaway', opaque: 'Opaque' };
 const NEXT_TANK: Record<TankMode, TankMode> = { transparent: 'cutaway', cutaway: 'opaque', opaque: 'transparent' };
 
-function Btn({ active, onClick, title, children }: { active?: boolean; onClick: () => void; title: string; children: ReactNode }) {
+function Btn({ active, disabled, onClick, title, children }: { active?: boolean; disabled?: boolean; onClick: () => void; title: string; children: ReactNode }) {
   return (
     <button
       type="button"
       title={title}
       aria-pressed={active}
+      disabled={disabled}
       onClick={onClick}
-      className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium ${
+      className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium disabled:cursor-not-allowed disabled:opacity-50 ${
         active ? 'bg-emerald-600 text-white' : 'bg-white/90 text-slate-700 hover:bg-white'
       }`}
     >
@@ -21,12 +22,13 @@ function Btn({ active, onClick, title, children }: { active?: boolean; onClick: 
   );
 }
 
-export function SceneToolbar() {
+export function SceneToolbar({ webglUnavailable = false }: { webglUnavailable?: boolean }) {
   const s = useSceneStore();
   const is3d = s.view === '3d';
   return (
     <div className="absolute top-2 right-2 z-10 flex max-w-[calc(100%-1rem)] flex-wrap justify-end gap-1 rounded-md bg-slate-900/10 p-1 backdrop-blur-sm">
-      <Btn active={is3d} onClick={() => s.set({ view: '3d' })} title="มุมมอง 3D">
+      <Btn active={is3d} disabled={webglUnavailable} onClick={() => s.set({ view: '3d' })}
+        title={webglUnavailable ? 'WebGL ใช้ไม่ได้ — โหลดหน้าใหม่เพื่อลองอีกครั้ง' : 'มุมมอง 3D'}>
         <Box className="h-3.5 w-3.5" /> 3D
       </Btn>
       <Btn active={!is3d} onClick={() => s.set({ view: '2d' })} title="ภาพตัดขวาง 2D (ระดับน้ำเทียบปลายราก)">

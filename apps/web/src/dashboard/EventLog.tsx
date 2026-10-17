@@ -3,6 +3,7 @@ import type { EventSeverity } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { formatSimTime } from '../lib/format';
 import { Panel } from './Panel';
+import { eventsForPlant } from './timeline';
 
 const STYLE: Record<EventSeverity, string> = {
   info: 'border-l-slate-300',
@@ -12,11 +13,14 @@ const STYLE: Record<EventSeverity, string> = {
 
 export function EventLog() {
   const events = useLabStore((s) => s.events);
-  const recent = events.slice(-100).reverse();
+  const plantId = useLabStore((s) => s.selectedPlantId);
+  const hours = useLabStore((s) => s.timelineHours);
+  const endS = useLabStore((s) => s.snapshot?.simTimeS ?? 0);
+  const recent = eventsForPlant(events, plantId, endS, hours).slice().reverse();
   return (
-    <Panel title="Event Log" icon={<ScrollText className="h-3.5 w-3.5" />} right={<span className="text-[10px] text-slate-400">{events.length}</span>}>
+    <Panel title="Timeline" icon={<ScrollText className="h-3.5 w-3.5" />} right={<span className="text-[10px] text-slate-400">Plant {plantId} · {recent.length}</span>}>
       {recent.length === 0 ? (
-        <p className="px-3 py-2 text-xs text-slate-400">ยังไม่มีเหตุการณ์</p>
+        <p className="px-3 py-2 text-xs text-slate-400">ยังไม่มีเหตุการณ์ในช่วงที่เลือก</p>
       ) : (
         <ul className="space-y-0.5 p-1.5">
           {recent.map((e) => (

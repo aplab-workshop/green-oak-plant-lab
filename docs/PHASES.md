@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-17: P8–P13 เสร็จ — ผู้ใช้อนุมัติทำ P12–P15 ต่อเนื่อง แล้วหยุดก่อนปรับรูปลักษณ์ 3D**
+> **สถานะ 2026-10-17: P8–P14 เสร็จ — ผู้ใช้อนุมัติทำ P12–P15 ต่อเนื่อง แล้วหยุดก่อนปรับรูปลักษณ์ 3D**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -160,13 +160,15 @@ tags: [green-oak, roadmap]
 
 - **ผลตรวจ:** AC-27 ผ่าน; tests 139/139 + typecheck ผ่าน; History 15 วัน, Lab isolation 24 h, Pause/Reset และ REST/WS
 
-### P14 — Plant Diagnostics, Timeline, Growth Chart & Curl
+### P14 — Plant Diagnostics, Timeline, Growth Chart & Curl ✅
 
-- [ ] แสดง Stress, Root Health และ Estimated Oxygen Status พร้อมคำอธิบายไทยและหน่วยที่ถูกต้อง
-- [ ] เพิ่ม Growth chart รายต้นและ Timeline เลือกช่วงเวลาพร้อม Event จาก Server History ตามขอบเขต P8
-- [ ] ต่อ Light Stress เข้า `plantVisuals.ts` และ Curl ของใบ พร้อมทดสอบ Mapping; คง Droop จาก Water Stress/Damage
-- [ ] ตรวจ Browser ทั้ง 3D, 2D fallback, Low Graphics, เลือกต้น, สลับ Lab, Pause และ Reset
+- [x] แสดง Stress, Root Health และ Estimated Oxygen Status พร้อมคำอธิบายไทยและหน่วยที่ถูกต้อง
+- [x] เพิ่ม Growth chart รายต้นและ Timeline เลือกช่วงเวลาพร้อม Event จาก Server History ตามขอบเขต P8
+- [x] ต่อ Light Stress เข้า `plantVisuals.ts` และ Curl ของใบ พร้อมทดสอบ Mapping; คง Droop จาก Water Stress/Damage
+- [x] ตรวจ Browser ทั้ง 3D, 2D fallback, Low Graphics, เลือกต้น, สลับ Lab, Pause และ Reset
 - **ผ่านเมื่อ:** กราฟ/ค่าตรงกับ Payload และต้นที่เลือก; ข้อมูลว่าง/หลัง Reset แสดงถูกต้อง; Curl เพิ่ม/ลดตาม State จาก Server; PPFD สูงอย่างเดียวไม่สั่งเหี่ยวทันที; ทุก Control ใช้งานได้และไม่มี Client คำนวณพฤติกรรมพืชเอง
+
+- **ผลตรวจ:** AC-28 ผ่าน; tests 148/148 + typecheck + build ผ่าน; Browser 3D/2D/Low/Cutaway/Roots, 6/24 h/14 วัน, เลือกต้น, สลับ Lab และ Reset จากอีกแท็บล้างกราฟ/Events; WebGL fault fixture ยืนยัน fallback และแก้ภาพล้น/ปุ่ม 3D ที่ใช้ไม่ได้
 
 ### P15 — M2 Acceptance & Handoff
 
@@ -180,7 +182,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P13 เสร็จ; งานถัดไป **P14 → P15** ตามคำสั่งล่าสุด; หลัง P15 หยุดให้ตรวจและค่อยปรับรูปลักษณ์ Model; tag m2 หลังผู้ใช้ตรวจรับ
+- P8–P14 เสร็จ; งานถัดไป **P15** ตามคำสั่งล่าสุด; หลัง P15 หยุดให้ตรวจและค่อยปรับรูปลักษณ์ Model; tag m2 หลังผู้ใช้ตรวจรับ
 
 ---
 

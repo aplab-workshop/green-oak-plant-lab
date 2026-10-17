@@ -74,6 +74,13 @@ describe('plantVisuals', () => {
   it('size grows with biomass (cube root)', () => {
     expect(plantVisuals(plant({ biomassG: 40 })).scale).toBeCloseTo(2);
   });
+
+  it('curl follows accumulated light stress and recovery without changing droop', () => {
+    const values = [0, 0.5, 1, 0.2, 0].map((lightStress) => plantVisuals(plant({ lightStress })));
+    expect(values.map((v) => v.curl)).toEqual([0, 0.5, 1, 0.2, 0]);
+    expect(values.every((v) => v.droop === 0)).toBe(true);
+    expect(plantVisuals(plant({ ppfd: 2000 }))).toEqual(plantVisuals(plant()));
+  });
 });
 
 describe('store helpers', () => {

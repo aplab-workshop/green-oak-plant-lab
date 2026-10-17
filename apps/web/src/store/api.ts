@@ -1,5 +1,5 @@
 import type { EventEntry, HistorySample, LabCommand, LabSnapshot, ScenarioInfo } from '@gol/shared';
-import { mergeEvents, useLabStore } from './labStore';
+import { acceptSnapshot, mergeEvents, useLabStore } from './labStore';
 
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -9,7 +9,7 @@ async function getJson<T>(url: string): Promise<T> {
 
 /** ส่งคำสั่งไปยัง Lab ปัจจุบัน แล้วอัปเดต Snapshot จากผลตอบกลับ */
 export async function sendCommand(cmd: LabCommand): Promise<boolean> {
-  const labId = useLabStore.getState().labId;
+  const { labId, viewRevision } = useLabStore.getState();
   if (!labId) return false;
   try {
     const res = await fetch(`/api/labs/${labId}/commands`, {
@@ -18,11 +18,13 @@ export async function sendCommand(cmd: LabCommand): Promise<boolean> {
       body: JSON.stringify(cmd),
     });
     const body = (await res.json()) as LabSnapshot | { error: string };
+    if (useLabStore.getState().labId !== labId || useLabStore.getState().viewRevision !== viewRevision) return false;
     if (!res.ok || 'error' in body) {
       useLabStore.setState({ commandError: 'error' in body ? body.error : `HTTP ${res.status}` });
       return false;
     }
-    useLabStore.setState({ snapshot: body, commandError: null });
+    if (!acceptSnapshot(body)) return false;
+    useLabStore.setState({ commandError: null });
     // reset / scenario ล้าง History และ Event ฝั่ง Server
     if (cmd.type === 'reset' || cmd.type === 'applyScenario' || cmd.type === 'clearScenario') {
       useLabStore.setState({ events: [], history: [] });
@@ -30,29 +32,48 @@ export async function sendCommand(cmd: LabCommand): Promise<boolean> {
     }
     return true;
   } catch (err) {
-    useLabStore.setState({ commandError: err instanceof Error ? err.message : String(err) });
+    if (useLabStore.getState().labId === labId && useLabStore.getState().viewRevision === viewRevision) {
+      useLabStore.setState({ commandError: err instanceof Error ? err.message : String(err) });
+    }
     return false;
   }
 }
 
+let historyRequest = 0;
+let eventsRequest = 0;
+
 export async function refreshHistory(): Promise<void> {
-  const labId = useLabStore.getState().labId;
-  if (!labId) return;
+  const { labId, snapshot, viewRevision } = useLabStore.getState();
+  if (!labId || !snapshot) return;
+  const request = ++historyRequest;
   try {
-    const history = await getJson<HistorySample[]>(`/api/labs/${labId}/history`);
-    if (useLabStore.getState().labId === labId) useLabStore.setState({ history });
+    const res = await fetch(`/api/labs/${labId}/history`);
+    if (!res.ok) return;
+    const runId = res.headers.get('X-Lab-Run-Id');
+    const history = await res.json() as HistorySample[];
+    const current = useLabStore.getState();
+    if (request === historyRequest && current.labId === labId && current.viewRevision === viewRevision &&
+        runId !== null && Number(runId) === snapshot.runId && current.snapshot?.runId === snapshot.runId) {
+      useLabStore.setState({ history });
+    }
   } catch {
     // ลองใหม่รอบถัดไป
   }
 }
 
 export async function refreshEvents(): Promise<void> {
-  const labId = useLabStore.getState().labId;
-  if (!labId) return;
+  const { labId, snapshot, viewRevision } = useLabStore.getState();
+  if (!labId || !snapshot) return;
+  const request = ++eventsRequest;
   try {
-    const events = await getJson<EventEntry[]>(`/api/labs/${labId}/events?limit=300`);
-    if (useLabStore.getState().labId === labId) {
-      useLabStore.setState((s) => ({ events: mergeEvents(s.events, events) }));
+    const res = await fetch(`/api/labs/${labId}/events?limit=1000`);
+    if (!res.ok) return;
+    const runId = res.headers.get('X-Lab-Run-Id');
+    const events = await res.json() as EventEntry[];
+    const current = useLabStore.getState();
+    if (request === eventsRequest && current.labId === labId && current.viewRevision === viewRevision &&
+        runId !== null && Number(runId) === snapshot.runId && current.snapshot?.runId === snapshot.runId) {
+      useLabStore.setState((s) => ({ events: mergeEvents(s.events, events.filter((e) => e.runId === snapshot.runId)) }));
     }
   } catch {
     // ลองใหม่รอบถัดไป

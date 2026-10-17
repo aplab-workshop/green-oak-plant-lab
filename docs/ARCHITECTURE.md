@@ -611,3 +611,13 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Stress Events Light/Nutrient/Root ใช้ threshold `cfg.events.stressOn=0.3` / `stressOff=0.15`; Damage Event levels ย้ายเข้า Config; Root Stress ใช้ `1−rootHealth`; ทดสอบหนึ่ง start/clear ต่อ Exposure และไม่ Spam
 - EventLog เพิ่ม capacity เป็น 1000; `runId` เพิ่มเมื่อ clear/reset และใส่ใน Snapshot/Event พร้อม Header `X-Lab-Run-Id` ของ REST History/Events (รูปแบบ body ยังเป็น array) เพื่อให้ P14 ป้องกันข้อมูลย้อนจากรอบเก่า
 - AC-27 ครอบคลุม History 15 วัน, สำเนาที่แก้ต้นฉบับไม่ได้, Lab แยก 24 h, Pause/Reset, REST/WS และ Regression PLC guard/Fail-safe; tests 139/139 และ typecheck ผ่าน
+
+### 11.12 Implementation Notes (P14)
+
+- Diagnostics แสดง Light/Nutrient Stress, Root Health, Estimated Oxygen พร้อมคำอธิบายไทย; Oxygen แสดง 0–100% ของดัชนี ไม่ใช่ DO mg/L
+- `timeline.ts` เลือก History/Events ตามต้นและหน้าต่าง 6/24 h/14 วันสิ้นสุดที่เวลาจำลองปัจจุบัน; ข้อมูลต้นที่หายเป็น null ไม่ใช้ค่าเฉลี่ยแทน; กราฟ 6 กลุ่มรวม Biomass/Health, Stress และ Root/Oxygen
+- `acceptSnapshot` ล้าง History/Events เมื่อ runId เปลี่ยนจากทุก Client; REST ตรวจ runId, viewRevision และลำดับ request ป้องกันคำตอบเก่าหลัง Reset/สลับ Lab/คำตอบกลับผิดลำดับ; Event เก็บสูงสุด 1000 เท่ากับ Server
+- Mapping Curl = Light Stress และ shader ใช้ค่าที่ Server ส่งอยู่แล้ว; เพิ่ม regression ว่า PPFD อย่างเดียวไม่เปลี่ยนภาพและ Curl recovery ไม่เปลี่ยน Droop; 2D ลดความกว้างใบตาม Curl เดียวกัน
+- Browser บน Windows ตรวจ 3D/Low/Roots/Cutaway, 2D, เลือกต้น, ทุกช่วงเวลา, Pause, สลับสอง Lab และ Reset จากอีกแท็บ; ตัวอย่าง Payload ขณะ Pause: Plant 3 biomass 5.105974 g → UI 5.1 g, Oxygen 0.95 → 95%, 8 history samples
+- WebGL unavailable ใช้ HTML fault fixture ชั่วคราวใน dist ที่คืน null จาก WebGL getContext ก่อนโหลด bundle; fallback ทำงานและเปลี่ยน toolbar เป็น 2D, ปุ่ม 3D disabled พร้อมคำอธิบาย; แก้ layout ไม่ให้ภาพล้น
+- Tests 148/148 + typecheck + build ผ่าน; Browser ปกติไม่มี console error, มี Three.js dependency deprecation warnings และ build chunk-size warning ที่ไม่ขวางการใช้งาน

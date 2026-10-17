@@ -47,6 +47,7 @@ export function PlantSelector() {
           type="button"
           onClick={() => select(p.id)}
           title={`Plant ${p.id}: Health ${Math.round(p.health)}`}
+          aria-label={`Select Plant ${p.id}`}
           className={`flex h-6 w-6 items-center justify-center rounded border text-[11px] font-semibold ${
             p.id === selected ? 'border-emerald-600 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-white text-slate-600'
           }`}
@@ -61,6 +62,7 @@ export function PlantSelector() {
 
 export function PlantDetail() {
   const plants = useLabStore((s) => s.snapshot?.plants);
+  const oxygen = useLabStore((s) => s.snapshot?.tank.estimatedOxygen);
   const selected = useLabStore((s) => s.selectedPlantId);
   const p = plants?.find((x) => x.id === selected) ?? plants?.[0];
 
@@ -83,6 +85,10 @@ export function PlantDetail() {
 
           <Meter label="Hydration" value={p.hydration} color="#0ea5e9" hint="ปริมาณน้ำในต้น 100% = เต็มที่" />
           <Meter label="Water stress" value={p.waterStress} color="#f59e0b" hint="ความเครียดจากการขาดน้ำ ลดลงได้เมื่อได้น้ำกลับมา" />
+          <Meter label="Light stress" value={p.lightStress} color="#eab308" hint="สะสมจากแสงเกินร่วมกับความร้อน/ขาดน้ำ; ลดแสงแล้วค่อยฟื้น" />
+          <Meter label="Nutrient stress" value={p.nutrientStress} color="#8b5cf6" hint="EC/pH นอกช่วงทำให้สะสม Stress และ Growth ลดลง" />
+          <Meter label="Root health" value={p.rootHealth} color="#059669" hint="สุขภาพรากจากน้ำที่เข้าถึงและ Oxygen; Root stress = 100% − Root health" />
+          {oxygen !== undefined && <Meter label="Estimated Oxygen" value={oxygen} color="#06b6d4" hint="ดัชนีของ Model 0–100% ไม่ใช่ค่าจาก DO Sensor หรือ mg/L" />}
           <Meter label="Accumulated damage" value={p.damage} color="#dc2626" hint="ความเสียหายถาวร ไม่ลดลง" />
           <Meter label="Roots in water" value={p.rootSubmerged} color="#14b8a6" hint="สัดส่วนความยาวรากที่แช่น้ำ" />
 
@@ -95,7 +101,7 @@ export function PlantDetail() {
             <Row label="DLI today / yesterday" value={`${fmt(p.dliToday, 1)} / ${fmt(p.dliYesterday, 1)}`} />
             <Row label="Water demand" value={`${fmt(p.demandLPerDay, 2)} L/day`} />
           </div>
-          <p className="text-[10px] leading-snug text-slate-400">แสง ธาตุอาหาร และสภาพรากมีผลต่อ Growth; Health score และ Damage ในรุ่นนี้ประเมินจาก Water stress</p>
+          <p className="text-[10px] leading-snug text-slate-400">Health และ Damage รวมผล Stress ทุกชนิด · Estimated Oxygen เป็นดัชนีประมาณ ไม่ใช่ DO (mg/L)</p>
         </div>
       )}
     </Panel>

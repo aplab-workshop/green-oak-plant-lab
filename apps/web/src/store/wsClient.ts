@@ -1,6 +1,6 @@
 import { WS_PATH, type ClientMessage, type ServerMessage } from '@gol/shared';
 import { useConnectionStore } from './connectionStore';
-import { mergeEvents, useLabStore } from './labStore';
+import { acceptEvent, acceptSnapshot, useLabStore } from './labStore';
 import { loadScenarios, refreshEvents, refreshHistory } from './api';
 
 /** สร้าง URL ของ WebSocket จาก location ของหน้าเว็บ (ผ่าน proxy / server เดียวกัน) */
@@ -33,7 +33,8 @@ function send(msg: ClientMessage): void {
 
 /** เปลี่ยน Lab ที่ดูอยู่ */
 export function selectLab(labId: string): void {
-  useLabStore.setState({ labId, snapshot: null, events: [], history: [], selectedPlantId: 1 });
+  useLabStore.setState((s) => ({ labId, snapshot: null, events: [], history: [], selectedPlantId: 1,
+    commandError: null, viewRevision: s.viewRevision + 1 }));
   const url = new URL(window.location.href);
   url.searchParams.set('lab', labId);
   window.history.replaceState(null, '', url);
@@ -58,13 +59,16 @@ function handle(msg: ServerMessage): void {
     case 'pong':
       useConnectionStore.setState({ rttMs: Date.now() - msg.t });
       break;
-    case 'snapshot':
-      if (msg.labId === useLabStore.getState().labId) useLabStore.setState({ snapshot: msg.data });
-      break;
-    case 'event':
-      if (msg.labId === useLabStore.getState().labId) {
-        useLabStore.setState((s) => ({ events: mergeEvents(s.events, [msg.event]) }));
+    case 'snapshot': {
+      const previousRun = useLabStore.getState().snapshot?.runId;
+      if (acceptSnapshot(msg.data) && previousRun !== msg.data.runId) {
+        void refreshHistory();
+        void refreshEvents();
       }
+      break;
+    }
+    case 'event':
+      acceptEvent(msg.labId, msg.event);
       break;
     case 'error':
       console.warn('[ws] server error:', msg.message);
