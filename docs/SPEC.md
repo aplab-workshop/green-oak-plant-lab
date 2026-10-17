@@ -223,6 +223,10 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-28 **P14 / FR-53, FR-55:** Browser แสดง 6 ต้นและเลือกต้น/ช่วง 6 h, 24 h, 14 วันได้; กราฟและ Diagnostics ตรง Payload ตามความละเอียดที่แสดง; Curl จาก Light Stress 0 → 1 เพิ่มตาม Mapping test ขณะที่ Droop ไม่เปลี่ยนเมื่อ Hydration/Damage คงเดิม; ตรวจ 3D/2D/Low/Reset/ข้อมูลว่าง/สลับ Lab ทุก Control ทำงาน
 - [x] AC-29 **P15 / NFR-06, NFR-07:** AC-16…28 ผ่าน, tests/typecheck/build ผ่าน และทำตามคู่มือการทดลองทุกกลไกได้ในโหมดห้องเรียนบน Windows; บันทึก Browser checks และข้อจำกัดก่อน tag m2 — tests 154/154; ดู [หลักฐานและขั้นตอน](M2-ACCEPTANCE.md) ซึ่งแยก Browser กับ Controlled fixtures ชัดเจน; LAN ตรวจบนเครื่อง Server ผ่าน IP ตัวเอง ยังไม่ตรวจเครื่องนักเรียนอีกเครื่อง
 
+### 8.2 Visual Polish หลัง M2
+
+- [x] AC-30 **P16:** ฉากโรงเรือนสไตล์เกมปลูกผักตามภาพอ้างอิง มีผัก 6 ต้น ฝาขาว ถังใส ราก โครงโรงเรือน และอุปกรณ์ที่คลิกได้; ภาพโต/เหี่ยว/Curl/น้ำ/Actuator ยังอ่าน Server State เดิม; ไม่มีการแก้ sim-core, Server, Shared protocol หรือ PLC addresses; ตรวจ High/Low, เลือกต้น/อุปกรณ์, กล้อง, Roots/Cutaway, 2D และ regression tests (154/154 + typecheck + build; Browser fixtures 5/80 g และถังแห้ง 12 h; รอผู้ใช้ตรวจความพอใจด้านรูปลักษณ์)
+
 ## 9. Assumptions
 
 - Sensor ที่ใช้คือ Virtual ทั้งหมด หาก Phase 2 ใช้ BH1750 (Lux) ต้องปรับเทียบเป็น PPFD ก่อน

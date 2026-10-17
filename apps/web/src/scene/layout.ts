@@ -42,4 +42,4 @@ export function potPosition(index: number, count: number): [number, number] {
 /** cm → m */
 export const cm = (v: number): number => v / 100;
 
-export const LED_Y = 0.58;
+export const LED_Y = 0.46;

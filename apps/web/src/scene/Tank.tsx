@@ -16,18 +16,18 @@ function Walls() {
   const transparent = mode !== 'opaque';
   const material = (
     <meshStandardMaterial
-      color={transparent ? '#dbeafe' : '#f8fafc'}
+      color={transparent ? '#bce2df' : '#f8fafc'}
       transparent={transparent}
-      opacity={transparent ? 0.18 : 1}
+      opacity={transparent ? 0.12 : 1}
       roughness={transparent ? 0.1 : 0.7}
       depthWrite={!transparent}
     />
   );
   return (
-    <group>
+    <group key={mode}>
       <mesh position={[0, -t / 2, 0]} receiveShadow>
         <boxGeometry args={[w + 2 * t, t, d + 2 * t]} />
-        <meshStandardMaterial color="#e2e8f0" roughness={0.8} />
+        <meshStandardMaterial color="#6c999d" roughness={0.3} metalness={0.3} />
       </mesh>
       <mesh position={[-(w + t) / 2, h / 2, 0]}>
         <boxGeometry args={[t, h, d + 2 * t]} />
@@ -48,6 +48,9 @@ function Walls() {
         </mesh>
       )}
       {/* ขีดบอกระดับ 25/50/75% บนผนังหลัง */}
+      {[-1, 1].flatMap((x) => [-1, 1].map((z) => <mesh key={`${x}:${z}`} position={[x * (w / 2 + t / 2), h / 2, z * (d / 2 + t / 2)]}>
+        <cylinderGeometry args={[0.004, 0.004, h, 6]} /><meshStandardMaterial color="#97c7c9" metalness={0.35} roughness={0.2} />
+      </mesh>))}
       {[0.25, 0.5, 0.75].map((f) => (
         <mesh key={f} position={[-w / 2 + 0.03, h * f, -d / 2 + 0.001]}>
           <planeGeometry args={[0.04, 0.0015]} />
@@ -81,10 +84,10 @@ function Lid({ count }: { count: number }) {
 
   return (
     <mesh position={[0, TANK.height, 0]} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
-      <extrudeGeometry args={[geometry.shape, { depth: geometry.depth, bevelEnabled: false }]} />
+      <extrudeGeometry args={[geometry.shape, { depth: geometry.depth - 0.004, bevelEnabled: true, bevelSize: 0.003, bevelThickness: 0.002, bevelSegments: 3, steps: 1 }]} />
       <meshStandardMaterial
-        color="#334155"
-        roughness={0.85}
+        color="#fffdf0"
+        roughness={0.42}
         transparent={mode === 'cutaway'}
         opacity={mode === 'cutaway' ? 0.45 : 1}
       />
@@ -114,11 +117,11 @@ function Water() {
     <group>
       <mesh ref={body} renderOrder={1}>
         <boxGeometry args={[w, 1, d]} />
-        <meshStandardMaterial color="#38a3e0" transparent opacity={0.28} roughness={0.05} depthWrite={false} />
+        <meshStandardMaterial color="#37b6d4" transparent opacity={0.22} roughness={0.16} depthWrite={false} />
       </mesh>
       <mesh ref={surface} rotation={[-Math.PI / 2, 0, 0]} renderOrder={2}>
         <planeGeometry args={[w, d]} />
-        <meshStandardMaterial color="#7cc8f0" transparent opacity={0.4} roughness={0.02} depthWrite={false} />
+        <meshStandardMaterial color="#88e0e4" transparent opacity={0.28} roughness={0.18} metalness={0.25} depthWrite={false} />
       </mesh>
     </group>
   );

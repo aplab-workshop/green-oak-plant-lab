@@ -73,19 +73,15 @@ export function Sensors() {
 
       {/* Air temperature / humidity sensor บนเสา */}
       <group position={[-0.3, 0, -0.3]}>
-        <mesh position={[0, 0.21, 0]}>
-          <cylinderGeometry args={[0.004, 0.004, 0.42, 8]} />
+        <mesh position={[0, 0.11, 0]}>
+          <cylinderGeometry args={[0.004, 0.004, 0.62, 8]} />
           <meshStandardMaterial color="#94a3b8" />
         </mesh>
         <Clickable device={{ kind: 'sensor', key: 'airTempC' }} position={[0, 0.43, 0]} labelOffset={[0, 0.05, 0]}>
-          <mesh castShadow>
-            <boxGeometry args={[0.04, 0.05, 0.03]} />
-            <meshStandardMaterial color="#f8fafc" />
-          </mesh>
-          {[-0.012, 0, 0.012].map((y) => (
-            <mesh key={y} position={[0, y, 0.0155]}>
-              <boxGeometry args={[0.03, 0.003, 0.001]} />
-              <meshStandardMaterial color="#94a3b8" />
+          {[-0.024, -0.012, 0, 0.012, 0.024].map((y) => (
+            <mesh key={y} position={[0, y, 0]} castShadow>
+              <cylinderGeometry args={[0.019, 0.024, 0.008, 16]} />
+              <meshStandardMaterial color="#fffdf4" roughness={0.4} />
             </mesh>
           ))}
         </Clickable>
@@ -118,7 +114,7 @@ export function Sensors() {
       </Clickable>
 
       {/* Power meter ปลั๊กพ่วง */}
-      <Clickable device={{ kind: 'sensor', key: 'powerW' }} position={[-0.25, 0.012, 0.36]} labelOffset={[0, 0.05, 0]}>
+      <Clickable device={{ kind: 'sensor', key: 'powerW' }} position={[-0.25, -0.187, 0.36]} labelOffset={[0, 0.05, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.16, 0.024, 0.05]} />
           <meshStandardMaterial color="#f8fafc" />

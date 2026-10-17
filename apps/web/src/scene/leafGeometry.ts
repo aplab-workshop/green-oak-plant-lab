@@ -36,13 +36,14 @@ export function createLeafGeometry(segmentsLength: number, segmentsHalfWidth: nu
       const s = j / (cols - 1) * 2 - 1; // −1…1
       const x = s * half;
       // ใบห่อขึ้นเล็กน้อย + ขอบใบเป็นคลื่น (ลักษณะใบผักสลัด)
-      const cup = 0.1 * s * s * half;
-      const ruffle = 0.035 * Math.abs(s) ** 2 * Math.sin(38 * t + 7 * s) * (0.3 + t);
-      positions.push(x, cup + ruffle, t);
+      const cup = 0.4 * s * s * half + 0.12 * Math.sin(Math.PI * t);
+      const ruffle = 0.026 * Math.abs(s) ** 3 * (Math.sin(48 * t + 7 * s) + 0.2 * Math.sin(97 * t)) * (0.3 + t);
+      const veinRidge = 0.006 * Math.cos(42 * t - Math.abs(s) * 8) * Math.abs(s);
+      positions.push(x, cup + ruffle + veinRidge, t);
       // เส้นกลางใบสว่าง ขอบใบเข้มขึ้น
-      const shade = 1 - 0.28 * Math.abs(s) ** 1.5 - 0.08 * (1 - t);
-      const vein = Math.abs(s) < 0.12 ? 0.12 : 0;
-      colors.push(Math.min(1, shade + vein * 0.8), Math.min(1, shade + vein), Math.min(1, shade + vein * 0.6));
+      const shade = 0.78 + 0.2 * Math.abs(s) + 0.06 * Math.sin(t * 16 + s * 4);
+      const vein = Math.abs(s) < 0.08 ? 0.2 : Math.pow(Math.max(0, Math.cos(42 * t - Math.abs(s) * 8)), 12) * 0.09;
+      colors.push(Math.min(1, shade + vein), Math.min(1, shade + vein), Math.min(1, shade * 0.72 + vein));
     }
   }
   for (let i = 0; i < segmentsLength; i++) {
@@ -80,7 +81,7 @@ export interface LeafUniforms {
  */
 export function createLeafMaterial(floorY: number): { material: MeshStandardMaterial; uniforms: LeafUniforms } {
   const uniforms: LeafUniforms = { uBend: { value: 0.3 }, uWilt: { value: 0 }, uCurl: { value: 0 }, uFloorY: { value: floorY } };
-  const material = new MeshStandardMaterial({ vertexColors: true, side: DoubleSide, roughness: 0.62, metalness: 0 });
+  const material = new MeshStandardMaterial({ vertexColors: true, side: DoubleSide, roughness: 0.72, metalness: 0 });
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uBend = uniforms.uBend;
     shader.uniforms.uWilt = uniforms.uWilt;

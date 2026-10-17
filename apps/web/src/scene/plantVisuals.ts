@@ -21,7 +21,7 @@ export interface PlantVisual {
 
 type Rgb = [number, number, number];
 
-const EMERALD: Rgb = [46, 158, 82];
+const EMERALD: Rgb = [119, 184, 43];
 const YELLOW_GREEN: Rgb = [176, 178, 64];
 const BROWN: Rgb = [133, 94, 54];
 

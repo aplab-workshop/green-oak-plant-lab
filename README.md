@@ -2,7 +2,7 @@
 
 ห้องปฏิบัติการเสมือนสำหรับฝึกเขียน PLC **Mitsubishi FX5U** เพื่อควบคุมระบบปลูกผักสลัด Green Oak แบบ Hydroponics **Deep Water Culture (DWC)** ด้วย Simulation และโมเดล 3D แบบ Interactive
 
-> **สถานะ:** Milestone 2 P8–P15 เสร็จ พร้อมให้ผู้ใช้ตรวจรับ — Plant Behavior Engine ใช้ Mock PLC; รูปลักษณ์ Model 3D จะปรับในรอบถัดไป
+> **สถานะ:** Milestone 2 P8–P15 และ P16 Greenhouse Visual Polish เสร็จ พร้อมให้ผู้ใช้ตรวจรับ — Plant Behavior Engine ใช้ Mock PLC; ภาพโรงเรือนสไตล์เกมขับด้วย Simulation เดิม
 >
 > **Educational Simulation:** แบบจำลองพืชใช้สมการที่อธิบายได้เพื่อการเรียนการสอน **ไม่ใช่**โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ
 
@@ -32,7 +32,7 @@
 | **Plant model** | ผัก 6 ต้นแยกสถานะ: Water/Light/Nutrient Stress, Root Health, Hydration, Damage ถาวร, Recovery, Growth, Leaf count/area, Root length, Health score รวม Stress |
 | **Mock PLC** | จำลอง Device memory ของ FX5U: `auto` (Ladder ตัวอย่าง), `manual` (กดสั่งเอง), `offline` (จำลองสายหลุด) และ Fail-safe เมื่อไม่ได้รับคำสั่ง |
 | **Student Dashboard** | Sensor → PLC (D100–D110), Actuator ← PLC (M100–M105, D200), Plant diagnostics + Estimated Oxygen, Growth/Stress chart รายต้น, Timeline 6 h/24 h/14 วัน, Scenario |
-| **3D DWC Scene** | ผัก Green Oak แบบ Procedural ที่ใบตก/เหี่ยว/ฟื้น/ม้วนตาม Simulation, ราก, น้ำขึ้นลงจริง, LED, Fan, Humidifier, Pumps, ฟองอากาศ, Sensor probes ที่คลิกดูข้อมูลได้ |
+| **3D DWC Scene** | โรงเรือน Diorama พร้อมฐานสวน ถังใสฝาขาว พุ่ม Green Oak แบบ Procedural และรากฝอย; ใบตก/เหี่ยว/ฟื้น/ม้วนตาม Simulation, น้ำขึ้นลงจริง, LED, Fan, Humidifier, Pumps, ฟองอากาศ และ Sensor probes ที่คลิกดูข้อมูลได้ |
 | **Scenario** | `Water Shortage Simulation` (ระดับน้ำ 65% + รั่ว 1.5 L/h) |
 
 เอกสารออกแบบอยู่ใน `docs/` (เปิดด้วย Obsidian ได้)
@@ -223,10 +223,10 @@ Green_oak_plan/
 
 ## 11. ข้อจำกัดและแผนถัดไป
 
-**สถานะหลัง P15**
+**สถานะหลัง P16**
 - ใช้ **Mock PLC** เท่านั้น ยังไม่ต่อ FX5U จริง
 - Light/Nutrient/Root Stress รวมใน Growth, Damage และ Health แล้ว; Air Pump/Water Temperature/Water Level ส่งผลต่อ Estimated Oxygen และ Root Health ซึ่งจำกัดการดูดน้ำ
-- Dashboard/Timeline/Curl ทำงานแล้ว; **ภาพ 3D ยังไม่ใช่รูปลักษณ์ Final** รอบถัดไปจึงค่อยปรับให้ใกล้ภาพโรงเรือนต้นแบบ
+- Dashboard/Timeline/Curl ทำงานแล้ว; P16 ปรับภาพโรงเรือนสไตล์เกมตามภาพอ้างอิงแล้ว พร้อมให้ตรวจรูปลักษณ์; เป็น Procedural stylized model ไม่ใช่ภาพ Photorealistic
 - pH ใช้ Empirical equilibrium (ค่าเริ่มต้น 6.2, time constant 2 วัน) พร้อมผล Refill/Dosing; ไม่ใช่เคมีกรด–ด่าง และไม่ได้ทำนายว่า pH ของจริงจะฟื้นเองโดยไม่ปรับสารละลาย
 - ยังไม่มี Login, Teacher Dashboard และการบันทึกลงฐานข้อมูล (ข้อมูลอยู่ในหน่วยความจำ Reset เมื่อปิด Server)
 
@@ -234,7 +234,7 @@ Green_oak_plan/
 
 | Milestone | เนื้อหา |
 |---|---|
-| M2 | P8–P15 เสร็จ รอผู้ใช้ตรวจรับก่อน tag `m2`; ปรับรูปลักษณ์ Model หลังตรวจรอบนี้ |
+| M2 | P8–P15 และส่วนต่อ P16 Visual Polish เสร็จ รอผู้ใช้ตรวจภาพและตรวจรับก่อน tag `m2` |
 | M3 | เชื่อม FX5U จริง 1 เครื่องผ่าน SLMP 3E, Communication monitor |
 | M4 | 10 Lab, 10 PLC, Teacher Dashboard, Login, SQLite |
 | M5 | Scenario 10 บท, Data logging, Performance evaluation, Real sensor architecture |

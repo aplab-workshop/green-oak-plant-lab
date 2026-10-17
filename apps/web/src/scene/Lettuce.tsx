@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import { useCursor } from '@react-three/drei';
-import { CatmullRomCurve3, Color, DoubleSide, InstancedMesh, MathUtils, Object3D, TubeGeometry, Vector3, type Group } from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { CatmullRomCurve3, Color, InstancedMesh, MathUtils, Object3D, TubeGeometry, Vector3, type Group } from 'three';
 import { useLabStore } from '../store/labStore';
 import { plantVisuals } from './plantVisuals';
 import { createLeafGeometry, createLeafMaterial } from './leafGeometry';
@@ -32,15 +33,25 @@ function NetPot({ selected }: { selected: boolean }) {
   const h = POT.topY - POT.bottomY;
   return (
     <group>
-      <mesh position={[0, POT.bottomY + h / 2, 0]} castShadow>
-        <cylinderGeometry args={[POT.topRadius, POT.bottomRadius, h, 20, 1, true]} />
-        <meshStandardMaterial color="#1f2937" roughness={0.8} side={DoubleSide} />
-      </mesh>
+      {[0, 0.35, 0.7, 1].map((f) => <mesh key={f} position={[0, POT.bottomY + h * f, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[POT.bottomRadius + (POT.topRadius - POT.bottomRadius) * f, 0.0018, 5, 20]} />
+        <meshStandardMaterial color="#283d36" roughness={0.65} />
+      </mesh>)}
+      {Array.from({ length: 14 }, (_, i) => {
+        const a = i * Math.PI * 2 / 14;
+        return <mesh key={i} position={[Math.sin(a) * 0.026, POT.bottomY + h / 2, Math.cos(a) * 0.026]} rotation={[0.13 * Math.cos(a), 0, -0.13 * Math.sin(a)]}>
+          <boxGeometry args={[0.0023, h, 0.0023]} /><meshStandardMaterial color="#283d36" roughness={0.65} />
+        </mesh>;
+      })}
       {/* Clay pebbles */}
       <mesh position={[0, POT.topY - 0.004, 0]}>
         <cylinderGeometry args={[POT.topRadius * 0.95, POT.topRadius * 0.9, 0.008, 20]} />
-        <meshStandardMaterial color="#9a5b3b" roughness={1} />
+        <meshStandardMaterial color="#715139" roughness={1} />
       </mesh>
+      {Array.from({ length: 9 }, (_, i) => <mesh key={i}
+        position={[Math.sin(i * 2.4) * 0.021, POT.topY, Math.cos(i * 2.4) * 0.021]}>
+        <icosahedronGeometry args={[0.005 + (i % 2) * 0.001, 0]} /><meshStandardMaterial color={i % 2 ? '#ae8252' : '#8c653e'} roughness={1} />
+      </mesh>)}
       <mesh position={[0, POT.topY + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[POT.topRadius * 1.05, POT.topRadius * (selected ? 1.45 : 1.15), 32]} />
         <meshBasicMaterial color={selected ? '#10b981' : '#111827'} transparent opacity={selected ? 0.95 : 0.7} />
@@ -51,9 +62,9 @@ function NetPot({ selected }: { selected: boolean }) {
 
 function Roots({ plantId, smoothed, low }: { plantId: number; smoothed: React.RefObject<Smoothed>; low: boolean }) {
   const group = useRef<Group>(null);
-  const geometries = useMemo(() => {
-    const strands = low ? 6 : 12;
-    return Array.from({ length: strands }, (_, i) => {
+  const geometry = useMemo(() => {
+    const strands = low ? 8 : 18;
+    const parts = Array.from({ length: strands }, (_, i) => {
       const a = (i / strands) * Math.PI * 2 + hash01(plantId, 50 + i);
       const spread = 0.25 + 0.35 * hash01(plantId, 80 + i);
       const pts = Array.from({ length: 6 }, (_, k) => {
@@ -61,27 +72,35 @@ function Roots({ plantId, smoothed, low }: { plantId: number; smoothed: React.Re
         const wob = 0.06 * Math.sin(t * 9 + i) * t;
         return new Vector3(Math.cos(a) * (spread * t + wob), -t * (0.85 + 0.15 * hash01(plantId, i)), Math.sin(a) * (spread * t - wob));
       });
-      return new TubeGeometry(new CatmullRomCurve3(pts), low ? 8 : 16, 0.035, low ? 3 : 4, false);
-    });
+      const main = new TubeGeometry(new CatmullRomCurve3(pts), low ? 8 : 18, 0.012, 3, false);
+      const branches = Array.from({ length: low ? 1 : 4 }, (_, j) => {
+        const t = 0.24 + j * 0.16;
+        const base = new CatmullRomCurve3(pts).getPoint(t);
+        const end = base.clone().add(new Vector3(Math.cos(a + j) * 0.2, -0.17, Math.sin(a + j) * 0.2));
+        return new TubeGeometry(new CatmullRomCurve3([base, base.clone().lerp(end, 0.5).add(new Vector3(0.04, 0, 0)), end]), 5, 0.005, 3, false);
+      });
+      return [main, ...branches];
+    }).flat();
+    const merged = mergeGeometries(parts);
+    parts.forEach((g) => g.dispose());
+    return merged;
   }, [plantId, low]);
-  useEffect(() => () => geometries.forEach((g) => g.dispose()), [geometries]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
 
   useFrame(() => {
     const g = group.current;
     if (!g || !smoothed.current) return;
-    const len = Math.max(0.005, smoothed.current.rootM);
-    // รากยาวขึ้นตาม Root length และแผ่กว้างขึ้นเมื่อโต (Tube radius 0.035 × scale ≈ 1.5–3 mm)
-    const spread = 0.02 + 0.4 * len;
+    const len = Math.min(POT.bottomY - 0.006, Math.max(0.005, smoothed.current.rootM));
+    // รากแผ่กว้างตาม Root length; จำกัดแนวดิ่งไม่ให้ทะลุก้นถัง (เฉพาะภาพ)
+    const spread = 0.025 + 0.45 * smoothed.current.rootM;
     g.scale.set(spread, len, spread);
   });
 
   return (
     <group ref={group} position={[0, POT.bottomY + 0.004, 0]}>
-      {geometries.map((g, i) => (
-        <mesh key={i} geometry={g}>
-          <meshStandardMaterial color="#efe3c2" roughness={0.9} />
+        <mesh geometry={geometry}>
+          <meshStandardMaterial color="#fff1cf" roughness={0.9} />
         </mesh>
-      ))}
     </group>
   );
 }
@@ -98,7 +117,7 @@ export function Lettuce({ plantId, x, z }: Props) {
   const [hovered, setHovered] = useState(false);
   useCursor(hovered);
 
-  const geometry = useMemo(() => createLeafGeometry(low ? 14 : 28, low ? 2 : 4), [low]);
+  const geometry = useMemo(() => createLeafGeometry(low ? 24 : 56, low ? 3 : 8), [low]);
   const { material, uniforms } = useMemo(() => createLeafMaterial(POT.topY + 0.0015), []);
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);
@@ -136,7 +155,7 @@ export function Lettuce({ plantId, x, z }: Props) {
 
     const poses = leafLayout(plantId, Math.min(v.leafCount, low ? 16 : MAX_LEAVES), s.scale, s.droop);
     poses.forEach((p, i) => {
-      dummy.position.set(Math.sin(p.yaw) * p.radialOffset, LEAF_BASE_Y, Math.cos(p.yaw) * p.radialOffset);
+      dummy.position.set(Math.sin(p.yaw) * p.radialOffset, LEAF_BASE_Y + p.lift, Math.cos(p.yaw) * p.radialOffset);
       dummy.rotation.set(-p.elevation, p.yaw, 0, 'YXZ');
       dummy.scale.set(p.width, p.length, p.length);
       dummy.updateMatrix();

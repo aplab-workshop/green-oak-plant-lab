@@ -630,3 +630,14 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Final suite: 22 files / 154 tests ผ่าน; typecheck ผ่าน; `npm run serve` build ผ่านและเปิดหน้า/REST/WS บน IP LAN ของเครื่อง Server ที่พอร์ตทดสอบ 3302, 2 Labs; ยังไม่ได้ตรวจเครื่องนักเรียนอีกเครื่อง
 - Browser ทดลอง LED 100% + Air OFF แล้ว Air ON/LED 60%: ก่อนฟื้น Light Stress 26%, Root Health 65%, Oxygen 14%; หลังประมาณ 5 h จำลอง Light Stress 7%, Root Health 76%, Oxygen 62% (น้ำยังอุ่นประมาณ 28.5 °C จึงไม่คาดว่า Oxygen ต้องเป็น 95%); UI/กราฟ/Timeline ตอบสนองตาม Server
 - ไม่เพิ่ม Production model parameters, PLC addresses หรือ Scenario Library ใน Phase ตรวจรับ; หยุดก่อน Visual polish, รอผู้ใช้ตรวจรับก่อน tag `m2`
+
+### 11.14 Implementation Notes (P16 — Visual Polish)
+
+- เพิ่ม `Greenhouse.tsx`: โครงโรงเรือนโลหะ แผงโปร่งแสง ฐานสวนและทางเดินแบบ Diorama; เปิดด้านหน้า/หลังคาด้านใกล้กล้องเพื่อเห็นผักและเลือกอุปกรณ์ได้ ไม่มี Animation ของฉากตกแต่ง
+- ปรับ Leaf geometry เป็นใบกว้าง มีขอบหยักและเส้นใบจาก Vertex colors; Rosette ยกยอดอ่อนให้พุ่มมีมิติ สีเขียวอมเหลือง; ขนาดยังใช้ Biomass scale, จำนวนใบจาก Server (High cap 32 / Low cap 16), Droop/Wilt/Curl และสีเสียหายยังใช้ Mapping เดิม
+- Net pot เป็นซี่โปร่งพร้อม Clay pebbles; Root geometry รวมเส้นหลัก/แขนงเป็นหนึ่ง Mesh ต่อต้น ลด Draw calls; จำกัดรากแนวดิ่งไม่ให้ทะลุก้นถังและแผ่ออกตาม Root length (ภาพเท่านั้น ไม่เปลี่ยน Root access ใน Model); Dispose geometry/material เมื่อเลิกใช้
+- ฝาขาวขอบมน ถังใสสีฟ้าและน้ำโปร่งแสง; เปลี่ยนโหมดผนังแล้วสร้าง Material ใหม่ ป้องกัน Opaque ค้างเมื่อกลับ Transparent
+- LED สองแถบและพัดลมสองตัวเป็นตัวแทนของ D200 และ M100 เดิมตามลำดับ ไม่เพิ่มอุปกรณ์ใน PLC หรือคูณกำลังไฟใน Simulation; จัดตำแหน่งขวด A/B ปั๊ม ท่อ และ Sensor ให้เข้ากับโรงเรือน
+- ปรับแสง วัสดุ และกล้องให้เหมือนเกมปลูกผัก; Double-click focus ใช้ขนาดจาก Biomass เพื่อไม่ให้กล้องเข้าไปในพุ่มต้นโต; Low ลดรายละเอียดใบ/ราก ตัดกอหญ้าและเงาตามโหมดเดิม
+- AC-30: Browser ใช้ Server fixture แยกพอร์ต 3303 ตรวจ 5 g/80 g และถังแห้ง 12 h ผ่าน Model จริง (Hydration 0%, Water stress 100%, Health 31 → ภาพเหี่ยวแบน/เหลือง); ตรวจเลือกต้น/ซูม/คืนกล้อง คลิกพัดลม High/Low/Roots/โหมดถัง/2D และไม่มี console error หลังตรวจ; ไม่แก้ State ของ Lab ผู้ใช้
+- Final regression: 154/154 tests (22 files), typecheck และ production build ผ่าน; ไม่มี diff ใน sim-core, Server หรือ Shared; ยังมี chunk-size warning เดิม จึงยังไม่อ้างผล FPS บนเครื่องนักเรียน รูปลักษณ์เป็น Procedural stylized model และรอผู้ใช้ตรวจรับ

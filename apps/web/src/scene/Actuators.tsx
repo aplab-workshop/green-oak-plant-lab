@@ -1,4 +1,5 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { RoundedBox } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
   AdditiveBlending,
@@ -49,6 +50,7 @@ function StatusLed({ bit, position }: { bit: BitKey; position: [number, number, 
 
 function Pipe({ points, radius = 0.004, color = '#cbd5e1' }: { points: [number, number, number][]; radius?: number; color?: string }) {
   const geometry = useMemo(() => new TubeGeometry(new CatmullRomCurve3(points.map((p) => new Vector3(...p))), 48, radius, 8, false), [points, radius]);
+  useEffect(() => () => geometry.dispose(), [geometry]);
   return (
     <mesh geometry={geometry}>
       <meshStandardMaterial color={color} roughness={0.5} />
@@ -57,7 +59,7 @@ function Pipe({ points, radius = 0.004, color = '#cbd5e1' }: { points: [number, 
 }
 
 /** Dimmable LED Grow Light (D200) */
-function LedFixture() {
+function LedFixture({ x }: { x: number }) {
   const panel = useRef<MeshStandardMaterial>(null);
   const cone = useRef<MeshBasicMaterial>(null);
   const light = useRef<SpotLight>(null);
@@ -67,29 +69,29 @@ function LedFixture() {
     level.current = MathUtils.damp(level.current, (commands()?.ledPct ?? 0) / 100, 6, Math.min(dt, 0.1));
     const l = level.current;
     if (panel.current) panel.current.emissiveIntensity = 0.05 + 2.2 * l;
-    if (cone.current) cone.current.opacity = 0.1 * l;
-    if (light.current) light.current.intensity = 1.2 * l;
+    if (cone.current) cone.current.opacity = 0.025 * l;
+    if (light.current) light.current.intensity = 0.22 * l;
   });
   return (
-    <Clickable device={{ kind: 'actuator', key: 'ledPct' }} position={[0, LED_Y, 0]} labelOffset={[0, 0.05, 0]}>
+    <Clickable device={{ kind: 'actuator', key: 'ledPct' }} position={[x, LED_Y, -0.08]} labelOffset={[0, 0.05, 0]}>
       <mesh castShadow>
-        <boxGeometry args={[0.42, 0.018, 0.28]} />
+        <boxGeometry args={[0.21, 0.018, 0.065]} />
         <meshStandardMaterial color="#1e293b" roughness={0.4} metalness={0.3} />
       </mesh>
       <mesh position={[0, -0.0095, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[0.38, 0.24]} />
-        <meshStandardMaterial ref={panel} color="#fff1f2" emissive="#ffe4e6" emissiveIntensity={0} />
+        <planeGeometry args={[0.19, 0.052]} />
+        <meshStandardMaterial ref={panel} color="#fce7f3" emissive="#f5a5d8" emissiveIntensity={0} />
       </mesh>
-      {[-0.18, 0.18].map((x) => (
-        <mesh key={x} position={[x, 0.2, 0]}>
-          <cylinderGeometry args={[0.0012, 0.0012, 0.4, 4]} />
+      {[-0.08, 0.08].map((x) => (
+        <mesh key={x} position={[x, 0.045, 0]}>
+          <cylinderGeometry args={[0.0012, 0.0012, 0.09, 4]} />
           <meshStandardMaterial color="#94a3b8" />
         </mesh>
       ))}
       {/* กรวยแสงเป็นแค่ภาพ ไม่รับการคลิก (ไม่งั้นบังต้นผักข้างใต้) */}
       <mesh position={[0, -0.19, 0]} raycast={() => null}>
-        <cylinderGeometry args={[0.2, 0.3, 0.36, 4, 1, true]} />
-        <meshBasicMaterial ref={cone} color="#fff7ed" transparent opacity={0} depthWrite={false} blending={AdditiveBlending} />
+        <cylinderGeometry args={[0.07, 0.14, 0.36, 4, 1, true]} />
+        <meshBasicMaterial ref={cone} color="#fbd3ec" transparent opacity={0} depthWrite={false} blending={AdditiveBlending} />
       </mesh>
       <spotLight
         ref={light}
@@ -108,7 +110,7 @@ function LedFixture() {
 }
 
 /** Ventilation Fan (M100) */
-function VentFan() {
+function VentFan({ x }: { x: number }) {
   const blades = useRef<Group>(null);
   const speed = useRef(0);
   useFrame((_, dt) => {
@@ -117,16 +119,12 @@ function VentFan() {
     if (blades.current) blades.current.rotation.x += speed.current * k;
   });
   return (
-    <group position={[-0.42, 0, 0.05]}>
-      <mesh position={[0, 0.17, 0]}>
-        <cylinderGeometry args={[0.006, 0.006, 0.34, 8]} />
-        <meshStandardMaterial color="#94a3b8" />
-      </mesh>
-      <mesh position={[0, 0.005, 0]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.01, 20]} />
-        <meshStandardMaterial color="#64748b" />
-      </mesh>
+    <group position={[x, 0.1, -0.21]}>
       <Clickable device={{ kind: 'actuator', key: 'fan' }} position={[0, 0.34, 0]} labelOffset={[0, 0.09, 0]}>
+        {[-1, 1].map((s) => <group key={s}>
+          <mesh position={[0, s * 0.073, 0]}><boxGeometry args={[0.025, 0.014, 0.16]} /><meshStandardMaterial color="#354a46" metalness={0.4} /></mesh>
+          <mesh position={[0, 0, s * 0.073]}><boxGeometry args={[0.025, 0.16, 0.014]} /><meshStandardMaterial color="#354a46" metalness={0.4} /></mesh>
+        </group>)}
         <mesh rotation={[0, 0, Math.PI / 2]}>
           <torusGeometry args={[0.065, 0.006, 8, 32]} />
           <meshStandardMaterial color="#e2e8f0" />
@@ -139,7 +137,7 @@ function VentFan() {
           {[0, 1, 2, 3, 4].map((i) => (
             <mesh key={i} rotation={[(i * Math.PI * 2) / 5, 0, 0]} position={[0.004, 0, 0]}>
               <boxGeometry args={[0.003, 0.055, 0.022]} />
-              <meshStandardMaterial color="#0ea5e9" />
+              <meshStandardMaterial color="#425c54" metalness={0.25} />
             </mesh>
           ))}
         </group>
@@ -178,12 +176,11 @@ function Humidifier() {
     (pts.material as { opacity: number }).opacity = 0.5 * intensity.current;
   });
   return (
-    <group position={[0.42, 0, 0.12]}>
+    <group position={[0.39, 0.38, -0.4]}>
       <Clickable device={{ kind: 'actuator', key: 'humidifier' }} labelOffset={[0, 0.17, 0]}>
-        <mesh position={[0, 0.05, 0]} castShadow>
-          <cylinderGeometry args={[0.045, 0.05, 0.1, 24]} />
-          <meshStandardMaterial color="#f1f5f9" roughness={0.4} />
-        </mesh>
+        <RoundedBox args={[0.075, 0.1, 0.055]} radius={0.012} position={[0, 0.05, 0]} castShadow>
+          <meshStandardMaterial color="#fffdf2" roughness={0.4} />
+        </RoundedBox>
         <mesh position={[0, 0.11, 0]}>
           <cylinderGeometry args={[0.012, 0.018, 0.02, 16]} />
           <meshStandardMaterial color="#94a3b8" />
@@ -218,7 +215,7 @@ function RefillSystem() {
     (s.material as MeshStandardMaterial).opacity = 0.45 + 0.1 * Math.sin(state.clock.elapsedTime * 30);
   });
   const pipe: [number, number, number][] = [
-    [-0.03, 0.04, -0.36],
+    [-0.03, -0.16, -0.36],
     [-0.03, 0.27, -0.33],
     [-0.2, 0.27, -0.24],
     [-0.2, 0.25, -0.17],
@@ -227,22 +224,22 @@ function RefillSystem() {
   return (
     <group>
       {/* ถังน้ำสำรอง */}
-      <mesh position={[-0.17, 0.09, -0.36]}>
+      <mesh position={[-0.17, -0.11, -0.36]}>
         <boxGeometry args={[0.18, 0.18, 0.1]} />
         <meshStandardMaterial color="#bfdbfe" transparent opacity={0.35} depthWrite={false} />
       </mesh>
-      <mesh position={[-0.17, 0.065, -0.36]}>
+      <mesh position={[-0.17, -0.135, -0.36]}>
         <boxGeometry args={[0.17, 0.13, 0.09]} />
         <meshStandardMaterial color="#38a3e0" transparent opacity={0.3} depthWrite={false} />
       </mesh>
-      <Clickable device={{ kind: 'actuator', key: 'refillPump' }} position={[-0.03, 0.025, -0.36]} labelOffset={[0, 0.07, 0]}>
+      <Clickable device={{ kind: 'actuator', key: 'refillPump' }} position={[-0.03, -0.175, -0.36]} labelOffset={[0, 0.07, 0]}>
         <mesh castShadow>
           <boxGeometry args={[0.06, 0.05, 0.05]} />
           <meshStandardMaterial color="#0f766e" roughness={0.5} />
         </mesh>
         <StatusLed bit="refillPump" position={[0.031, 0.012, 0]} />
       </Clickable>
-      <Pipe points={pipe} radius={0.005} color="#e2e8f0" />
+      <Pipe points={pipe} radius={0.006} color="#278aaa" />
       <mesh ref={stream} position={[REFILL_OUTLET[0], 0.1, REFILL_OUTLET[2]]} renderOrder={4}>
         <cylinderGeometry args={[0.004, 0.006, 1, 10, 1, true]} />
         <meshStandardMaterial color="#7dd3fc" transparent opacity={0.5} depthWrite={false} />
@@ -254,21 +251,21 @@ function RefillSystem() {
 /** Nutrient Pump A (M103) / B (M104) */
 function NutrientPumps() {
   const bottles: { key: 'nutrientA' | 'nutrientB'; x: number; color: string }[] = [
-    { key: 'nutrientA', x: 0.32, color: '#f59e0b' },
-    { key: 'nutrientB', x: 0.42, color: '#8b5cf6' },
+    { key: 'nutrientA', x: 0.35, color: '#278cda' },
+    { key: 'nutrientB', x: 0.45, color: '#e76554' },
   ];
   return (
     <group>
       {bottles.map((b, i) => (
         <group key={b.key}>
-          <mesh position={[b.x, 0.07, -0.33]} castShadow>
-            <cylinderGeometry args={[0.03, 0.03, 0.14, 20]} />
-            <meshStandardMaterial color={b.color} transparent opacity={0.75} roughness={0.3} />
-          </mesh>
+          <RoundedBox args={[0.075, 0.12, 0.08]} radius={0.009} position={[b.x, 0.075, -0.3]} castShadow>
+            <meshStandardMaterial color="#fffbed" roughness={0.4} />
+          </RoundedBox>
+          <mesh position={[b.x, 0.14, -0.3]}><cylinderGeometry args={[0.013, 0.013, 0.012, 16]} /><meshStandardMaterial color={b.color} /></mesh>
           <Clickable device={{ kind: 'actuator', key: b.key }} position={[b.x, 0.02, -0.26]} labelOffset={[0, 0.06, 0]}>
             <mesh castShadow>
               <boxGeometry args={[0.05, 0.04, 0.04]} />
-              <meshStandardMaterial color="#334155" />
+              <meshStandardMaterial color={b.color} roughness={0.4} />
             </mesh>
             <mesh position={[0, 0, 0.021]} rotation={[0, 0, 0]}>
               <circleGeometry args={[0.012, 16]} />
@@ -284,7 +281,7 @@ function NutrientPumps() {
               [0.2 - i * 0.03, 0.21, -0.17],
             ]}
             radius={0.0022}
-            color={b.color}
+            color="#d9e7df"
           />
         </group>
       ))}
@@ -300,7 +297,7 @@ function AirPump() {
   });
   return (
     <group>
-      <Clickable device={{ kind: 'actuator', key: 'airPump' }} position={[-0.38, 0.025, -0.25]} labelOffset={[0, 0.07, 0]}>
+      <Clickable device={{ kind: 'actuator', key: 'airPump' }} position={[-0.38, -0.175, -0.25]} labelOffset={[0, 0.07, 0]}>
         <group ref={body}>
           <mesh castShadow>
             <boxGeometry args={[0.09, 0.05, 0.06]} />
@@ -311,7 +308,7 @@ function AirPump() {
       </Clickable>
       <Pipe
         points={[
-          [-0.34, 0.03, -0.25],
+          [-0.34, -0.17, -0.25],
           [-0.3, 0.25, -0.24],
           [-0.15, 0.25, -0.12],
           [-0.12, 0.1, -0.02],
@@ -327,17 +324,14 @@ function AirPump() {
 export function Actuators() {
   return (
     <group>
-      <LedFixture />
-      <VentFan />
+      <LedFixture x={-0.12} />
+      <LedFixture x={0.12} />
+      <VentFan x={-0.46} />
+      <VentFan x={0.54} />
       <Humidifier />
       <RefillSystem />
       <NutrientPumps />
       <AirPump />
-      {/* พื้นโต๊ะ */}
-      <mesh position={[0, -0.009, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[1.4, 1.0]} />
-        <meshStandardMaterial color="#e5e7eb" roughness={0.95} />
-      </mesh>
     </group>
   );
 }

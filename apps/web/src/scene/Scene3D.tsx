@@ -8,14 +8,15 @@ import { Actuators } from './Actuators';
 import { Lettuce } from './Lettuce';
 import { Sensors } from './Sensors';
 import { Tank } from './Tank';
+import { Greenhouse } from './Greenhouse';
 import { potPosition } from './layout';
 import { useSceneStore } from './sceneStore';
 
-const CAMERA_POS: [number, number, number] = [0.62, 0.5, 0.78];
-const TARGET: [number, number, number] = [0, 0.18, 0];
+const CAMERA_POS: [number, number, number] = [1.06, 0.77, 1.62];
+const TARGET: [number, number, number] = [0.04, 0.16, 0];
 
-const DAY_BG = new Color('#eef2f6');
-const NIGHT_BG = new Color('#0f172a');
+const DAY_BG = new Color('#e5eee5');
+const NIGHT_BG = new Color('#27394b');
 
 /** 0 = กลางคืน, 1 = กลางวัน ตามชั่วโมงจำลอง (06–18 สว่าง เปลี่ยนแบบนุ่มนวล) */
 export function daylight(minuteOfDay: number): number {
@@ -39,22 +40,24 @@ function Ambience() {
     const d = level.current;
     bg.current.copy(NIGHT_BG).lerp(DAY_BG, d);
     scene.background = bg.current;
-    if (hemi.current) hemi.current.intensity = 0.25 + 0.9 * d;
-    if (sun.current) sun.current.intensity = 0.1 + 1.5 * d;
+    if (hemi.current) hemi.current.intensity = 0.8 + 1.25 * d;
+    if (sun.current) sun.current.intensity = 0.25 + 2.3 * d;
   });
 
   return (
     <>
-      <hemisphereLight ref={hemi} args={['#ffffff', '#cbd5e1', 1]} />
+      <hemisphereLight ref={hemi} args={['#fff8df', '#91aaa2', 1]} />
+      <directionalLight position={[-1, 0.8, -0.5]} intensity={0.8} color="#dcefff" />
       <directionalLight
         ref={sun}
         position={[0.8, 1.4, 0.6]}
         castShadow={!low}
-        shadow-mapSize={[1024, 1024]}
-        shadow-camera-left={-0.6}
-        shadow-camera-right={0.6}
-        shadow-camera-top={0.6}
-        shadow-camera-bottom={-0.6}
+        shadow-mapSize={[2048, 2048]}
+        shadow-camera-left={-1}
+        shadow-camera-right={1}
+        shadow-camera-top={1}
+        shadow-camera-bottom={-1}
+        shadow-normalBias={0.003}
       />
     </>
   );
@@ -74,8 +77,11 @@ function Controls() {
   useEffect(() => {
     if (!focus || !ref.current) return;
     const [x, y, z] = focus.point;
-    ref.current.target.set(x, y + 0.02, z);
-    camera.position.set(x + 0.14, y + 0.13, z + 0.18);
+    const state = useLabStore.getState();
+    const plant = state.snapshot?.plants.find((p) => p.id === state.selectedPlantId);
+    const size = Math.max(1, Math.cbrt((plant?.biomassG ?? 5) / 5));
+    ref.current.target.set(x, y + 0.04 * size, z);
+    camera.position.set(x + 0.18 * size, y + 0.14 * size, z + 0.22 * size);
     ref.current.update();
   }, [focus, camera]);
   return (
@@ -86,7 +92,7 @@ function Controls() {
       enablePan
       enableDamping
       minDistance={0.25}
-      maxDistance={2.2}
+      maxDistance={3}
       maxPolarAngle={Math.PI * 0.49}
     />
   );
@@ -124,6 +130,7 @@ export default function Scene3D() {
     >
       <Ambience />
       <Controls />
+      <Greenhouse />
       <Tank plantCount={plantCount} />
       <Plants />
       <Actuators />
