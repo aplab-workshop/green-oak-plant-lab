@@ -691,3 +691,4 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `LabManager` สร้าง Lab ที่ `level: 'L1'`; Test helper เดิมยังเป็น Free Play (ค่าเริ่มต้นของ LabSessionOptions)
 - `deviceOfBit()` อยู่ใน `shared` ให้ Server (guard 409) และ Web (🔒) ใช้กฎเดียวกัน
 - การปรับเป้า: `packages/sim-core/test/levels.test.ts` เล่นตามสูตร GAME-GUIDE ทุกด่านด้วย dt 1 s (~40 s CPU รวม) และบังคับเหลือเวลา ≥ 15%; ถ้าแก้ Model พืชแล้วเทสต์นี้ล้ม ให้ปรับ `LEVELS` ไม่ใช่ลดเกณฑ์เทสต์
+- (หลัง P21) Layout จอกว้าง: `scoreCards`/`sensorCard` เป็น Element ร่วม — จอแคบอยู่ใน `.garden-hud`, จอกว้างอยู่ใน `.workspace-left` (flex column เริ่ม top 12px) ทำให้การ์ดที่สูงขึ้นดันแผงลงแทนการซ้อน; คู่มือในเกม `GuidePanel`/`LevelBriefing` อ่าน `snapshot.level` และข้อความคงที่ใน `guideContent.ts` (ไม่คำนวณพืช); Briefing แสดงครั้งเดียวต่อ `labId:runId` เมื่อ `game.status === 'ready'`

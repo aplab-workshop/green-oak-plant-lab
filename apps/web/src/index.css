@@ -73,8 +73,11 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
   .garden-hud .sensor-card > span:first-child { margin-bottom: 6px; }
   .garden-hud .sensor-values { gap: 13px; }
   .plant-card { display: none; }
-  .workspace-left { position: absolute; left: 12px; top: 122px; bottom: 38px; width: 238px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+  .workspace-left { position: absolute; left: 12px; top: 12px; bottom: 38px; width: 238px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
   .workspace-right { position: absolute; right: 12px; top: 52px; bottom: 262px; width: 258px; display: flex; pointer-events: none; }
+  /* P21 fix: การ์ด HUD อยู่ในคอลัมน์ซ้ายเดียวกับแผง → เรียงต่อกัน ไม่ซ้อน */
+  .workspace-left > .hud-card { flex: none; padding: 10px 13px; border-radius: 16px; }
+  .workspace-left > .score-card > span:nth-child(2) { font-size: 25px; }
   .workspace-panel { min-height: 0; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #dce8df; border-radius: 16px; background: #fffffff5; box-shadow: 0 5px 20px #23493412; pointer-events: auto; }
   .workspace-sensors { flex: 1.25; }
   .workspace-plant { flex: 1; }
@@ -111,5 +114,6 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
   .workspace-actuators li { padding-top: 3px; padding-bottom: 3px; }
   .workspace-actuators .text-\[11px\] { font-size: 10px; }
   .workspace-actuators .text-\[10px\] { font-size: 9px; }
-  .workspace-left { top: 118px; bottom: 32px; }
+  .workspace-left { top: 10px; bottom: 32px; }
+  .workspace-left > .hud-card { padding: 8px 12px; }
 }

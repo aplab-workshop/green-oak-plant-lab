@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Activity, ChartNoAxesCombined, ChevronRight, Droplets, Leaf, List, Maximize2, SlidersHorizontal, Sprout, Trophy, X } from 'lucide-react';
+import { Activity, BookOpen, ChartNoAxesCombined, ChevronRight, Droplets, Leaf, List, Maximize2, SlidersHorizontal, Sprout, Trophy, X } from 'lucide-react';
 import { Header } from './Header';
 import { SensorPanel } from '../dashboard/SensorPanel';
 import { ActuatorPanel } from '../dashboard/ActuatorPanel';
@@ -8,11 +8,12 @@ import { SimControls } from '../dashboard/SimControls';
 import { ScenarioPanel } from '../dashboard/ScenarioPanel';
 import { TrendChart } from '../dashboard/TrendChart';
 import { EventLog } from '../dashboard/EventLog';
+import { GuidePanel, LevelBriefing } from '../dashboard/GuidePanel';
 import { PlantView } from '../scene/PlantView';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 
-type Detail = 'sensors' | 'actuators' | 'plant' | 'scenario' | 'trends' | 'timeline' | 'score';
+type Detail = 'sensors' | 'actuators' | 'plant' | 'scenario' | 'trends' | 'timeline' | 'score' | 'guide';
 const PINNABLE: Detail[] = ['sensors', 'plant', 'actuators', 'trends'];
 const ITEMS: { key: Detail; label: string; icon: ReactNode }[] = [
   { key: 'sensors', label: 'Sensors', icon: <Activity /> },
@@ -21,6 +22,7 @@ const ITEMS: { key: Detail; label: string; icon: ReactNode }[] = [
   { key: 'scenario', label: 'ภารกิจ', icon: <Leaf /> },
   { key: 'trends', label: 'กราฟ', icon: <ChartNoAxesCombined /> },
   { key: 'timeline', label: 'Timeline', icon: <List /> },
+  { key: 'guide', label: 'คู่มือ', icon: <BookOpen /> },
 ];
 
 /** Native dialog จัดการ Focus trap และ Escape; ปิดแล้วคืน Focus ให้ปุ่มเดิม */
@@ -98,6 +100,9 @@ export function App() {
   const round = snap ? `${snap.labId}:${snap.runId}` : '';
   const lost = game?.status === 'lost';
   const showLoss = lost && seenLoss !== round;
+  // Briefing เด้งครั้งเดียวต่อรอบตอนรอเริ่ม (ready) บอกเป้าหมาย/สิ่งที่ต้องทำ/ข้อควรระวัง
+  const [seenBrief, setSeenBrief] = useState('');
+  const showBrief = game?.status === 'ready' && seenBrief !== round && !showLoss;
   const closeDetail = () => setDetail(null);
   const open = (key: Detail) => setDetail(key);
   const toggle = (key: Detail) => {
@@ -113,6 +118,7 @@ export function App() {
       case 'trends': return <TrendChart selectedChart={chart} onChartChange={setChart} />;
       case 'timeline': return <EventLog />;
       case 'score': return <ScoreDetail />;
+      case 'guide': return <GuidePanel />;
     }
   };
   const pinned = (key: Detail) => panels.includes(key) && <aside className={`workspace-panel workspace-${key}`} aria-label={`แผง${ITEMS.find((i) => i.key === key)!.label}`}>
@@ -122,6 +128,35 @@ export function App() {
     </div></header>
     <div className="workspace-content">{detail !== key && content(key)}</div>
   </aside>;
+  const scoreCards = <>
+    <button className="hud-card score-card" onClick={() => open('score')} aria-label="ขยายคะแนนการดูแล">
+      <span className="flex items-center justify-between text-xs text-emerald-800"><span className="flex items-center gap-2"><Trophy size={16} className="text-amber-500" /> CARE SCORE</span><Maximize2 size={13} /></span>
+      <span className="mt-1 block text-3xl font-bold text-emerald-950">{game && game.elapsedS > 0 ? game.score : '—'} <span className="text-xs font-normal text-slate-500">/ 1,500</span></span>
+      <span className="mt-1 block text-xs text-slate-600">{game ? `รอด ${game.totalPlants - game.deadPlantIds.length}/${game.totalPlants} ต้น` : 'รอ Server'} · Best {game?.best?.score ?? '—'}</span>
+      {game && <span className="mt-1 block text-xs text-slate-600">
+        เป้า {game.targetG} g{game.timeLimitS !== null && ` · วัน ${Math.min(game.elapsedS, game.timeLimitS) / 86400 | 0}/${game.timeLimitS / 86400}`}
+        {game.energyBudgetKWh !== null && ` · ⚡ ${game.energyKWh.toFixed(1)}/${game.energyBudgetKWh} kWh`}
+      </span>}
+      {game?.testRun && <span className="mt-1 block text-[11px] font-semibold text-amber-700">TEST · ใช้ Auto ระหว่างรอบ ไม่นับ Best</span>}
+    </button>
+    {game?.canHarvest && <button className="hud-card harvest-card" onClick={() => void sendCommand({ type: 'harvest' })}>
+      <span className="flex items-center gap-2 text-sm font-bold text-emerald-900"><Sprout size={18} /> ผักโตเต็มที่ — เก็บเกี่ยว!</span>
+    </button>}
+    {game?.status === 'won' && <button className="hud-card harvest-card" onClick={() => open('score')}>
+      <span className="block text-sm font-bold text-emerald-900">🎉 เก็บเกี่ยวสำเร็จ · {game.yieldG?.toFixed(0)} g</span>
+      <span className="block text-xs text-slate-600">{'⭐'.repeat(game.stars)} · คะแนน {game.score} (โบนัส +{game.harvestBonus}) · เลือกด่านถัดไปหรือ Reset</span>
+    </button>}
+  </>;
+  const sensorCard = (
+    <button className="hud-card sensor-card" onClick={() => open('sensors')} aria-label="ขยาย Sensors">
+      <span className="mb-3 flex items-center justify-between text-xs font-semibold text-slate-500"><span className="flex items-center gap-2"><Droplets size={15} /> สภาพแวดล้อม</span><Maximize2 size={13} /></span>
+      <span className="sensor-values">
+        <span>น้ำ <b>{snap?.sensors.waterLevelPct.toFixed(0) ?? '—'}<small>%</small></b></span>
+        <span>EC <b>{snap?.sensors.ecMsCm.toFixed(2) ?? '—'}<small>mS/cm</small></b></span>
+        <span>pH <b>{snap?.sensors.ph.toFixed(2) ?? '—'}</b></span>
+      </span>
+    </button>
+  );
   return <div className="game-app">
     <Header />
     <main className="game-main">
@@ -131,40 +166,15 @@ export function App() {
       </div>
       <div className="garden-stage">
         <div className="scene-window"><PlantView /></div>
-        <div className="garden-hud">
-          <button className="hud-card score-card" onClick={() => open('score')} aria-label="ขยายคะแนนการดูแล">
-            <span className="flex items-center justify-between text-xs text-emerald-800"><span className="flex items-center gap-2"><Trophy size={16} className="text-amber-500" /> CARE SCORE</span><Maximize2 size={13} /></span>
-            <span className="mt-1 block text-3xl font-bold text-emerald-950">{game && game.elapsedS > 0 ? game.score : '—'} <span className="text-xs font-normal text-slate-500">/ 1,500</span></span>
-            <span className="mt-1 block text-xs text-slate-600">{game ? `รอด ${game.totalPlants - game.deadPlantIds.length}/${game.totalPlants} ต้น` : 'รอ Server'} · Best {game?.best?.score ?? '—'}</span>
-            {game && <span className="mt-1 block text-xs text-slate-600">
-              เป้า {game.targetG} g{game.timeLimitS !== null && ` · วัน ${Math.min(game.elapsedS, game.timeLimitS) / 86400 | 0}/${game.timeLimitS / 86400}`}
-              {game.energyBudgetKWh !== null && ` · ⚡ ${game.energyKWh.toFixed(1)}/${game.energyBudgetKWh} kWh`}
-            </span>}
-            {game?.testRun && <span className="mt-1 block text-[11px] font-semibold text-amber-700">TEST · ใช้ Auto ระหว่างรอบ ไม่นับ Best</span>}
-          </button>
-          {game?.canHarvest && <button className="hud-card harvest-card" onClick={() => void sendCommand({ type: 'harvest' })}>
-            <span className="flex items-center gap-2 text-sm font-bold text-emerald-900"><Sprout size={18} /> ผักโตเต็มที่ — เก็บเกี่ยว!</span>
-          </button>}
-          {game?.status === 'won' && <button className="hud-card harvest-card" onClick={() => open('score')}>
-            <span className="block text-sm font-bold text-emerald-900">🎉 เก็บเกี่ยวสำเร็จ · {game.yieldG?.toFixed(0)} g</span>
-            <span className="block text-xs text-slate-600">{'⭐'.repeat(game.stars)} · คะแนน {game.score} (โบนัส +{game.harvestBonus}) · เลือกด่านถัดไปหรือ Reset</span>
-          </button>}
-          <button className="hud-card sensor-card" onClick={() => open('sensors')} aria-label="ขยาย Sensors">
-            <span className="mb-3 flex items-center justify-between text-xs font-semibold text-slate-500"><span className="flex items-center gap-2"><Droplets size={15} /> สภาพแวดล้อม</span><Maximize2 size={13} /></span>
-            <span className="sensor-values">
-              <span>น้ำ <b>{snap?.sensors.waterLevelPct.toFixed(0) ?? '—'}<small>%</small></b></span>
-              <span>EC <b>{snap?.sensors.ecMsCm.toFixed(2) ?? '—'}<small>mS/cm</small></b></span>
-              <span>pH <b>{snap?.sensors.ph.toFixed(2) ?? '—'}</b></span>
-            </span>
-          </button>
-        </div>
+        {!wide && <div className="garden-hud">{scoreCards}{sensorCard}</div>}
         <aside className="hud-card plant-card">
           <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-emerald-800">ผักของคุณ</span><PlantSelector /></div>
           <button className="mt-3 flex w-full items-center justify-between text-left" onClick={() => open('plant')} aria-label="ขยายข้อมูลต้นผัก">
             <span><span className="block text-sm font-semibold">Plant {plant?.id ?? '—'} {plant && game?.deadPlantIds.includes(plant.id) ? '· ตายแล้ว' : ''}</span><span className="text-xs text-slate-500">Health {plant?.health.toFixed(0) ?? '—'}% · {plant?.biomassG.toFixed(1) ?? '—'} g</span></span><ChevronRight size={18} />
           </button>
         </aside>
-        {wide && <><div className="workspace-left">{pinned('sensors')}{pinned('plant')}</div>
+        {/* จอกว้าง: การ์ดคะแนนและแผงซ้ายเรียงในคอลัมน์เดียว ไม่ซ้อนกันแม้การ์ดสูงขึ้น; ซ่อนการ์ดสภาพแวดล้อมเมื่อเปิดแผง Sensors (ค่าซ้ำ) */}
+        {wide && <><div className="workspace-left">{scoreCards}{!panels.includes('sensors') && sensorCard}{pinned('sensors')}{pinned('plant')}</div>
           <div className="workspace-right">{pinned('actuators')}</div>{pinned('trends')}</>}
         {lost && <button className="loss-banner" onClick={() => setSeenLoss('')}>Game Over · {game.lostReason === 'timeout' ? 'หมดเวลาด่าน' : 'ต้นไม้ตายหมด'} — ดูผลรอบนี้</button>}
         <nav className="garden-dock" aria-label="รายละเอียดสวน">
@@ -177,8 +187,19 @@ export function App() {
       {error && <p role="alert" className="bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
       <footer className="px-3 py-1 text-[10px] text-slate-500">Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ</footer>
     </main>
-    {detail && !showLoss && <DetailDialog title={detail === 'score' ? 'คะแนนการดูแล' : ITEMS.find((x) => x.key === detail)!.label} close={closeDetail}>
+    {detail && !showLoss && <DetailDialog title={detail === 'score' ? 'คะแนนการดูแล' : detail === 'guide' ? '📖 คู่มือเกม' : ITEMS.find((x) => x.key === detail)!.label} close={closeDetail}>
       {content(detail)}
+    </DetailDialog>}
+    {showBrief && !detail && <DetailDialog title="🌱 ภารกิจก่อนเริ่มปลูก" close={() => setSeenBrief(round)}>
+      <div className="space-y-5 p-6"><LevelBriefing />
+        <div className="flex flex-wrap justify-end gap-3">
+          <button className="rounded-xl border px-4 py-2 text-sm" onClick={() => { setSeenBrief(round); open('guide'); }}>📖 อ่านคู่มือเต็ม</button>
+          <button className="rounded-xl bg-emerald-700 px-5 py-2 text-sm font-semibold text-white" onClick={async () => {
+            setSeenBrief(round);
+            await sendCommand({ type: 'startGame' });
+          }}>เริ่มปลูก 🌱</button>
+        </div>
+      </div>
     </DetailDialog>}
     {showLoss && <DetailDialog title={game.lostReason === 'timeout' ? 'Game Over — หมดเวลา' : 'Game Over — ต้นไม้ตายหมด'} close={() => setSeenLoss(round)}>
       <div className="p-6 text-center"><Sprout className="mx-auto mb-3 text-rose-500" size={48} />
