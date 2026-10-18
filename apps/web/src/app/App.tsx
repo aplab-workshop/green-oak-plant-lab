@@ -9,6 +9,7 @@ import { ScenarioPanel } from '../dashboard/ScenarioPanel';
 import { TrendChart } from '../dashboard/TrendChart';
 import { EventLog } from '../dashboard/EventLog';
 import { GuidePanel, LevelBriefing } from '../dashboard/GuidePanel';
+import { LossStoryView } from '../dashboard/LossStoryView';
 import { PlantView } from '../scene/PlantView';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
@@ -202,18 +203,15 @@ export function App() {
       </div>
     </DetailDialog>}
     {showLoss && <DetailDialog title={game.lostReason === 'timeout' ? 'Game Over — หมดเวลา' : 'Game Over — ต้นไม้ตายหมด'} close={() => setSeenLoss(round)}>
-      <div className="p-6 text-center"><Sprout className="mx-auto mb-3 text-rose-500" size={48} />
-        <h3 className="text-2xl font-bold text-slate-800">สวนรอบนี้จบแล้ว</h3>
-        <p className="my-3 text-sm text-slate-600">{game.lostReason === 'timeout'
-          ? `ครบ ${game.timeLimitS! / 86400} วันแล้ว แต่ผักยังไม่ถึง ${game.targetG} g ทุกต้น — ลองให้แสงและปุ๋ยให้เหมาะสม`
-          : 'ต้นไม้ทุกต้นมี Damage สะสม 100% จึงไม่สามารถฟื้นได้'}<br />ดู Timeline เพื่อหาสาเหตุ แล้วลองดูแลใหม่อีกครั้ง</p>
-        <p className="mb-5 font-semibold">คะแนนสุดท้าย {game.score} · ดูแลมา {(game.elapsedS / 86400).toFixed(2)} วัน</p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <button className="rounded-xl border px-4 py-2 text-sm" onClick={() => { setSeenLoss(round); open('timeline'); }}>ดูสาเหตุใน Timeline</button>
+      <div className="p-6"><h3 className="mb-4 text-center text-xl font-bold text-slate-800">📖 เกิดอะไรขึ้นกับสวนรอบนี้?</h3>
+        <LossStoryView />
+        <div className="mt-5 flex flex-wrap justify-center gap-3">
+          <button className="rounded-xl border px-4 py-2 text-sm" onClick={() => { setSeenLoss(round); open('timeline'); }}>ดูรายละเอียดใน Timeline</button>
           <button disabled={resetting} className="rounded-xl bg-emerald-700 px-5 py-2 text-sm font-semibold text-white disabled:opacity-50" onClick={async () => {
             setResetting(true);
             const ok = await sendCommand({ type: 'reset' });
-            if (ok) { setDetail(null); await sendCommand({ type: 'startGame' }); }
+            // Reset แล้วให้ Briefing ของด่านเด้ง ผู้เล่นทบทวนก่อนกดเริ่มปลูก
+            if (ok) setDetail(null);
             setResetting(false);
           }}>{resetting ? 'กำลังเริ่ม…' : 'ปลูกใหม่'}</button>
         </div>{error && <p role="alert" className="mt-3 text-sm text-rose-600">{error}</p>}
