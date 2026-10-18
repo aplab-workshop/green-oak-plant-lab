@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, Droplets, Fan, FlaskConical, Lightbulb, Power, Wind, Waves } from 'lucide-react';
-import { COMMAND_BITS, LED_COMMAND_REGISTER, deviceName, type MockPlcMode } from '@gol/shared';
+import { COMMAND_BITS, LED_COMMAND_REGISTER, deviceName, deviceOfBit, type MockPlcMode } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 import { Panel } from './Panel';
@@ -72,7 +72,9 @@ export function ActuatorPanel() {
   const snap = useLabStore((s) => s.snapshot);
   const error = useLabStore((s) => s.commandError);
   if (!snap) return <Panel title="Actuators ← PLC">{null}</Panel>;
-  const { commands, plc, failsafe } = snap;
+  const { commands, plc, failsafe, level } = snap;
+  // ด่านที่ยังไม่ปลดล็อกอุปกรณ์ → ผู้ช่วยฟาร์มคุมแทน (SPEC § 4.6)
+  const locked = (key: (typeof COMMAND_BITS)[number]['key']) => !!level && !level.playerDevices.includes(deviceOfBit(key));
   const manual = plc.mode === 'manual';
 
   return (
@@ -124,7 +126,8 @@ export function ActuatorPanel() {
               >
                 {on ? 'ON' : 'OFF'}
               </span>
-              {manual && (
+              {manual && locked(bit.key) && <span className="text-[10px] text-slate-400" title="ด่านนี้ยังไม่ปลดล็อก ผู้ช่วยฟาร์มดูแลให้">🔒 ผู้ช่วย</span>}
+              {manual && !locked(bit.key) && (
                 <Switch
                   on={on}
                   disabled={failsafe}

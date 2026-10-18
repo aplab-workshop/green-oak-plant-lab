@@ -19,3 +19,5 @@ export * from './plant/nutrient';
 export * from './plant/root';
 export * from './plant/plant';
 export * from './simulation';
+export * from './levels';
+export * from './careGame';

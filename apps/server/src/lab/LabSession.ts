@@ -7,8 +7,14 @@ import {
   type LabSnapshot,
   type SensorReadings,
   type CareRecord,
+  type LevelId,
+  deviceOfBit,
 } from '@gol/shared';
-import { SimClock, Simulation, levelPct, waterHeightCm, type SimulationOptions } from '@gol/sim-core';
+import {
+  LEVELS, SimClock, Simulation, findLevel, levelInfo, levelPct, levelRound, waterHeightCm,
+  type LevelDef, type RoundStart, type SimulationOptions,
+} from '@gol/sim-core';
+import { applyFarmHelper } from './farmHelper';
 import { FAILSAFE_COMMANDS } from '../plc/failsafe';
 import { MockPlcAdapter } from '../plc/MockPlcAdapter';
 import { nextHeartbeat, type PlcAdapter } from '../plc/PlcAdapter';
@@ -28,6 +34,8 @@ export interface LabSessionOptions {
   now?: () => number;
   /** true = ข้ามหน้า Ready และเริ่มรอบทันทีทุกครั้งที่ Reset (ใช้ใน Test/สคริปต์) */
   autoStart?: boolean;
+  /** ด่านเริ่มต้น (SPEC § 4.6) — ค่าเริ่มต้น Free Play */
+  level?: LevelId | 'free';
 }
 
 export class LabCommandError extends Error {
@@ -75,13 +83,25 @@ export class LabSession {
   private lastLagLogAt = -Infinity;
   private readonly bestByScenario = new Map<string, CareRecord>();
   private readonly autoStart: boolean;
+  private level: LevelDef | null = null;
+  private readonly unlocked = new Set<LevelId>(['L1']);
+  private readonly bestStars = new Map<LevelId, number>();
+
+  private get recordKey(): string {
+    return this.level?.id ?? this.scenario?.id ?? 'free';
+  }
 
   private saveRecord(): void {
     const game = this.sim.game;
     if (game.testRun) return;
-    const key = this.scenario?.id ?? 'free';
+    if (this.level && game.status === 'won') {
+      this.bestStars.set(this.level.id, Math.max(game.stars, this.bestStars.get(this.level.id) ?? 0));
+      const next = LEVELS[LEVELS.findIndex((l) => l.id === this.level!.id) + 1];
+      if (next) this.unlocked.add(next.id);
+    }
+    const key = this.recordKey;
     const best = this.bestByScenario.get(key);
-    if (game.elapsedS >= this.sim.cfg.game.recordMinS && (!best || game.score > best.score)) {
+    if ((game.status === 'won' || game.elapsedS >= this.sim.cfg.game.recordMinS) && (!best || game.score > best.score)) {
       this.bestByScenario.set(key, { score: game.score, elapsedS: game.elapsedS });
     }
   }
@@ -93,6 +113,10 @@ export class LabSession {
     this.commandTimeoutMs = opts.commandTimeoutMs ?? 3000;
     this.autoStart = opts.autoStart ?? false;
     this.sim = new Simulation(opts.sim);
+    if (opts.level && opts.level !== 'free') {
+      this.level = findLevel(opts.level);
+      this.sim.reset(levelRound(this.level));
+    }
     this.clock = new SimClock({
       startS: this.sim.startTimeS,
       dtS: this.sim.cfg.time.dtS,
@@ -198,7 +222,8 @@ export class LabSession {
       );
     }
 
-    const next = this.failsafe || !this.lastCommands ? { ...FAILSAFE_COMMANDS } : { ...this.lastCommands };
+    let next = this.failsafe || !this.lastCommands ? { ...FAILSAFE_COMMANDS } : { ...this.lastCommands };
+    if (this.level && !this.failsafe) next = applyFarmHelper(next, this.applied, this.lastSensors, this.level.playerDevices);
     if (!sameCommands(next, this.applied)) this.logActuatorChanges(this.applied, next);
     this.applied = next;
   }
@@ -256,7 +281,8 @@ export class LabSession {
         if (!s) throw new LabCommandError(`ไม่พบ Scenario ${cmd.scenarioId}`, 404);
         this.saveRecord();
         this.scenario = s;
-        this.reset(false);
+        this.level = null;
+        this.reset(false, {});
         return;
       }
       case 'clearScenario':
@@ -264,12 +290,23 @@ export class LabSession {
         this.scenario = null;
         this.reset(false);
         return;
+      case 'selectLevel': {
+        if (cmd.levelId !== 'free' && !this.unlocked.has(cmd.levelId)) throw new LabCommandError('ด่านนี้ยังล็อกอยู่ — ผ่านด่านก่อนหน้าก่อน', 409);
+        this.saveRecord();
+        this.scenario = null;
+        this.level = cmd.levelId === 'free' ? null : findLevel(cmd.levelId);
+        this.reset(false, this.level ? levelRound(this.level) : {});
+        return;
+      }
       case 'setPlcMode':
         this.mock().setMode(cmd.mode);
         this.log('plc.mode', 'info', `Mock PLC mode: ${cmd.mode}`);
         await this.poll();
         return;
       case 'setManualBit':
+        if (this.level && !this.level.playerDevices.includes(deviceOfBit(cmd.key))) {
+          throw new LabCommandError('อุปกรณ์นี้ยังไม่ปลดล็อกในด่านนี้ — ผู้ช่วยฟาร์มดูแลให้', 409);
+        }
         this.manual().setManualBit(cmd.key, cmd.value);
         await this.poll();
         return;
@@ -281,9 +318,9 @@ export class LabSession {
   }
 
   /** Reset Lab นี้ (FR-42) — ใช้ Scenario เดิมถ้ามี ไม่กระทบ Lab อื่น */
-  reset(saveRecord = true): void {
+  reset(saveRecord = true, round?: RoundStart): void {
     if (saveRecord) this.saveRecord();
-    this.sim.reset();
+    this.sim.reset(round);
     this.clock.reset(this.sim.startTimeS);
     this.history.clear();
     this.events.clear();
@@ -292,7 +329,8 @@ export class LabSession {
     this.lastSensors = this.provider.read();
     this.history.maybeSample(this.sim);
     this.enterRound();
-    this.log('lab.reset', 'info', this.scenario ? `Reset Lab และเริ่ม Scenario: ${this.scenario.title}` : 'Reset Lab สู่สภาวะเริ่มต้น');
+    this.log('lab.reset', 'info', this.scenario ? `Reset Lab และเริ่ม Scenario: ${this.scenario.title}`
+      : this.level ? `เริ่มด่าน ${this.level.id}: ${this.level.title}` : 'Reset Lab สู่สภาวะเริ่มต้น (Free Play)');
   }
 
   private mock(): MockPlcAdapter {
@@ -317,8 +355,10 @@ export class LabSession {
     const s = this.sim.snapshot();
     const cfg = this.sim.cfg;
     return {
-      game: { ...this.sim.game, best: this.bestByScenario.has(this.scenario?.id ?? 'free')
-        ? { ...this.bestByScenario.get(this.scenario?.id ?? 'free')! } : null },
+      game: { ...this.sim.game, best: this.bestByScenario.has(this.recordKey)
+        ? { ...this.bestByScenario.get(this.recordKey)! } : null },
+      level: this.level ? levelInfo(this.level) : null,
+      levels: LEVELS.map((l) => ({ id: l.id, title: l.title, unlocked: this.unlocked.has(l.id), bestStars: this.bestStars.get(l.id) ?? 0 })),
       labId: this.labId,
       runId: this.events.runId,
       at: this.now(),

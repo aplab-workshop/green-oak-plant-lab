@@ -33,6 +33,8 @@ export class LabManager {
         commandTimeoutMs: config.commandTimeoutMs,
         // seed ต่างกันต่อ Lab ทำให้ต้นแต่ละ Lab ไม่เหมือนกันทุกประการ
         sim: { seed: i },
+        // เกมเริ่มที่ด่านแรก (SPEC § 4.6); Free Play/Scenario เลือกได้ภายหลัง
+        level: 'L1',
       });
       lab.events.onEvent((e) => this.eventListeners.forEach((l) => l(labId, e)));
       this.labs.set(labId, lab);

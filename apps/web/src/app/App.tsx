@@ -63,6 +63,20 @@ function ScoreDetail() {
   </div>;
 }
 
+/** เลือกด่าน (ขั้นต่ำ P21; หน้าเลือกด่านเต็มรูปแบบใน P24) */
+function LevelSelect() {
+  const level = useLabStore((s) => s.snapshot?.level);
+  const levels = useLabStore((s) => s.snapshot?.levels);
+  if (!levels) return null;
+  return <select aria-label="เลือกด่าน" className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700"
+    value={level?.id ?? 'free'} onChange={(e) => void sendCommand({ type: 'selectLevel', levelId: e.target.value as 'L1' })}>
+    {levels.map((l) => <option key={l.id} value={l.id} disabled={!l.unlocked}>
+      {l.unlocked ? '' : '🔒 '}ด่าน {l.id.slice(1)}: {l.title} {'⭐'.repeat(l.bestStars)}
+    </option>)}
+    <option value="free">Free Play (ฝึก PLC)</option>
+  </select>;
+}
+
 export function App() {
   const snap = useLabStore((s) => s.snapshot);
   const selected = useLabStore((s) => s.selectedPlantId);
@@ -113,7 +127,7 @@ export function App() {
     <main className="game-main">
       <div className="game-topbar">
         <div><span className="text-xs font-semibold tracking-[0.15em] text-emerald-700">GREEN OAK GARDEN</span><p className="text-xs text-slate-500">ดูแลสวนของคุณให้เติบโต</p></div>
-        <SimControls />
+        <div className="flex flex-wrap items-center gap-3"><LevelSelect /><SimControls /></div>
       </div>
       <div className="garden-stage">
         <div className="scene-window"><PlantView /></div>
@@ -122,6 +136,10 @@ export function App() {
             <span className="flex items-center justify-between text-xs text-emerald-800"><span className="flex items-center gap-2"><Trophy size={16} className="text-amber-500" /> CARE SCORE</span><Maximize2 size={13} /></span>
             <span className="mt-1 block text-3xl font-bold text-emerald-950">{game && game.elapsedS > 0 ? game.score : '—'} <span className="text-xs font-normal text-slate-500">/ 1,500</span></span>
             <span className="mt-1 block text-xs text-slate-600">{game ? `รอด ${game.totalPlants - game.deadPlantIds.length}/${game.totalPlants} ต้น` : 'รอ Server'} · Best {game?.best?.score ?? '—'}</span>
+            {game && <span className="mt-1 block text-xs text-slate-600">
+              เป้า {game.targetG} g{game.timeLimitS !== null && ` · วัน ${Math.min(game.elapsedS, game.timeLimitS) / 86400 | 0}/${game.timeLimitS / 86400}`}
+              {game.energyBudgetKWh !== null && ` · ⚡ ${game.energyKWh.toFixed(1)}/${game.energyBudgetKWh} kWh`}
+            </span>}
             {game?.testRun && <span className="mt-1 block text-[11px] font-semibold text-amber-700">TEST · ใช้ Auto ระหว่างรอบ ไม่นับ Best</span>}
           </button>
           {game?.canHarvest && <button className="hud-card harvest-card" onClick={() => void sendCommand({ type: 'harvest' })}>
@@ -129,7 +147,7 @@ export function App() {
           </button>}
           {game?.status === 'won' && <button className="hud-card harvest-card" onClick={() => open('score')}>
             <span className="block text-sm font-bold text-emerald-900">🎉 เก็บเกี่ยวสำเร็จ · {game.yieldG?.toFixed(0)} g</span>
-            <span className="block text-xs text-slate-600">คะแนน {game.score} (โบนัส +{game.harvestBonus}) · Reset เพื่อเล่นใหม่</span>
+            <span className="block text-xs text-slate-600">{'⭐'.repeat(game.stars)} · คะแนน {game.score} (โบนัส +{game.harvestBonus}) · เลือกด่านถัดไปหรือ Reset</span>
           </button>}
           <button className="hud-card sensor-card" onClick={() => open('sensors')} aria-label="ขยาย Sensors">
             <span className="mb-3 flex items-center justify-between text-xs font-semibold text-slate-500"><span className="flex items-center gap-2"><Droplets size={15} /> สภาพแวดล้อม</span><Maximize2 size={13} /></span>
@@ -148,7 +166,7 @@ export function App() {
         </aside>
         {wide && <><div className="workspace-left">{pinned('sensors')}{pinned('plant')}</div>
           <div className="workspace-right">{pinned('actuators')}</div>{pinned('trends')}</>}
-        {lost && <button className="loss-banner" onClick={() => setSeenLoss('')}>Game Over · ต้นไม้ตายหมด — ดูผลรอบนี้</button>}
+        {lost && <button className="loss-banner" onClick={() => setSeenLoss('')}>Game Over · {game.lostReason === 'timeout' ? 'หมดเวลาด่าน' : 'ต้นไม้ตายหมด'} — ดูผลรอบนี้</button>}
         <nav className="garden-dock" aria-label="รายละเอียดสวน">
           {ITEMS.map((item) => <button key={item.key} onClick={() => toggle(item.key)} aria-pressed={wide && panels.includes(item.key)} aria-label={`เปิด${item.label}`}>
             {item.icon}<span>{item.label}</span>
@@ -162,10 +180,12 @@ export function App() {
     {detail && !showLoss && <DetailDialog title={detail === 'score' ? 'คะแนนการดูแล' : ITEMS.find((x) => x.key === detail)!.label} close={closeDetail}>
       {content(detail)}
     </DetailDialog>}
-    {showLoss && <DetailDialog title="Game Over — ต้นไม้ตายหมด" close={() => setSeenLoss(round)}>
+    {showLoss && <DetailDialog title={game.lostReason === 'timeout' ? 'Game Over — หมดเวลา' : 'Game Over — ต้นไม้ตายหมด'} close={() => setSeenLoss(round)}>
       <div className="p-6 text-center"><Sprout className="mx-auto mb-3 text-rose-500" size={48} />
         <h3 className="text-2xl font-bold text-slate-800">สวนรอบนี้จบแล้ว</h3>
-        <p className="my-3 text-sm text-slate-600">ต้นไม้ทุกต้นมี Damage สะสม 100% จึงไม่สามารถฟื้นได้<br />ดู Timeline เพื่อหาสาเหตุ แล้วลองดูแลใหม่อีกครั้ง</p>
+        <p className="my-3 text-sm text-slate-600">{game.lostReason === 'timeout'
+          ? `ครบ ${game.timeLimitS! / 86400} วันแล้ว แต่ผักยังไม่ถึง ${game.targetG} g ทุกต้น — ลองให้แสงและปุ๋ยให้เหมาะสม`
+          : 'ต้นไม้ทุกต้นมี Damage สะสม 100% จึงไม่สามารถฟื้นได้'}<br />ดู Timeline เพื่อหาสาเหตุ แล้วลองดูแลใหม่อีกครั้ง</p>
         <p className="mb-5 font-semibold">คะแนนสุดท้าย {game.score} · ดูแลมา {(game.elapsedS / 86400).toFixed(2)} วัน</p>
         <div className="flex flex-wrap justify-center gap-3">
           <button className="rounded-xl border px-4 py-2 text-sm" onClick={() => { setSeenLoss(round); open('timeline'); }}>ดูสาเหตุใน Timeline</button>

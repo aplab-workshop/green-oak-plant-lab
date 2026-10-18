@@ -14,7 +14,8 @@ import { levelPct, waterHeightCm } from './environment/tank';
 import { createPlant, plantWaterRequest, stepPlant, type PlantEnvironment, type PlantState } from './plant/plant';
 import { rootSupplyRatio } from './plant/water';
 import { readSensors, readSimInfo } from './sensors';
-import { CareGame } from './careGame';
+import { CareGame, type Mission } from './careGame';
+import { powerW } from './environment/power';
 
 export interface Disturbance {
   /** น้ำรั่วออกจากถัง (L/h) */
@@ -44,6 +45,13 @@ interface PlantFlags {
   root: boolean;
 }
 
+/** จุดเริ่มของรอบตามด่าน (SPEC § 4.6) — ว่าง = Free Play ตาม Config */
+export interface RoundStart {
+  initialBiomassG?: number;
+  startDay?: number;
+  mission?: Mission;
+}
+
 /**
  * Simulation — รวม Environment + Plants + Sensors ของ 1 Lab (Pure, ไม่มี I/O)
  * เวลาเดินผ่าน step(dt, commands) เท่านั้น
@@ -63,6 +71,7 @@ export class Simulation {
   private empty = false;
   private events: SimEvent[] = [];
   disturbance: Disturbance = { leakLph: 0 };
+  private round: RoundStart = {};
 
   constructor(opts: SimulationOptions = {}) {
     this.cfg = opts.cfg ?? DEFAULT_CONFIG;
@@ -80,25 +89,27 @@ export class Simulation {
     return this._plants;
   }
 
-  /** เวลาเริ่มต้นตาม Config */
+  /** เวลาเริ่มต้นตาม Config (หรือตามด่านของรอบนี้) */
   get startTimeS(): number {
-    return simTimeFrom(this.cfg.time.startDay, this.cfg.time.startHour);
+    return simTimeFrom(this.round.startDay ?? this.cfg.time.startDay, this.cfg.time.startHour);
   }
 
-  /** กลับสู่สภาวะเริ่มต้น (Deterministic ตาม seed) */
-  reset(): void {
+  /** กลับสู่สภาวะเริ่มต้น (Deterministic ตาม seed); round = จุดเริ่มของด่าน (คงไว้จนส่งค่าใหม่) */
+  reset(round?: RoundStart): void {
+    if (round) this.round = round;
     const cfg = this.cfg;
     this._simTimeS = this.startTimeS;
     this._env = initialEnvironment(cfg, this._simTimeS);
     const growthRng = new Rng(this.seed);
     this.noiseRng = new Rng(this.seed + 0x9e3779b9);
-    const { count, initialBiomassG, initialBiomassSpread } = cfg.plant;
+    const { count, initialBiomassSpread } = cfg.plant;
+    const initialBiomassG = this.round.initialBiomassG ?? cfg.plant.initialBiomassG;
     this._plants = Array.from({ length: count }, (_, i) => {
       const variation = 1 + initialBiomassSpread * (2 * growthRng.next() - 1);
       return createPlant(i + 1, i, initialBiomassG * variation, this._simTimeS, cfg);
     });
     this.flags = this._plants.map(() => ({ dead: false, stressed: false, wilting: false, damageLevel: 0, light: false, nutrient: false, root: false }));
-    this.care = new CareGame(this._plants, cfg);
+    this.care = new CareGame(this._plants, cfg, this.round.mission);
     this.rootsExposed = false;
     this.overflowing = false;
     this.empty = false;
@@ -114,11 +125,13 @@ export class Simulation {
   /** เก็บเกี่ยว playing → won เมื่อต้นที่รอดทุกต้นถึง harvestAtG */
   harvest(): boolean {
     const ok = this.care.harvest(this._plants, this._simTimeS);
-    if (ok) {
-      const g = this.care.snapshot();
-      this.emit({ kind: 'game.won', severity: 'info', message: `เก็บเกี่ยวสำเร็จ — ผลผลิต ${g.yieldG!.toFixed(0)} g, คะแนน ${g.score} (โบนัส ${g.harvestBonus})` });
-    }
+    if (ok) this.emitWon();
     return ok;
+  }
+
+  private emitWon(): void {
+    const g = this.care.snapshot();
+    this.emit({ kind: 'game.won', severity: 'info', message: `เก็บเกี่ยวสำเร็จ — ผลผลิต ${g.yieldG!.toFixed(0)} g, คะแนน ${g.score} (โบนัส ${g.harvestBonus}), ${'⭐'.repeat(g.stars)}` });
   }
 
   /** ติดป้ายรอบ Test (Auto ถูกใช้ขณะเล่น) */
@@ -166,11 +179,14 @@ export class Simulation {
     this._plants = this._plants.map((p, i) => stepPlant(p, requests[i]!, plantEnv, tankFactor, dtS, cfg));
     this._env = result.state;
     this._simTimeS += dtS;
-    const wasLost = this.care.lost;
-    this.care.step(this._plants, dtS, this._simTimeS);
-    if (!wasLost && this.care.lost) {
-      this.emit({ kind: 'game.over', severity: 'critical', message: 'Game Over — ต้นไม้ตายครบทุกต้น เริ่มรอบใหม่เพื่อปลูกอีกครั้ง' });
+    const wasPlaying = this.care.status === 'playing';
+    this.care.step(this._plants, dtS, this._simTimeS, powerW(cmd, cfg));
+    if (wasPlaying && this.care.lost) {
+      this.emit({ kind: 'game.over', severity: 'critical', message: this.care.snapshot().lostReason === 'timeout'
+        ? 'Game Over — หมดเวลาของด่าน ผักยังไม่ถึงเป้าหมาย'
+        : 'Game Over — ต้นไม้ตายครบทุกต้น เริ่มรอบใหม่เพื่อปลูกอีกครั้ง' });
     }
+    if (wasPlaying && this.care.status === 'won') this.emitWon();
 
     this.detectEvents(env, result.state);
   }

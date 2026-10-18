@@ -83,7 +83,7 @@ tags: [green-oak, roadmap]
 
 ## Milestone 2 — Plant Behavior Engine
 
-> **สถานะ 2026-10-18: P8–P15 และส่วนต่อ P16–P20 เสร็จ (P21–P22 Garden Game ยังไม่เริ่ม) — รอผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
+> **สถานะ 2026-10-18: P8–P15 และส่วนต่อ P16–P21 เสร็จ (Garden Game v2: P22–P25 ยังไม่เริ่ม) — รอผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/คะแนน/Game Over และตรวจรับก่อน tag `m2`; ยังไม่เริ่ม M3**
 >
 > ใช้เลข Phase ต่อจาก M1: **P8 → P9 → P10 → P11 → P12 → P13 → P14 → P15** ทำตามลำดับและหยุดให้ผู้ใช้ตรวจทุก Phase
 
@@ -185,7 +185,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P15 และส่วนต่อ P16–P20 เสร็จ; ถัดไป P21 Game Screens → P22 Care Guide; **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
+- P8–P15 และส่วนต่อ P16–P21 เสร็จ; ถัดไป P22 Dose/pH Down → P23 Events → P24 UI → P25 Plant Feedback; **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
 
 ---
 
@@ -249,21 +249,34 @@ tags: [green-oak, roadmap]
 
 - **ผลตรวจ:** AC-34 ผ่าน; tests 169/169 (26 files), typecheck และ build ผ่าน; ตรวจ REST บน Dev server: Lab ใหม่ `ready`/paused/manual, `resume` และ `harvest` → 409, `startGame` → playing, Speed 3600x รับได้; Web มีปุ่มเริ่มปลูก/เก็บเกี่ยวขั้นต่ำ (หน้าจอเต็มทำใน P21); ยังไม่ตรวจภาพใน Browser (Chrome extension ไม่เชื่อมต่อ); หยุดรอผู้ใช้ตรวจ P20
 
-> 📝 **2026-10-18 ผู้ใช้ขอออกแบบระบบเกมใหม่** → ร่าง [[GAME-DESIGN]] (`docs/GAME-DESIGN.md`) เสนอ P21–P25 ใหม่แทน P21–P22 ด้านล่าง — **รออนุมัติ ห้ามเริ่มโค้ด**
+## P21–P25 — Garden Game v2 (ส่วนต่อ M2 ตาม [[GAME-DESIGN]])
 
-### P21 — Game Screens & Layout (web)
-- [ ] หน้า **Game Start**: ชื่อเกม เป้าหมาย กติกาสั้น ๆ ปุ่ม "เริ่มปลูก" และลิงก์ไปหน้าวิธีดูแล
-- [ ] HUD ระหว่างเล่น: Score, วันที่ปลูก/ความคืบหน้าสู่เก็บเกี่ยว (%), ต้นรอด, ปุ่ม **เก็บเกี่ยว** (เปิดเมื่อพร้อม)
-- [ ] หน้า **Harvest / You Win**: ผลผลิตรายต้น คะแนน เกรด (เช่น A–D) เวลาที่ใช้ และปุ่มเล่นใหม่; ปรับหน้า **Game Over** ให้สอดคล้อง (สาเหตุหลัก + เล่นใหม่)
-- [ ] Actuator panel เริ่มที่ Manual; Auto/Offline ยังกดได้ (ติดป้าย Test) และแสดงป้ายบน HUD ว่ารอบนี้เป็น Test ไม่นับ Best
-- [ ] ตรวจ Browser จอกว้าง/แคบ; tests/typecheck/build → commit `phase(P21): ...`
+> **ผู้ใช้อนุมัติ 2026-10-18 ("โอเคร")** ตามข้อเสนอ: 4 ด่าน + ดาว, เพิ่ม pH Down (M106) ใน P22, งบไฟ (เกินงบเสียดาวที่ 3); แทน P21–P22 เดิม (Game Screens / Care Guide → รวมไว้ใน P24)
+> เนื้อหาคู่มือ: [[GAME-GUIDE]]
 
-### P22 — Care Guide & Live Hints
-- เนื้อหาตั้งต้น: [[GAME-GUIDE]] (`docs/GAME-GUIDE.md` คู่มือระดับ ป.5 ที่ผู้ใช้ขอ 2026-10-18) — P22 นำเนื้อหานี้เข้าเกม
-- [ ] หน้า **วิธีดูแลผัก (Care Guide)**: ค่าที่ต้องดู (Water Level, EC, pH, Air Temp, RH/VPD, PPFD/DLI, Water Temp/O₂) พร้อมช่วงที่เหมาะสมจาก Config และตาราง "ถ้าเกิดแบบนี้ → ปรับอะไร" (เช่น น้ำต่ำ → Refill Pump, EC ต่ำ → Nutrient A+B, ร้อน → Fan, RH ต่ำ → Humidifier)
-- [ ] **Live Hints** ระหว่างเล่น: การ์ดเตือนเมื่อค่าออกนอกช่วงหรือ Stress สูง พร้อมคำแนะนำอุปกรณ์ที่ควรกด (อ่านจาก Snapshot ของ Server, ไม่คำนวณพืชใน Web)
-- [ ] เปิด Guide ได้จากหน้า Start, HUD และหน้า Game Over
-- [ ] tests (กฎ Hint) + typecheck + build, ตรวจ Browser, อัปเดต SPEC/ARCHITECTURE/M2-ACCEPTANCE → commit `phase(P22): ...`
+### P21 — Levels & Missions (sim-core + server) ✅
+- [x] SPEC § 4.6 + AC-35; ด่าน L1–L4 ใน `sim-core/src/levels.ts` เริ่มจากช่วงการเติบโตต่างกัน (5/15/30/5 g) พร้อมเป้า g, เวลาจำกัด, งบไฟ, อุปกรณ์ที่ผู้เล่นคุม
+- [x] `CareGame` รับ Mission: เป้าหมายแทน harvestAtG, ครบเวลา → เก็บอัตโนมัติถ้าพร้อม/มิฉะนั้น `lost` (`timeout`), สะสม `energyKWh`, ดาว 1–3
+- [x] ผู้ช่วยฟาร์ม (`apps/server/src/lab/farmHelper.ts`) คุมอุปกรณ์ที่ล็อกด้วยเกณฑ์ Ladder ตัวอย่าง; ปฏิเสธการกดอุปกรณ์ที่ล็อก (409)
+- [x] `selectLevel`, ปลดล็อกด่านถัดไป/ดาวสูงสุดใน Memory, testRun ไม่ปลดล็อก, Lab เริ่มที่ L1; Best แยกตามด่าน และบันทึกทุกรอบที่ชนะ
+- [x] ปรับเป้าด้วย Simulation ตามสูตรคู่มือ: L1 5.6/8 วัน, L2 6.3/8, L3 7.5/9, L4 28.5/35, พลังงานต่ำกว่างบ, ได้ ⭐⭐⭐ ทุกด่าน (L2 ขยายจาก 7 → 8 วันเพราะเหลือเวลาแค่ 10%)
+- [x] Web ขั้นต่ำ: ตัวเลือกด่าน, เป้า/วัน/งบไฟบน HUD, ดาวเมื่อชนะ, อุปกรณ์ล็อกแสดง 🔒 ผู้ช่วย, Game Over แยกสาเหตุหมดเวลา
+- **ผลตรวจ:** AC-35 ผ่าน; tests 181/181 (28 files), typecheck และ build ผ่าน; Dev server: Lab เริ่ม L1 `ready`, กด Fan → 409, เลือก L3 ที่ล็อก → 409; ยังไม่ตรวจภาพใน Browser (Chrome extension ไม่เชื่อมต่อ); หยุดรอผู้ใช้ตรวจ P21
+
+### P22 — Dose Actuators + pH Down
+- [ ] SPEC ก่อน; คำสั่งโดส (เติมน้ำ +10% = M102 2 นาทีจำลอง, ปุ๋ย 1 โดส = M103+M104) นับเวลาจำลอง ผลเท่ากันทุก Speed; LED presets 0/50/80/100
+- [ ] pH Down **M106**: DEVICE-MAP, Read allowlist M100–M106, Model pH −≈0.2/โดสใน Config, Ladder ตัวอย่าง/Auto, ผู้ช่วยฟาร์ม; Gateway ยังห้ามเขียน M (FR-31)
+- [ ] Tests: โดสเท่ากันที่ 60x/3600x, guard, pH Down ตาม Config → commit `phase(P22): ...`
+
+### P23 — Events & Challenge
+- [ ] Event scheduler Deterministic ตาม Seed + ด่าน: คลื่นความร้อน, ถังรั่ว (+ซ่อม), ไฟดับ, อากาศแห้ง, น้ำประปาด่าง; เตือนล่วงหน้า 6 h; Auto-pause เมื่อเตือน/ค่าแดงครั้งแรก
+- [ ] ตรวจว่าสูตรคู่มือ + การรับมือ Event ยังผ่านด่าน; tests → commit `phase(P23): ...`
+
+### P24 — Simple Game UI
+- [ ] หน้าเลือกด่าน, Briefing, ผ่าน/แพ้, คู่มือ 📖 ในเกม, HUD 5 ส่วน (แถบบน/มาตรวัด 4/ฉาก/ผู้ช่วย/แถบปุ่ม), ลิ้นชัก 🔬 สำหรับแผงเดิม; Browser จอกว้าง/มือถือ → commit `phase(P24): ...`
+
+### P25 — Plant Feedback
+- [ ] Mood + ไอคอนสาเหตุต่อต้น (กฎใน shared + test), "+g วันนี้", ฉลองเปลี่ยนระยะ, เหี่ยว/เหลือง/ตายชัดขึ้น; ภาพตาม State จาก Server → commit `phase(P25): ...`
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 

@@ -82,7 +82,39 @@ export interface CareProgress {
   yieldG: number | null;
   /** รอบนี้เคยใช้ Mock PLC Auto ขณะเล่น → เป็นรอบ Test ไม่นับ Best */
   testRun: boolean;
+  /** เป้าหมายน้ำหนักต่อต้นของรอบนี้ (g) — Free Play = harvestAtG */
+  targetG: number;
+  /** เวลาจำกัดของด่าน (s จำลอง) — null = ไม่จำกัด */
+  timeLimitS: number | null;
+  /** พลังงานไฟฟ้าสะสมขณะเล่น (kWh) */
+  energyKWh: number;
+  /** งบไฟของด่าน (kWh) — null = ไม่มีงบ */
+  energyBudgetKWh: number | null;
+  /** ดาวเมื่อชนะ 1–3 (0 = ยังไม่ชนะ) */
+  stars: number;
+  lostReason: 'allDead' | 'timeout' | null;
 }
+
+export const LEVEL_IDS = ['L1', 'L2', 'L3', 'L4'] as const;
+export type LevelId = (typeof LEVEL_IDS)[number];
+/** อุปกรณ์ที่ผู้เล่นคุมได้ในแต่ละด่าน (nutrient = Pump A+B) */
+export type PlayerDevice = 'led' | 'refillPump' | 'nutrient' | 'fan' | 'humidifier' | 'airPump';
+
+/** Bit ของ Actuator → อุปกรณ์ผู้เล่น (Nutrient A/B รวมเป็นปุ่มเดียว) */
+export const deviceOfBit = (key: 'fan' | 'humidifier' | 'refillPump' | 'nutrientA' | 'nutrientB' | 'airPump'): PlayerDevice =>
+  key === 'nutrientA' || key === 'nutrientB' ? 'nutrient' : key;
+
+export interface LevelInfo {
+  id: LevelId;
+  title: string;
+  description: string;
+  targetG: number;
+  timeLimitDays: number;
+  energyBudgetKWh: number;
+  playerDevices: PlayerDevice[];
+}
+
+export interface LevelProgress { id: LevelId; title: string; unlocked: boolean; bestStars: number }
 
 export type GameStatus = 'ready' | 'playing' | 'won' | 'lost';
 
@@ -90,6 +122,9 @@ export interface CareRecord { score: number; elapsedS: number }
 
 export interface LabSnapshot {
   game: CareProgress & { best: CareRecord | null };
+  /** ด่านปัจจุบัน — null = Free Play */
+  level: LevelInfo | null;
+  levels: LevelProgress[];
   labId: string;
   runId: number;
   /** เวลาจริงที่สร้าง Snapshot (ms epoch) */
@@ -132,6 +167,7 @@ export const LabCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('reset') }),
   z.object({ type: z.literal('startGame') }),
   z.object({ type: z.literal('harvest') }),
+  z.object({ type: z.literal('selectLevel'), levelId: z.enum(['L1', 'L2', 'L3', 'L4', 'free']) }),
   z.object({ type: z.literal('setPlcMode'), mode: z.enum(['manual', 'auto', 'offline']) }),
   z.object({ type: z.literal('setManualBit'), key: ActuatorBitKey, value: z.boolean() }),
   z.object({ type: z.literal('setManualLed'), value: z.number().int().min(0).max(100) }),

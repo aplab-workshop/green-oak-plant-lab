@@ -682,3 +682,12 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `LabSessionOptions.autoStart` ใช้กับ Test/สคริปต์ที่ต้องการให้เวลาเดินทันที (`apps/server/test/helpers.ts` ตั้งค่าเริ่มต้นเป็น true); Server จริงเริ่มที่ `ready` เสมอ; `MOCK_PLC_MODE` ค่าเริ่มต้นเปลี่ยนเป็น `manual`
 - Speed เพิ่ม 1440x/3600x (`SIM_SPEEDS`, `SPEED_VALUES`, zod) — ที่ Tick 100 ms คือ 144/360 steps ต่อ Tick ต่ำกว่า `maxStepsPerTick` 5000; ข้อจำกัด: PLC poll 500 ms = 12–30 นาทีจำลองต่อรอบ ทำให้ Refill/Nutrient แบบกดเองหยาบมากที่ Speed สูง (แนะนำลด Speed ก่อนสั่ง — จะอธิบายใน Care Guide P22)
 - Web (ขั้นต่ำเพื่อให้เล่นได้ก่อน P21): ปุ่ม "เริ่มปลูก" แทน Resume ตอน `ready`, การ์ด "เก็บเกี่ยว" เมื่อ `canHarvest`, การ์ดผลชนะ, ป้าย TEST; Game Over "ปลูกใหม่" = reset + startGame; หน้า Start/Win/Guide เต็มรูปแบบอยู่ใน P21–P22
+
+### 11.19 Implementation Notes (P21 — Levels & Missions)
+
+- `sim-core/src/levels.ts`: `LEVELS` (ข้อมูลด่านพร้อมหน่วย), `levelRound()` → `RoundStart { initialBiomassG, startDay, mission }`; `Simulation.reset(round?)` จำ Round ไว้จนส่งค่าใหม่ (`reset({})` = Free Play) และ `startTimeS` ใช้ `startDay` ของด่าน
+- `CareGame(plants, cfg, mission?)`: `targetG` แทน `harvestAtG` ทั้งใน growthProgress และ canHarvest; `step(..., powerW)` สะสม `energyKWh` จาก `powerW(cmd)` ของ Simulation; ครบ `timeLimitS` → `harvest()` ถ้าพร้อม (ส่ง `game.won`) มิฉะนั้น `lost`/`timeout` คะแนน 0; ดาว = 1 + ไม่มีต้นตาย + (สุขภาพเฉลี่ย ≥ `game.starHealthPct` และไม่เกินงบ)
+- `LabSession`: `level` (null = Free Play), `unlocked`/`bestStars` ใน Memory; `saveRecord()` อัปเดตดาว/ปลดล็อกเมื่อ `won` และไม่ใช่ testRun (เรียกซ้ำได้ ผลเท่าเดิม); `recordKey` = ด่าน → Scenario → `free`; `updateCommandState()` ใส่ `applyFarmHelper()` หลังเลือกคำสั่ง PLC (ไม่ใช้ตอน Fail-safe) — คำสั่งใน Snapshot จึงเป็นคำสั่งที่ใช้จริง ไม่ใช่ค่าใน PLC สำหรับ Bit ที่ล็อก
+- `LabManager` สร้าง Lab ที่ `level: 'L1'`; Test helper เดิมยังเป็น Free Play (ค่าเริ่มต้นของ LabSessionOptions)
+- `deviceOfBit()` อยู่ใน `shared` ให้ Server (guard 409) และ Web (🔒) ใช้กฎเดียวกัน
+- การปรับเป้า: `packages/sim-core/test/levels.test.ts` เล่นตามสูตร GAME-GUIDE ทุกด่านด้วย dt 1 s (~40 s CPU รวม) และบังคับเหลือเวลา ≥ 15%; ถ้าแก้ Model พืชแล้วเทสต์นี้ล้ม ให้ปรับ `LEVELS` ไม่ใช่ลดเกณฑ์เทสต์

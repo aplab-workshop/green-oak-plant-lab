@@ -111,9 +111,29 @@ tags: [green-oak, spec]
 - คะแนนสุดท้ายเมื่อชนะ = Care Score (§ 4.4) + Harvest Bonus; `harvestBonus = round(500 × aliveFraction × timeAverageHealth/100)` (ค่าใน Config `game.harvestBonus`); เก็บ `yieldG` = Biomass รวมของต้นที่รอด ณ ตอนเก็บ; คะแนนสูงสุด 1500
 - `lost` คงตาม § 4.4 (ตายครบ, คะแนน 0, Simulation ตรวจต่อได้)
 - **Auto = Test เท่านั้น:** ถ้า Mock PLC อยู่โหมด `auto` ขณะ `playing` แม้ครั้งเดียว → `game.testRun = true` จนจบรอบ; รอบ Test ไม่บันทึก Best; ปุ่ม Auto ยังเปิดใช้ใน UI จนกว่าโปรเจกต์เสร็จ; ค่าเริ่มต้น `MOCK_PLC_MODE` ของ Server เปลี่ยนเป็น `manual`
-- Best บันทึกเมื่อจบรอบด้วย `won` (คะแนนสุดท้าย) หรือ Reset/Scenario/Game Over ตามเงื่อนไข § 4.4 และไม่ใช่ `testRun`
+- Best บันทึกเมื่อจบรอบด้วย `won` (คะแนนสุดท้าย; ไม่ต้องถึงเกณฑ์ 24 h เพราะเป็นรอบที่จบสมบูรณ์ — P21) หรือ Reset/Scenario/Game Over ตามเงื่อนไข § 4.4 และไม่ใช่ `testRun`
 - Speed ที่รองรับ: 1x / 60x / 360x / 1440x / 3600x (FR-02) — รอบ 25–30 วันจำลองใช้ ~30 / ~12 นาทีจริงที่ 1440x / 3600x; ที่ Speed สูง 1 วินาทีจริง = 24–60 นาทีจำลอง ผู้เล่นควรลด Speed ก่อนสั่ง Refill/Nutrient
 - ไม่เพิ่ม PLC addresses และไม่เปลี่ยนสมการพืช
+
+### 4.6 P21 — Levels & Missions Contract (2026-10-18, ผู้ใช้อนุมัติ [[GAME-DESIGN]])
+
+- โหมดรอบ: **Level L1–L4** (เกม) หรือ **Free Play** (`free` — พฤติกรรม P20 เดิม, ใช้ Scenario และฝึก Ladder); Server เริ่ม Lab ที่ L1; คำสั่ง `selectLevel { levelId }` จบรอบเดิม (บันทึก Best ตามกติกา) แล้วเริ่มรอบใหม่ที่ `ready`; เลือกด่านที่ยังล็อก → 409; `applyScenario` เปลี่ยนเป็น Free Play
+- แต่ละด่านเริ่มจากต้นผักขนาดต่างกัน (ช่วงหนึ่งของการเติบโต) และใช้ Model พืชเดิมทุกอย่าง:
+
+| Level | ชื่อ | เริ่ม (g/ต้น, ±15%) | เป้าหมาย (g) | เวลาจำกัด (วัน) | งบไฟ (kWh) | ผู้เล่นคุม |
+|---|---|---|---|---|---|---|
+| L1 | ต้นกล้าแรก | 5 | 10 | 8 | 20 | LED, Refill |
+| L2 | อาหารของผัก | 15 | 30 | 8 | 18 | + Nutrient A/B |
+| L3 | คลื่นความร้อน | 30 | 60 | 9 | 23 | + Fan, Humidifier |
+| L4 | ฟาร์มของฉัน | 5 | 100 | 35 | 60 | ทุกอย่าง + Air Pump |
+
+- ค่าเป้าหมายตั้งจาก Simulation ตามสูตรดูแลใน [[GAME-GUIDE]] (LED 80% 06–22 น., Refill <70→90%, Fan >25.5 °C, Humidifier <55%, A+B EC <1.0→1.2): ผล Simulation (seed 1): L1 5.6/8 วัน, L2 6.3/8, L3 7.5/9, L4 28.5/35 (เหลือเวลา 16–30%), พลังงาน 11/14/15/54 kWh ต่ำกว่างบ; LED 100% ใช้ไฟมากและโตช้ากว่า 80% (Light stress)
+- **ผู้ช่วยฟาร์ม:** Actuator ที่ด่านนั้นยังไม่ปลดล็อกถูกคุมโดยกฎคงที่ใน Server (เกณฑ์เดียวกับ Ladder ตัวอย่าง: Fan >25.5/<24.5 °C, Humidifier <55/>70 %RH, A+B EC <1.0/≥1.2, Air Pump ON) แทนค่าจาก PLC เฉพาะ Bit นั้น; ไม่ทำงานระหว่าง Fail-safe; ไม่นับเป็น Auto/Test; `setManualBit` ของอุปกรณ์ที่ล็อก → 409
+- **ชนะ:** `canHarvest` เมื่อต้นที่รอดทุกต้น ≥ เป้าหมายของด่าน (Free Play = `harvestAtG`) → `harvest`; ถ้าครบเวลาจำกัดขณะ `canHarvest` → เก็บเกี่ยวอัตโนมัติ; ครบเวลาแต่ยังไม่ถึงเป้า → `lost` ด้วย `lostReason = 'timeout'` (ตายครบ = `'allDead'`)
+- **ดาว** เมื่อชนะ: ⭐ ผ่าน + ⭐ ไม่มีต้นตาย + ⭐ สุขภาพเฉลี่ย ≥ 85% และพลังงานสะสม ≤ งบไฟ (`energyKWh` = ∫Power dt ขณะ `playing`; Free Play ไม่มีงบ)
+- ผ่านด่าน (ไม่ใช่ `testRun`) → ปลดล็อกด่านถัดไป และเก็บดาวสูงสุดต่อด่าน ใน Memory ของ LabSession (Server restart ล้าง) เหมือน Best; Best แยกตามด่าน/Scenario
+- Snapshot เพิ่ม `level` (ด่านปัจจุบันหรือ null) และ `levels` (สถานะปลดล็อก/ดาว); `game` เพิ่ม `targetG`, `timeLimitS`, `energyKWh`, `energyBudgetKWh`, `stars`, `lostReason`
+- ไม่เปลี่ยน PLC addresses ใน P21 (pH Down M106 อยู่ใน P22)
 
 ## 5. Functional Requirements
 
@@ -279,6 +299,8 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - จอแคบใช้ Dialog ทีละแผงและคืน Focus เมื่อปิด; คง Controls, คะแนน/Game Over และ Server data เดิม
 - Humidifier มีละอองขอบนุ่มคล้ายควันตาม M101; ปิดแล้วหยุดปล่อย/จางหาย, Low ลดจำนวนละออง; เมื่อ Pause รูปลักษณ์ละอองหยุดเดินตามเวลาจำลอง
 - Water Refill Pump (M102), Flow Sensor (D107), Air Pump (M105), Power Meter (D108) ปรับรูปลักษณ์และตำแหน่งให้เห็นชัด มีท่อ/สายเชื่อมและคลิกได้; Meter แสดง W จริงจาก Snapshot ไม่สร้าง kWh หรือปริมาณน้ำสำรองจำลองเพิ่ม
+- [x] AC-35 **P21:** ดูแลตามสูตรใน GAME-GUIDE ผ่าน L1–L4 ทันเวลาและได้ ⭐⭐⭐; ไม่ทำอะไรเลยแพ้; ครบเวลาไม่ถึงเป้า → timeout; ผู้ช่วยคุมเฉพาะอุปกรณ์ที่ล็อกและปฏิเสธการกดอุปกรณ์ที่ล็อก; ปลดล็อกด่าน/ดาว/งบไฟถูกต้อง, testRun ไม่ปลดล็อก; tests/typecheck ผ่าน
+
 - [x] AC-34 **P20:** รอบใหม่อยู่ `ready` เวลาไม่เดินจน `startGame`; `harvest` ถูกปฏิเสธก่อนพร้อม และเมื่อต้นที่รอดทุกต้นถึง 100 g → `won` พร้อม Bonus/yield และเวลาหยุด; ใช้ Auto ระหว่างเล่น → `testRun` ไม่นับ Best; Speed 1440x/3600x ใช้ได้; tests/typecheck ผ่าน
 
 - [x] AC-33: Desktop เปิด/ปิด/ขยาย 4 แผงได้พร้อมกันและยังเลือกต้น/อุปกรณ์ได้; Mobile ไม่มีแผงทับฉากจนใช้ไม่ได้; Humidifier ON/OFF/Pause/Low ถูกต้อง; Utility devices คลิกข้อมูลตรง PLC และ Meter W ตรง Server; tests/typecheck/build และ Browser ผ่าน
