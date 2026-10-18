@@ -6,6 +6,7 @@ import { useLabStore } from '../store/labStore';
 import { useSceneStore } from './sceneStore';
 import { Clickable } from './Clickable';
 import { cm } from './layout';
+import { RoutedPipe } from './Plumbing';
 
 type Point = [number, number, number];
 function Pipe({ points, radius = 0.006, color = '#168bd4' }: { points: Point[]; radius?: number; color?: string }) {
@@ -135,7 +136,7 @@ export function UtilityEquipment() {
     <mesh position={[0.40, -0.087, 0]}><boxGeometry args={[0.139, 0.17, 0.129]} /><meshStandardMaterial color="#289bd4" transparent opacity={0.43} depthWrite={false} /></mesh>
     <Box size={[0.165, 0.018, 0.155]} position={[0.40, 0.047, 0]} color="#e9f0f0" />
     <Box size={[0.165, 0.012, 0.155]} position={[0.40, -0.174, 0]} color="#d9e5e8" />
-    <Pipe points={[[0.43, -0.15, 0], [0.43, 0.069, 0], [0.50, 0.062, 0.05], [0.50, -0.12, 0.15], [0.45, -0.12, 0.19]]} />
+    <RoutedPipe points={[[0.43, -0.15, 0], [0.43, 0.075, 0], [0.51, 0.075, 0], [0.51, -0.125, 0], [0.51, -0.125, 0.19], [0.458, -0.125, 0.19]]} />
     <Clickable device={{ kind: 'actuator', key: 'refillPump' }} position={[0.40, -0.125, 0.19]} labelOffset={[0, 0.09, 0]}>
       <Box size={[0.115, 0.074, 0.08]} radius={0.014} />
       <Box size={[0.10, 0.012, 0.1]} position={[0, -0.046, 0]} />
@@ -144,7 +145,7 @@ export function UtilityEquipment() {
       <Box size={[0.045, 0.018, 0.05]} position={[0.012, 0.044, 0]} radius={0.003} />
       <Indicator bit="refillPump" position={[0.03, 0.052, 0.018]} />
     </Clickable>
-    <Pipe points={[[0.345, -0.12, 0.19], [0.33, -0.04, 0.20], [0.33, 0.025, 0.20], [0.357, 0.025, 0.20]]} />
+    <RoutedPipe points={[[0.328, -0.125, 0.19], [0.305, -0.125, 0.19], [0.305, -0.125, 0.20], [0.305, 0.025, 0.20], [0.357, 0.025, 0.20]]} />
     <Clickable device={{ kind: 'sensor', key: 'flowLpm' }} position={[0.40, 0.025, 0.20]} labelOffset={[0, 0.07, 0]}>
       {/* Inline turbine housing: ฝาดำแปดเหลี่ยมและ Union สองข้าง */}
       <Box size={[0.044, 0.039, 0.039]} radius={0.008} color="#252b2e" />
@@ -175,7 +176,9 @@ export function UtilityEquipment() {
       </group>)}
       <Pipe points={[[-0.027, 0.028, -0.002], [-0.027, 0.037, -0.008], [-0.018, 0.041, -0.026]]} radius={0.0015} color="#a63a36" />
     </Clickable>
-    <Pipe points={[[0.443, 0.025, 0.20], [0.48, 0.04, 0.20], [0.48, 0.27, 0.17], [0.29, 0.27, 0.17], [0.18, 0.25, 0.17], OUTLET]} />
+    <RoutedPipe points={[[0.443, 0.025, 0.20], [0.49, 0.025, 0.20], [0.49, 0.235, 0.20], [0.18, 0.235, 0.20], [0.18, 0.235, 0.17], OUTLET]} />
+    {/* แคลมป์ยึดแนวท่อบนขอบโต๊ะ */}
+    <Box size={[0.014, 0.03, 0.019]} position={[0.25, 0.227, 0.20]} radius={0.003} color="#42545b" />
     <WaterStream />
     <Clickable device={{ kind: 'actuator', key: 'airPump' }} position={[0.44, -0.13, 0.35]} labelOffset={[0, 0.09, 0]}>
       <Box size={[0.16, 0.075, 0.09]} radius={0.022} />
@@ -185,7 +188,7 @@ export function UtilityEquipment() {
       <Indicator bit="airPump" position={[0.055, 0.012, 0.045]} />
       <Port position={[-0.085, 0, 0]} radius={0.007} rotation={[0, 0, Math.PI / 2]} />
     </Clickable>
-    <Pipe points={[[0.355, -0.13, 0.35], [0.31, -0.06, 0.29], [0.28, 0.24, 0.22], [0.12, 0.24, 0.18], [0.12, 0.012, 0.08], [-0.12, 0.012, 0]]} radius={0.0028} color="#d7e1dc" />
+    <RoutedPipe points={[[0.355, -0.13, 0.35], [0.278, -0.13, 0.35], [0.278, -0.13, 0.18], [0.278, 0.222, 0.18], [0.12, 0.222, 0.18], [0.12, 0.012, 0.18], [0.12, 0.012, 0], [-0.12, 0.012, 0]]} radius={0.0028} color="#d7e1dc" />
     <PowerMeter />
     <Pipe points={[[0.26, -0.17, 0.34], [0.26, -0.177, 0.41], [0.44, -0.177, 0.41], [0.44, -0.13, 0.39]]} radius={0.003} color="#30393d" />
     <Pipe points={[[0.30, -0.17, 0.34], [0.30, -0.177, 0.23], [0.45, -0.17, 0.24], [0.45, -0.12, 0.21]]} radius={0.003} color="#30393d" />

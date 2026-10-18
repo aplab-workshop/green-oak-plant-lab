@@ -145,6 +145,8 @@ export interface LabSnapshot {
     waterHeightCm: number;
     volumeL: number;
     capacityL: number;
+    /** อัตราน้ำล้นจริงจาก Model (L/min); ไม่ใช่ PLC sensor */
+    overflowFlowLpm: number;
     heightCm: number;
     potBottomCm: number;
     /** Estimated Oxygen Status [0,1] ไร้หน่วย ไม่ใช่ Sensor DO */

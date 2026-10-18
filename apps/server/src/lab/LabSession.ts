@@ -375,6 +375,7 @@ export class LabSession {
         waterHeightCm: waterHeightCm(s.env.waterVolumeL, cfg),
         volumeL: s.env.waterVolumeL,
         capacityL: cfg.tank.capacityL,
+        overflowFlowLpm: this.applied.refillPump ? s.env.overflowFlowLpm : 0,
         heightCm: cfg.tank.heightCm,
         potBottomCm: cfg.tank.potBottomCm,
         estimatedOxygen: s.env.estimatedOxygen,

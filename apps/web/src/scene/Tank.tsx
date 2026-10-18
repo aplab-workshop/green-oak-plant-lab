@@ -4,6 +4,7 @@ import { InstancedMesh, MathUtils, Object3D, Path, Shape, type Mesh } from 'thre
 import { useLabStore } from '../store/labStore';
 import { LID, POT, TANK, cm, potPosition } from './layout';
 import { useSceneStore } from './sceneStore';
+import { Overflow } from './Overflow';
 
 const AIR_STONES: [number, number][] = [
   [-0.12, 0],
@@ -181,6 +182,7 @@ export function Tank({ plantCount }: { plantCount: number }) {
       <Lid count={plantCount} />
       <Water />
       <Bubbles />
+      <Overflow />
     </group>
   );
 }

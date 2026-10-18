@@ -150,3 +150,21 @@ describe('Power', () => {
     expect(powerW(all, cfg)).toBe(120 + 15 + 25 + 18 + 5 + 5 + 5);
   });
 });
+
+describe('Overflow visual signal', () => {
+  it('reports actual excess only at capacity and clears after refill stops', () => {
+    const cfg = flatRoomConfig();
+    const start = initialEnvironment(cfg, simTimeFrom(14, 6));
+    expect(start.overflowFlowLpm).toBe(0);
+    const partial = runEnv({ cfg, cmd: { refillPump: true }, hours: 1 / 3600, env: start }).env;
+    expect(partial.overflowFlowLpm).toBe(0);
+    const full = { ...start, waterVolumeL: cfg.tank.capacityL };
+    const result = runEnv({ cfg, cmd: { refillPump: true }, hours: 1 / 3600, env: full }).env;
+    expect(result.overflowFlowLpm).toBeGreaterThan(0);
+    expect(result.overflowFlowLpm).toBeLessThanOrEqual(cfg.tank.refillFlowLpm);
+    expect(result.overflowFlowLpm / 60).toBeCloseTo(result.totalOverflowL, 8);
+    const stopped = runEnv({ cfg, cmd: { refillPump: false }, hours: 1 / 3600, env: result }).env;
+    expect(stopped.overflowFlowLpm).toBe(0);
+    expect(initialEnvironment(cfg, 0).overflowFlowLpm).toBe(0);
+  });
+});

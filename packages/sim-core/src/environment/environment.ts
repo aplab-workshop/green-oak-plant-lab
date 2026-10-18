@@ -29,6 +29,8 @@ export interface EnvironmentState {
   dliYesterday: number;
   /** อัตราไหล Refill ล่าสุด (L/min) */
   refillFlowLpm: number;
+  /** น้ำที่เกินความจุใน step ล่าสุด (L/min) */
+  overflowFlowLpm: number;
   powerW: number;
   /** สะสมเพื่อสถิติ (L) */
   totalRefillL: number;
@@ -69,6 +71,7 @@ export function initialEnvironment(cfg: SimConfig, simTimeS: number): Environmen
     dliToday: 0,
     dliYesterday: 0,
     refillFlowLpm: 0,
+    overflowFlowLpm: 0,
     powerW: 0,
     totalRefillL: 0,
     totalUptakeL: 0,
@@ -149,6 +152,7 @@ export function stepEnvironment(
       dliToday,
       dliYesterday,
       refillFlowLpm: cmd.refillPump ? cfg.tank.refillFlowLpm : 0,
+      overflowFlowLpm: dtS > 0 ? tank.overflowL * 60 / dtS : 0,
       powerW: powerW({ ...cmd, ledPct }, cfg),
       totalRefillL: s.totalRefillL + refillInL,
       totalUptakeL: s.totalUptakeL + tank.uptakeL,

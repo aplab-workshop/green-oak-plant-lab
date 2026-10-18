@@ -1,15 +1,12 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useRef } from 'react';
 import { RoundedBox } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import {
   AdditiveBlending,
 
 
-  CatmullRomCurve3,
   Color,
   MathUtils,
-  TubeGeometry,
-  Vector3,
 
 
   type MeshBasicMaterial,
@@ -24,6 +21,7 @@ import { VentFan } from './VentFan';
 import { Humidifier, UtilityEquipment } from './UtilityEquipment';
 import { LED_Y } from './layout';
 import { useSceneStore } from './sceneStore';
+import { RoutedPipe } from './Plumbing';
 
 type BitKey = Exclude<keyof ActuatorCommands, 'ledPct'>;
 
@@ -46,16 +44,6 @@ function StatusLed({ bit, position }: { bit: BitKey; position: [number, number, 
     <mesh position={position}>
       <sphereGeometry args={[0.005, 10, 8]} />
       <meshStandardMaterial ref={mat} />
-    </mesh>
-  );
-}
-
-function Pipe({ points, radius = 0.004, color = '#cbd5e1' }: { points: [number, number, number][]; radius?: number; color?: string }) {
-  const geometry = useMemo(() => new TubeGeometry(new CatmullRomCurve3(points.map((p) => new Vector3(...p))), 48, radius, 8, false), [points, radius]);
-  useEffect(() => () => geometry.dispose(), [geometry]);
-  return (
-    <mesh geometry={geometry}>
-      <meshStandardMaterial color={color} roughness={0.5} />
     </mesh>
   );
 }
@@ -136,11 +124,13 @@ function NutrientPumps() {
             </mesh>
             <StatusLed bit={b.key} position={[0.018, 0.015, 0.021]} />
           </Clickable>
-          <Pipe
+          <RoutedPipe
             points={[
               [b.x, 0.04, -0.26],
-              [b.x, 0.25, -0.24],
-              [0.22 - i * 0.03, 0.25, -0.2],
+              [b.x, 0.23, -0.26],
+              [b.x, 0.23, -0.22 - i * 0.008],
+              [0.2 - i * 0.03, 0.23, -0.22 - i * 0.008],
+              [0.2 - i * 0.03, 0.23, -0.17],
               [0.2 - i * 0.03, 0.21, -0.17],
             ]}
             radius={0.0022}

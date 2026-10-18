@@ -704,3 +704,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 ### P27 — Inline Flow Sensor
 - UtilityEquipment.tsx เปลี่ยนทรง Flow Sensor เป็น RoundedBox + ฝาแปดเหลี่ยม, Union วงแหวน, คอบน/ล่างและสกรู ใช้วัสดุดำต่างเฉดเพื่อแยกชิ้นส่วน
 - จุด Sensor [0.40, 0.025, 0.20] และ key flowLpm เดิม; เปลี่ยนปลายท่อจาก Pump ไปเข้าด้านซ้ายที่ x=0.357 แทนใต้ตัวเรือน
+
+### Overflow visual (2026-10-18)
+- EnvironmentState.overflowFlowLpm = stepTank.overflowL × 60 / dtS, initial/reset = 0; LabSnapshot.tank ส่งให้ Web และ mask เป็น 0 เมื่อ Refill ปิด
+- Overflow.tsx แสดงหยดน้ำเล็กด้านหน้าถังเมื่อ Server รายงานอัตราล้น > 0 และปั๊มเปิด; phase ใช้ simTimeS จึงไม่เดินตอน Pause, Low ลดจาก 28 เป็น 12 หยด
+- PlantView แสดงคำเตือนทั้ง 3D/2D; ไม่มีคะแนนหรือสมการน้ำใหม่ เปลี่ยนเฉพาะการเปิดเผยผลเดิมของ Model
+- ตรวจ tests 187/187, typecheck/build; Lab02 พอร์ต 3308 เติมถึง 100% ได้ overflow ~2 L/min, ปิดปั๊มขณะ Pause → 0 และคำเตือนหาย; console ไม่มี error
+- Preview รุ่นนี้ใช้ 3308; 3307 ยังคง Server รุ่นก่อนเพื่อไม่ล้างรอบเดิม
