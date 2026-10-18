@@ -700,3 +700,7 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Lettuce: High 96×25 vertices ต่อใบ, Low 40×11; InstancedMesh และขีดจำกัดใบเดิม; เม็ดวัสดุปลูกมนและสีสงบ
 - Scene3D ลดแสง Directional เพิ่ม Hemisphere; App เริ่มแผง Actuators เท่านั้น และขยายความสูงแผงเมื่อปิด Trends ส่วนแผงอื่นยังเปิด/ขยายได้
 - ตรวจ 186 tests, typecheck/build, Browser High/Low และ selection ผ่าน; ไม่เปลี่ยน Simulation/PLC; รอผู้ใช้ตรวจรับรูปลักษณ์
+
+### P27 — Inline Flow Sensor
+- UtilityEquipment.tsx เปลี่ยนทรง Flow Sensor เป็น RoundedBox + ฝาแปดเหลี่ยม, Union วงแหวน, คอบน/ล่างและสกรู ใช้วัสดุดำต่างเฉดเพื่อแยกชิ้นส่วน
+- จุด Sensor [0.40, 0.025, 0.20] และ key flowLpm เดิม; เปลี่ยนปลายท่อจาก Pump ไปเข้าด้านซ้ายที่ x=0.357 แทนใต้ตัวเรือน

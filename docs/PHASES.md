@@ -297,3 +297,9 @@ tags: [green-oak, roadmap]
 - [x] ตรวจ Browser High/Low + tests/typecheck/build และ commit
 
 - ผลตรวจ: tests 186/186, typecheck/build ผ่าน; Browser 1280×720 ตรวจมุมรวม/ซูมต้น 5, Low, Dock Sensors, ไม่มี Console error; ไม่ Reset/เริ่มเกมใน Lab ผู้ใช้; เปิด preview 3307 ให้ตรวจรับ ภาพยังเป็น Procedural stylized และยังไม่ได้ตรวจภาพต้นโตเต็มวัย/ตายรอบนี้
+
+## P27 — Flow Sensor ตามภาพตัวอย่าง
+- [x] ตัวเรือนดำ ฝาแปดเหลี่ยม ข้อต่อ Union ซ้าย/ขวา คอบน/ล่าง สกรูและสายสัญญาณสั้น
+- [x] ต่อท่อเข้าด้านซ้ายให้ตรงแกนทางออกขวา; คง D107/flowLpm และ Clickable เดิม
+- [x] tests 186/186, typecheck/build ผ่าน; Browser คลิก Flow Sensor แสดง D107 0.00 L/min และไม่มี Console error; รอผู้ใช้ตรวจรับรูปทรง
+

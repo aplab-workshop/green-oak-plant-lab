@@ -75,3 +75,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - ตามคำสั่งผู้ใช้ ปรับ Green Oak/แสง/วัสดุปลูก และ HUD เรียบง่ายก่อน P22–P25; tests 186/186 + typecheck/build ผ่าน และ Browser High/Low/Selection ตรวจแล้ว
 - P26 รอผู้ใช้ตรวจรับ; P22–P25 ยังไม่เริ่มต่อ ไม่ tag m2; preview ล่าสุด http://127.0.0.1:3307/?lab=lab01
 - AGENTS.md ของ repo อยู่ใน docs/AGENTS.md
+
+### สถานะเพิ่มเติม — P27 Flow Sensor
+- ปรับ Flow Sensor ตามภาพผู้ใช้: ฝาดำแปดเหลี่ยม, ข้อต่อสองข้าง, คอและสกรู; ท่อเข้าแกนซ้าย/ออกขวา
+- tests 186/186 + typecheck/build ผ่าน; Browser คลิก D107 ผ่าน ไม่มี Console error; รอผู้ใช้ตรวจรับรูปลักษณ์ที่พอร์ต 3307

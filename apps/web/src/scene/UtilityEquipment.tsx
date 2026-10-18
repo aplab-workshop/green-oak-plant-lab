@@ -144,13 +144,36 @@ export function UtilityEquipment() {
       <Box size={[0.045, 0.018, 0.05]} position={[0.012, 0.044, 0]} radius={0.003} />
       <Indicator bit="refillPump" position={[0.03, 0.052, 0.018]} />
     </Clickable>
-    <Pipe points={[[0.345, -0.12, 0.19], [0.345, -0.04, 0.20], [0.40, 0.005, 0.20]]} />
+    <Pipe points={[[0.345, -0.12, 0.19], [0.33, -0.04, 0.20], [0.33, 0.025, 0.20], [0.357, 0.025, 0.20]]} />
     <Clickable device={{ kind: 'sensor', key: 'flowLpm' }} position={[0.40, 0.025, 0.20]} labelOffset={[0, 0.07, 0]}>
-      <Port position={[0, 0, 0]} radius={0.025} length={0.05} />
-      <Port position={[0, 0, 0]} radius={0.012} length={0.085} rotation={[0, 0, Math.PI / 2]} />
-      <mesh position={[0, 0, 0.026]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[0.019, 0.019, 0.004, 24]} /><meshStandardMaterial color="#bdcbd0" metalness={0.6} roughness={0.35} /></mesh>
-      <Box size={[0.014, 0.007, 0.003]} position={[0, 0, 0.03]} radius={0.001} color="#385a64" />
-      <Pipe points={[[0, 0.025, 0], [0, 0.048, -0.012], [0.045, 0.048, -0.025]]} radius={0.002} color="#343d43" />
+      {/* Inline turbine housing: ฝาดำแปดเหลี่ยมและ Union สองข้าง */}
+      <Box size={[0.044, 0.039, 0.039]} radius={0.008} color="#252b2e" />
+      <mesh position={[0, 0, 0.021]} rotation={[Math.PI / 2, Math.PI / 8, 0]}>
+        <cylinderGeometry args={[0.022, 0.022, 0.008, 8]} />
+        <meshStandardMaterial color="#303639" roughness={0.43} />
+      </mesh>
+      <mesh position={[0, 0, 0.0255]}>
+        <torusGeometry args={[0.006, 0.001, 6, 16]} />
+        <meshStandardMaterial color="#202629" roughness={0.6} />
+      </mesh>
+      {[-1, 1].map((side) => <group key={side}>
+        <Port position={[side * 0.033, 0, 0]} radius={0.013} length={0.022} rotation={[0, 0, Math.PI / 2]} />
+        {[0.026, 0.036, 0.041].map((x) => <mesh key={x} position={[side * x, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.016, 0.016, 0.004, 12]} />
+          <meshStandardMaterial color="#353d40" roughness={0.4} />
+        </mesh>)}
+        <Port position={[0, side * 0.024, 0]} radius={0.016} length={0.01} />
+        <mesh position={[0, side * 0.029, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.014, 0.002, 8, 24]} />
+          <meshStandardMaterial color="#424a4d" roughness={0.4} />
+        </mesh>
+        <Port position={[side * 0.027, 0.019, 0]} radius={0.005} length={0.018} />
+        <mesh position={[side * 0.027, 0.029, 0]}>
+          <cylinderGeometry args={[0.003, 0.003, 0.002, 6]} />
+          <meshStandardMaterial color="#8a9499" metalness={0.7} roughness={0.4} />
+        </mesh>
+      </group>)}
+      <Pipe points={[[-0.027, 0.028, -0.002], [-0.027, 0.037, -0.008], [-0.018, 0.041, -0.026]]} radius={0.0015} color="#a63a36" />
     </Clickable>
     <Pipe points={[[0.443, 0.025, 0.20], [0.48, 0.04, 0.20], [0.48, 0.27, 0.17], [0.29, 0.27, 0.17], [0.18, 0.25, 0.17], OUTLET]} />
     <WaterStream />
