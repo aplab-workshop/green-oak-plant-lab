@@ -86,7 +86,7 @@ export function App() {
   const error = useLabStore((s) => s.commandError);
   const [detail, setDetail] = useState<Detail | null>(null);
   const [wide, setWide] = useState(() => window.matchMedia('(min-width: 1100px)').matches);
-  const [panels, setPanels] = useState<Detail[]>(PINNABLE);
+  const [panels, setPanels] = useState<Detail[]>(['actuators']);
   const [chart, setChart] = useState('growth');
   useEffect(() => {
     const query = window.matchMedia('(min-width: 1100px)');
@@ -176,7 +176,7 @@ export function App() {
         </aside>
         {/* จอกว้าง: การ์ดคะแนนและแผงซ้ายเรียงในคอลัมน์เดียว ไม่ซ้อนกันแม้การ์ดสูงขึ้น; ซ่อนการ์ดสภาพแวดล้อมเมื่อเปิดแผง Sensors (ค่าซ้ำ) */}
         {wide && <><div className="workspace-left">{scoreCards}{!panels.includes('sensors') && sensorCard}{pinned('sensors')}{pinned('plant')}</div>
-          <div className="workspace-right">{pinned('actuators')}</div>{pinned('trends')}</>}
+          <div className="workspace-right" style={panels.includes('trends') ? undefined : { bottom: 90 }}>{pinned('actuators')}</div>{pinned('trends')}</>}
         {lost && <button className="loss-banner" onClick={() => setSeenLoss('')}>Game Over · {game.lostReason === 'timeout' ? 'หมดเวลาด่าน' : 'ต้นไม้ตายหมด'} — ดูผลรอบนี้</button>}
         <nav className="garden-dock" aria-label="รายละเอียดสวน">
           {ITEMS.map((item) => <button key={item.key} onClick={() => toggle(item.key)} aria-pressed={wide && panels.includes(item.key)} aria-label={`เปิด${item.label}`}>

@@ -40,8 +40,8 @@ function Ambience() {
     const d = level.current;
     bg.current.copy(NIGHT_BG).lerp(DAY_BG, d);
     scene.background = bg.current;
-    if (hemi.current) hemi.current.intensity = 0.8 + 1.25 * d;
-    if (sun.current) sun.current.intensity = 0.25 + 2.3 * d;
+    if (hemi.current) hemi.current.intensity = 0.8 + 1.4 * d;
+    if (sun.current) sun.current.intensity = 0.25 + 1.8 * d;
   });
 
   return (

@@ -7,7 +7,7 @@ const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const DEG = Math.PI / 180;
 
 /** ความยาวใบของต้นกล้า 5 g (m) */
-export const BASE_LEAF_LENGTH = 0.06;
+export const BASE_LEAF_LENGTH = 0.07;
 
 export interface LeafPose {
   /** มุมรอบแกนตั้ง (rad) */
@@ -37,17 +37,17 @@ export function leafLayout(plantId: number, leafCount: number, scale: number, dr
     // rank: 0 = ใบนอกสุด (แก่สุด), 1 = ใบในสุด (อ่อนสุด)
     const r = n === 1 ? 1 : i / (n - 1);
     const jitter = hash01(plantId, i) - 0.5;
-    const length = BASE_LEAF_LENGTH * scale * (1 - 0.22 * r) * (1 + 0.15 * jitter);
-    const baseElev = (40 + 40 * r + 8 * jitter) * DEG;
+    const length = BASE_LEAF_LENGTH * scale * (1 - 0.4 * r) * (1 + 0.12 * jitter);
+    const baseElev = (24 + 52 * r + 6 * jitter) * DEG;
     // ใบตก: ใบนอกห้อยลงได้มากกว่าใบใน
     const drop = droop * (baseElev + (35 - 25 * r) * DEG);
     poses.push({
       yaw: yaw0 + i * GOLDEN_ANGLE,
       elevation: baseElev - drop,
       length,
-      width: length * (0.95 + 0.12 * jitter),
-      radialOffset: 0.004 * (1 - r) * scale,
-      lift: 0.018 * r * scale * (1 - droop),
+      width: length * (1.3 + 0.1 * jitter),
+      radialOffset: 0.008 * (1 - r) * scale,
+      lift: 0.006 * r * scale * (1 - droop),
     });
   }
   return poses;

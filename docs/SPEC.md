@@ -304,3 +304,8 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-34 **P20:** รอบใหม่อยู่ `ready` เวลาไม่เดินจน `startGame`; `harvest` ถูกปฏิเสธก่อนพร้อม และเมื่อต้นที่รอดทุกต้นถึง 100 g → `won` พร้อม Bonus/yield และเวลาหยุด; ใช้ Auto ระหว่างเล่น → `testRun` ไม่นับ Best; Speed 1440x/3600x ใช้ได้; tests/typecheck ผ่าน
 
 - [x] AC-33: Desktop เปิด/ปิด/ขยาย 4 แผงได้พร้อมกันและยังเลือกต้น/อุปกรณ์ได้; Mobile ไม่มีแผงทับฉากจนใช้ไม่ได้; Humidifier ON/OFF/Pause/Low ถูกต้อง; Utility devices คลิกข้อมูลตรง PLC และ Meter W ตรง Server; tests/typecheck/build และ Browser ผ่าน
+### P26 — Green Oak Visual Refinement
+- พุ่ม Rosette เตี้ย ใบนอกกว้าง ใบในเล็กตั้งขึ้น ขอบหยักมน มีเส้นใบและวัสดุปลูกสีสงบ; จำนวนใบ/ขนาด/Stress ใช้ State เดิม
+- หน้าเริ่มต้นแสดงคะแนน สรุปสภาพแวดล้อม และควบคุม; Sensors/Plant/Trends เปิดจาก Dock และขยายได้ตามเดิม ลดข้อมูลบังฉาก
+- AC-36: ตรวจภาพระยะใกล้/ภาพรวม High/Low, เลือกต้นและเปิดแผงได้; tests/typecheck/build ผ่าน
+- [x] AC-36 ตรวจ Browser High/Low/เลือกต้น/Dock Sensors และ tests 186/186 + typecheck/build ผ่าน; ความใกล้เคียงภาพอ้างอิงรอผู้ใช้ตรวจรับ

@@ -70,3 +70,8 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - ก่อนเลิกงานทุกครั้ง: commit งานที่เสร็จ และอัปเดต `docs/PHASES.md` (และหัวข้อ "สถานะ" ในไฟล์นี้) ให้ AI ตัวถัดไปรู้ว่าทำถึงไหน
 - งานที่ทำค้างไว้ ให้จดใน `docs/PHASES.md` ใต้ Phase นั้นว่าเหลืออะไร
 - อย่า commit `.env`, `node_modules`, `dist`
+
+### สถานะเพิ่มเติม 2026-10-18 — P26
+- ตามคำสั่งผู้ใช้ ปรับ Green Oak/แสง/วัสดุปลูก และ HUD เรียบง่ายก่อน P22–P25; tests 186/186 + typecheck/build ผ่าน และ Browser High/Low/Selection ตรวจแล้ว
+- P26 รอผู้ใช้ตรวจรับ; P22–P25 ยังไม่เริ่มต่อ ไม่ tag m2; preview ล่าสุด http://127.0.0.1:3307/?lab=lab01
+- AGENTS.md ของ repo อยู่ใน docs/AGENTS.md

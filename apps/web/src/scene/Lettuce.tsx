@@ -46,11 +46,11 @@ function NetPot({ selected }: { selected: boolean }) {
       {/* Clay pebbles */}
       <mesh position={[0, POT.topY - 0.004, 0]}>
         <cylinderGeometry args={[POT.topRadius * 0.95, POT.topRadius * 0.9, 0.008, 20]} />
-        <meshStandardMaterial color="#715139" roughness={1} />
+        <meshStandardMaterial color="#635344" roughness={1} />
       </mesh>
       {Array.from({ length: 9 }, (_, i) => <mesh key={i}
         position={[Math.sin(i * 2.4) * 0.021, POT.topY, Math.cos(i * 2.4) * 0.021]}>
-        <icosahedronGeometry args={[0.005 + (i % 2) * 0.001, 0]} /><meshStandardMaterial color={i % 2 ? '#ae8252' : '#8c653e'} roughness={1} />
+        <icosahedronGeometry args={[0.004 + (i % 2) * 0.001, 1]} /><meshStandardMaterial color={i % 2 ? '#93806a' : '#7b6955'} roughness={1} />
       </mesh>)}
       <mesh position={[0, POT.topY + 0.001, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[POT.topRadius * 1.05, POT.topRadius * (selected ? 1.45 : 1.15), 32]} />
@@ -117,7 +117,7 @@ export function Lettuce({ plantId, x, z }: Props) {
   const [hovered, setHovered] = useState(false);
   useCursor(hovered);
 
-  const geometry = useMemo(() => createLeafGeometry(low ? 24 : 56, low ? 3 : 8), [low]);
+  const geometry = useMemo(() => createLeafGeometry(low ? 40 : 96, low ? 5 : 12), [low]);
   const { material, uniforms } = useMemo(() => createLeafMaterial(POT.topY + 0.0015), []);
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => () => material.dispose(), [material]);

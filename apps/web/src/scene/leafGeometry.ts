@@ -12,9 +12,9 @@ export const LEAF_LOBES = 4.5;
 
 /** ครึ่งความกว้างของใบที่ตำแหน่ง t (0 = ก้าน, 1 = ปลาย) */
 export function leafHalfWidth(t: number): number {
-  const petiole = 0.18 + 0.82 * smoothstep(0, 0.22, t);
-  const envelope = Math.pow(Math.sin(Math.PI * Math.min(1, t * 0.98 + 0.02)), 0.65) * petiole;
-  const lobe = 0.7 + 0.3 * Math.cos(2 * Math.PI * LEAF_LOBES * t);
+  const petiole = 0.12 + 0.88 * smoothstep(0, 0.3, t);
+  const envelope = Math.pow(Math.max(0, Math.sin(Math.PI * t)), 0.5) * petiole;
+  const lobe = 0.8 + 0.2 * Math.cos(2 * Math.PI * LEAF_LOBES * t);
   return 0.5 * envelope * lobe;
 }
 
@@ -36,13 +36,13 @@ export function createLeafGeometry(segmentsLength: number, segmentsHalfWidth: nu
       const s = j / (cols - 1) * 2 - 1; // −1…1
       const x = s * half;
       // ใบห่อขึ้นเล็กน้อย + ขอบใบเป็นคลื่น (ลักษณะใบผักสลัด)
-      const cup = 0.4 * s * s * half + 0.12 * Math.sin(Math.PI * t);
-      const ruffle = 0.026 * Math.abs(s) ** 3 * (Math.sin(48 * t + 7 * s) + 0.2 * Math.sin(97 * t)) * (0.3 + t);
+      const cup = 0.38 * s * s * half + 0.24 * Math.sin(Math.PI * t);
+      const ruffle = 0.065 * Math.abs(s) ** 4 * (Math.sin(48 * t + 2 * s) + 0.22 * Math.sin(96 * t)) * Math.sin(Math.PI * t);
       const veinRidge = 0.006 * Math.cos(42 * t - Math.abs(s) * 8) * Math.abs(s);
       positions.push(x, cup + ruffle + veinRidge, t);
       // เส้นกลางใบสว่าง ขอบใบเข้มขึ้น
-      const shade = 0.78 + 0.2 * Math.abs(s) + 0.06 * Math.sin(t * 16 + s * 4);
-      const vein = Math.abs(s) < 0.08 ? 0.2 : Math.pow(Math.max(0, Math.cos(42 * t - Math.abs(s) * 8)), 12) * 0.09;
+      const shade = 0.84 + 0.12 * Math.abs(s) + 0.025 * Math.sin(t * 16 + s * 4);
+      const vein = 0.12 * Math.exp(-s * s * 240) + Math.pow(Math.max(0, Math.cos(42 * t - Math.abs(s) * 8)), 18) * 0.045;
       colors.push(Math.min(1, shade + vein), Math.min(1, shade + vein), Math.min(1, shade * 0.72 + vein));
     }
   }
@@ -83,6 +83,12 @@ export function createLeafMaterial(floorY: number): { material: MeshStandardMate
   const uniforms: LeafUniforms = { uBend: { value: 0.3 }, uWilt: { value: 0 }, uCurl: { value: 0 }, uFloorY: { value: floorY } };
   const material = new MeshStandardMaterial({ vertexColors: true, side: DoubleSide, roughness: 0.72, metalness: 0 });
   material.onBeforeCompile = (shader) => {
+    // ใช้ผิวหลัง Bend/Wilt เพื่อให้แสงตรงกับใบที่โค้งจริง ไม่เกิดสันเงาปลอม
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <normal_fragment_begin>',
+      `#include <normal_fragment_begin>
+      normal = normalize(cross(dFdx(vViewPosition), dFdy(vViewPosition)));`,
+    );
     shader.uniforms.uBend = uniforms.uBend;
     shader.uniforms.uWilt = uniforms.uWilt;
     shader.uniforms.uCurl = uniforms.uCurl;

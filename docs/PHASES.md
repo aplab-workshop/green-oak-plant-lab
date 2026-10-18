@@ -289,3 +289,11 @@ tags: [green-oak, roadmap]
 | M3 One Real FX5U | SLMP 3E Binary client · Batch R/W · Reconnect/Timeout/Heartbeat · Communication Monitor UI · ทดสอบกับ FX5U จริง · Ladder examples |
 | M4 Multi-Lab Classroom | 10 LabSession + Config IP · Auth/สิทธิ์ · Teacher Dashboard · SQLite · Concurrent connection test |
 | M5 Advanced | Scenario library 10 บท + metrics · Experiment logging/export · Performance evaluation · Real sensor provider architecture |
+
+## P26 — Green Oak Visual Refinement (ตามภาพผู้ใช้ 2026-10-18)
+- ปรับภาพก่อน P22–P25 ตามคำขอล่าสุด; ไม่เปลี่ยนสมการหรือ PLC mapping
+- [x] ใบ Rosette กว้างเตี้ย หยักมน และปรับวัสดุปลูก/แสง
+- [x] เริ่มด้วย HUD ย่อและแผงควบคุม รายละเอียดเปิดจาก Dock
+- [x] ตรวจ Browser High/Low + tests/typecheck/build และ commit
+
+- ผลตรวจ: tests 186/186, typecheck/build ผ่าน; Browser 1280×720 ตรวจมุมรวม/ซูมต้น 5, Low, Dock Sensors, ไม่มี Console error; ไม่ Reset/เริ่มเกมใน Lab ผู้ใช้; เปิด preview 3307 ให้ตรวจรับ ภาพยังเป็น Procedural stylized และยังไม่ได้ตรวจภาพต้นโตเต็มวัย/ตายรอบนี้

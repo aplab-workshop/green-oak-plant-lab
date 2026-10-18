@@ -693,3 +693,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - การปรับเป้า: `packages/sim-core/test/levels.test.ts` เล่นตามสูตร GAME-GUIDE ทุกด่านด้วย dt 1 s (~40 s CPU รวม) และบังคับเหลือเวลา ≥ 15%; ถ้าแก้ Model พืชแล้วเทสต์นี้ล้ม ให้ปรับ `LEVELS` ไม่ใช่ลดเกณฑ์เทสต์
 - (หลัง P21) Layout จอกว้าง: `scoreCards`/`sensorCard` เป็น Element ร่วม — จอแคบอยู่ใน `.garden-hud`, จอกว้างอยู่ใน `.workspace-left` (flex column เริ่ม top 12px) ทำให้การ์ดที่สูงขึ้นดันแผงลงแทนการซ้อน; คู่มือในเกม `GuidePanel`/`LevelBriefing` อ่าน `snapshot.level` และข้อความคงที่ใน `guideContent.ts` (ไม่คำนวณพืช); Briefing แสดงครั้งเดียวต่อ `labId:runId` เมื่อ `game.status === 'ready'`
 - (หลัง P21) Game Over Story: `buildLossStory(game, plants, events, history)` ใน Web เป็น Pure function อ่านเฉพาะ Event ของรอบ (`endedAtS − elapsedS … endedAtS`), History และ Stress ของต้นที่ Server คงไว้ ณ ตอนตาย (`plantCause()` = ค่าสูงสุดของ water/heat(lightStress)/nutrient/root) — ไม่คำนวณพืชซ้ำ; ข้อความปุ๋ยเลือกจาก EC ใน History ใกล้เวลานั้น (<0.8 ขาด, >1.6 เกิน, อื่น ๆ = pH)
+
+### P26 — Green Oak Visual Refinement
+- leafLayout: Rosette ใบนอก 7 cm ที่ Scale 1, ใบในสั้นลง 40%, มุม 24–76 องศา, ลด Lift; จำนวนใบและ Scale ยังมาจาก plantVisuals
+- leafGeometry: ขอบมนแบบ sine envelope, petiole แคบ, ruffle ขอบใบและเส้นใบ; Fragment normal จาก derivative ของผิวหลัง Bend/Wilt เพื่อให้แสงตามผิวที่เปลี่ยนรูป
+- Lettuce: High 96×25 vertices ต่อใบ, Low 40×11; InstancedMesh และขีดจำกัดใบเดิม; เม็ดวัสดุปลูกมนและสีสงบ
+- Scene3D ลดแสง Directional เพิ่ม Hemisphere; App เริ่มแผง Actuators เท่านั้น และขยายความสูงแผงเมื่อปิด Trends ส่วนแผงอื่นยังเปิด/ขยายได้
+- ตรวจ 186 tests, typecheck/build, Browser High/Low และ selection ผ่าน; ไม่เปลี่ยน Simulation/PLC; รอผู้ใช้ตรวจรับรูปลักษณ์
