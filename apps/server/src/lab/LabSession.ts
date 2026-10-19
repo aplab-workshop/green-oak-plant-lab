@@ -8,7 +8,10 @@ import {
   type SensorReadings,
   type CareRecord,
   type LevelId,
+  type ActiveDose,
+  type DoseDevice,
   deviceOfBit,
+  playerDeviceOfDose,
 } from '@gol/shared';
 import {
   LEVELS, SimClock, Simulation, findLevel, levelInfo, levelPct, levelRound, waterHeightCm,
@@ -50,6 +53,30 @@ export class LabCommandError extends Error {
 const sameCommands = (a: ActuatorCommands, b: ActuatorCommands) =>
   COMMAND_BITS.every((bit) => a[bit.key] === b[bit.key]) && a.ledPct === b.ledPct;
 
+type BitKey = (typeof COMMAND_BITS)[number]['key'];
+
+/** โดส → Bit ที่เปิด (SPEC § 4.7) */
+const DOSE_BITS: Record<DoseDevice, readonly BitKey[]> = {
+  refill: ['refillPump'],
+  nutrient: ['nutrientA', 'nutrientB'],
+  phDown: ['phDown'],
+};
+
+const DOSE_LABEL: Record<DoseDevice, string> = {
+  refill: 'เติมน้ำ +10% (M102)',
+  nutrient: 'ใส่ปุ๋ย 1 โดส (M103+M104)',
+  phDown: 'pH Down 1 โดส (M106)',
+};
+
+/** โดสของ Bit นี้ (ถ้ามี) */
+const doseOfBit = (key: BitKey): DoseDevice | null =>
+  key === 'refillPump' ? 'refill' : key === 'nutrientA' || key === 'nutrientB' ? 'nutrient' : key === 'phDown' ? 'phDown' : null;
+
+/** pH ที่ผู้ช่วยฟาร์มสั่ง pH Down 1 โดส (ด่านที่ยังล็อก M106) */
+const HELPER_PH_DOWN_ABOVE = 6.6;
+/** EC ที่ผู้ช่วยฟาร์มสั่งปุ๋ย 1 โดส (ด่านที่ยังล็อก A+B) — เกณฑ์ล่างของ Ladder ตัวอย่าง */
+const HELPER_NUTRIENT_BELOW = 1.0;
+
 /**
  * LabSession — 1 Lab ที่แยกอิสระ (FR-40): Simulation, Clock, PLC adapter, Event log, History ของตัวเอง
  *
@@ -85,6 +112,8 @@ export class LabSession {
   private readonly autoStart: boolean;
   private level: LevelDef | null = null;
   private readonly unlocked = new Set<LevelId>(['L1']);
+  /** โดสที่ค้าง นับเวลาจำลองราย Step (SPEC § 4.7) */
+  private readonly doses = new Map<DoseDevice, ActiveDose>();
   private readonly bestStars = new Map<LevelId, number>();
 
   private get recordKey(): string {
@@ -144,9 +173,10 @@ export class LabSession {
   tick(realElapsedMs: number): void {
     this.updateCommandState();
     if (this.usingAuto) this.sim.markTestRun();
-    const cmd = this.applied;
     const result = this.clock.advance(realElapsedMs, (dt) => {
-      this.sim.step(dt, cmd);
+      // โดสซ้อนบนคำสั่งจริงเฉพาะ Step ที่ยังเหลือเวลา → ผลเท่ากันทุก Speed / ทุกการแบ่ง Tick
+      this.sim.step(dt, this.effectiveCommands());
+      this.consumeDoses(dt);
       this.history.maybeSample(this.sim);
     });
     if (result.lagged && this.now() - this.lastLagLogAt > 10_000) {
@@ -202,6 +232,48 @@ export class LabSession {
     this.updateCommandState();
   }
 
+  /** คำสั่งที่ Simulation ใช้จริง = คำสั่งจาก PLC/ผู้ช่วย + โดสที่ค้าง */
+  private effectiveCommands(): ActuatorCommands {
+    if (this.doses.size === 0) return this.applied;
+    const out = { ...this.applied };
+    for (const d of this.doses.keys()) for (const bit of DOSE_BITS[d]) out[bit] = true;
+    return out;
+  }
+
+  private doseDurationS(device: DoseDevice): number {
+    const d = this.sim.cfg.dose;
+    return device === 'refill' ? d.refillS : device === 'nutrient' ? d.nutrientS : d.phDownS;
+  }
+
+  /** เพิ่มโดสเข้าคิว (กดซ้ำ = ต่อเวลา) — คืน false ถ้าเกินจำนวนค้างสูงสุด */
+  private startDose(device: DoseDevice, by: 'player' | 'helper'): boolean {
+    const per = this.doseDurationS(device);
+    const cur = this.doses.get(device);
+    if (cur && cur.remainingS + per > per * this.sim.cfg.dose.maxQueued + 1e-9) return false;
+    if (cur) {
+      cur.remainingS += per;
+      cur.totalS += per;
+    } else this.doses.set(device, { device, remainingS: per, totalS: per });
+    this.log('dose.start', 'info', (by === 'helper' ? 'ผู้ช่วยฟาร์ม: ' : '') + DOSE_LABEL[device] + ' — ' + per + ' s จำลอง');
+    return true;
+  }
+
+  private consumeDoses(dtS: number): void {
+    for (const [device, dose] of this.doses) {
+      dose.remainingS -= dtS;
+      if (dose.remainingS <= 1e-9) {
+        this.doses.delete(device);
+        this.log('dose.done', 'info', DOSE_LABEL[device] + ' เสร็จ');
+      }
+    }
+  }
+
+  private clearDoses(reason: string): void {
+    if (this.doses.size === 0) return;
+    this.doses.clear();
+    this.log('dose.cancel', 'warning', 'ยกเลิกโดสที่ค้าง: ' + reason);
+  }
+
   /** ตรวจอายุ Command → เลือกคำสั่งที่ใช้จริง และบันทึกการเปลี่ยนสถานะ Actuator */
   private updateCommandState(): void {
     const fresh = this.lastCommandAt !== null && this.now() - this.lastCommandAt <= this.commandTimeoutMs;
@@ -220,10 +292,21 @@ export class LabSession {
         'critical',
         `ไม่ได้รับคำสั่งจาก PLC เกิน ${this.commandTimeoutMs / 1000} วินาที → Fail-safe (ปิดทุกอย่าง ยกเว้น Air Pump)`,
       );
+      this.clearDoses('Fail-safe');
     }
 
     let next = this.failsafe || !this.lastCommands ? { ...FAILSAFE_COMMANDS } : { ...this.lastCommands };
-    if (this.level && !this.failsafe) next = applyFarmHelper(next, this.applied, this.lastSensors, this.level.playerDevices);
+    if (this.level && !this.failsafe) {
+      next = applyFarmHelper(next, this.applied, this.lastSensors, this.level.playerDevices);
+      // Nutrient / pH Down ที่ล็อก: ผู้ช่วยสั่งครั้งละ 1 โดส (นับเวลาจำลอง) แทนการเปิดค้างระหว่างรอบ Poll
+      const lockedDevice = (d: 'nutrient' | 'phDown') => !this.level!.playerDevices.includes(d);
+      if (lockedDevice('nutrient') && this.lastSensors.ecMsCm < HELPER_NUTRIENT_BELOW && !this.doses.has('nutrient')) {
+        this.startDose('nutrient', 'helper');
+      }
+      if (lockedDevice('phDown') && this.lastSensors.ph > HELPER_PH_DOWN_ABOVE && !this.doses.has('phDown')) {
+        this.startDose('phDown', 'helper');
+      }
+    }
     if (!sameCommands(next, this.applied)) this.logActuatorChanges(this.applied, next);
     this.applied = next;
   }
@@ -300,6 +383,7 @@ export class LabSession {
       }
       case 'setPlcMode':
         this.mock().setMode(cmd.mode);
+        this.clearDoses('เปลี่ยนโหมด PLC เป็น ' + cmd.mode);
         this.log('plc.mode', 'info', `Mock PLC mode: ${cmd.mode}`);
         await this.poll();
         return;
@@ -308,18 +392,35 @@ export class LabSession {
           throw new LabCommandError('อุปกรณ์นี้ยังไม่ปลดล็อกในด่านนี้ — ผู้ช่วยฟาร์มดูแลให้', 409);
         }
         this.manual().setManualBit(cmd.key, cmd.value);
+        {
+          // สั่ง Bit เองระหว่างโดส = ยกเลิกโดสนั้นแล้วใช้ค่าที่สั่ง
+          const dosed = doseOfBit(cmd.key);
+          if (dosed && this.doses.delete(dosed)) this.log('dose.cancel', 'info', 'ยกเลิก' + DOSE_LABEL[dosed] + ' — สั่งเองด้วย Manual');
+        }
         await this.poll();
         return;
       case 'setManualLed':
         this.manual().setManualLed(cmd.value);
         await this.poll();
         return;
+      case 'dose': {
+        this.manual();
+        if (this.failsafe) throw new LabCommandError('อยู่ใน Fail-safe — สั่งโดสไม่ได้จนกว่า PLC จะกลับมา', 409);
+        if (this.level && !this.level.playerDevices.includes(playerDeviceOfDose(cmd.device))) {
+          throw new LabCommandError('อุปกรณ์นี้ยังไม่ปลดล็อกในด่านนี้ — ผู้ช่วยฟาร์มดูแลให้', 409);
+        }
+        if (!this.startDose(cmd.device, 'player')) {
+          throw new LabCommandError('โดสค้างได้สูงสุด ' + this.sim.cfg.dose.maxQueued + ' ครั้ง — รอให้โดสก่อนหน้าทำงานก่อน', 409);
+        }
+        return;
+      }
     }
   }
 
   /** Reset Lab นี้ (FR-42) — ใช้ Scenario เดิมถ้ามี ไม่กระทบ Lab อื่น */
   reset(saveRecord = true, round?: RoundStart): void {
     if (saveRecord) this.saveRecord();
+    this.doses.clear();
     this.sim.reset(round);
     this.clock.reset(this.sim.startTimeS);
     this.history.clear();
@@ -344,8 +445,9 @@ export class LabSession {
     return m;
   }
 
+  /** คำสั่งที่ใช้จริง (รวมโดสที่ค้าง) */
   get commands(): Readonly<ActuatorCommands> {
-    return this.applied;
+    return this.effectiveCommands();
   }
   get isFailsafe(): boolean {
     return this.failsafe;
@@ -354,6 +456,7 @@ export class LabSession {
   snapshot(): LabSnapshot {
     const s = this.sim.snapshot();
     const cfg = this.sim.cfg;
+    const commands = { ...this.effectiveCommands() };
     return {
       game: { ...this.sim.game, best: this.bestByScenario.has(this.recordKey)
         ? { ...this.bestByScenario.get(this.recordKey)! } : null },
@@ -368,14 +471,14 @@ export class LabSession {
       paused: this.clock.paused,
       plc: this.adapter.status(),
       failsafe: this.failsafe,
-      commands: { ...this.applied },
+      commands,
       sensors: { ...this.lastSensors },
       tank: {
         waterLevelPct: levelPct(s.env.waterVolumeL, cfg),
         waterHeightCm: waterHeightCm(s.env.waterVolumeL, cfg),
         volumeL: s.env.waterVolumeL,
         capacityL: cfg.tank.capacityL,
-        overflowFlowLpm: this.applied.refillPump ? s.env.overflowFlowLpm : 0,
+        overflowFlowLpm: commands.refillPump ? s.env.overflowFlowLpm : 0,
         heightCm: cfg.tank.heightCm,
         potBottomCm: cfg.tank.potBottomCm,
         estimatedOxygen: s.env.estimatedOxygen,
@@ -385,6 +488,7 @@ export class LabSession {
         ? { id: this.scenario.id, title: this.scenario.title, objective: this.scenario.objective, description: this.scenario.description }
         : null,
       disturbance: s.disturbance,
+      doses: [...this.doses.values()].map((d) => ({ ...d })),
     };
   }
 }

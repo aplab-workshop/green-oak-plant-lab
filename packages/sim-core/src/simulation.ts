@@ -146,6 +146,11 @@ export class Simulation {
     this._env = { ...this._env, waterVolumeL: volume, saltMass: ec * volume };
   }
 
+  /** ตั้ง pH ของสารละลาย (Initial condition ของ Scenario/Event) clamp ตาม Config */
+  setPh(ph: number): void {
+    this._env = { ...this._env, ph: clamp(ph, this.cfg.nutrient.phMin, this.cfg.nutrient.phMax) };
+  }
+
   /** เดิน Simulation 1 step */
   step(dtS: number, cmd: ActuatorCommands): void {
     const cfg = this.cfg;

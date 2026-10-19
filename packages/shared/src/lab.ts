@@ -98,11 +98,25 @@ export interface CareProgress {
 export const LEVEL_IDS = ['L1', 'L2', 'L3', 'L4'] as const;
 export type LevelId = (typeof LEVEL_IDS)[number];
 /** อุปกรณ์ที่ผู้เล่นคุมได้ในแต่ละด่าน (nutrient = Pump A+B) */
-export type PlayerDevice = 'led' | 'refillPump' | 'nutrient' | 'fan' | 'humidifier' | 'airPump';
+export type PlayerDevice = 'led' | 'refillPump' | 'nutrient' | 'fan' | 'humidifier' | 'airPump' | 'phDown';
 
 /** Bit ของ Actuator → อุปกรณ์ผู้เล่น (Nutrient A/B รวมเป็นปุ่มเดียว) */
-export const deviceOfBit = (key: 'fan' | 'humidifier' | 'refillPump' | 'nutrientA' | 'nutrientB' | 'airPump'): PlayerDevice =>
+export const deviceOfBit = (key: 'fan' | 'humidifier' | 'refillPump' | 'nutrientA' | 'nutrientB' | 'airPump' | 'phDown'): PlayerDevice =>
   key === 'nutrientA' || key === 'nutrientB' ? 'nutrient' : key;
+
+/** อุปกรณ์ที่สั่งเป็นโดสได้ (SPEC § 4.7) */
+export const DOSE_DEVICES = ['refill', 'nutrient', 'phDown'] as const;
+export type DoseDevice = (typeof DOSE_DEVICES)[number];
+
+/** โดส → อุปกรณ์ผู้เล่น (ใช้ตรวจการปลดล็อกในด่าน) */
+export const playerDeviceOfDose = (d: DoseDevice): PlayerDevice => (d === 'refill' ? 'refillPump' : d);
+
+/** โดสที่กำลังทำงานหรือรอคิว (เวลาจำลอง) */
+export interface ActiveDose {
+  device: DoseDevice;
+  remainingS: number;
+  totalS: number;
+}
 
 export interface LevelInfo {
   id: LevelId;
@@ -155,11 +169,13 @@ export interface LabSnapshot {
   plants: PlantState[];
   scenario: ScenarioInfo | null;
   disturbance: { leakLph: number };
+  /** โดสที่ค้างอยู่ (SPEC § 4.7) */
+  doses: ActiveDose[];
 }
 
 export const SPEED_VALUES = [1, 60, 360, 1440, 3600] as const;
 
-const ActuatorBitKey = z.enum(['fan', 'humidifier', 'refillPump', 'nutrientA', 'nutrientB', 'airPump']);
+const ActuatorBitKey = z.enum(['fan', 'humidifier', 'refillPump', 'nutrientA', 'nutrientB', 'airPump', 'phDown']);
 
 /** คำสั่งที่ Client ส่งมาที่ POST /api/labs/:labId/commands */
 export const LabCommand = z.discriminatedUnion('type', [
@@ -173,6 +189,7 @@ export const LabCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('setPlcMode'), mode: z.enum(['manual', 'auto', 'offline']) }),
   z.object({ type: z.literal('setManualBit'), key: ActuatorBitKey, value: z.boolean() }),
   z.object({ type: z.literal('setManualLed'), value: z.number().int().min(0).max(100) }),
+  z.object({ type: z.literal('dose'), device: z.enum(DOSE_DEVICES) }),
   z.object({ type: z.literal('applyScenario'), scenarioId: z.string().min(1).max(64) }),
   z.object({ type: z.literal('clearScenario') }),
 ]);

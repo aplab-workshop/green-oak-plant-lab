@@ -31,6 +31,8 @@ export interface ActuatorCommands {
   nutrientA: boolean;
   nutrientB: boolean;
   airPump: boolean;
+  /** pH Down Pump M106 (P22) */
+  phDown: boolean;
 }
 
 export type ActuatorKey = keyof ActuatorCommands;

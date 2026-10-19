@@ -52,10 +52,11 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
   });
 
   it('farm helper rules use Ladder-sample thresholds with hysteresis only for locked devices', () => {
-    const off: ActuatorCommands = { fan: false, humidifier: false, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, ledPct: 40 };
+    const off: ActuatorCommands = { fan: false, humidifier: false, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false, ledPct: 40 };
     const s = (over: Partial<SensorReadings>) => ({ airTempC: 25, rhPct: 60, ecMsCm: 1.1, waterLevelPct: 80, ...over }) as SensorReadings;
     const hot = applyFarmHelper(off, off, s({ airTempC: 26, rhPct: 50, ecMsCm: 0.9, waterLevelPct: 60 }), ['led']);
-    expect(hot).toEqual({ fan: true, humidifier: true, refillPump: true, nutrientA: true, nutrientB: true, airPump: true, ledPct: 40 });
+    // Nutrient / pH Down ที่ล็อก ผู้ช่วยสั่งเป็นโดสใน LabSession (P22) จึงปิดไว้ที่นี่
+    expect(hot).toEqual({ fan: true, humidifier: true, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false, ledPct: 40 });
     // อยู่ในช่วง Hysteresis → คงค่าเดิม
     expect(applyFarmHelper(off, hot, s({}), ['led'])).toEqual(hot);
     // อุปกรณ์ที่ผู้เล่นคุม → ใช้ค่าจาก PLC

@@ -395,7 +395,7 @@ Sim start = **Day 14 หลังเพาะ (ย้ายลงถัง), 06:
 - **ความแปรปรวนระหว่างต้น:** Biomass เริ่มต้น ±15% จาก Seeded PRNG (Deterministic ต่อ seed)
 - **Events (FR-43):** `plant.water_stress` (S_w ≥ 0.3, cleared ≤ 0.15), `plant.wilting` (S_w ≥ 0.7), `plant.damage` (ข้าม 1%, 25%, 50%), `tank.roots_exposed/covered`, `tank.overflow`, `tank.empty`
 - **ผลตรวจ 30 วัน (Refill 70/90, LED 80% 06–22, Fan > 25 °C):** Biomass 4.9 g (Day 14) → 110 g (Day 44, Stage harvest), ใช้น้ำ 26 L, Performance ~600k steps/s
-- **ประเด็นสำหรับ M2:** pH drift ขึ้นถึง ~8.4 ใน 30 วัน เพราะไม่มี Actuator ปรับ pH ควรพิจารณาเพิ่ม pH-down pump หรือปรับ Model
+- **ประเด็นสำหรับ M2:** pH drift ขึ้นถึง ~8.4 ใน 30 วัน เพราะไม่มี Actuator ปรับ pH ควรพิจารณาเพิ่ม pH-down pump หรือปรับ Model (แก้แล้ว: P10 Empirical equilibrium และ P22 เพิ่ม pH Down M106)
   - **แก้แล้วใน P10:** ใช้ Empirical equilibrium ตาม § 11.3 แทน drift คงที่; สูตรและผล 30 วันข้างบนเป็นประวัติ M1
 
 ## 8. Mock PLC
@@ -711,3 +711,14 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - PlantView แสดงคำเตือนทั้ง 3D/2D; ไม่มีคะแนนหรือสมการน้ำใหม่ เปลี่ยนเฉพาะการเปิดเผยผลเดิมของ Model
 - ตรวจ tests 187/187, typecheck/build; Lab02 พอร์ต 3308 เติมถึง 100% ได้ overflow ~2 L/min, ปิดปั๊มขณะ Pause → 0 และคำเตือนหาย; console ไม่มี error
 - Preview รุ่นนี้ใช้ 3308; 3307 ยังคง Server รุ่นก่อนเพื่อไม่ล้างรอบเดิม
+
+### 11.20 Implementation Notes (P22 — Dose Actuators & pH Down)
+
+- **M106 `phDown`** เพิ่มใน `ActuatorCommands` / `COMMAND_BITS` (shared) → Gateway อ่าน M100–M106; Mock memory, Fail-safe (OFF), Power 5 W, Event log และ 3D (`NutrientPumps` ขวดฝาม่วงข้างขวด B) ใช้ COMMAND_BITS เดิมจึงรองรับอัตโนมัติ
+- **pH Model:** `stepPh` รับ `phDownMinutes` แล้วลด `phDownPerMin × min × min(4, V_ref / V)` โดย V_ref = ปริมาตรที่ `initialLevelPct` ไม่คิดปริมาตรกรด ไม่แตะ EC; `Simulation.setPh()` สำหรับ Scenario/Event/Test
+- **โดส (`LabSession`):** `doses: Map<DoseDevice, ActiveDose>`; ใน `clock.advance` แต่ละ Step ใช้ `effectiveCommands()` = คำสั่งจาก PLC/ผู้ช่วย OR Bit ของโดสที่เหลือเวลา แล้ว `consumeDoses(dt)` — โดสเริ่มที่ Step ถัดไปและจบตรงเวลาจำลอง ไม่ขึ้นกับรอบ Poll; ไม่เขียน Mock memory จึงไม่ต้องรอ Poll เพื่อปิด
+- `commands` ใน Snapshot และ `overflowFlowLpm` ใช้ค่าหลังรวมโดส; Event `dose.start` / `dose.done` / `dose.cancel`
+- **ยกเลิกโดส:** `setManualBit` ของ Bit เดียวกัน, เข้า Fail-safe, `setPlcMode`, Reset/เลือกด่าน
+- **ผู้ช่วยฟาร์ม:** Nutrient และ pH Down ที่ล็อก ไม่เปิดค้างตามรอบ Poll อีกต่อไป (`farmHelper` ปิดไว้) แต่ `LabSession.updateCommandState` สั่ง 1 โดสเมื่อ EC < 1.0 / pH > 6.6 และไม่มีโดสชนิดนั้นค้าง — แก้ปัญหา EC พุ่งที่ 3600x
+- **UI:** `ActuatorPanel` แสดงปุ่มโดส (manual และไม่ใช่ Fail-safe) พร้อม `formatDoseRemaining`, 🔒 ตามด่าน, LED presets; Slider แสดงเฉพาะ Free Play
+

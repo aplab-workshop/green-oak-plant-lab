@@ -16,6 +16,7 @@ export const OFF: ActuatorCommands = {
   nutrientA: false,
   nutrientB: false,
   airPump: true,
+  phDown: false,
 };
 
 /** Config ที่อุณหภูมิห้องคงที่ 26 °C เพื่อให้คาดค่าได้ง่าย */

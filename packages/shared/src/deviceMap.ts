@@ -60,6 +60,7 @@ export const COMMAND_BITS: readonly BitCommand[] = [
   { key: 'nutrientA', address: 103, label: 'Nutrient Pump A' },
   { key: 'nutrientB', address: 104, label: 'Nutrient Pump B' },
   { key: 'airPump', address: 105, label: 'Air Pump' },
+  { key: 'phDown', address: 106, label: 'pH Down Pump' },
 ];
 
 export const LED_COMMAND_REGISTER = {

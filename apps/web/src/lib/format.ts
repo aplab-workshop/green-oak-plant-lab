@@ -17,3 +17,9 @@ export const fmt = (v: number, digits = 1): string => (Number.isFinite(v) ? v.to
 
 /** 0–1 → "73%" */
 export const pct = (v: number): string => `${Math.round(v * 100)}%`;
+
+/** เวลาโดสที่เหลือ (s จำลอง) → "1:40" */
+export function formatDoseRemaining(seconds: number): string {
+  const s = Math.max(0, Math.ceil(seconds));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}

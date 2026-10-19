@@ -33,7 +33,8 @@ describe('deviceMap', () => {
     expect(WRITABLE_D_ADDRESSES.has(LED_COMMAND_REGISTER.address)).toBe(false);
   });
 
-  it('maps commands to M100–M105', () => {
-    expect(COMMAND_BITS.map((b) => b.address)).toEqual([100, 101, 102, 103, 104, 105]);
+  it('maps commands to M100–M106 (M106 = pH Down, P22)', () => {
+    expect(COMMAND_BITS.map((b) => b.address)).toEqual([100, 101, 102, 103, 104, 105, 106]);
+    expect(COMMAND_BITS.find((b) => b.address === 106)?.key).toBe('phDown');
   });
 });

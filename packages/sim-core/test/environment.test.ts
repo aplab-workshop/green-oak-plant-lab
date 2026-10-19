@@ -146,8 +146,8 @@ describe('Power', () => {
     const cfg = flatRoomConfig();
     expect(powerW({ ...OFF, airPump: false }, cfg)).toBe(0);
     expect(powerW({ ...OFF, ledPct: 50, fan: true }, cfg)).toBe(60 + 15 + 5);
-    const all = { fan: true, humidifier: true, ledPct: 100, refillPump: true, nutrientA: true, nutrientB: true, airPump: true };
-    expect(powerW(all, cfg)).toBe(120 + 15 + 25 + 18 + 5 + 5 + 5);
+    const all = { fan: true, humidifier: true, ledPct: 100, refillPump: true, nutrientA: true, nutrientB: true, airPump: true, phDown: true };
+    expect(powerW(all, cfg)).toBe(120 + 15 + 25 + 18 + 5 + 5 + 5 + 5);
   });
 });
 

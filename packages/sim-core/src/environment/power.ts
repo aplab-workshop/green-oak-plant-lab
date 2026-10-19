@@ -12,6 +12,7 @@ export function powerW(cmd: ActuatorCommands, cfg: SimConfig): number {
     (cmd.refillPump ? p.refillPumpW : 0) +
     (cmd.nutrientA ? p.nutrientPumpW : 0) +
     (cmd.nutrientB ? p.nutrientPumpW : 0) +
-    (cmd.airPump ? p.airPumpW : 0)
+    (cmd.airPump ? p.airPumpW : 0) +
+    (cmd.phDown ? p.phDownPumpW : 0)
   );
 }

@@ -114,6 +114,8 @@ export interface SimConfig {
     phTauDays: number;
     /** pH ลดลงต่อการเปิดปั๊ม Nutrient 1 ตัว 1 นาที — Empirical */
     phDropPerDoseMin: number;
+    /** pH ลดลงต่อนาทีที่ pH Down Pump (M106) เปิด ณ ปริมาตรที่ระดับเริ่มต้น — Empirical (P22) */
+    phDownPerMin: number;
     phMin: number;
     phMax: number;
     /** Suitability [min, optLow, optHigh, max] เรียงเพิ่ม (mS/cm) */
@@ -158,6 +160,19 @@ export interface SimConfig {
     refillPumpW: number;
     nutrientPumpW: number;
     airPumpW: number;
+    /** pH Down Pump M106 (W) */
+    phDownPumpW: number;
+  };
+  /** ระยะเวลาต่อ 1 โดส (s เวลาจำลอง) — SPEC § 4.7 */
+  dose: {
+    /** M102: 2 L/min × 2 นาที = 4 L ≈ +10% ของถัง 40 L */
+    refillS: number;
+    /** M103+M104: 2 × 0.05 L/min × 0.5 นาที × EC 100 = 5 mS/cm·L ≈ EC +0.15 ที่ 34 L */
+    nutrientS: number;
+    /** M106: 0.1 pH/นาที × 2 นาที ≈ pH −0.2 ที่ระดับน้ำ 85% */
+    phDownS: number;
+    /** จำนวนโดสค้างสูงสุดต่ออุปกรณ์ */
+    maxQueued: number;
   };
   /** Sensor noise (Standard deviation) — 0 = ปิด */
   noise: {
@@ -271,6 +286,7 @@ export const DEFAULT_CONFIG: SimConfig = {
     phEquilibrium: 6.2,
     phTauDays: 2,
     phDropPerDoseMin: 0.02,
+    phDownPerMin: 0.1,
     phMin: 4,
     phMax: 9,
     ecCardinalMsCm: [0, 0.8, 1.6, 3.2],
@@ -292,7 +308,8 @@ export const DEFAULT_CONFIG: SimConfig = {
     healthRecoveryH: 6,
   },
   events: { stressOn: 0.3, stressOff: 0.15, damageLevels: [0.01, 0.25, 0.5] },
-  power: { ledW: 120, fanW: 15, humidifierW: 25, refillPumpW: 18, nutrientPumpW: 5, airPumpW: 5 },
+  power: { ledW: 120, fanW: 15, humidifierW: 25, refillPumpW: 18, nutrientPumpW: 5, airPumpW: 5, phDownPumpW: 5 },
+  dose: { refillS: 120, nutrientS: 30, phDownS: 120, maxQueued: 5 },
   noise: { airTempC: 0.1, rhPct: 0.5, ppfd: 2, waterTempC: 0.05, ph: 0.01, ecMsCm: 0.01, waterLevelPct: 0.2 },
   plant: {
     count: 6,

@@ -99,11 +99,12 @@ function LedFixture({ x }: { x: number }) {
   );
 }
 
-/** Nutrient Pump A (M103) / B (M104) */
+/** Nutrient Pump A (M103) / B (M104) และ pH Down Pump (M106, P22) */
 function NutrientPumps() {
-  const bottles: { key: 'nutrientA' | 'nutrientB'; x: number; color: string }[] = [
+  const bottles: { key: 'nutrientA' | 'nutrientB' | 'phDown'; x: number; color: string }[] = [
     { key: 'nutrientA', x: 0.35, color: '#278cda' },
     { key: 'nutrientB', x: 0.45, color: '#e76554' },
+    { key: 'phDown', x: 0.55, color: '#8b5cf6' },
   ];
   return (
     <group>

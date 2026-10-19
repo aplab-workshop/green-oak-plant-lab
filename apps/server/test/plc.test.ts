@@ -15,7 +15,7 @@ describe('Gateway write guard — AC-11', () => {
     for (const a of WRITABLE_D_ADDRESSES) expect(() => assertWritable('D', a)).not.toThrow();
     expect(() => assertWritable('D', 200)).toThrow(/D200/);
     expect(() => assertWritable('D', 99)).toThrow();
-    for (const m of [100, 101, 102, 103, 104, 105]) expect(() => assertWritable('M', m)).toThrow(/M10/);
+    for (const m of [100, 101, 102, 103, 104, 105, 106]) expect(() => assertWritable('M', m)).toThrow(/M10/);
   });
 
   it('encodes sensors into exactly the allowed registers', () => {
@@ -77,6 +77,19 @@ describe('MockPlcAdapter', () => {
     const night = await mock.readCommands();
     expect(night.commands.ledPct).toBe(0);
     expect(night.commands.airPump).toBe(true);
+  });
+
+  it('auto program drives pH Down M106 with hysteresis 6.60 / 6.30 (P22)', async () => {
+    const mock = new MockPlcAdapter('auto');
+    const w = sampleWrite();
+    const at = async (ph: number) => {
+      await mock.writeSensors({ ...w, sensors: { ...w.sensors, ph } });
+      return (await mock.readCommands()).commands.phDown;
+    };
+    expect(await at(6.5)).toBe(false);
+    expect(await at(6.7)).toBe(true);
+    expect(await at(6.4)).toBe(true); // ยังลดต่อจนถึง 6.30
+    expect(await at(6.3)).toBe(false);
   });
 
   it('clamps out-of-range D200 read from the PLC', async () => {

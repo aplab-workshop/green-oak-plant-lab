@@ -17,6 +17,7 @@ const DESCRIPTIONS: Record<ActuatorKey, { description: string; ratedPower: strin
   nutrientA: { description: 'เติมสารละลายธาตุอาหารเข้มข้น A ทำให้ EC สูงขึ้น (ไม่ได้ใช้ควบคุม pH)', ratedPower: '5 W' },
   nutrientB: { description: 'เติมสารละลายธาตุอาหารเข้มข้น B ทำให้ EC สูงขึ้น (ไม่ได้ใช้ควบคุม pH)', ratedPower: '5 W' },
   airPump: { description: 'เติมอากาศให้รากผ่าน Air stone ควรทำงานตลอดเวลา (Fail-safe จะเปิดไว้เสมอ)', ratedPower: '5 W' },
+  phDown: { description: 'เติมกรดเจือจางลด pH (≈ −0.2 ต่อโดส 2 นาทีที่ระดับน้ำ 85%) น้ำน้อยจะลดแรงกว่า เป็นค่าประมาณเชิงประจักษ์', ratedPower: '5 W' },
 };
 
 export const ACTUATOR_INFO: Record<ActuatorKey, ActuatorInfo> = Object.fromEntries([
@@ -36,7 +37,7 @@ export const SENSOR_DEVICES: Partial<Record<SensorKey, SensorDeviceInfo>> = {
   airTempC: { label: 'Air Temp / RH Sensor', keys: ['airTempC', 'rhPct', 'vpdKPa'], description: 'วัดอุณหภูมิและความชื้นอากาศ VPD คำนวณจากสองค่านี้ (ค่าประมาณ)' },
   ppfd: { label: 'PAR Quantum Sensor', keys: ['ppfd', 'dli'], description: 'วัด PPFD ที่ระดับยอดพืชกลางถัง DLI สะสมจาก PPFD ตามเวลาจำลอง' },
   waterTempC: { label: 'Water Temp Probe', keys: ['waterTempC'], description: 'วัดอุณหภูมิสารละลาย น้ำอุ่นเกินไปทำให้ออกซิเจนในน้ำลดลง' },
-  ph: { label: 'pH Probe', keys: ['ph'], description: 'pH model เป็นค่าประมาณเชิงประจักษ์ ระบบนี้ไม่มีปั๊มปรับ pH' },
+  ph: { label: 'pH Probe', keys: ['ph'], description: 'pH model เป็นค่าประมาณเชิงประจักษ์ ลด pH ได้ด้วย pH Down Pump (M106)' },
   ecMsCm: { label: 'EC Probe', keys: ['ecMsCm'], description: 'วัดความเข้มข้นธาตุอาหารรวม ไม่บอกชนิดธาตุ' },
   waterLevelPct: { label: 'Water Level Sensor', keys: ['waterLevelPct'], description: 'ทุ่นลอยวัดระดับน้ำ 0–100% ของความสูงถัง' },
   flowLpm: { label: 'Flow Sensor', keys: ['flowLpm'], description: 'วัดอัตราไหลในท่อ Refill' },

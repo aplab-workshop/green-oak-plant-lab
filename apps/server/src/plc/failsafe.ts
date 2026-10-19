@@ -12,4 +12,5 @@ export const FAILSAFE_COMMANDS: Readonly<ActuatorCommands> = Object.freeze({
   nutrientA: false,
   nutrientB: false,
   airPump: true,
+  phDown: false,
 });

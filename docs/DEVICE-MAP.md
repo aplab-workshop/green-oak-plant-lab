@@ -47,10 +47,11 @@ tags: [green-oak, plc, fx5u, slmp]
 | M103 | Nutrient Pump A | bit | 0/1 |
 | M104 | Nutrient Pump B | bit | 0/1 |
 | M105 | Air Pump | bit | 0/1 |
+| M106 | pH Down Pump | bit | 0/1 (เพิ่มใน P22) |
 | D200 | Grow Light Brightness | INT16 | 0 … 100 (%) |
 
 **กฎการอ่าน (Gateway):**
-- Batch read M100–M105 (6 bits) และ D200 (1 word)
+- Batch read M100–M106 (7 bits) และ D200 (1 word)
 - D200 นอกช่วง 0–100 → Clamp และบันทึก Event `command.out_of_range`
 - ทุก Command ติด Timestamp ถ้าอ่านไม่ได้นานกว่า `PLC_COMMAND_TIMEOUT_MS` (3000 ms) ให้เข้า **Fail-safe**
 
@@ -59,7 +60,7 @@ tags: [green-oak, plc, fx5u, slmp]
 | Operation | Allowed devices |
 |---|---|
 | **Write** | D100–D110, D111–D112, D120 |
-| **Read** | M100–M105, D200 |
+| **Read** | M100–M106, D200 |
 | **ห้ามเด็ดขาด** | เขียน M Device ใด ๆ, เขียน D200, เขียนนอกช่วงที่ระบุ |
 
 Software บังคับใช้ 2 ชั้น
@@ -82,7 +83,7 @@ Gateway เขียน Register เหล่านี้พร้อม Sensor 
 
 | Actuator | State |
 |---|---|
-| Fan, Humidifier, Refill, Nutrient A/B | OFF |
+| Fan, Humidifier, Refill, Nutrient A/B, pH Down | OFF |
 | LED | 0 % |
 | **Air Pump** | **ON** (เพื่อให้รากยังได้ออกซิเจน) |
 
@@ -105,5 +106,15 @@ Gateway เขียน Register เหล่านี้พร้อม Sensor 
 |--[ >= D106 K90 ]---------------( RST M102 )--|
 |--[ SM400 ]---------------------( M105 )------|   // Air pump ON ตลอด
 ```
+
+### ตัวอย่าง pH Down (P22)
+
+```
+// pH > 6.60 → เปิดปั๊มกรด, pH ≤ 6.30 → ปิด  (D104 = pH × 100)
+|--[ > D104 K660 ]---------------( SET M106 )--|
+|--[ <= D104 K630 ]--------------( RST M106 )--|
+```
+
+> pH Down เปิดค้างทำให้ pH ลดเร็ว (≈0.1 pH/นาที ที่ระดับน้ำ 85%) ถ้าเร่งเวลา Poll แต่ละรอบกินเวลาจำลองนาน ค่าอาจเลยเป้า ควรทดสอบที่ 1x–60x หรือใช้ Timer สั่งเป็นช่วงสั้น ๆ
 
 ตัวอย่างครบทุกบทเรียนจะอยู่ใน `docs/ladder-examples.md` (M3/M5)

@@ -128,12 +128,36 @@ tags: [green-oak, spec]
 | L4 | ฟาร์มของฉัน | 5 | 100 | 35 | 60 | ทุกอย่าง + Air Pump |
 
 - ค่าเป้าหมายตั้งจาก Simulation ตามสูตรดูแลใน [[GAME-GUIDE]] (LED 80% 06–22 น., Refill <70→90%, Fan >25.5 °C, Humidifier <55%, A+B EC <1.0→1.2): ผล Simulation (seed 1): L1 5.6/8 วัน, L2 6.3/8, L3 7.5/9, L4 28.5/35 (เหลือเวลา 16–30%), พลังงาน 11/14/15/54 kWh ต่ำกว่างบ; LED 100% ใช้ไฟมากและโตช้ากว่า 80% (Light stress)
-- **ผู้ช่วยฟาร์ม:** Actuator ที่ด่านนั้นยังไม่ปลดล็อกถูกคุมโดยกฎคงที่ใน Server (เกณฑ์เดียวกับ Ladder ตัวอย่าง: Fan >25.5/<24.5 °C, Humidifier <55/>70 %RH, A+B EC <1.0/≥1.2, Air Pump ON) แทนค่าจาก PLC เฉพาะ Bit นั้น; ไม่ทำงานระหว่าง Fail-safe; ไม่นับเป็น Auto/Test; `setManualBit` ของอุปกรณ์ที่ล็อก → 409
+- **ผู้ช่วยฟาร์ม:** Actuator ที่ด่านนั้นยังไม่ปลดล็อกถูกคุมโดยกฎคงที่ใน Server (เกณฑ์เดียวกับ Ladder ตัวอย่าง: Fan >25.5/<24.5 °C, Humidifier <55/>70 %RH, Air Pump ON; A+B สั่ง**ครั้งละ 1 โดส**เมื่อ EC < 1.0 ตั้งแต่ P22 — ดู § 4.7) แทนค่าจาก PLC เฉพาะ Bit นั้น; ไม่ทำงานระหว่าง Fail-safe; ไม่นับเป็น Auto/Test; `setManualBit` ของอุปกรณ์ที่ล็อก → 409
 - **ชนะ:** `canHarvest` เมื่อต้นที่รอดทุกต้น ≥ เป้าหมายของด่าน (Free Play = `harvestAtG`) → `harvest`; ถ้าครบเวลาจำกัดขณะ `canHarvest` → เก็บเกี่ยวอัตโนมัติ; ครบเวลาแต่ยังไม่ถึงเป้า → `lost` ด้วย `lostReason = 'timeout'` (ตายครบ = `'allDead'`)
 - **ดาว** เมื่อชนะ: ⭐ ผ่าน + ⭐ ไม่มีต้นตาย + ⭐ สุขภาพเฉลี่ย ≥ 85% และพลังงานสะสม ≤ งบไฟ (`energyKWh` = ∫Power dt ขณะ `playing`; Free Play ไม่มีงบ)
 - ผ่านด่าน (ไม่ใช่ `testRun`) → ปลดล็อกด่านถัดไป และเก็บดาวสูงสุดต่อด่าน ใน Memory ของ LabSession (Server restart ล้าง) เหมือน Best; Best แยกตามด่าน/Scenario
 - Snapshot เพิ่ม `level` (ด่านปัจจุบันหรือ null) และ `levels` (สถานะปลดล็อก/ดาว); `game` เพิ่ม `targetG`, `timeLimitS`, `energyKWh`, `energyBudgetKWh`, `stars`, `lostReason`
 - ไม่เปลี่ยน PLC addresses ใน P21 (pH Down M106 อยู่ใน P22)
+
+### 4.7 P22 — Dose Actuators & pH Down Contract (2026-10-19)
+
+**pH Down Pump (M106)**
+- Actuator ใหม่ `phDown` ที่ **M106** (bit) — Gateway อ่าน M100–M106 และยัง**ห้ามเขียน M Device** (FR-31); Fail-safe = OFF; Power 5 W (`power.phDownPumpW`)
+- Model (Empirical, เพื่อการสอน): ขณะเปิด pH ลด `nutrient.phDownPerMin` × นาที × (V_ref / V) โดย V_ref = ปริมาตรที่ระดับเริ่มต้น 85% (น้ำน้อย → ลดแรงกว่า), clamp [phMin, phMax]; ไม่คิดปริมาตรกรดที่เติม; ค่าเริ่มต้น 0.1 pH/นาที
+- Ladder ตัวอย่าง / Mock Auto: SET M106 เมื่อ D104 > 660, RST เมื่อ D104 ≤ 630
+- ผู้เล่นคุมได้ใน **L4** และ Free Play (`PlayerDevice = 'phDown'`); ด่านอื่นผู้ช่วยฟาร์มดูแลโดยสั่ง **1 โดส** เมื่อ pH > 6.6 และไม่มีโดส pH Down ค้างอยู่
+- **ผู้ช่วยฟาร์ม Nutrient (แก้ใน P22):** เดิมเปิด A+B แบบ Hysteresis ตามรอบ Poll ซึ่งที่ 3600x ทำให้ปั๊มเปิด 30 นาทีจำลองต่อรอบ และ EC พุ่งเกิน 8 mS/cm หลังเติมน้ำ จึงเปลี่ยนเป็นสั่ง 1 โดส (30 s, EC +≈0.15) เมื่อ EC < 1.0 และไม่มีโดสปุ๋ยค้าง
+
+**คำสั่งโดส** `{ type: 'dose', device: 'refill' | 'nutrient' | 'phDown' }`
+| device | Actuator | ระยะเวลา/โดส (เวลาจำลอง) | ผลโดยประมาณที่ระดับน้ำ 85% |
+|---|---|---|---|
+| `refill` | M102 | 120 s (`dose.refillS`) | +4 L ≈ **+10%** |
+| `nutrient` | M103 + M104 | 30 s (`dose.nutrientS`) | EC **+≈0.15** mS/cm |
+| `phDown` | M106 | 120 s (`dose.phDownS`) | pH **−≈0.2** |
+
+- **นับเวลาจำลองราย Step** ใน LabSession (Server overlay บนคำสั่งที่ใช้จริง) ผลจึงเท่ากันทุก Speed (1x–3600x) และทุกการแบ่ง Tick; เริ่มที่ Step ถัดไปหลังรับคำสั่ง
+- **ไม่เขียน Mock PLC memory** (ต่างจากร่างใน GAME-DESIGN): ถ้าเขียน Bit แล้วรอ Poll (500 ms จริง = 30 นาทีจำลองที่ 3600x) จะคุมระยะเวลาโดสไม่ได้ จึงเป็น "คำสั่งเกม" ของ Server; Snapshot `commands` แสดงค่ารวม overlay แล้ว และ Event log บันทึกการเปิด/ปิดเหมือน Actuator อื่น
+- ใช้ได้เฉพาะ Mock PLC **manual** (อื่น ๆ → 409) และไม่อยู่ใน Fail-safe (→ 409); ด่านที่อุปกรณ์ยังล็อก → 409; กดซ้ำ = ต่อคิวเวลาเพิ่ม สูงสุด 5 โดสค้าง (เกิน → 409)
+- `setManualBit` ของ Bit ที่กำลังโดสจะ**ยกเลิกโดส**นั้นแล้วใช้ค่าที่สั่ง; เข้า Fail-safe, เปลี่ยนโหมด PLC, Reset/เลือกด่าน → ล้างโดสทั้งหมด
+- Snapshot เพิ่ม `doses: { device, remainingS, totalS }[]` (เฉพาะที่ค้าง)
+- **LED presets** ใน UI: ปิด / 50% / 80% / 100% (ส่ง `setManualLed` เดิม); Slider ยังอยู่ใน Free Play
+- เมื่อต่อ PLC จริง (M3) คำสั่งโดสไม่ใช้ — นักเรียนเขียน Ladder/Timer เอง
 
 ## 5. Functional Requirements
 
@@ -173,7 +197,7 @@ tags: [green-oak, spec]
 | ID | Requirement | M |
 |---|---|---|
 | FR-30 | `PlcAdapter` interface เดียวสำหรับ Mock และ SLMP ประกอบด้วย `connect`, `writeSensors`, `readCommands`, `status` | M1 (interface + mock) |
-| FR-31 | Gateway **เขียน**เฉพาะ Sensor Registers (D100–D112, D120) และ**อ่าน**เฉพาะ Command Devices (M100–M105, D200) **ห้ามเขียน M Device เด็ดขาด** | M1 (บังคับใน interface) / M3 |
+| FR-31 | Gateway **เขียน**เฉพาะ Sensor Registers (D100–D112, D120) และ**อ่าน**เฉพาะ Command Devices (M100–M106, D200) **ห้ามเขียน M Device เด็ดขาด** | M1 (บังคับใน interface) / M3 |
 | FR-32 | Command ที่อ่านได้ต้องมี Timestamp หาก Command เก่ากว่า `COMMAND_TIMEOUT` ให้ Simulation เข้า **Fail-safe** (Actuator ทั้งหมด OFF ยกเว้น Air Pump ON) และบันทึก Event | M1 (logic) / M3 |
 | FR-33 | ตรวจ Range ของค่าก่อนเขียน (Clamp ใน INT16) และตรวจ Range ของ D200 (0–100) ที่อ่านกลับ | M1 |
 | FR-34 | SLMP 3E Frame (Binary) ผ่าน TCP, Batch Read/Write, Timeout, Auto-Reconnect, Heartbeat, Poll 500 ms (ปรับได้) | M3 |
@@ -271,6 +295,10 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 - [x] AC-31 **P17:** HUD ย่อ/ขยายและ Controls ใช้ได้ทั้งจอกว้าง/แคบ; คะแนนจริงจาก Server ไม่เพิ่มเมื่อ Pause และไม่ขึ้นกับ Tick splitting; รอบดูแลดีได้คะแนนสูงกว่ากลุ่มขาดน้ำ; Damage 100% ตายถาวรและไม่ดูดน้ำ; ตายบางต้นยังเล่นได้ ตายครบ Game Over ครั้งเดียว; Reset/Scenario/Best แยก Lab ถูกต้อง; tests/typecheck/build และ Browser ผ่าน (160 tests; Browser 1440×900 / 390×844, Game Over → Timeline → ปลูกใหม่)
 
 - [x] AC-30 **P16:** ฉากโรงเรือนสไตล์เกมปลูกผักตามภาพอ้างอิง มีผัก 6 ต้น ฝาขาว ถังใส ราก โครงโรงเรือน และอุปกรณ์ที่คลิกได้; ภาพโต/เหี่ยว/Curl/น้ำ/Actuator ยังอ่าน Server State เดิม; ไม่มีการแก้ sim-core, Server, Shared protocol หรือ PLC addresses; ตรวจ High/Low, เลือกต้น/อุปกรณ์, กล้อง, Roots/Cutaway, 2D และ regression tests (154/154 + typecheck + build; Browser fixtures 5/80 g และถังแห้ง 12 h; รอผู้ใช้ตรวจความพอใจด้านรูปลักษณ์)
+
+### 8.4 P22 — Dose Actuators & pH Down
+
+- [x] AC-38 🧪 **P22 / SPEC § 4.7:** โดส refill/nutrient/phDown ที่ 60x และ 3600x (และ Tick ต่างกัน) ให้ State เท่ากัน ±1e-9 และได้ผล +10% / EC +≈0.15 / pH −≈0.2 ตาม Config; กดซ้ำต่อคิวได้ ≤ 5 โดส; Manual OFF ยกเลิกโดส; Auto/Fail-safe/อุปกรณ์ล็อก → 409; Gateway อ่าน M106 แต่ไม่เขียน M; Mock Auto และผู้ช่วยฟาร์มทำ pH Down ตามเกณฑ์; Fail-safe ปิด M106; UI มีปุ่มโดส, LED presets และ M106 ใน 3D/แผง โดยค่าทั้งหมดมาจาก Server
 
 ## 9. Assumptions
 

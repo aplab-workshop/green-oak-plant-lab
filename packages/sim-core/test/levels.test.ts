@@ -7,7 +7,7 @@ function playGuide(level: LevelDef, ledPct: number) {
   const sim = new Simulation({ cfg: makeConfig() });
   sim.reset(levelRound(level));
   sim.startGame();
-  const cmd: ActuatorCommands = { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true };
+  const cmd: ActuatorCommands = { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
   for (let s = 0; sim.game.status === 'playing'; s++) {
     if (s % 60 === 0) {
       const r = sim.readSensors(false);

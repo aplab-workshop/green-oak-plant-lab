@@ -79,3 +79,9 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ### สถานะเพิ่มเติม — P27 Flow Sensor
 - ปรับ Flow Sensor ตามภาพผู้ใช้: ฝาดำแปดเหลี่ยม, ข้อต่อสองข้าง, คอและสกรู; ท่อเข้าแกนซ้าย/ออกขวา
 - tests 186/186 + typecheck/build ผ่าน; Browser คลิก D107 ผ่าน ไม่มี Console error; รอผู้ใช้ตรวจรับรูปลักษณ์ที่พอร์ต 3307
+
+### สถานะเพิ่มเติม 2026-10-19 — P22 Dose Actuators + pH Down
+- เสร็จและ commit แล้ว: คำสั่ง `dose` นับเวลาจำลอง (SPEC § 4.7), pH Down M106 ครบทุกชั้น, ผู้ช่วยฟาร์มสั่งปุ๋ย/pH Down เป็นโดส (แก้ EC พุ่งที่ 3600x); tests 206/206 + typecheck/build ผ่าน
+- `CLAUDE.md` ชี้มาที่ไฟล์นี้แล้ว (`@docs/AGENTS.md`); เทสต์ยาวต้องใส่ timeout เอง (ดูตัวอย่าง 30000 ใน lab.test.ts)
+- ถัดไป P23 Events & Challenge — รอผู้ใช้ตรวจรับ P22 ก่อน; ยังไม่ tag m2
+

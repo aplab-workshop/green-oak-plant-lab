@@ -185,7 +185,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P15 และส่วนต่อ P16–P21 เสร็จ; ถัดไป P22 Dose/pH Down → P23 Events → P24 UI → P25 Plant Feedback; **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
+- P8–P15 และส่วนต่อ P16–P22 เสร็จ; ถัดไป P23 Events → P24 UI → P25 Plant Feedback; **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
 
 ---
 
@@ -267,10 +267,14 @@ tags: [green-oak, roadmap]
 
 - **Game Over Story (ผู้ใช้ขอ 2026-10-18):** หน้า Game Over เล่าเรื่องตามลำดับเวลา (ไฟไม่เคยเปิด, รากพ้นน้ำ, ถังแห้ง, กระหายน้ำ, ร้อน/แสงแรง, ปุ๋ยขาด/เกิน/pH ตาม EC ขณะนั้น, รากขาดอากาศ, ใบเหี่ยว, ต้นที่ตายจัดกลุ่มตามวัน), สาเหตุหลักรายต้นจาก Stress ที่ Server คงไว้ ณ ตอนตาย และ "ครั้งหน้าลองแบบนี้"; Timeout อธิบายต้นที่เล็กสุดเทียบเป้า; `apps/web/src/dashboard/lossStory.ts` + test 5 ข้อ; ตรวจกับรอบจริงบน Lab 01 (ไฟไม่เปิด + EC 3.06 → สาเหตุปุ๋ยเข้มเกิน); ปุ่ม "ปลูกใหม่" Reset แล้วให้ Briefing เด้งก่อนเริ่ม; tests 186/186, typecheck, build ผ่าน
 
-### P22 — Dose Actuators + pH Down
-- [ ] SPEC ก่อน; คำสั่งโดส (เติมน้ำ +10% = M102 2 นาทีจำลอง, ปุ๋ย 1 โดส = M103+M104) นับเวลาจำลอง ผลเท่ากันทุก Speed; LED presets 0/50/80/100
-- [ ] pH Down **M106**: DEVICE-MAP, Read allowlist M100–M106, Model pH −≈0.2/โดสใน Config, Ladder ตัวอย่าง/Auto, ผู้ช่วยฟาร์ม; Gateway ยังห้ามเขียน M (FR-31)
-- [ ] Tests: โดสเท่ากันที่ 60x/3600x, guard, pH Down ตาม Config → commit `phase(P22): ...`
+### P22 — Dose Actuators + pH Down ✅
+- [x] SPEC § 4.7 + AC-38 ก่อน; คำสั่ง `dose` (เติมน้ำ +10% = M102 120 s, ปุ๋ย = M103+M104 30 s, pH Down = M106 120 s) นับเวลาจำลองราย Step ผลเท่ากันทุก Speed; กดซ้ำต่อคิว ≤ 5; LED presets 0/50/80/100 (Slider เฉพาะ Free Play)
+- [x] pH Down **M106**: DEVICE-MAP, Read M100–M106, Model `phDownPerMin` สเกลตามปริมาตร, Fail-safe OFF, Ladder ตัวอย่าง/Auto (D104 > 660 / ≤ 630), L4 ผู้เล่นคุม, ด่านอื่นผู้ช่วยสั่งโดสเมื่อ pH > 6.6; Gateway ยังห้ามเขียน M (FR-31)
+- [x] Web: ปุ่มโดส 3 ปุ่มพร้อมเวลาที่เหลือ/🔒, แถว M106, ขวด+ปั๊ม pH Down ใน 3D คลิกดูข้อมูลได้, คู่มือในเกม/GAME-GUIDE แนะนำปุ่มโดสแทน "ลดเหลือ 60x"
+- [x] Tests: โดสเท่ากันที่ 60x/3600x/Tick ต่างกัน, ผล +10% / EC +0.15 / pH −0.2, คิว, ยกเลิก, Auto/Fail-safe/ล็อก → 409, Auto ladder M106, ผู้ช่วย, pH Down Model → commit `phase(P22): ...`
+- **ผลตรวจ:** AC-38 ผ่าน; tests 206/206 (31 files), typecheck และ build ผ่าน; Browser 1440×900: L1 แผงควบคุมแสดงโดส/🔒/M106/LED presets, โดสเติมน้ำ 2 ครั้ง = 240 s และหยุดเองที่ 3600x, คลิกปั๊ม pH Down แสดง M106; Free Play มีโดสครบ + สวิตช์ M106 + Slider, pH Down จริงลด 5.997 → 5.806
+- **พบและแก้ระหว่าง P22:** ผู้ช่วยฟาร์มของ P21 เปิดปั๊มปุ๋ยค้างตามรอบ Poll → ที่ 3600x หลังเติมน้ำ EC พุ่ง 8.57 / pH 4.97 จึงเปลี่ยนเป็นสั่งปุ๋ยครั้งละ 1 โดสเมื่อ EC < 1.0 (หลังแก้ EC 1.41 / pH 6.36) พร้อม regression test
+- **ต่างจากร่าง GAME-DESIGN:** โดสเป็น Server overlay ไม่เขียน Mock PLC memory (เหตุผลใน SPEC § 4.7)
 
 ### P23 — Events & Challenge
 - [ ] Event scheduler Deterministic ตาม Seed + ด่าน: คลื่นความร้อน, ถังรั่ว (+ซ่อม), ไฟดับ, อากาศแห้ง, น้ำประปาด่าง; เตือนล่วงหน้า 6 h; Auto-pause เมื่อเตือน/ค่าแดงครั้งแรก

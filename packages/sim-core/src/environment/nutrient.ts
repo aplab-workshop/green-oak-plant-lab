@@ -39,6 +39,8 @@ export interface PhFlows {
   refillInL: number;
   /** นาทีรวมที่ปั๊ม Nutrient ทำงานใน step นี้ (A + B) */
   doseMinutes: number;
+  /** นาทีที่ pH Down Pump (M106) ทำงานใน step นี้ */
+  phDownMinutes?: number;
 }
 
 /**
@@ -50,6 +52,12 @@ export interface PhFlows {
 export function stepPh(ph: number, f: PhFlows, dtS: number, cfg: SimConfig): number {
   const n = cfg.nutrient;
   let next = approach(ph, n.phEquilibrium, dtS, n.phTauDays * 86_400) - n.phDropPerDoseMin * f.doseMinutes;
+  // pH Down (P22): น้ำน้อยกรดเท่าเดิมทำให้ pH ลดแรงกว่า — สเกลด้วยปริมาตรอ้างอิงที่ระดับเริ่มต้น
+  if (f.phDownMinutes && f.phDownMinutes > 0) {
+    const refL = (cfg.tank.initialLevelPct / 100) * cfg.tank.capacityL;
+    const scale = Math.min(4, refL / Math.max(f.volumeBeforeL, 0.5));
+    next -= n.phDownPerMin * f.phDownMinutes * scale;
+  }
   const total = f.volumeBeforeL + f.refillInL;
   if (f.refillInL > 0 && total > 0) next = (next * f.volumeBeforeL + n.tapPh * f.refillInL) / total;
   return clamp(next, n.phMin, n.phMax);

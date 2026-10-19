@@ -18,7 +18,7 @@ export const LEVELS: readonly LevelDef[] = [
     startBiomassG: 30, startDay: 28, targetG: 60, timeLimitDays: 9, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'] },
   { id: 'L4', title: 'ฟาร์มของฉัน', description: 'ดูแลทุกอย่างเองตั้งแต่ต้นกล้าจนเก็บเกี่ยว 100 g ภายในงบไฟ',
     startBiomassG: 5, startDay: 14, targetG: 100, timeLimitDays: 35, energyBudgetKWh: 60,
-    playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump'] },
+    playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'] },
 ];
 
 export const findLevel = (id: LevelId): LevelDef => LEVELS.find((l) => l.id === id)!;

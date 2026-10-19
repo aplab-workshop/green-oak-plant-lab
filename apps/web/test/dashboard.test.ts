@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { EventEntry, PlantState } from '@gol/shared';
-import { formatClock, formatSimTime } from '../src/lib/format';
+import { formatClock, formatDoseRemaining, formatSimTime } from '../src/lib/format';
 import { sensorStatus } from '../src/dashboard/sensorMeta';
 import { leafColor, plantVisuals } from '../src/scene/plantVisuals';
 import { mergeEvents } from '../src/store/labStore';
@@ -95,5 +95,14 @@ describe('store helpers', () => {
     expect(pickLab(['lab01', 'lab02'], '?lab=lab09', 'lab02')).toBe('lab02');
     expect(pickLab(['lab01'], '', null)).toBe('lab01');
     expect(pickLab([], '', null)).toBeNull();
+  });
+});
+
+describe('formatDoseRemaining (P22)', () => {
+  it('shows simulated seconds left as m:ss, rounding up', () => {
+    expect(formatDoseRemaining(239.4)).toBe('4:00');
+    expect(formatDoseRemaining(60)).toBe('1:00');
+    expect(formatDoseRemaining(5)).toBe('0:05');
+    expect(formatDoseRemaining(-3)).toBe('0:00');
   });
 });

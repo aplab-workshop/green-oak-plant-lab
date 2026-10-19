@@ -11,6 +11,7 @@ import type { DeviceMemory } from './DeviceMemory';
  *   LED     : D200 = 80 เมื่อ D111 อยู่ระหว่าง 06:00–22:00 (360–1319) มิฉะนั้น 0
  *   Nutrient: SET M103,M104 ถ้า D105 < 100 | RST ถ้า D105 ≥ 120
  *   Air pump: M105 ON ตลอด (SM400)
+ *   pH Down : SET M106 ถ้า D104 > 660  | RST ถ้า D104 ≤ 630
  */
 export function autoProgramScan(mem: DeviceMemory): void {
   const d = (a: number) => mem.getD(a);
@@ -29,6 +30,8 @@ export function autoProgramScan(mem: DeviceMemory): void {
   setReset(103, ecLow, ecOk);
   setReset(104, ecLow, ecOk);
   mem.setM(105, true);
+  // pH Down (P22): SET M106 ถ้า D104 > 660 | RST ถ้า D104 ≤ 630
+  setReset(106, d(104) > 660, d(104) <= 630);
 }
 
 /** ล้างคำสั่งทั้งหมดใน PLC (เช่นตอนเปลี่ยนโหมด) แต่คง Air pump ไว้ */
