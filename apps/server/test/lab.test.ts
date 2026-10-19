@@ -63,7 +63,8 @@ describe('PLC-in-the-loop — AC-09', () => {
       expect(p.waterStress).toBeLessThan(0.1);
     }
     expect(s.failsafe).toBe(false);
-  });
+    // จำลอง 3 วัน: ปกติ ~2 s แต่ตอนรันพร้อมเทสต์ 30 วันอื่นเครื่องโหลดหนักจึงเกิน 5 s ที่เป็น default
+  }, 30000);
 
   it('without PLC refill the water-shortage scenario stresses the plants', async () => {
     const t = makeLab('lab01', 'manual');
