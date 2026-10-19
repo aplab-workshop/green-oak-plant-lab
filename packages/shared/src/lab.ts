@@ -111,6 +111,22 @@ export type DoseDevice = (typeof DOSE_DEVICES)[number];
 /** โดส → อุปกรณ์ผู้เล่น (ใช้ตรวจการปลดล็อกในด่าน) */
 export const playerDeviceOfDose = (d: DoseDevice): PlayerDevice => (d === 'refill' ? 'refillPump' : d);
 
+/** เหตุการณ์ท้าทาย (SPEC § 4.8) */
+export type ChallengeKind = 'heatWave' | 'leak' | 'powerOutage' | 'dryAir' | 'alkalineTap';
+
+/** เหตุการณ์ที่ผู้เล่นเห็น (ถูกเตือนแล้ว) */
+export interface ChallengeView {
+  id: number;
+  kind: ChallengeKind;
+  title: string;
+  status: 'warned' | 'active' | 'done';
+  /** เวลาจำลองที่เริ่ม (s) */
+  startS: number;
+  /** เวลาจำลองที่จบ — null = จนกว่าจะซ่อม */
+  endS: number | null;
+  repaired: boolean;
+}
+
 /** โดสที่กำลังทำงานหรือรอคิว (เวลาจำลอง) */
 export interface ActiveDose {
   device: DoseDevice;
@@ -171,6 +187,10 @@ export interface LabSnapshot {
   disturbance: { leakLph: number };
   /** โดสที่ค้างอยู่ (SPEC § 4.7) */
   doses: ActiveDose[];
+  /** เหตุการณ์ที่เตือนแล้ว/กำลังเกิด/จบแล้วในรอบนี้ (SPEC § 4.8) */
+  challenges: ChallengeView[];
+  /** ผู้ช่วยหยุดเกม — reason = เหตุผลที่หยุดล่าสุด (ล้างเมื่อ Resume) */
+  autoPause: { enabled: boolean; reason: string | null };
 }
 
 export const SPEED_VALUES = [1, 60, 360, 1440, 3600] as const;
@@ -190,6 +210,8 @@ export const LabCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('setManualBit'), key: ActuatorBitKey, value: z.boolean() }),
   z.object({ type: z.literal('setManualLed'), value: z.number().int().min(0).max(100) }),
   z.object({ type: z.literal('dose'), device: z.enum(DOSE_DEVICES) }),
+  z.object({ type: z.literal('repairLeak') }),
+  z.object({ type: z.literal('setAutoPause'), enabled: z.boolean() }),
   z.object({ type: z.literal('applyScenario'), scenarioId: z.string().min(1).max(64) }),
   z.object({ type: z.literal('clearScenario') }),
 ]);

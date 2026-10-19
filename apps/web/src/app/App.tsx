@@ -10,6 +10,7 @@ import { TrendChart } from '../dashboard/TrendChart';
 import { EventLog } from '../dashboard/EventLog';
 import { GuidePanel, LevelBriefing } from '../dashboard/GuidePanel';
 import { LossStoryView } from '../dashboard/LossStoryView';
+import { AutoPauseBanner, AutoPauseToggle, ChallengeCard } from '../dashboard/ChallengeCard';
 import { PlantView } from '../scene/PlantView';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
@@ -140,6 +141,7 @@ export function App() {
       </span>}
       {game?.testRun && <span className="mt-1 block text-[11px] font-semibold text-amber-700">TEST · ใช้ Auto ระหว่างรอบ ไม่นับ Best</span>}
     </button>
+    <ChallengeCard />
     {game?.canHarvest && <button className="hud-card harvest-card" onClick={() => void sendCommand({ type: 'harvest' })}>
       <span className="flex items-center gap-2 text-sm font-bold text-emerald-900"><Sprout size={18} /> ผักโตเต็มที่ — เก็บเกี่ยว!</span>
     </button>}
@@ -163,10 +165,11 @@ export function App() {
     <main className="game-main">
       <div className="game-topbar">
         <div><span className="text-xs font-semibold tracking-[0.15em] text-emerald-700">GREEN OAK GARDEN</span><p className="text-xs text-slate-500">ดูแลสวนของคุณให้เติบโต</p></div>
-        <div className="flex flex-wrap items-center gap-3"><LevelSelect /><SimControls /></div>
+        <div className="flex flex-wrap items-center gap-3"><LevelSelect /><AutoPauseToggle /><SimControls /></div>
       </div>
       <div className="garden-stage">
         <div className="scene-window"><PlantView /></div>
+        <AutoPauseBanner />
         {!wide && <div className="garden-hud">{scoreCards}{sensorCard}</div>}
         <aside className="hud-card plant-card">
           <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-emerald-800">ผักของคุณ</span><PlantSelector /></div>

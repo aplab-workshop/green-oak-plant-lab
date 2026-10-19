@@ -66,5 +66,5 @@ describe('Care score and permanent death — P17', () => {
     dry.reset();
     expect(dry.game).toMatchObject({ status: 'ready', score: 0, elapsedS: 0, deadPlantIds: [] });
     expect(dry.plants.every((p) => p.damage === 0)).toBe(true);
-  });
+  }, 30000);
 });

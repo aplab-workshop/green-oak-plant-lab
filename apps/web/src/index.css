@@ -117,3 +117,36 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
   .workspace-left { top: 10px; bottom: 32px; }
   .workspace-left > .hud-card { padding: 8px 12px; }
 }
+
+/* P23: แถบผู้ช่วยหยุดเกม — กลางด้านบนของฉาก */
+.autopause-banner {
+  position: absolute;
+  top: 0.75rem;
+  left: 50%;
+  z-index: 30;
+  display: flex;
+  max-width: min(36rem, calc(100% - 2rem));
+  transform: translateX(-50%);
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 0.9rem;
+  background: #fffbeb;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.8rem;
+  color: #78350f;
+  box-shadow: 0 6px 20px rgb(15 23 42 / 0.18);
+}
+.autopause-resume {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 0.6rem;
+  background: #047857;
+  padding: 0.3rem 0.7rem;
+  font-weight: 600;
+  color: white;
+}
+.autopause-resume:hover {
+  background: #065f46;
+}

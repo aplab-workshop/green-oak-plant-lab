@@ -163,6 +163,26 @@ export interface SimConfig {
     /** pH Down Pump M106 (W) */
     phDownPumpW: number;
   };
+  /** เหตุการณ์ท้าทาย (SPEC § 4.8) */
+  challenges: {
+    /** เตือนล่วงหน้าก่อนเริ่ม (s จำลอง) */
+    warnAheadS: number;
+    /** ระยะห่างขั้นต่ำระหว่างเหตุการณ์ (วัน) */
+    minGapDays: number;
+    /** คลื่นความร้อน: อุณหภูมิห้องเพิ่ม (°C) และระยะเวลา [ต่ำสุด, สูงสุด] (h) */
+    heatWaveDeltaC: number;
+    heatWaveHours: [number, number];
+    /** ถังรั่ว (L/h) จนกว่าจะซ่อม */
+    leakLph: number;
+    /** ไฟดับ [ต่ำสุด, สูงสุด] (h) */
+    outageHours: [number, number];
+    /** อากาศแห้ง: RH ห้องเปลี่ยน (%, ติดลบ) และระยะเวลา (h) */
+    dryAirRhDeltaPct: number;
+    dryAirHours: number;
+    /** น้ำประปาด่าง: pH ของน้ำที่เติม และระยะเวลา (h) */
+    alkalineTapPh: number;
+    alkalineTapHours: number;
+  };
   /** ระยะเวลาต่อ 1 โดส (s เวลาจำลอง) — SPEC § 4.7 */
   dose: {
     /** M102: 2 L/min × 2 นาที = 4 L ≈ +10% ของถัง 40 L */
@@ -310,6 +330,18 @@ export const DEFAULT_CONFIG: SimConfig = {
   events: { stressOn: 0.3, stressOff: 0.15, damageLevels: [0.01, 0.25, 0.5] },
   power: { ledW: 120, fanW: 15, humidifierW: 25, refillPumpW: 18, nutrientPumpW: 5, airPumpW: 5, phDownPumpW: 5 },
   dose: { refillS: 120, nutrientS: 30, phDownS: 120, maxQueued: 5 },
+  challenges: {
+    warnAheadS: 6 * 3600,
+    minGapDays: 2,
+    heatWaveDeltaC: 5,
+    heatWaveHours: [6, 8],
+    leakLph: 1.5,
+    outageHours: [2, 3],
+    dryAirRhDeltaPct: -20,
+    dryAirHours: 12,
+    alkalineTapPh: 8.0,
+    alkalineTapHours: 24,
+  },
   noise: { airTempC: 0.1, rhPct: 0.5, ppfd: 2, waterTempC: 0.05, ph: 0.01, ecMsCm: 0.01, waterLevelPct: 0.2 },
   plant: {
     count: 6,

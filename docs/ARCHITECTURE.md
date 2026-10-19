@@ -722,3 +722,13 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - **ผู้ช่วยฟาร์ม:** Nutrient และ pH Down ที่ล็อก ไม่เปิดค้างตามรอบ Poll อีกต่อไป (`farmHelper` ปิดไว้) แต่ `LabSession.updateCommandState` สั่ง 1 โดสเมื่อ EC < 1.0 / pH > 6.6 และไม่มีโดสชนิดนั้นค้าง — แก้ปัญหา EC พุ่งที่ 3600x
 - **UI:** `ActuatorPanel` แสดงปุ่มโดส (manual และไม่ใช่ Fail-safe) พร้อม `formatDoseRemaining`, 🔒 ตามด่าน, LED presets; Slider แสดงเฉพาะ Free Play
 
+### 11.21 Implementation Notes (P23 — Events & Challenge)
+
+- **`sim-core/src/challenges.ts`:** `planChallenges(spec, seed, roundStartS, cfg)` ใช้ `Rng` ผสม Seed กับ `spec.salt` ของด่าน — ชนิดสุ่มลำดับแบบ Fisher–Yates (ไม่ซ้ำถ้ามีพอ), วันแบ่งช่วงเป็น n ส่วนแล้วบังคับห่าง `minGapDays`, ชั่วโมงเริ่มตามชนิด (คลื่นความร้อน 11–13 น.); `LevelDef.challenges` ส่งผ่าน `levelRound` → `RoundStart.challenges` (หรือ `challengePlan` สำหรับ Test/Fixture)
+- **สถานะ:** `scheduled → warned (start − 6 h) → active → done` อัปเดตต้น `Simulation.step` และ emit `challenge.warning/start/end`; `repairLeak()` จบ leak ที่ active
+- **ผลต่อ Model** (`effectsOf`): `roomTempDeltaC`/`roomRhDeltaPct` เข้า `stepAir`, `tapPh` เข้า `stepPh`, leak บวกกับ `disturbance.leakLph`, ไฟดับแทนคำสั่งด้วย OFF ทั้งหมดใน `Simulation.step`; ไม่มีเหตุการณ์ active คืน `NO_EFFECTS` คงที่ (ไม่สร้าง Object ต่อ Step)
+- **ไฟดับกับโดส:** `LabSession` ถาม `sim.powerOutage` (คำนวณจากตาราง ณ เวลาก่อน Step) แล้วข้าม `consumeDoses`; Snapshot `commands` แสดง OFF ทั้งหมดระหว่างไฟดับ
+- **Auto-pause:** `drainSimEvents` หยุดเมื่อ warning/start; `checkRedValues` หลังแต่ละ Tick ใช้ `sensorStatus` จาก `@gol/shared` กับ 5 ค่า หยุดครั้งแรกต่อค่าต่อรอบ (`redSeen` ล้างตอน Reset); ทำงานเฉพาะ `level !== null` และ `playing`; Resume ล้าง `reason`
+- **Web:** `dashboard/ChallengeCard.tsx` (`ChallengeCard`, `AutoPauseBanner`, `AutoPauseToggle`, `challengeLine`), `formatHours`; `sensorMeta.ts` ดึงช่วงสีจาก `SENSOR_RANGES`
+- **สมดุล:** วัดด้วยสูตรดูแล + การรับมือ Seed 1–5 → L3 ขยายเป็น 10 วัน; เทสต์ `levels.test.ts` ใช้สูตรเดียวกัน
+

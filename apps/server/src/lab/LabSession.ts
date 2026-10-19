@@ -12,6 +12,8 @@ import {
   type DoseDevice,
   deviceOfBit,
   playerDeviceOfDose,
+  sensorStatus,
+  SENSOR_REGISTERS,
 } from '@gol/shared';
 import {
   LEVELS, SimClock, Simulation, findLevel, levelInfo, levelPct, levelRound, waterHeightCm,
@@ -77,6 +79,14 @@ const HELPER_PH_DOWN_ABOVE = 6.6;
 /** EC ที่ผู้ช่วยฟาร์มสั่งปุ๋ย 1 โดส (ด่านที่ยังล็อก A+B) — เกณฑ์ล่างของ Ladder ตัวอย่าง */
 const HELPER_NUTRIENT_BELOW = 1.0;
 
+/** ค่าที่ Auto-pause ตรวจ "สีแดงครั้งแรก" (SPEC § 4.8) */
+const RED_WATCH = ['waterLevelPct', 'ecMsCm', 'ph', 'airTempC', 'rhPct'] as const;
+
+/** คำสั่งที่มีผลระหว่างไฟดับ (แสดงใน Snapshot) */
+const OUTAGE_COMMANDS: Readonly<ActuatorCommands> = Object.freeze({
+  fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false,
+});
+
 /**
  * LabSession — 1 Lab ที่แยกอิสระ (FR-40): Simulation, Clock, PLC adapter, Event log, History ของตัวเอง
  *
@@ -114,6 +124,11 @@ export class LabSession {
   private readonly unlocked = new Set<LevelId>(['L1']);
   /** โดสที่ค้าง นับเวลาจำลองราย Step (SPEC § 4.7) */
   private readonly doses = new Map<DoseDevice, ActiveDose>();
+  /** ผู้ช่วยหยุดเกม (SPEC § 4.8) */
+  private autoPauseEnabled = true;
+  private autoPauseReason: string | null = null;
+  /** ค่าที่เคยแดงแล้วในรอบนี้ (หยุดครั้งแรกครั้งเดียวต่อค่า) */
+  private readonly redSeen = new Set<string>();
   private readonly bestStars = new Map<LevelId, number>();
 
   private get recordKey(): string {
@@ -175,8 +190,10 @@ export class LabSession {
     if (this.usingAuto) this.sim.markTestRun();
     const result = this.clock.advance(realElapsedMs, (dt) => {
       // โดสซ้อนบนคำสั่งจริงเฉพาะ Step ที่ยังเหลือเวลา → ผลเท่ากันทุก Speed / ทุกการแบ่ง Tick
+      // ไฟดับ: ปั๊มไม่ทำงาน โดสจึงหยุดนับเวลาไว้ก่อน (SPEC § 4.8)
+      const outage = this.sim.powerOutage;
       this.sim.step(dt, this.effectiveCommands());
-      this.consumeDoses(dt);
+      if (!outage) this.consumeDoses(dt);
       this.history.maybeSample(this.sim);
     });
     if (result.lagged && this.now() - this.lastLagLogAt > 10_000) {
@@ -184,12 +201,40 @@ export class LabSession {
       this.log('sim.lagged', 'warning', 'Server คำนวณไม่ทัน เวลาจำลองช้ากว่าที่ตั้งไว้');
     }
     this.drainSimEvents();
+    this.checkRedValues();
   }
 
   private drainSimEvents(): void {
     for (const e of this.sim.drainEvents()) {
       if (e.kind === 'game.over' || e.kind === 'game.won') this.saveRecord();
       this.events.add({ at: this.now(), ...e });
+      if (e.kind === 'challenge.warning' || e.kind === 'challenge.start') this.autoPause(e.message);
+    }
+  }
+
+  /** Auto-pause ใช้เฉพาะโหมดด่านขณะกำลังเล่น */
+  private get autoPauseActive(): boolean {
+    return this.autoPauseEnabled && this.level !== null && this.sim.game.status === 'playing';
+  }
+
+  private autoPause(reason: string): void {
+    if (!this.autoPauseActive) return;
+    this.autoPauseReason = reason;
+    if (this.clock.paused) return;
+    this.clock.pause();
+    this.log('game.autopause', 'warning', 'ผู้ช่วยหยุดเกมให้: ' + reason);
+  }
+
+  /** ค่าสีแดงครั้งแรกในรอบ → Auto-pause */
+  private checkRedValues(): void {
+    if (!this.autoPauseActive) return;
+    const r = this.sim.readSensors(false);
+    for (const key of RED_WATCH) {
+      if (this.redSeen.has(key) || sensorStatus(key, r[key]) !== 'alarm') continue;
+      this.redSeen.add(key);
+      const reg = SENSOR_REGISTERS.find((x) => x.key === key)!;
+      this.autoPause(`${reg.label} เป็นสีแดง (${r[key].toFixed(key === 'ph' || key === 'ecMsCm' ? 2 : 1)} ${reg.unit})`);
+      return;
     }
   }
 
@@ -234,6 +279,7 @@ export class LabSession {
 
   /** คำสั่งที่ Simulation ใช้จริง = คำสั่งจาก PLC/ผู้ช่วย + โดสที่ค้าง */
   private effectiveCommands(): ActuatorCommands {
+    if (this.sim.powerOutage) return OUTAGE_COMMANDS;
     if (this.doses.size === 0) return this.applied;
     const out = { ...this.applied };
     for (const d of this.doses.keys()) for (const bit of DOSE_BITS[d]) out[bit] = true;
@@ -342,6 +388,7 @@ export class LabSession {
         if (status === 'ready') throw new LabCommandError('กด Start เพื่อเริ่มรอบก่อน', 409);
         if (status === 'won') throw new LabCommandError('เก็บเกี่ยวแล้ว — Reset เพื่อเริ่มรอบใหม่', 409);
         this.clock.resume();
+        this.autoPauseReason = null;
         this.log('sim.resume', 'info', 'เดิน Simulation ต่อ');
         return;
       }
@@ -403,6 +450,15 @@ export class LabSession {
         this.manual().setManualLed(cmd.value);
         await this.poll();
         return;
+      case 'repairLeak':
+        if (!this.sim.repairLeak()) throw new LabCommandError('ตอนนี้ไม่มีถังรั่วให้ซ่อม', 409);
+        this.drainSimEvents();
+        return;
+      case 'setAutoPause':
+        this.autoPauseEnabled = cmd.enabled;
+        if (!cmd.enabled) this.autoPauseReason = null;
+        this.log('game.autopause_setting', 'info', cmd.enabled ? 'เปิดผู้ช่วยหยุดเกม' : 'ปิดผู้ช่วยหยุดเกม');
+        return;
       case 'dose': {
         this.manual();
         if (this.failsafe) throw new LabCommandError('อยู่ใน Fail-safe — สั่งโดสไม่ได้จนกว่า PLC จะกลับมา', 409);
@@ -421,6 +477,8 @@ export class LabSession {
   reset(saveRecord = true, round?: RoundStart): void {
     if (saveRecord) this.saveRecord();
     this.doses.clear();
+    this.redSeen.clear();
+    this.autoPauseReason = null;
     this.sim.reset(round);
     this.clock.reset(this.sim.startTimeS);
     this.history.clear();
@@ -489,6 +547,8 @@ export class LabSession {
         : null,
       disturbance: s.disturbance,
       doses: [...this.doses.values()].map((d) => ({ ...d })),
+      challenges: this.sim.challengeViews(),
+      autoPause: { enabled: this.autoPauseEnabled, reason: this.autoPauseReason },
     };
   }
 }

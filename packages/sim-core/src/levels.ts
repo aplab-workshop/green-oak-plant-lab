@@ -1,5 +1,6 @@
 import type { LevelId, LevelInfo } from '@gol/shared';
 import type { RoundStart } from './simulation';
+import { CHALLENGE_KINDS, type ChallengeSpec } from './challenges';
 
 /** ด่านของเกม (SPEC § 4.6) — เป้าหมายตั้งจาก Simulation ตามสูตรใน GAME-GUIDE */
 export interface LevelDef extends LevelInfo {
@@ -7,6 +8,8 @@ export interface LevelDef extends LevelInfo {
   startBiomassG: number;
   /** อายุต้นตอนเริ่ม (วันจำลองนับจากเพาะ) */
   startDay: number;
+  /** เหตุการณ์ท้าทายของด่าน (SPEC § 4.8) — ไม่มี = ไม่มีเหตุการณ์ */
+  challenges?: ChallengeSpec;
 }
 
 export const LEVELS: readonly LevelDef[] = [
@@ -15,21 +18,23 @@ export const LEVELS: readonly LevelDef[] = [
   { id: 'L2', title: 'อาหารของผัก', description: 'ผักโตเร็ว กินปุ๋ยมาก คอยดู EC และเติมปุ๋ย',
     startBiomassG: 15, startDay: 23, targetG: 30, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'] },
   { id: 'L3', title: 'คลื่นความร้อน', description: 'ไฟ LED ทำให้ร้อน ใช้พัดลมและหมอกคุมอากาศ',
-    startBiomassG: 30, startDay: 28, targetG: 60, timeLimitDays: 9, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'] },
+    startBiomassG: 30, startDay: 28, targetG: 60, timeLimitDays: 10, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'],
+    challenges: { kinds: ['heatWave'], count: [1, 2], windowDays: [1, 7], salt: 3 } },
   { id: 'L4', title: 'ฟาร์มของฉัน', description: 'ดูแลทุกอย่างเองตั้งแต่ต้นกล้าจนเก็บเกี่ยว 100 g ภายในงบไฟ',
     startBiomassG: 5, startDay: 14, targetG: 100, timeLimitDays: 35, energyBudgetKWh: 60,
-    playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'] },
+    playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'],
+    challenges: { kinds: CHALLENGE_KINDS, count: [3, 4], windowDays: [3, 30], salt: 4 } },
 ];
 
 export const findLevel = (id: LevelId): LevelDef => LEVELS.find((l) => l.id === id)!;
 
 export function levelInfo(l: LevelDef): LevelInfo {
-  const { startBiomassG: _b, startDay: _d, ...info } = l;
+  const { startBiomassG: _b, startDay: _d, challenges: _c, ...info } = l;
   return { ...info, playerDevices: [...info.playerDevices] };
 }
 
 /** จุดเริ่มรอบของ Simulation จากด่าน */
 export function levelRound(l: LevelDef): RoundStart {
-  return { initialBiomassG: l.startBiomassG, startDay: l.startDay,
+  return { initialBiomassG: l.startBiomassG, startDay: l.startDay, challenges: l.challenges,
     mission: { targetG: l.targetG, timeLimitS: l.timeLimitDays * 86_400, energyBudgetKWh: l.energyBudgetKWh } };
 }

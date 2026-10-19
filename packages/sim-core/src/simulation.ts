@@ -16,6 +16,17 @@ import { rootSupplyRatio } from './plant/water';
 import { readSensors, readSimInfo } from './sensors';
 import { CareGame, type Mission } from './careGame';
 import { powerW } from './environment/power';
+import {
+  challengeMessage,
+  challengeViews,
+  effectsOf,
+  outageAt,
+  planChallenges,
+  toState,
+  type ChallengePlan,
+  type ChallengeSpec,
+  type ChallengeState,
+} from './challenges';
 
 export interface Disturbance {
   /** น้ำรั่วออกจากถัง (L/h) */
@@ -33,6 +44,8 @@ export interface SimulationSnapshot {
   env: EnvironmentState;
   plants: PlantState[];
   disturbance: Disturbance;
+  /** สถานะเหตุการณ์ทั้งหมดของรอบ (SPEC § 4.8) */
+  challenges: ChallengeState[];
 }
 
 interface PlantFlags {
@@ -50,7 +63,23 @@ export interface RoundStart {
   initialBiomassG?: number;
   startDay?: number;
   mission?: Mission;
+  /** เหตุการณ์ของด่าน (สร้างตารางจาก Seed) — SPEC § 4.8 */
+  challenges?: ChallengeSpec;
+  /** ตารางเหตุการณ์ที่กำหนดเอง (Test/Scenario) — มาก่อน challenges */
+  challengePlan?: ChallengePlan[];
 }
+
+/** คำสั่งระหว่างไฟดับ: ทุกอย่าง OFF รวม Air Pump และ LED */
+const OUTAGE_COMMANDS: Readonly<ActuatorCommands> = Object.freeze({
+  fan: false,
+  humidifier: false,
+  ledPct: 0,
+  refillPump: false,
+  nutrientA: false,
+  nutrientB: false,
+  airPump: false,
+  phDown: false,
+});
 
 /**
  * Simulation — รวม Environment + Plants + Sensors ของ 1 Lab (Pure, ไม่มี I/O)
@@ -72,6 +101,7 @@ export class Simulation {
   private events: SimEvent[] = [];
   disturbance: Disturbance = { leakLph: 0 };
   private round: RoundStart = {};
+  private _challenges: ChallengeState[] = [];
 
   constructor(opts: SimulationOptions = {}) {
     this.cfg = opts.cfg ?? DEFAULT_CONFIG;
@@ -115,6 +145,56 @@ export class Simulation {
     this.empty = false;
     this.events = [];
     this.disturbance = { leakLph: 0 };
+    const plan = this.round.challengePlan
+      ?? (this.round.challenges ? planChallenges(this.round.challenges, this.seed, this._simTimeS, cfg) : []);
+    this._challenges = plan.map(toState);
+  }
+
+  /** สถานะเหตุการณ์ทั้งหมดของรอบ (รวมที่ยังไม่เตือน) */
+  get challenges(): readonly Readonly<ChallengeState>[] {
+    return this._challenges;
+  }
+
+  /** เหตุการณ์ที่ผู้เล่นเห็น (เตือนแล้ว) */
+  challengeViews() {
+    return challengeViews(this._challenges);
+  }
+
+  /** ไฟดับในช่วงเวลาจำลองปัจจุบัน */
+  get powerOutage(): boolean {
+    return outageAt(this._challenges, this._simTimeS);
+  }
+
+  /** ซ่อมถังรั่ว — คืน false ถ้าไม่มีการรั่วที่กำลังเกิด */
+  repairLeak(): boolean {
+    const leak = this._challenges.find((c) => c.kind === 'leak' && c.status === 'active');
+    if (!leak) return false;
+    leak.status = 'done';
+    leak.endedAtS = this._simTimeS;
+    leak.repaired = true;
+    this.emit({ kind: 'challenge.end', severity: 'info', message: challengeMessage(leak, 'end', this.cfg) });
+    return true;
+  }
+
+  /** เปลี่ยนสถานะเหตุการณ์ตามเวลาจำลอง: scheduled → warned → active → done */
+  private updateChallenges(): void {
+    const t = this._simTimeS;
+    const warnAhead = this.cfg.challenges.warnAheadS;
+    for (const c of this._challenges) {
+      if (c.status === 'scheduled' && t >= c.startS - warnAhead) {
+        c.status = 'warned';
+        this.emit({ kind: 'challenge.warning', severity: 'warning', message: challengeMessage(c, 'warning', this.cfg) });
+      }
+      if (c.status === 'warned' && t >= c.startS) {
+        c.status = 'active';
+        this.emit({ kind: 'challenge.start', severity: 'critical', message: challengeMessage(c, 'start', this.cfg) });
+      }
+      if (c.status === 'active' && c.durationS !== null && t >= c.startS + c.durationS) {
+        c.status = 'done';
+        c.endedAtS = c.startS + c.durationS;
+        this.emit({ kind: 'challenge.end', severity: 'info', message: challengeMessage(c, 'end', this.cfg) });
+      }
+    }
   }
 
   /** เริ่มรอบเกม ready → playing (SPEC § 4.5) */
@@ -152,9 +232,13 @@ export class Simulation {
   }
 
   /** เดิน Simulation 1 step */
-  step(dtS: number, cmd: ActuatorCommands): void {
+  step(dtS: number, cmdIn: ActuatorCommands): void {
     const cfg = this.cfg;
     const env = this._env;
+    this.updateChallenges();
+    const fx = effectsOf(this._challenges, cfg);
+    // ไฟดับ: Actuator ทุกตัวหยุด ไม่ว่าคำสั่งจาก PLC จะเป็นอะไร
+    const cmd = fx.powerOutage ? OUTAGE_COMMANDS : cmdIn;
     const ledPct = clamp(Number.isFinite(cmd.ledPct) ? cmd.ledPct : 0, 0, 100);
     const plantEnv: PlantEnvironment = {
       simTimeS: this._simTimeS,
@@ -174,7 +258,15 @@ export class Simulation {
     // 2) ถังจ่ายน้ำได้จริงเท่าไร
     const result = stepEnvironment(
       env,
-      { cmd, simTimeS: this._simTimeS, plantUptakeDemandL: requestedL, leakLph: this.disturbance.leakLph },
+      {
+        cmd,
+        simTimeS: this._simTimeS,
+        plantUptakeDemandL: requestedL,
+        leakLph: this.disturbance.leakLph + fx.leakLph,
+        roomTempDeltaC: fx.roomTempDeltaC,
+        roomRhDeltaPct: fx.roomRhDeltaPct,
+        ...(fx.tapPh !== null ? { tapPh: fx.tapPh } : {}),
+      },
       dtS,
       cfg,
     );
@@ -218,6 +310,7 @@ export class Simulation {
       env: { ...this._env },
       plants: this._plants.map((p) => ({ ...p })),
       disturbance: { ...this.disturbance },
+      challenges: this._challenges.map((c) => ({ ...c })),
     };
   }
 

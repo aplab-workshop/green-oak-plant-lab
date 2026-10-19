@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import type { ActuatorCommands } from '@gol/shared';
 import { CareGame, LEVELS, Simulation, createPlant, levelRound, makeConfig, type LevelDef } from '../src';
 
-/** สูตรดูแลตาม GAME-GUIDE: LED 06–22 น., Refill <70→90%, Fan >25.5/<24.5 °C, Humidifier <55/>70%, A+B EC <1.0→1.2 */
-function playGuide(level: LevelDef, ledPct: number) {
-  const sim = new Simulation({ cfg: makeConfig() });
+/**
+ * สูตรดูแลตาม GAME-GUIDE: LED 06–22 น., Refill <70→90%, Fan >25.5/<24.5 °C, Humidifier <55/>70%, A+B EC <1.0→1.2
+ * + รับมือเหตุการณ์ (SPEC § 4.8): คลื่นความร้อน LED 40%, pH Down >6.6→6.3, ซ่อมถังทันทีที่รั่ว
+ */
+function playGuide(level: LevelDef, ledPct: number, seed = 1) {
+  const sim = new Simulation({ cfg: makeConfig(), seed });
   sim.reset(levelRound(level));
   sim.startGame();
   const cmd: ActuatorCommands = { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
@@ -12,11 +15,14 @@ function playGuide(level: LevelDef, ledPct: number) {
     if (s % 60 === 0) {
       const r = sim.readSensors(false);
       const minute = (sim.simTimeS % 86_400) / 60;
-      cmd.ledPct = minute >= 360 && minute < 1320 ? ledPct : 0;
+      const heat = sim.challenges.some((c) => c.kind === 'heatWave' && c.status === 'active');
+      cmd.ledPct = minute >= 360 && minute < 1320 ? (heat ? Math.min(ledPct, 40) : ledPct) : 0;
       cmd.refillPump = r.waterLevelPct < 70 ? true : r.waterLevelPct >= 90 ? false : cmd.refillPump;
       cmd.fan = r.airTempC > 25.5 ? true : r.airTempC < 24.5 ? false : cmd.fan;
       cmd.humidifier = r.rhPct < 55 ? true : r.rhPct > 70 ? false : cmd.humidifier;
       cmd.nutrientA = cmd.nutrientB = r.ecMsCm < 1.0 ? true : r.ecMsCm >= 1.2 ? false : cmd.nutrientA;
+      cmd.phDown = r.ph > 6.6 ? true : r.ph <= 6.3 ? false : cmd.phDown;
+      if (sim.challenges.some((c) => c.kind === 'leak' && c.status === 'active')) sim.repairLeak();
     }
     sim.step(1, cmd);
     if (sim.game.canHarvest) sim.harvest();

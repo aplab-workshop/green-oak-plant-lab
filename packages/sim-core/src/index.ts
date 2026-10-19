@@ -21,3 +21,4 @@ export * from './plant/plant';
 export * from './simulation';
 export * from './levels';
 export * from './careGame';
+export * from './challenges';

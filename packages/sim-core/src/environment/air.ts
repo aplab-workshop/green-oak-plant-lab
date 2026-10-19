@@ -14,6 +14,10 @@ export interface AirInput {
   ledPct: number;
   fan: boolean;
   humidifier: boolean;
+  /** เหตุการณ์ (SPEC § 4.8): อุณหภูมิห้องเพิ่ม (°C) */
+  roomTempDeltaC?: number;
+  /** เหตุการณ์: RH ห้องเปลี่ยน (%) */
+  roomRhDeltaPct?: number;
 }
 
 export interface AirState {
@@ -29,7 +33,7 @@ export interface AirState {
  */
 export function stepAir(s: AirState, u: AirInput, dtS: number, cfg: SimConfig): AirState {
   const a = cfg.air;
-  const tRoom = roomTempC(u.simTimeS, cfg);
+  const tRoom = roomTempC(u.simTimeS, cfg) + (u.roomTempDeltaC ?? 0);
   const fan = u.fan ? 1 : 0;
   const hum = u.humidifier ? 1 : 0;
   const led = clamp(u.ledPct, 0, 100) / 100;
@@ -38,7 +42,7 @@ export function stepAir(s: AirState, u: AirInput, dtS: number, cfg: SimConfig): 
   const airTempC = approach(s.airTempC, tEq, dtS, a.tempTauMin * 60);
 
   const rhEq = clamp(
-    cfg.room.rhPct +
+    cfg.room.rhPct + (u.roomRhDeltaPct ?? 0) +
       a.humidifierGainPct * hum * (1 - a.fanHumidityLoss * fan) +
       a.enclosureMoisturePct * (1 - fan) -
       a.rhPerDegC * (airTempC - tRoom),

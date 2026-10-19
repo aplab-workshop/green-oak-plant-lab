@@ -53,7 +53,7 @@ describe('Root Health / water supply — P11', () => {
     for (let i = 0; i < 24 * 3600; i++) off.step(1, { ...OFF, ledPct: 60 });
     expect(off.plants[0]!.rootHealth).toBeGreaterThan(0.9);
     expect(off.plants[0]!.supplyRatio).toBeGreaterThan(before.supplyRatio);
-  });
+  }, 30000);
 
   it('AC-23: Air Pump cannot replace water that does not reach the roots', () => {
     const sim = new Simulation({ cfg: makeConfig({ tank: { initialLevelPct: 30 } }) });

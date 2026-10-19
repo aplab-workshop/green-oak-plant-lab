@@ -16,7 +16,10 @@ export interface SimEvent {
     | 'tank.roots_exposed'
     | 'tank.roots_covered'
     | 'tank.overflow'
-    | 'tank.empty';
+    | 'tank.empty'
+    | 'challenge.warning'
+    | 'challenge.start'
+    | 'challenge.end';
   severity: EventSeverity;
   plantId?: number;
   /** ข้อความภาษาไทย ศัพท์เทคนิคภาษาอังกฤษ */

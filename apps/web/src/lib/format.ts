@@ -23,3 +23,9 @@ export function formatDoseRemaining(seconds: number): string {
   const s = Math.max(0, Math.ceil(seconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
+
+/** วินาทีจำลอง → "5:30" (ชั่วโมง:นาที) สำหรับนับถอยหลังเหตุการณ์ */
+export function formatHours(seconds: number): string {
+  const m = Math.max(0, Math.ceil(seconds / 60));
+  return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+}

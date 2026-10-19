@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EventEntry, PlantState } from '@gol/shared';
-import { formatClock, formatDoseRemaining, formatSimTime } from '../src/lib/format';
+import { formatClock, formatDoseRemaining, formatHours, formatSimTime } from '../src/lib/format';
+import { challengeLine } from '../src/dashboard/ChallengeCard';
 import { sensorStatus } from '../src/dashboard/sensorMeta';
 import { leafColor, plantVisuals } from '../src/scene/plantVisuals';
 import { mergeEvents } from '../src/store/labStore';
@@ -106,3 +107,22 @@ describe('formatDoseRemaining (P22)', () => {
     expect(formatDoseRemaining(-3)).toBe('0:00');
   });
 });
+
+describe('challenge countdown (P23)', () => {
+  const base = { id: 1, title: '🔥 คลื่นความร้อน', startS: 10_000, endS: 30_000, repaired: false } as const;
+
+  it('formats simulated hours as h:mm', () => {
+    expect(formatHours(5.5 * 3600)).toBe('5:30');
+    expect(formatHours(59)).toBe('0:01');
+    expect(formatHours(-10)).toBe('0:00');
+  });
+
+  it('describes warned, active, repaired and finished events', () => {
+    expect(challengeLine({ ...base, kind: 'heatWave', status: 'warned' }, 10_000 - 3 * 3600)).toBe('อีก 3:00 ชม.');
+    expect(challengeLine({ ...base, kind: 'heatWave', status: 'active' }, 30_000 - 1800)).toBe('เหลือ 0:30 ชม.');
+    expect(challengeLine({ ...base, kind: 'leak', status: 'active', endS: null }, 12_000)).toBe('กำลังเกิด — กดซ่อม');
+    expect(challengeLine({ ...base, kind: 'leak', status: 'done', repaired: true }, 40_000)).toBe('ซ่อมแล้ว');
+    expect(challengeLine({ ...base, kind: 'dryAir', status: 'done' }, 40_000)).toBe('จบแล้ว');
+  });
+});
+

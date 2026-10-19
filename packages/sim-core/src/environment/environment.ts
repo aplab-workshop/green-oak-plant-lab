@@ -47,6 +47,10 @@ export interface EnvironmentInput {
   plantUptakeDemandL: number;
   /** น้ำรั่ว (L/h) — Scenario disturbance, ค่าเริ่มต้น 0 */
   leakLph?: number;
+  /** ผลของเหตุการณ์ (SPEC § 4.8) */
+  roomTempDeltaC?: number;
+  roomRhDeltaPct?: number;
+  tapPh?: number;
 }
 
 export interface EnvironmentStepResult {
@@ -92,7 +96,12 @@ export function stepEnvironment(
   const ledPct = clamp(Number.isFinite(cmd.ledPct) ? cmd.ledPct : 0, 0, 100);
 
   // --- Air ---
-  const air = stepAir(s, { simTimeS: u.simTimeS, ledPct, fan: cmd.fan, humidifier: cmd.humidifier }, dtS, cfg);
+  const air = stepAir(
+    s,
+    { simTimeS: u.simTimeS, ledPct, fan: cmd.fan, humidifier: cmd.humidifier, roomTempDeltaC: u.roomTempDeltaC, roomRhDeltaPct: u.roomRhDeltaPct },
+    dtS,
+    cfg,
+  );
   const vpd = vpdKPa(air.airTempC, air.rhPct);
 
   // --- Water balance ---
@@ -118,7 +127,7 @@ export function stepEnvironment(
     cfg,
   );
   const doseMinutes = ((cmd.nutrientA ? 1 : 0) + (cmd.nutrientB ? 1 : 0)) * dtMin;
-  const ph = stepPh(s.ph, { volumeBeforeL: s.waterVolumeL, refillInL, doseMinutes, phDownMinutes: cmd.phDown ? dtMin : 0 }, dtS, cfg);
+  const ph = stepPh(s.ph, { volumeBeforeL: s.waterVolumeL, refillInL, doseMinutes, phDownMinutes: cmd.phDown ? dtMin : 0, tapPh: u.tapPh }, dtS, cfg);
 
   // --- Water temperature ---
   const waterTempC = stepWaterTemp(s.waterTempC, air.airTempC, s.waterVolumeL, refillInL, dtS, cfg);

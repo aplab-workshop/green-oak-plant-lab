@@ -41,6 +41,8 @@ export interface PhFlows {
   doseMinutes: number;
   /** นาทีที่ pH Down Pump (M106) ทำงานใน step นี้ */
   phDownMinutes?: number;
+  /** pH ของน้ำที่เติม (เหตุการณ์น้ำประปาด่าง) — ไม่ระบุ = Config */
+  tapPh?: number;
 }
 
 /**
@@ -59,6 +61,6 @@ export function stepPh(ph: number, f: PhFlows, dtS: number, cfg: SimConfig): num
     next -= n.phDownPerMin * f.phDownMinutes * scale;
   }
   const total = f.volumeBeforeL + f.refillInL;
-  if (f.refillInL > 0 && total > 0) next = (next * f.volumeBeforeL + n.tapPh * f.refillInL) / total;
+  if (f.refillInL > 0 && total > 0) next = (next * f.volumeBeforeL + (f.tapPh ?? n.tapPh) * f.refillInL) / total;
   return clamp(next, n.phMin, n.phMax);
 }

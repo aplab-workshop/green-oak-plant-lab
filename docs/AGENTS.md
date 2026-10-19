@@ -85,3 +85,9 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - `CLAUDE.md` ชี้มาที่ไฟล์นี้แล้ว (`@docs/AGENTS.md`); เทสต์ยาวต้องใส่ timeout เอง (ดูตัวอย่าง 30000 ใน lab.test.ts)
 - ถัดไป P23 Events & Challenge — รอผู้ใช้ตรวจรับ P22 ก่อน; ยังไม่ tag m2
 
+### สถานะเพิ่มเติม 2026-10-19 — P23 Events & Challenge
+- เสร็จและ commit แล้ว: เหตุการณ์ 5 ชนิด (SPEC § 4.8), ตาราง Deterministic ตาม Seed + ด่าน, Auto-pause, ซ่อมถัง; L3 ขยายเป็น 10 วัน; tests 229/229 + typecheck/build ผ่าน
+- ตรวจ UI ด้วย Server ทดสอบแยก (สคริปต์อยู่นอก repo) เพราะ L3/L4 ล็อกจนกว่าจะชนะด่านก่อนหน้า — ถ้าต้องตรวจอีก ให้ปลดล็อกผ่าน fixture ไม่ใช่แก้โค้ด
+- `docs/GAME-GUIDE.md` มีการจัดรูปตาราง (จาก Obsidian ของผู้ใช้) ค้างไม่ได้ commit — อย่า revert
+- ถัดไป P24 Simple Game UI — รอผู้ใช้ตรวจรับ P23 ก่อน; ยังไม่ tag m2
+
