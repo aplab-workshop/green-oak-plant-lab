@@ -519,7 +519,7 @@ export class LabSession {
       game: { ...this.sim.game, best: this.bestByScenario.has(this.recordKey)
         ? { ...this.bestByScenario.get(this.recordKey)! } : null },
       level: this.level ? levelInfo(this.level) : null,
-      levels: LEVELS.map((l) => ({ id: l.id, title: l.title, unlocked: this.unlocked.has(l.id), bestStars: this.bestStars.get(l.id) ?? 0 })),
+      levels: LEVELS.map((l) => ({ ...levelInfo(l), unlocked: this.unlocked.has(l.id), bestStars: this.bestStars.get(l.id) ?? 0 })),
       labId: this.labId,
       runId: this.events.runId,
       at: this.now(),

@@ -91,3 +91,8 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - `docs/GAME-GUIDE.md` มีการจัดรูปตาราง (จาก Obsidian ของผู้ใช้) ค้างไม่ได้ commit — อย่า revert
 - ผู้ใช้ตรวจรับ P23 แล้ว (2026-10-19); ถัดไป P24 Simple Game UI; ยังไม่ tag m2
 
+### สถานะเพิ่มเติม 2026-10-19 — P24 Simple Game UI
+- เสร็จและ commit แล้ว: หน้าจอเกม 5 ส่วนสำหรับโหมดด่าน (`apps/web/src/game/`), ลิ้นชัก 🔬, เลือกด่าน, ผ่านด่าน; Free Play ยังใช้ Layout เดิม; tests 240/240 + typecheck/build ผ่าน
+- แก้ UI โหมดด่านที่ `game/`; แก้ Free Play ที่ส่วนเดิมใน `App.tsx` และ `dashboard/`
+- ถัดไป P25 Plant Feedback — รอผู้ใช้ตรวจรับ P24 ก่อน; ยังไม่ tag m2
+

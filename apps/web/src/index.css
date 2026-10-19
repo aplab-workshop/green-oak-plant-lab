@@ -150,3 +150,76 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
 .autopause-resume:hover {
   background: #065f46;
 }
+
+/* ===== P24: Simple Game UI (โหมดด่าน) ===== */
+.game-screen {
+  position: relative;
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  gap: 8px;
+  grid-template-columns: 190px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-areas: 'top top' 'gauges scene' 'helper helper' 'actions actions';
+}
+.game-top { grid-area: top; padding: 10px 14px; border-radius: 16px; }
+.game-gauges { grid-area: gauges; display: flex; flex-direction: column; gap: 8px; overflow: auto; }
+.game-scene { grid-area: scene; position: relative; min-height: 360px; overflow: hidden; border-radius: 16px; background: #e5eee5; }
+.game-scene-cards { position: absolute; top: 0.75rem; left: 0.75rem; z-index: 20; width: min(16rem, calc(100% - 1.5rem)); pointer-events: none; }
+.game-scene-cards > * { pointer-events: auto; }
+.game-helper { grid-area: helper; border-radius: 14px; padding: 10px 14px; font-size: 0.9rem; font-weight: 500; }
+.helper-info { background: #f1f5f9; color: #334155; }
+.helper-good { background: #ecfdf5; color: #065f46; }
+.helper-warn { background: #fffbeb; color: #92400e; }
+.helper-danger { background: #fff1f2; color: #9f1239; }
+.game-actions { grid-area: actions; display: flex; align-items: stretch; gap: 6px; overflow-x: auto; border-radius: 16px; background: #ffffffe6; padding: 8px; box-shadow: 0 6px 24px #23493412; }
+.game-bar { height: 8px; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+.game-bar > div { height: 100%; border-radius: 999px; transition: width 0.4s; }
+.game-chip { display: inline-flex; align-items: center; gap: 4px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 500; color: #334155; }
+.game-chip:hover { background: #f8fafc; }
+.game-harvest { margin-top: 8px; display: flex; width: 100%; align-items: center; justify-content: center; gap: 6px; border-radius: 12px; background: #047857; padding: 8px; font-weight: 700; color: white; }
+.game-harvest:hover { background: #065f46; }
+
+.gauge { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: center; border-radius: 14px; border: 2px solid transparent; background: white; padding: 10px 12px; text-align: left; box-shadow: 0 4px 16px #23493410; }
+.gauge-icon { grid-row: span 2; font-size: 1.5rem; }
+.gauge-label { font-size: 0.75rem; color: #64748b; }
+.gauge-value { font-size: 1.05rem; font-weight: 700; color: #0f172a; }
+.gauge-trend { font-size: 0.9rem; color: #64748b; }
+.gauge-ok { border-color: #34d399; }
+.gauge-warn { border-color: #fbbf24; background: #fffbeb; }
+.gauge-alarm { border-color: #f43f5e; background: #fff1f2; }
+.gauge-neutral { border-color: #e2e8f0; }
+
+.action-btn { display: flex; min-width: 76px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border-radius: 12px; border: 1px solid #e2e8f0; background: white; padding: 6px 8px; font-size: 0.75rem; color: #334155; }
+.action-btn:hover:not(:disabled) { background: #f8fafc; }
+.action-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.action-on { border-color: #34d399; background: #ecfdf5; color: #065f46; }
+.action-group { display: flex; align-items: center; gap: 4px; border-radius: 12px; border: 1px solid #fde68a; background: #fffbeb; padding: 4px 6px; }
+.action-group-label { font-size: 0.75rem; font-weight: 600; color: #92400e; white-space: nowrap; }
+.led-btn { border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; font-weight: 600; color: #78350f; }
+.led-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.led-on { background: #fbbf24; color: #451a03; }
+.action-spacer { flex: 1; }
+.action-note { display: flex; flex-basis: 100%; align-items: center; border-radius: 10px; background: #fff1f2; padding: 6px 10px; font-size: 0.75rem; color: #9f1239; }
+.game-actions:has(.action-note) { flex-wrap: wrap; }
+
+.science-drawer { position: absolute; top: 0; right: 0; bottom: 0; z-index: 40; display: flex; width: min(440px, 100%); flex-direction: column; border-radius: 16px; background: white; box-shadow: -8px 0 32px #0f172a2e; }
+
+.level-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: 2px solid #e2e8f0; border-radius: 16px; background: white; padding: 14px; text-align: left; }
+.level-card:hover:not(:disabled) { border-color: #34d399; background: #f0fdf4; }
+.level-card:disabled { cursor: not-allowed; opacity: 0.55; }
+.level-current { border-color: #059669; }
+
+@media (max-width: 1099px) {
+  /* จอแคบ: หน้ายาวเลื่อนลงได้ ไม่บีบแถวให้พอดีความสูงจอ (แถวที่ overflow ถูกบีบจนหายได้) */
+  .game-main:has(.game-screen) { overflow: auto; }
+  .game-screen {
+    flex: none;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 420px auto auto;
+    grid-template-areas: 'top' 'gauges' 'scene' 'helper' 'actions';
+  }
+  .game-gauges { flex-direction: row; overflow-x: auto; overflow-y: hidden; min-height: max-content; }
+  .gauge { min-width: 128px; flex: 1 0 auto; }
+  .science-drawer { position: fixed; inset: auto 0 0 0; height: 75vh; width: 100%; border-radius: 16px 16px 0 0; }
+}

@@ -732,3 +732,12 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - **Web:** `dashboard/ChallengeCard.tsx` (`ChallengeCard`, `AutoPauseBanner`, `AutoPauseToggle`, `challengeLine`), `formatHours`; `sensorMeta.ts` ดึงช่วงสีจาก `SENSOR_RANGES`
 - **สมดุล:** วัดด้วยสูตรดูแล + การรับมือ Seed 1–5 → L3 ขยายเป็น 10 วัน; เทสต์ `levels.test.ts` ใช้สูตรเดียวกัน
 
+### 11.22 Implementation Notes (P24 — Simple Game UI)
+
+- **โครง:** `App.tsx` เลือก Layout ตาม `snapshot.level` — มีด่าน → `game/GameScreen` (Grid 5 ส่วน), Free Play → Layout เดิมของ P19; Dialog กลาง (Briefing, Loss, คู่มือ, คะแนน) ใช้ร่วมกัน และเพิ่ม Dialog เลือกด่าน/ผ่านด่าน (ผ่านด่านแสดงครั้งเดียวต่อ `labId:runId`)
+- **`game/gameModel.ts` (Pure):** `gauges()` สีจาก `sensorStatus` ของ `@gol/shared`, อากาศใช้สีที่แย่กว่าระหว่าง Temp/RH, แสงตาม LED/PPFD/เวลา, `trendOf()` จาก History 2 จุดล่าสุด; `goalProgress()` = Biomass ต่ำสุดของต้นที่รอด ÷ เป้า; `helperMessage()` ลำดับความสำคัญตาม SPEC § 4.9 และอ้างปุ่มเฉพาะอุปกรณ์ที่ผู้เล่นคุมได้ (`canControl`)
+- **แถบปุ่ม:** ส่งคำสั่งเดิม (`setManualLed`, `dose`, `setManualBit`) — ไม่มีตรรกะใหม่ฝั่ง Server; ไม่ใช่ Manual/อยู่ใน Fail-safe → แสดงเหตุผลและปุ่มเปลี่ยนเป็น Manual
+- **ลิ้นชัก 🔬 (`game/ScienceDrawer.tsx`):** แท็บของคอมโพเนนต์เดิม (SensorPanel, ActuatorPanel, PlantDetail, TrendChart, EventLog, ScenarioPanel, ScoreDetail); จอกว้างเป็นแผงขวาในพื้นที่เกม จอแคบเป็น Bottom sheet
+- **Server:** `levels` ใน Snapshot เป็น `LevelInfo + unlocked/bestStars` ทำให้การ์ดเลือกด่านไม่เก็บค่าเป้า/เวลา/งบซ้ำ
+- **CSS:** `.game-screen` Grid areas `top / gauges+scene / helper / actions`; จอ < 1100 px เป็นคอลัมน์เดียวความสูงตามเนื้อหาและให้ `.game-main` เลื่อน
+

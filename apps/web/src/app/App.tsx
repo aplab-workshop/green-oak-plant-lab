@@ -12,6 +12,9 @@ import { GuidePanel, LevelBriefing } from '../dashboard/GuidePanel';
 import { LossStoryView } from '../dashboard/LossStoryView';
 import { AutoPauseBanner, AutoPauseToggle, ChallengeCard } from '../dashboard/ChallengeCard';
 import { PlantView } from '../scene/PlantView';
+import { GameScreen } from '../game/GameScreen';
+import { ScienceDrawer, type DrawerTab } from '../game/ScienceDrawer';
+import { LevelSelect as LevelSelectScreen, WinScreen } from '../game/LevelScreens';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 
@@ -104,7 +107,13 @@ export function App() {
   const showLoss = lost && seenLoss !== round;
   // Briefing เด้งครั้งเดียวต่อรอบตอนรอเริ่ม (ready) บอกเป้าหมาย/สิ่งที่ต้องทำ/ข้อควรระวัง
   const [seenBrief, setSeenBrief] = useState('');
-  const showBrief = game?.status === 'ready' && seenBrief !== round && !showLoss;
+  const [showLevels, setShowLevels] = useState(false);
+  const showBrief = game?.status === 'ready' && seenBrief !== round && !showLoss && !showLevels;
+  // P24: โหมดด่านใช้หน้าจอเกม 5 ส่วน + ลิ้นชัก 🔬 + หน้าเลือกด่าน/ผ่านด่าน
+  const [drawer, setDrawer] = useState<string | null>(null);
+  const [seenWin, setSeenWin] = useState('');
+  const gameMode = !!snap?.level;
+  const showWin = gameMode && game?.status === 'won' && seenWin !== round && !showLevels;
   const closeDetail = () => setDetail(null);
   const open = (key: Detail) => setDetail(key);
   const toggle = (key: Detail) => {
@@ -160,9 +169,28 @@ export function App() {
       </span>
     </button>
   );
+  const drawerTabs: DrawerTab[] = [
+    { key: 'sensors', label: 'Sensors', content: <SensorPanel /> },
+    { key: 'actuators', label: 'ควบคุม / PLC', content: <ActuatorPanel /> },
+    { key: 'plant', label: 'ต้นผัก', content: <PlantDetail /> },
+    { key: 'trends', label: 'กราฟ', content: <TrendChart selectedChart={chart} onChartChange={setChart} /> },
+    { key: 'timeline', label: 'Timeline', content: <EventLog /> },
+    { key: 'scenario', label: 'ภารกิจ', content: <ScenarioPanel /> },
+    { key: 'score', label: 'คะแนน', content: <ScoreDetail /> },
+  ];
+  const gameMain = <main className="game-main">
+    <GameScreen
+      onOpenLevels={() => setShowLevels(true)}
+      onGuide={() => open('guide')}
+      onDrawer={(tab) => setDrawer(tab ?? drawer ?? 'sensors')}
+      drawer={drawer && <ScienceDrawer tabs={drawerTabs} tab={drawer} onTab={setDrawer} onClose={() => setDrawer(null)} />}
+    />
+    {error && <p role="alert" className="bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
+    <footer className="px-3 py-1 text-[10px] text-slate-500">Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ</footer>
+  </main>;
   return <div className="game-app">
     <Header />
-    <main className="game-main">
+    {gameMode ? gameMain : <main className="game-main">
       <div className="game-topbar">
         <div><span className="text-xs font-semibold tracking-[0.15em] text-emerald-700">GREEN OAK GARDEN</span><p className="text-xs text-slate-500">ดูแลสวนของคุณให้เติบโต</p></div>
         <div className="flex flex-wrap items-center gap-3"><LevelSelect /><AutoPauseToggle /><SimControls /></div>
@@ -190,7 +218,13 @@ export function App() {
       </div>
       {error && <p role="alert" className="bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
       <footer className="px-3 py-1 text-[10px] text-slate-500">Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ</footer>
-    </main>
+    </main>}
+    {showLevels && <DetailDialog title="🗺️ เลือกด่าน" close={() => setShowLevels(false)}>
+      <LevelSelectScreen onDone={() => setShowLevels(false)} />
+    </DetailDialog>}
+    {showWin && !detail && <DetailDialog title="🎉 ผ่านด่าน" close={() => setSeenWin(round)}>
+      <WinScreen onLevels={() => { setSeenWin(round); setShowLevels(true); }} onClose={() => setSeenWin(round)} />
+    </DetailDialog>}
     {detail && !showLoss && <DetailDialog title={detail === 'score' ? 'คะแนนการดูแล' : detail === 'guide' ? '📖 คู่มือเกม' : ITEMS.find((x) => x.key === detail)!.label} close={closeDetail}>
       {content(detail)}
     </DetailDialog>}

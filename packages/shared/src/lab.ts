@@ -144,7 +144,8 @@ export interface LevelInfo {
   playerDevices: PlayerDevice[];
 }
 
-export interface LevelProgress { id: LevelId; title: string; unlocked: boolean; bestStars: number }
+/** สถานะด่านใน Snapshot — รวมรายละเอียดด่านเพื่อให้หน้าเลือกด่านไม่ต้องเก็บค่าซ้ำ (P24) */
+export interface LevelProgress extends LevelInfo { unlocked: boolean; bestStars: number }
 
 export type GameStatus = 'ready' | 'playing' | 'won' | 'lost';
 
