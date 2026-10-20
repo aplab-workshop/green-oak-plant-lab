@@ -14,6 +14,7 @@ import { AutoPauseBanner, AutoPauseToggle, ChallengeCard } from '../dashboard/Ch
 import { PlantView } from '../scene/PlantView';
 import { LevelSelect as LevelSelectScreen, WinScreen } from '../game/LevelScreens';
 import { HelperBubble } from '../game/HelperBubble';
+import { LevelWatch } from '../game/LevelWatch';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 
@@ -175,6 +176,7 @@ export function App() {
       </div>
       <div className="garden-stage">
         <div className="scene-window"><PlantView /></div>
+        {gameMode && <LevelWatch />}
         <AutoPauseBanner />
         {!wide && <div className="garden-hud">{scoreCards}{sensorCard}</div>}
         <aside className="hud-card plant-card">

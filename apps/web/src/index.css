@@ -177,3 +177,26 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
 .plant-badge-damage > div { height: 100%; background: #dc2626; }
 .plant-badge-gain { border-radius: 999px; background: #059669; padding: 1px 6px; font-size: 10px; font-weight: 700; color: white; white-space: nowrap; }
 .plant-badge-party { border-radius: 999px; background: #f59e0b; padding: 1px 7px; font-size: 11px; font-weight: 700; color: #451a03; white-space: nowrap; }
+
+/* ===== P31: สิ่งที่ต้องดูของด่าน (หน้าปัดกลม + เป้าหมาย/เวลา) ===== */
+.level-watch { position: absolute; top: 12px; left: 262px; right: 330px; z-index: 12; display: flex; align-items: stretch; gap: 8px; overflow-x: auto; pointer-events: auto; scrollbar-width: thin; }
+.level-watch > * { flex: none; border-radius: 14px; background: #ffffffe8; box-shadow: 0 6px 20px #2349341a; backdrop-filter: blur(8px); }
+.watch-goal { display: flex; width: 170px; flex-direction: column; justify-content: center; gap: 3px; padding: 8px 11px; }
+.watch-goal-title { font-size: 13px; font-weight: 700; color: #064e3b; }
+.watch-goal-bar { height: 7px; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+.watch-goal-bar > div { height: 100%; border-radius: 999px; background: #059669; transition: width 0.4s; }
+.watch-dial { display: flex; width: 86px; flex-direction: column; align-items: center; padding: 6px 4px 5px; }
+.watch-dial-label { font-size: 11px; font-weight: 600; color: #334155; white-space: nowrap; }
+.watch-dial-value { margin-top: -8px; font-size: 13px; font-family: ui-monospace, monospace; }
+.watch-dial-range { font-size: 10px; color: #64748b; white-space: nowrap; }
+.garden-stage:has(.level-watch) .autopause-banner { top: 150px; }
+@media (max-width: 1099px) {
+  /* แท็บเล็ต: ถัดจากคอลัมน์การ์ด (garden-hud กว้าง 174 px) */
+  .level-watch { top: 64px; left: 196px; right: 8px; }
+  .garden-stage:has(.level-watch) .autopause-banner { top: 0.75rem; }
+}
+@media (max-width: 600px) {
+  /* มือถือ: ใต้แถวการ์ดคะแนน/สภาพแวดล้อม ไม่ทับการ์ดผักและ Dock ด้านล่าง */
+  .level-watch { top: 214px; left: 8px; }
+}
+

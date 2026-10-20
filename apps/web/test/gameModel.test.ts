@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { LabSnapshot, LevelInfo, PlantState } from '@gol/shared';
 import { canControl, goalProgress, helperMessage } from '../src/game/gameModel';
+import { formatRemaining, watchDials, watchGoal } from '../src/game/watchModel';
 
 const plant = (id: number, over: Partial<PlantState> = {}): PlantState => ({
   id, position: id - 1, ageDays: 14, stage: 'seedling', biomassG: 8, leafCount: 7, leafAreaCm2: 50, rootLengthCm: 6,
   hydration: 1, waterStress: 0, lightStress: 0, nutrientStress: 0, rootHealth: 1, damage: 0, health: 100,
-  rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0.1, ppfd: 300, dliToday: 5, dliYesterday: 12, ...over,
+  rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0.1, ppfd: 300, dliToday: 5, dliYesterday: 12, lightLoadH: 4, ...over,
 } as PlantState);
 
-const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', description: '', targetG: 30, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'] };
+const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', description: '', targetG: 30, startBiomassG: 15, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'] };
 
 /** Snapshot ที่ทุกอย่างปกติ (กลางวัน ไฟ 80%) */
 function snap(over: Partial<LabSnapshot> = {}, sensors: Partial<LabSnapshot['sensors']> = {}): LabSnapshot {
@@ -99,3 +100,41 @@ describe('helperMessage priority', () => {
     expect(canControl(snap(), 'fan')).toBe(false);
   });
 });
+
+describe('level watch HUD (P31)', () => {
+  const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 8, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'] };
+  const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'] };
+
+  it('picks dials from the devices the level unlocks', () => {
+    expect(watchDials(snap({ level: L1 })).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad']);
+    expect(watchDials(snap()).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad', 'ec']);
+    expect(watchDials(snap({ level: L4 })).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad', 'ec', 'temp', 'rh', 'ph']);
+    expect(watchDials(snap({ level: null }))).toEqual([]);
+  });
+
+  it('colours and labels follow the recommended ranges', () => {
+    const d = Object.fromEntries(watchDials(snap({}, { waterLevelPct: 60, ecMsCm: 2.4, ppfd: 320 })).map((x) => [x.key, x]));
+    expect(d.water).toMatchObject({ status: 'warn', display: '60%', rangeText: '65–100%' });
+    expect(d.ec).toMatchObject({ status: 'alarm', display: '2.40', rangeText: '0.8–1.6' });
+    expect(d.ppfd).toMatchObject({ status: 'ok', rangeText: '200–350' });
+    expect(d.lightLoad).toMatchObject({ status: 'ok', display: '4 ชม.' });
+    const temp = watchDials(snap({ level: L4 }, { airTempC: 27 })).find((x) => x.key === 'temp')!;
+    expect(temp).toMatchObject({ status: 'warn', rangeText: '15–25°C' });
+  });
+
+  it('PPFD is grey "dark" at night with lights off; light load uses the most tired living plant', () => {
+    const night = snap({ sim: { day: 23, minuteOfDay: 23 * 60 }, commands: { ...snap().commands, ledPct: 0 } }, { ppfd: 0 });
+    expect(watchDials(night).find((x) => x.key === 'ppfd')).toMatchObject({ status: 'neutral', display: 'มืด' });
+    const base = snap();
+    const tired = { ...base, plants: [{ ...base.plants[0]!, lightLoadH: 17 }, { ...base.plants[1]!, lightLoadH: 30, damage: 1 }, base.plants[2]!] };
+    expect(watchDials(tired).find((x) => x.key === 'lightLoad')).toMatchObject({ value: 17, status: 'warn' });
+  });
+
+  it('goal card shows smallest living plant, start weight and time left', () => {
+    expect(watchGoal(snap())).toEqual({ targetG: 30, minG: 9, startG: 15, ratio: 0.3, remainingS: 8 * 86400 - 3600, limitDays: 8 });
+    expect(watchGoal(snap({ level: null }))).toBeNull();
+    expect(formatRemaining(8 * 86400 - 3600)).toBe('7 วัน 23 ชม.');
+    expect(formatRemaining(5 * 3600 + 59)).toBe('5 ชม.');
+  });
+});
+

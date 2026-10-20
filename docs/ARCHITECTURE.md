@@ -774,3 +774,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - สมดุล: LED 80 % (320/272 PPFD) สะสม 1 h/h; ตาราง 16/8 → load สูงสุด 16 แล้วมืด 8 ชม. ล้าง 24 → ไม่เกิด Stress; เปิด 24 ชม. → Stress เริ่มหลัง 18 ชม. ถึงเพดาน 0.6 ที่ 26 ชม. (ไม่ถึงเกณฑ์ Damage 0.7)
 - Web: `LIGHT_LOAD_WARN_H` (16) ใน shared ใช้ใน `helperMessage` ก่อนข้อความร้อน/แห้ง
 
+### 11.28 Implementation Notes (P31 — Level Watch HUD)
+
+- `game/watchModel.ts` (Pure, ไม่ตั้งชื่อ `levelWatch.ts` เพราะชนกับ `LevelWatch.tsx` บน Windows): `watchDials(snapshot)` / `watchGoal(snapshot)` / `formatRemaining`; PPFD กลางคืนไฟปิด = neutral "มืด"; แสงสะสม = `max lightLoadH` ของต้นที่ยังรอด
+- `game/LevelWatch.tsx`: หน้าปัด SVG (polar/arc จากด้านบน ±120°) แถบเหลือง `warn`, เขียว `ok`, เข็มตามค่า; render ใน `App.tsx` เมื่อ `snapshot.level` มีค่า
+- CSS `.level-watch`: จอกว้าง `top 12 / left 262 / right 330` (ระหว่างคอลัมน์การ์ดกับแผงควบคุม), ≤ 1099 px ถัดคอลัมน์ `garden-hud`, ≤ 600 px ใต้แถวการ์ด; `.garden-stage:has(.level-watch) .autopause-banner` เลื่อนลง
+- `LevelInfo.startBiomassG` ย้ายจาก `LevelDef` มาเป็นข้อมูลที่ Server ส่งใน `levels`/`level`
+

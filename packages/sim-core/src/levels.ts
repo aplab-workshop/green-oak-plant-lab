@@ -4,8 +4,6 @@ import { CHALLENGE_KINDS, type ChallengeSpec } from './challenges';
 
 /** ด่านของเกม (SPEC § 4.6) — เป้าหมายตั้งจาก Simulation ตามสูตรใน GAME-GUIDE */
 export interface LevelDef extends LevelInfo {
-  /** Biomass เริ่มต้นต่อต้น (g) ก่อนสุ่ม ±initialBiomassSpread */
-  startBiomassG: number;
   /** อายุต้นตอนเริ่ม (วันจำลองนับจากเพาะ) */
   startDay: number;
   /** เหตุการณ์ท้าทายของด่าน (SPEC § 4.8) — ไม่มี = ไม่มีเหตุการณ์ */
@@ -29,7 +27,7 @@ export const LEVELS: readonly LevelDef[] = [
 export const findLevel = (id: LevelId): LevelDef => LEVELS.find((l) => l.id === id)!;
 
 export function levelInfo(l: LevelDef): LevelInfo {
-  const { startBiomassG: _b, startDay: _d, challenges: _c, ...info } = l;
+  const { startDay: _d, challenges: _c, ...info } = l;
   return { ...info, playerDevices: [...info.playerDevices] };
 }
 

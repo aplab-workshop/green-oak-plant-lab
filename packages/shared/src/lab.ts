@@ -145,6 +145,8 @@ export interface LevelInfo {
   title: string;
   description: string;
   targetG: number;
+  /** Biomass เริ่มต้นต่อต้นของด่าน (g) ก่อนสุ่ม ± — P31 */
+  startBiomassG: number;
   timeLimitDays: number;
   energyBudgetKWh: number;
   playerDevices: PlayerDevice[];

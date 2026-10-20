@@ -28,6 +28,8 @@ export const STAGE_CELEBRATION: Record<GrowthStage, string> = {
 
 /** ชั่วโมงแสงสะสมที่ผู้ช่วยเริ่มเตือนให้พักไฟ (ก่อนเกิด Photoperiod stress ที่ 18 ชม. ใน Config, P30) */
 export const LIGHT_LOAD_WARN_H = 16;
+/** ชั่วโมงแสงสะสมที่เริ่มเกิด Photoperiod stress — ตรงกับ cfg.light.photoperiodMaxH ค่าเริ่ม (P30/P31) */
+export const LIGHT_LOAD_STRESS_H = 18;
 /** Stress ขั้นต่ำที่นับเป็นสาเหตุ */
 export const CAUSE_STRESS_MIN = 0.25;
 /** PPFD ที่ต้นต่ำกว่านี้ตอนกลางวัน = มืด */
