@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { HistorySample, LabSnapshot, LevelInfo, PlantState } from '@gol/shared';
-import { canControl, gauges, goalProgress, helperMessage, lightStatus, trendOf } from '../src/game/gameModel';
+import type { LabSnapshot, LevelInfo, PlantState } from '@gol/shared';
+import { canControl, goalProgress, helperMessage } from '../src/game/gameModel';
 
 const plant = (id: number, over: Partial<PlantState> = {}): PlantState => ({
   id, position: id - 1, ageDays: 14, stage: 'seedling', biomassG: 8, leafCount: 7, leafAreaCm2: 50, rootLengthCm: 6,
@@ -26,43 +26,6 @@ function snap(over: Partial<LabSnapshot> = {}, sensors: Partial<LabSnapshot['sen
     ...over,
   };
 }
-
-const h = (over: Partial<HistorySample>): HistorySample => ({
-  simTimeS: 0, waterLevelPct: 80, airTempC: 23, rhPct: 65, ppfd: 300, ecMsCm: 1.2, ph: 6.1,
-  avgHydration: 1, avgWaterStress: 0, avgHealth: 100, avgBiomassG: 10, ...over,
-} as HistorySample);
-
-describe('gauges', () => {
-  it('shows 4 traffic-light gauges, plus pH only when the level unlocks pH Down', () => {
-    const g = gauges(snap(), []);
-    expect(g.map((x) => x.key)).toEqual(['water', 'nutrient', 'air', 'light']);
-    expect(g.every((x) => x.status === 'ok')).toBe(true);
-    const l4 = { ...L2, id: 'L4' as const, playerDevices: [...L2.playerDevices, 'phDown' as const] };
-    expect(gauges(snap({ level: l4 }), []).map((x) => x.key)).toContain('ph');
-    expect(gauges(snap({ level: null }), []).map((x) => x.key)).toContain('ph'); // Free Play คุมได้ทุกอย่าง
-  });
-
-  it('colours from shared ranges; air uses the worse of temperature and humidity', () => {
-    const g = gauges(snap({}, { waterLevelPct: 50, ecMsCm: 0.7, airTempC: 23, rhPct: 35 }), []);
-    expect(g.find((x) => x.key === 'water')!.status).toBe('alarm');
-    expect(g.find((x) => x.key === 'nutrient')!.status).toBe('warn');
-    expect(g.find((x) => x.key === 'air')!.status).toBe('alarm');
-  });
-
-  it('light: lit = PPFD range, daytime off = warn, night off = neutral', () => {
-    expect(lightStatus(320, 80, 600)).toBe('ok');
-    expect(lightStatus(450, 100, 600)).toBe('warn');
-    expect(lightStatus(0, 0, 600)).toBe('warn');
-    expect(lightStatus(0, 0, 23 * 60)).toBe('neutral');
-  });
-
-  it('trend arrows come from the last two history points', () => {
-    expect(trendOf([], 'waterLevelPct', 0.3)).toBe('flat');
-    expect(trendOf([h({ waterLevelPct: 80 }), h({ waterLevelPct: 78 })], 'waterLevelPct', 0.3)).toBe('down');
-    expect(trendOf([h({ ecMsCm: 1.2 }), h({ ecMsCm: 1.25 })], 'ecMsCm', 0.01)).toBe('up');
-    expect(trendOf([h({ ph: 6.1 }), h({ ph: 6.105 })], 'ph', 0.01)).toBe('flat');
-  });
-});
 
 describe('goalProgress', () => {
   it('uses the smallest surviving plant', () => {

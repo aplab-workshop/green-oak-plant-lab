@@ -12,9 +12,8 @@ import { GuidePanel, LevelBriefing } from '../dashboard/GuidePanel';
 import { LossStoryView } from '../dashboard/LossStoryView';
 import { AutoPauseBanner, AutoPauseToggle, ChallengeCard } from '../dashboard/ChallengeCard';
 import { PlantView } from '../scene/PlantView';
-import { GameScreen } from '../game/GameScreen';
-import { ScienceDrawer, type DrawerTab } from '../game/ScienceDrawer';
 import { LevelSelect as LevelSelectScreen, WinScreen } from '../game/LevelScreens';
+import { HelperBubble } from '../game/HelperBubble';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 
@@ -70,18 +69,15 @@ function ScoreDetail() {
   </div>;
 }
 
-/** เลือกด่าน (ขั้นต่ำ P21; หน้าเลือกด่านเต็มรูปแบบใน P24) */
-function LevelSelect() {
+/** ปุ่มเปิดการ์ดเลือกด่าน (P24b แทน Dropdown) */
+function LevelButton({ onOpen }: { onOpen: () => void }) {
   const level = useLabStore((s) => s.snapshot?.level);
-  const levels = useLabStore((s) => s.snapshot?.levels);
-  if (!levels) return null;
-  return <select aria-label="เลือกด่าน" className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700"
-    value={level?.id ?? 'free'} onChange={(e) => void sendCommand({ type: 'selectLevel', levelId: e.target.value as 'L1' })}>
-    {levels.map((l) => <option key={l.id} value={l.id} disabled={!l.unlocked}>
-      {l.unlocked ? '' : '🔒 '}ด่าน {l.id.slice(1)}: {l.title} {'⭐'.repeat(l.bestStars)}
-    </option>)}
-    <option value="free">Free Play (ฝึก PLC)</option>
-  </select>;
+  const hasLevels = useLabStore((s) => !!s.snapshot?.levels);
+  if (!hasLevels) return null;
+  return <button type="button" onClick={onOpen} aria-label="เลือกด่าน"
+    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">
+    🗺️ {level ? `ด่าน ${level.id.slice(1)}: ${level.title}` : 'Free Play (ฝึก PLC)'}
+  </button>;
 }
 
 export function App() {
@@ -109,8 +105,7 @@ export function App() {
   const [seenBrief, setSeenBrief] = useState('');
   const [showLevels, setShowLevels] = useState(false);
   const showBrief = game?.status === 'ready' && seenBrief !== round && !showLoss && !showLevels;
-  // P24: โหมดด่านใช้หน้าจอเกม 5 ส่วน + ลิ้นชัก 🔬 + หน้าเลือกด่าน/ผ่านด่าน
-  const [drawer, setDrawer] = useState<string | null>(null);
+  // P24b: Layout P19 ทุกโหมด + การ์ดเลือกด่าน/หน้าผ่านด่าน/ข้อความผู้ช่วย
   const [seenWin, setSeenWin] = useState('');
   const gameMode = !!snap?.level;
   const showWin = gameMode && game?.status === 'won' && seenWin !== round && !showLevels;
@@ -154,7 +149,7 @@ export function App() {
     {game?.canHarvest && <button className="hud-card harvest-card" onClick={() => void sendCommand({ type: 'harvest' })}>
       <span className="flex items-center gap-2 text-sm font-bold text-emerald-900"><Sprout size={18} /> ผักโตเต็มที่ — เก็บเกี่ยว!</span>
     </button>}
-    {game?.status === 'won' && <button className="hud-card harvest-card" onClick={() => open('score')}>
+    {game?.status === 'won' && <button className="hud-card harvest-card" onClick={() => gameMode ? setSeenWin('') : open('score')}>
       <span className="block text-sm font-bold text-emerald-900">🎉 เก็บเกี่ยวสำเร็จ · {game.yieldG?.toFixed(0)} g</span>
       <span className="block text-xs text-slate-600">{'⭐'.repeat(game.stars)} · คะแนน {game.score} (โบนัส +{game.harvestBonus}) · เลือกด่านถัดไปหรือ Reset</span>
     </button>}
@@ -169,31 +164,12 @@ export function App() {
       </span>
     </button>
   );
-  const drawerTabs: DrawerTab[] = [
-    { key: 'sensors', label: 'Sensors', content: <SensorPanel /> },
-    { key: 'actuators', label: 'ควบคุม / PLC', content: <ActuatorPanel /> },
-    { key: 'plant', label: 'ต้นผัก', content: <PlantDetail /> },
-    { key: 'trends', label: 'กราฟ', content: <TrendChart selectedChart={chart} onChartChange={setChart} /> },
-    { key: 'timeline', label: 'Timeline', content: <EventLog /> },
-    { key: 'scenario', label: 'ภารกิจ', content: <ScenarioPanel /> },
-    { key: 'score', label: 'คะแนน', content: <ScoreDetail /> },
-  ];
-  const gameMain = <main className="game-main">
-    <GameScreen
-      onOpenLevels={() => setShowLevels(true)}
-      onGuide={() => open('guide')}
-      onDrawer={(tab) => setDrawer(tab ?? drawer ?? 'sensors')}
-      drawer={drawer && <ScienceDrawer tabs={drawerTabs} tab={drawer} onTab={setDrawer} onClose={() => setDrawer(null)} />}
-    />
-    {error && <p role="alert" className="bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
-    <footer className="px-3 py-1 text-[10px] text-slate-500">Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ</footer>
-  </main>;
   return <div className="game-app">
     <Header />
-    {gameMode ? gameMain : <main className="game-main">
+    <main className="game-main">
       <div className="game-topbar">
         <div><span className="text-xs font-semibold tracking-[0.15em] text-emerald-700">GREEN OAK GARDEN</span><p className="text-xs text-slate-500">ดูแลสวนของคุณให้เติบโต</p></div>
-        <div className="flex flex-wrap items-center gap-3"><LevelSelect /><AutoPauseToggle /><SimControls /></div>
+        <div className="flex flex-wrap items-center gap-3"><LevelButton onOpen={() => setShowLevels(true)} /><AutoPauseToggle /><SimControls /></div>
       </div>
       <div className="garden-stage">
         <div className="scene-window"><PlantView /></div>
@@ -209,6 +185,7 @@ export function App() {
         {wide && <><div className="workspace-left">{scoreCards}{!panels.includes('sensors') && sensorCard}{pinned('sensors')}{pinned('plant')}</div>
           <div className="workspace-right" style={panels.includes('trends') ? undefined : { bottom: 90 }}>{pinned('actuators')}</div>{pinned('trends')}</>}
         {lost && <button className="loss-banner" onClick={() => setSeenLoss('')}>Game Over · {game.lostReason === 'timeout' ? 'หมดเวลาด่าน' : 'ต้นไม้ตายหมด'} — ดูผลรอบนี้</button>}
+        {gameMode && !lost && <HelperBubble />}
         <nav className="garden-dock" aria-label="รายละเอียดสวน">
           {ITEMS.map((item) => <button key={item.key} onClick={() => toggle(item.key)} aria-pressed={wide && panels.includes(item.key)} aria-label={`เปิด${item.label}`}>
             {item.icon}<span>{item.label}</span>
@@ -218,7 +195,7 @@ export function App() {
       </div>
       {error && <p role="alert" className="bg-rose-50 px-4 py-2 text-sm text-rose-700">{error}</p>}
       <footer className="px-3 py-1 text-[10px] text-slate-500">Educational Simulation — แบบจำลองเพื่อการเรียนการสอน ไม่ใช่โมเดลทำนายชีววิทยาที่ผ่านการตรวจสอบความแม่นยำ</footer>
-    </main>}
+    </main>
     {showLevels && <DetailDialog title="🗺️ เลือกด่าน" close={() => setShowLevels(false)}>
       <LevelSelectScreen onDone={() => setShowLevels(false)} />
     </DetailDialog>}

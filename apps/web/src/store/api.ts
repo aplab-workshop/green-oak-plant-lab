@@ -23,7 +23,8 @@ export async function sendCommand(cmd: LabCommand): Promise<boolean> {
       useLabStore.setState({ commandError: 'error' in body ? body.error : `HTTP ${res.status}` });
       return false;
     }
-    if (!acceptSnapshot(body)) return false;
+    // Snapshot เก่ากว่าที่ WebSocket ส่งมาแล้ว (เช่น selectLevel/reset ขึ้นรอบใหม่ก่อน HTTP ตอบ) = คำสั่งสำเร็จแล้ว
+    acceptSnapshot(body);
     useLabStore.setState({ commandError: null });
     // reset / scenario ล้าง History และ Event ฝั่ง Server
     if (cmd.type === 'reset' || cmd.type === 'applyScenario' || cmd.type === 'clearScenario') {

@@ -1,70 +1,11 @@
-import { sensorStatus, type HistorySample, type LabSnapshot, type PlayerDevice, type SensorStatus } from '@gol/shared';
+import type { LabSnapshot, PlayerDevice } from '@gol/shared';
 
 /**
  * ตรรกะหน้าเกม (SPEC § 4.9) — Pure function จาก Snapshot/History ของ Server ไม่คำนวณพืชเอง
  */
 
-export type Trend = 'up' | 'down' | 'flat';
-
-export interface Gauge {
-  key: 'water' | 'nutrient' | 'air' | 'light' | 'ph';
-  icon: string;
-  label: string;
-  value: string;
-  status: SensorStatus;
-  trend: Trend;
-}
-
-const RANK: Record<SensorStatus, number> = { neutral: 0, ok: 1, warn: 2, alarm: 3 };
-const worse = (a: SensorStatus, b: SensorStatus): SensorStatus => (RANK[a] >= RANK[b] ? a : b);
-
 /** กลางวันตามเวลาจำลอง (06:00–22:00 เหมือนสูตรดูแล) */
 export const isDaytime = (minuteOfDay: number): boolean => minuteOfDay >= 360 && minuteOfDay < 1320;
-
-/** ลูกศรแนวโน้มจาก History 2 จุดล่าสุด (เปลี่ยนน้อยกว่า eps = คงที่) */
-export function trendOf(history: readonly HistorySample[], key: keyof HistorySample, eps: number): Trend {
-  const a = history.at(-2);
-  const b = history.at(-1);
-  if (!a || !b) return 'flat';
-  const d = (b[key] as number) - (a[key] as number);
-  return d > eps ? 'up' : d < -eps ? 'down' : 'flat';
-}
-
-/** สถานะแสง: เปิดไฟดูช่วง PPFD, ปิดไฟตอนกลางวัน = เหลือง, กลางคืน = ปกติ */
-export function lightStatus(ppfd: number, ledPct: number, minuteOfDay: number): SensorStatus {
-  if (ledPct <= 0) return isDaytime(minuteOfDay) ? 'warn' : 'neutral';
-  if (ppfd >= 200 && ppfd <= 350) return 'ok';
-  if (ppfd >= 100 && ppfd <= 500) return 'warn';
-  return 'alarm';
-}
-
-export function gauges(s: LabSnapshot, history: readonly HistorySample[]): Gauge[] {
-  const r = s.sensors;
-  const out: Gauge[] = [
-    { key: 'water', icon: '💧', label: 'น้ำ', value: `${r.waterLevelPct.toFixed(0)}%`, status: sensorStatus('waterLevelPct', r.waterLevelPct), trend: trendOf(history, 'waterLevelPct', 0.3) },
-    { key: 'nutrient', icon: '🧪', label: 'ปุ๋ย', value: r.ecMsCm.toFixed(2), status: sensorStatus('ecMsCm', r.ecMsCm), trend: trendOf(history, 'ecMsCm', 0.01) },
-    {
-      key: 'air',
-      icon: '🌡️',
-      label: 'อากาศ',
-      value: `${r.airTempC.toFixed(1)}° · ${r.rhPct.toFixed(0)}%`,
-      status: worse(sensorStatus('airTempC', r.airTempC), sensorStatus('rhPct', r.rhPct)),
-      trend: trendOf(history, 'airTempC', 0.2),
-    },
-    {
-      key: 'light',
-      icon: '☀️',
-      label: 'แสง',
-      value: s.commands.ledPct > 0 ? `${r.ppfd.toFixed(0)}` : isDaytime(s.sim.minuteOfDay) ? 'ไฟปิด' : 'กลางคืน',
-      status: lightStatus(r.ppfd, s.commands.ledPct, s.sim.minuteOfDay),
-      trend: trendOf(history, 'ppfd', 5),
-    },
-  ];
-  if (canControl(s, 'phDown')) {
-    out.push({ key: 'ph', icon: '⚗️', label: 'pH', value: r.ph.toFixed(2), status: sensorStatus('ph', r.ph), trend: trendOf(history, 'ph', 0.01) });
-  }
-  return out;
-}
 
 /** ผู้เล่นคุมอุปกรณ์นี้ได้ในด่านปัจจุบัน (Free Play = ได้ทุกอย่าง) */
 export const canControl = (s: LabSnapshot, d: PlayerDevice): boolean => !s.level || s.level.playerDevices.includes(d);
@@ -110,7 +51,7 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   if (g.status === 'ready') return { text: 'อ่านภารกิจแล้วกด "เริ่มปลูก 🌱" เพื่อเริ่มด่าน', tone: 'info' };
   if (g.status === 'won') return { text: `เก่งมาก! เก็บเกี่ยวได้ ${g.yieldG?.toFixed(0) ?? 0} g ${'⭐'.repeat(g.stars)} — ไปด่านถัดไปได้เลย`, tone: 'good' };
   if (g.status === 'lost') return { text: 'รอบนี้ยังไม่สำเร็จ ดูสาเหตุแล้วลองปลูกใหม่อีกครั้งนะ', tone: 'danger' };
-  if (s.failsafe) return { text: 'PLC ไม่ตอบสนอง (Fail-safe) — อุปกรณ์ปิดหมดยกเว้นปั๊มลม เปลี่ยนเป็นโหมด Manual ในลิ้นชัก 🔬', tone: 'danger' };
+  if (s.failsafe) return { text: 'PLC ไม่ตอบสนอง (Fail-safe) — อุปกรณ์ปิดหมดยกเว้นปั๊มลม เปลี่ยนเป็นโหมด Manual ในแผงควบคุม', tone: 'danger' };
 
   const active = s.challenges.filter((c) => c.status === 'active');
   if (active.some((c) => c.kind === 'powerOutage')) return { text: '⚡ ไฟดับ! อุปกรณ์หยุดหมด รอให้ไฟกลับมา แล้วค่อยเช็คน้ำและอากาศ', tone: 'danger' };

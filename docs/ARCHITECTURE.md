@@ -741,3 +741,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - **Server:** `levels` ใน Snapshot เป็น `LevelInfo + unlocked/bestStars` ทำให้การ์ดเลือกด่านไม่เก็บค่าเป้า/เวลา/งบซ้ำ
 - **CSS:** `.game-screen` Grid areas `top / gauges+scene / helper / actions`; จอ < 1100 px เป็นคอลัมน์เดียวความสูงตามเนื้อหาและให้ `.game-main` เลื่อน
 
+### 11.23 Implementation Notes (P24b — กลับไปใช้ Layout P19)
+
+- `App.tsx` ไม่แยก Layout ตาม `snapshot.level` อีกแล้ว — ทุกโหมดใช้ Layout P19 (แทนที่ § 11.22 ส่วนหน้าจอ 5 ส่วน/ลิ้นชัก)
+- `LevelButton` บนแถบบนเปิด Dialog `game/LevelScreens.LevelSelect` (การ์ดจาก `snapshot.levels`); `WinScreen` เด้งครั้งเดียวต่อ `labId:runId` และการ์ด "เก็บเกี่ยวสำเร็จ" ในโหมดด่านเปิดซ้ำ (`setSeenWin('')`)
+- `game/HelperBubble.tsx` เรียก `helperMessage()` (Pure, มีเทสต์) แสดงเหนือ `.garden-dock` (`bottom: 112px`, จอ ≤ 900 px `106px`); ไม่แสดงใน Free Play และตอน Game Over
+- `store/api.sendCommand`: เมื่อ HTTP ตอบ OK แต่ Snapshot เก่ากว่าที่ WebSocket ส่งมาแล้ว ถือว่าสำเร็จ (เดิมคืน false ทำให้ UI ที่รอผลค้าง)
+
