@@ -322,6 +322,12 @@ tags: [green-oak, roadmap]
 - **ผลตรวจ:** AC-42 ผ่าน; tests 251/251 (36 files), typecheck และ build ผ่าน; Browser: Dialog ต้นผักแสดง 6 แถบตามภาพตัวอย่าง, สาเหตุ 🌑 ก่อนเปิดไฟ, ส่วนพับเปิดได้; ไม่มี Console error
 - **ยังไม่ได้ตรวจใน Browser:** สีเตือน/สีเทาของต้นตายกับข้อมูลจริง — ตรวจด้วย Unit test
 
+### P28b — กลับไปใช้แผงต้นผักแบบเดิม ✅
+- [x] ผู้ใช้ตรวจ P28 (2026-10-20): "ไม่ชอบ เอาแบบเดิม" → แก้ SPEC § 4.11 + AC-42 ก่อน
+- [x] แผงต้นผักกลับเป็นแบบ P25; ลบ `dashboard/plantStamina.ts`, เทสต์ และ CSS `.stamina*`
+- [x] คงการแก้ Bug ต้นตาย: ย้าย `isPlantDead` (Damage ≥ 1 หรือใน `deadPlantIds`) ไป `packages/shared/src/plantFeedback.ts` ใช้ทั้งแผงต้นผักและป้ายในฉาก + Unit test
+- **ผลตรวจ:** AC-42 ผ่าน; tests 248/248 (35 files), typecheck และ build ผ่าน; Browser: Dialog ต้นผักกลับเป็น Meter แบบเดิม ไม่มี Console error หลังโหลดใหม่
+
 ### P29 — น้ำล้นเสียคะแนน
 - [ ] SPEC ก่อน: เปิดเติมน้ำจนล้น → หักคะแนนตามลิตรที่สูญเสีย, แสดงลิตรและพลังงาน (kWh) ที่เสียไป, ยังเล่นต่อและชนะได้ → test/Browser → commit `phase(P29): ...`
 

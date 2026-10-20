@@ -756,8 +756,7 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Selector ของป้ายคืนสตริง `mood|cause|gain|stage|damage` (primitive) ตามกฎ Zustand; `CelebrationRing` เป็น Mesh วงแหวนทองรอบกระถาง
 - **`plantVisuals`:** `leafColor(water, damage, nutrient, light)` ผสมทีละ Stress (เหลืองเขียว/เหลืองซีด/ซีดขาว/น้ำตาล), Damage ≥ 1 = น้ำตาลเข้ม; `dead` ทำให้ droop = 1 และ Lettuce เอนกลุ่มใบ 0.55 rad (damp)
 
-### 11.25 Implementation Notes (P28 — Plant Stamina Panel)
+### 11.25 Implementation Notes (P28 / P28b — Plant Panel)
 
-- `dashboard/plantStamina.ts` (Pure): `staminaBars(p, dead)` แปลง State เป็น 6 แถบ "ค่ามาก = ดี" (`1 − stress`, `rootHealth`, `1 − damage`) พร้อมระดับ ok/low/critical/dead (เกณฑ์ 0.6/0.3) และสี; `isPlantDead` = Damage ≥ 1 หรืออยู่ใน `deadPlantIds`
-- `PlantDetail` แสดงแถบด้วย CSS `.stamina*` (index.css) และย้าย Meter เดิมไปไว้ใน `<details>` "รายละเอียดทางเทคนิค"; `PlantBadge` ใช้กฎตายเดียวกัน
-
+- P28 เคยเปลี่ยนแผงต้นผักเป็นแถบ Stamina แต่ผู้ใช้ไม่ชอบ → P28b คืนแผงแบบ P25 (`dashboard/PlantDetail.tsx`)
+- คงไว้: `isPlantDead` ใน `packages/shared/src/plantFeedback.ts` (Damage ≥ 1 หรือใน `deadPlantIds`) ใช้ใน `PlantDetail` และ `scene/PlantBadge.tsx` — ต้นตายไม่แสดงระยะ/สาเหตุ/โตเมื่อวาน

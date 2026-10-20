@@ -38,6 +38,10 @@ export const CELEBRATION_S = 3 * 3600;
 /** กลางวันตามเวลาจำลอง 06:00–22:00 (ตรงกับสูตรดูแลใน GAME-GUIDE) */
 export const isDaytime = (minuteOfDay: number): boolean => minuteOfDay >= 360 && minuteOfDay < 1320;
 
+/** ต้นตาย = Damage ≥ 1 หรืออยู่ใน deadPlantIds (Server อาจยังไม่ประกาศตายในรอบที่จบแล้ว) */
+export const isPlantDead = (p: Pick<PlantState, 'id' | 'damage'>, deadPlantIds: readonly number[] = []): boolean =>
+  p.damage >= 1 || deadPlantIds.includes(p.id);
+
 export function plantMood(p: Pick<PlantState, 'health' | 'damage'>, dead = false): PlantMood {
   if (dead || p.damage >= 1) return 'dead';
   if (p.health >= 85) return 'happy';

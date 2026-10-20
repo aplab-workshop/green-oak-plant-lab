@@ -1,10 +1,9 @@
 import { Sprout } from 'lucide-react';
-import { CAUSE_INFO, MOOD_EMOJI, plantCause, plantMood, type PlantState } from '@gol/shared';
+import { CAUSE_INFO, MOOD_EMOJI, isPlantDead, plantCause, plantMood, type PlantState } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { fmt, pct } from '../lib/format';
 import { healthColor } from '../scene/plantVisuals';
 import { Bar, Panel } from './Panel';
-import { isPlantDead, staminaBars, type StaminaBar } from './plantStamina';
 
 const STAGE_LABEL: Record<PlantState['stage'], string> = {
   seedling: 'Seedling (ต้นกล้า)',
@@ -29,21 +28,6 @@ function Meter({ label, value, color, hint }: { label: string; value: number; co
         <span className="font-mono text-slate-800">{pct(value)}</span>
       </div>
       <Bar value={value} color={color} />
-    </div>
-  );
-}
-
-/** แถบ Stamina แบบเกม Survival (SPEC § 4.11) */
-function Stamina({ bar }: { bar: StaminaBar }) {
-  const pct = Math.round(bar.value * 100);
-  return (
-    <div className={`stamina stamina-${bar.level}`} title={bar.hint} role="meter" aria-label={bar.label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
-      <span className="stamina-icon" aria-hidden>{bar.icon}</span>
-      <div className="stamina-track">
-        <div className="stamina-fill" style={{ width: `${pct}%`, backgroundColor: bar.color }} />
-        <span className="stamina-label">{bar.label}</span>
-        <span className="stamina-value">{pct}%</span>
-      </div>
     </div>
   );
 }
@@ -108,19 +92,15 @@ export function PlantDetail() {
             {dead ? '💀 ตายแล้ว' : cause ? `${CAUSE_INFO[cause].icon} ${CAUSE_INFO[cause].label}` : '✅ ไม่มีปัญหาเด่น'}
             {!dead && p.gainYesterdayG !== null && <span className="float-right font-semibold">โตเมื่อวาน +{fmt(p.gainYesterdayG, 1)} g</span>}
           </div>
-          <div className="space-y-1.5">
-            {staminaBars(p, dead).map((bar) => <Stamina key={bar.key} bar={bar} />)}
-          </div>
-
-          <details className="group rounded-md border border-slate-100 px-2 py-1">
-            <summary className="cursor-pointer text-xs font-semibold text-slate-600">รายละเอียดทางเทคนิค</summary>
-            <div className="mt-2 space-y-2">
+          <Meter label="Hydration" value={p.hydration} color="#0ea5e9" hint="ปริมาณน้ำในต้น 100% = เต็มที่" />
           <Meter label="Water stress" value={p.waterStress} color="#f59e0b" hint="ความเครียดจากการขาดน้ำ ลดลงได้เมื่อได้น้ำกลับมา" />
           <Meter label="Light stress" value={p.lightStress} color="#eab308" hint="สะสมจากแสงเกินร่วมกับความร้อน/ขาดน้ำ; ลดแสงแล้วค่อยฟื้น" />
           <Meter label="Nutrient stress" value={p.nutrientStress} color="#8b5cf6" hint="EC/pH นอกช่วงทำให้สะสม Stress และ Growth ลดลง" />
+          <Meter label="Root health" value={p.rootHealth} color="#059669" hint="สุขภาพรากจากน้ำที่เข้าถึงและ Oxygen; Root stress = 100% − Root health" />
           {oxygen !== undefined && <Meter label="Estimated Oxygen" value={oxygen} color="#06b6d4" hint="ดัชนีของ Model 0–100% ไม่ใช่ค่าจาก DO Sensor หรือ mg/L" />}
           <Meter label="Accumulated damage" value={p.damage} color="#dc2626" hint="ความเสียหายถาวร ไม่ลดลง" />
           <Meter label="Roots in water" value={p.rootSubmerged} color="#14b8a6" hint="สัดส่วนความยาวรากที่แช่น้ำ" />
+
           <div className="space-y-0.5 border-t border-slate-100 pt-2">
             <Row label="Age" value={`${fmt(p.ageDays, 1)} days`} />
             <Row label="Biomass (est.)" value={`${fmt(p.biomassG, 1)} g`} />
@@ -130,8 +110,6 @@ export function PlantDetail() {
             <Row label="DLI today / yesterday" value={`${fmt(p.dliToday, 1)} / ${fmt(p.dliYesterday, 1)}`} />
             <Row label="Water demand" value={`${fmt(p.demandLPerDay, 2)} L/day`} />
           </div>
-            </div>
-          </details>
           <p className="text-[10px] leading-snug text-slate-400">Health และ Damage รวมผล Stress ทุกชนิด · Estimated Oxygen เป็นดัชนีประมาณ ไม่ใช่ DO (mg/L)</p>
         </div>
       )}

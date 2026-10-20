@@ -3,6 +3,7 @@ import {
   MOOD_EMOJI,
   STAGE_CELEBRATION,
   isCelebrating,
+  isPlantDead,
   plantCause,
   plantMood,
   showGainBadge,
@@ -27,7 +28,7 @@ function badgeKey(s: LabState, plantId: number): string {
   const snap = s.snapshot;
   const p = snap?.plants.find((x) => x.id === plantId);
   if (!snap || !p) return '';
-  const dead = p.damage >= 1 || snap.game.deadPlantIds.includes(p.id);
+  const dead = isPlantDead(p, snap.game.deadPlantIds);
   const mood = plantMood(p, dead);
   const cause = dead ? '' : (plantCause(p, { ph: snap.sensors.ph, minuteOfDay: snap.sim.minuteOfDay }) ?? '');
   const gain = !dead && showGainBadge(p, snap.sim.minuteOfDay) ? p.gainYesterdayG!.toFixed(1) : '';

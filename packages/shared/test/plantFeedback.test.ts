@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isCelebrating, isDaytime, plantCause, plantMood, showGainBadge } from '../src';
+import { isCelebrating, isDaytime, isPlantDead, plantCause, plantMood, showGainBadge } from '../src';
 
 const calm = { waterStress: 0, rootHealth: 1, lightStress: 0, nutrientStress: 0, ppfd: 300, damage: 0 };
 const day = { ph: 6.0, minuteOfDay: 600 };
@@ -60,5 +60,14 @@ describe('time-based badges follow simulated time', () => {
     expect(isCelebrating(p, 1000 + 3 * 3600)).toBe(false);
     expect(isCelebrating({ stageChangedAtS: null, damage: 0 }, 5)).toBe(false);
     expect(isCelebrating({ stageChangedAtS: 1000, damage: 1 }, 1001)).toBe(false);
+  });
+});
+
+describe('isPlantDead', () => {
+  it('uses damage as well as the server dead list', () => {
+    expect(isPlantDead({ id: 1, damage: 1 }, [])).toBe(true);
+    expect(isPlantDead({ id: 1, damage: 0.3 }, [1])).toBe(true);
+    expect(isPlantDead({ id: 1, damage: 0.3 }, [2])).toBe(false);
+    expect(isPlantDead({ id: 1, damage: 0.99 })).toBe(false);
   });
 });
