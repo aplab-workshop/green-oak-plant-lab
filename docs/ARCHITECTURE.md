@@ -756,3 +756,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Selector ของป้ายคืนสตริง `mood|cause|gain|stage|damage` (primitive) ตามกฎ Zustand; `CelebrationRing` เป็น Mesh วงแหวนทองรอบกระถาง
 - **`plantVisuals`:** `leafColor(water, damage, nutrient, light)` ผสมทีละ Stress (เหลืองเขียว/เหลืองซีด/ซีดขาว/น้ำตาล), Damage ≥ 1 = น้ำตาลเข้ม; `dead` ทำให้ droop = 1 และ Lettuce เอนกลุ่มใบ 0.55 rad (damp)
 
+### 11.25 Implementation Notes (P28 — Plant Stamina Panel)
+
+- `dashboard/plantStamina.ts` (Pure): `staminaBars(p, dead)` แปลง State เป็น 6 แถบ "ค่ามาก = ดี" (`1 − stress`, `rootHealth`, `1 − damage`) พร้อมระดับ ok/low/critical/dead (เกณฑ์ 0.6/0.3) และสี; `isPlantDead` = Damage ≥ 1 หรืออยู่ใน `deadPlantIds`
+- `PlantDetail` แสดงแถบด้วย CSS `.stamina*` (index.css) และย้าย Meter เดิมไปไว้ใน `<details>` "รายละเอียดทางเทคนิค"; `PlantBadge` ใช้กฎตายเดียวกัน
+
