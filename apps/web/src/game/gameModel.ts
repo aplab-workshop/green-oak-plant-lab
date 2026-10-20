@@ -71,11 +71,15 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
 
   if (r.ecMsCm < 0.8) return { text: `ผักหิวปุ๋ย (EC ${r.ecMsCm.toFixed(2)}) — ${own('nutrient') ? 'กด 🧪 ใส่ปุ๋ย แล้วรอดูค่า' : 'ผู้ช่วยฟาร์มกำลังเติมปุ๋ยให้'}`, tone: 'warn' };
   if (r.ecMsCm > 1.6) return { text: `ปุ๋ยเข้มเกิน (EC ${r.ecMsCm.toFixed(2)}) — เติมน้ำเพื่อเจือจาง และหยุดใส่ปุ๋ยก่อน`, tone: 'warn' };
-  if (r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
+  if (r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) ผักใช้ปุ๋ยได้น้อย — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส แล้วรอดู' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
+  if (r.ph < 5.5) {
+    const stop = cmd.phDown && own('phDown') ? 'ปิด ⚗️ pH Down ก่อน แล้ว' : '';
+    return { text: `pH ต่ำเกิน (${r.ph.toFixed(2)}) ผักเครียด — ${stop}เติมน้ำ 🚰 เล็กน้อยให้ pH ขยับขึ้น`, tone: 'warn' };
+  }
 
   const tired = cmd.ledPct > 0 ? Math.max(0, ...s.plants.filter((p) => !isPlantDead(p, g.deadPlantIds)).map((p) => p.lightLoadH)) : 0;
   if (tired >= LIGHT_LOAD_WARN_H) return { text: `เปิดไฟมา ${tired.toFixed(0)} ชม. ผักต้องการช่วงมืด — ปิดหรือลดไฟ 💡 ไม่งั้นจะเครียดและโตช้า`, tone: 'warn' };
-  if (r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C — ${own('fan') ? 'เปิด 🌀 พัดลม หรือลดไฟ LED' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
+  if (r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C ผักโตช้า — ${own('fan') ? 'เปิด 🌀 พัดลม (เย็นได้ถึงอุณหภูมิห้อง) หรือลดไฟ LED' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
   // P33: ใช้ VPD — แห้งเปิดหมอก, ชื้นจัดขณะเปิดหมอกให้ปิด
   const comfort = airComfort(r.vpdKPa);
   if (comfort === 'dry' && !cmd.humidifier) {

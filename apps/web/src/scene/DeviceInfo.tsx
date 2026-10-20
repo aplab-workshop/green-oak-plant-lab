@@ -4,6 +4,7 @@ import { useLabStore } from '../store/labStore';
 import { fmt } from '../lib/format';
 import { SENSOR_META } from '../dashboard/sensorMeta';
 import { ACTUATOR_INFO, SENSOR_DEVICES } from './devices';
+import { DEVICE_RATIONALE } from '../dashboard/deviceRationale';
 import { useSceneStore } from './sceneStore';
 
 /** การ์ดข้อมูลอุปกรณ์ที่คลิกในฉาก 3D: สถานะ + Address ใน PLC */
@@ -33,6 +34,11 @@ export function DeviceInfo() {
           PLC: <b>{info.address}</b> · {info.ratedPower}
         </div>
         <p className="mt-1 text-xs text-slate-600">{info.description}</p>
+        <ul className="mt-1.5 space-y-0.5 border-t border-slate-100 pt-1.5 text-xs" aria-label="เหตุผลของอุปกรณ์">
+          <li className="text-slate-700">🩺 <b>ปัญหา:</b> {DEVICE_RATIONALE[device.key].problem}</li>
+          <li className="text-emerald-800">✅ <b>ผลดี:</b> {DEVICE_RATIONALE[device.key].benefit}</li>
+          <li className="text-amber-800">⚠️ <b>ระวัง:</b> {DEVICE_RATIONALE[device.key].caution}</li>
+        </ul>
         {snap.failsafe && <p className="mt-1 text-xs font-medium text-rose-600">Fail-safe active: ไม่ได้ใช้คำสั่งจาก PLC</p>}
       </>
     );

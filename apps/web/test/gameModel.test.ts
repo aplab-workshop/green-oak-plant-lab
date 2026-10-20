@@ -70,6 +70,14 @@ describe('helperMessage priority', () => {
     expect(helperMessage(snap({}, { vpdKPa: 2.0, rhPct: 40 })).text).toContain('ผู้ช่วยฟาร์ม');
   });
 
+  it('low pH tells the player to stop pH Down and dilute (P34)', () => {
+    const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'] };
+    const low = snap({ level: L4, commands: { ...snap().commands, phDown: true } }, { ph: 5.1 });
+    expect(helperMessage(low).text).toContain('pH ต่ำเกิน');
+    expect(helperMessage(low).text).toContain('ปิด ⚗️ pH Down');
+    expect(helperMessage(snap({ level: L4 }, { ph: 5.1 })).text).not.toContain('ปิด ⚗️');
+  });
+
   it('overflow comes right after outage/leak and shows litres and penalty (P29)', () => {
     const base = snap();
     const over = { ...base, tank: { ...base.tank, overflowFlowLpm: 2 }, game: { ...base.game, overflowL: 3.4, overflowPenalty: 34 }, challenges: [{ id: 1, kind: 'heatWave' as const, title: '🔥 คลื่นความร้อน', status: 'warned' as const, startS: 9e9, endS: 9e9, repaired: false }] };

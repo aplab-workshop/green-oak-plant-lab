@@ -793,3 +793,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - เหตุผลการจัดกลุ่ม: อากาศแห้งเพิ่มการคายน้ำ/ปิดปากใบ (สาเหตุเดียวกับขาดน้ำ), อากาศชื้นจัดลดการคายน้ำที่ลำเลียงธาตุอาหาร (สาเหตุเดียวกับธาตุอาหารไม่พอ)
 - Web: `airComfort` (shared) ใช้ใน `watchModel` (หน้าปัด `air`) และ `helperMessage`; `AIR_DRY_VPD`/`AIR_HUMID_VPD` ตรงกับ `cfg.airStress` ค่าเริ่ม
 
+### 11.31 Implementation Notes (P34 — Device Rationale in UI)
+
+- `dashboard/deviceRationale.ts`: `DEVICE_RATIONALE: Record<ActuatorKey, {problem, benefit, caution}>` + `PLAYER_DEVICE_KEY` (PlayerDevice → ActuatorKey); ใช้ใน `scene/DeviceInfo.tsx` และ `GuidePanel` แท็บ `devices` — ข้อความสอนอย่างเดียว ตรงกับ SPEC § 4.15–4.16 และ Scenario tests
+- `guideContent.ts`/`gameModel.helperMessage` อัปเดตข้อความตาม Model P29–P33; ไม่เปลี่ยนโครง Layout
+

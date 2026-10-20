@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useLabStore } from '../store/labStore';
 import { DAILY_ROUTINE, DEVICE_LABEL, GOLDEN_RULES, IF_THEN, LEVEL_BRIEF, WATCH } from './guideContent';
+import { DEVICE_RATIONALE, PLAYER_DEVICE_KEY } from './deviceRationale';
+import type { PlayerDevice } from '@gol/shared';
 
 /** สรุปภารกิจของด่านปัจจุบัน — ใช้ทั้งใน Briefing และแท็บแรกของคู่มือ */
 export function LevelBriefing() {
@@ -39,7 +41,28 @@ const TABS = [
   { key: 'routine', label: 'ทำอะไรตอนไหน' },
   { key: 'ifthen', label: 'ถ้าเห็น → ทำ' },
   { key: 'watch', label: 'ค่าที่ต้องดู' },
+  { key: 'devices', label: 'อุปกรณ์ทำอะไร' },
 ] as const;
+
+const ALL_DEVICES: PlayerDevice[] = ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'];
+
+/** แท็บ "อุปกรณ์ทำอะไร": ปัญหา → ผลดี → ระวัง (SPEC § 4.17) */
+function DeviceRationaleList() {
+  const level = useLabStore((s) => s.snapshot?.level);
+  return <div className="space-y-2 text-sm">
+    <p className="text-xs text-slate-500">ทุกอุปกรณ์มีเหตุผล: เกิดปัญหาอะไร → ใช้อุปกรณ์ไหน → ได้ผลดีอะไร และต้องระวังอะไร</p>
+    {ALL_DEVICES.map((d) => {
+      const r = DEVICE_RATIONALE[PLAYER_DEVICE_KEY[d]];
+      const locked = !!level && !level.playerDevices.includes(d);
+      return <div key={d} className="rounded-xl bg-slate-50 px-3 py-2">
+        <p className="font-semibold text-slate-800">{DEVICE_LABEL[d]}{locked && <span className="ml-2 text-xs font-normal text-slate-500">🔒 ด่านนี้ผู้ช่วยฟาร์มดูแล</span>}</p>
+        <p className="text-xs text-slate-700">🩺 <b>ปัญหา:</b> {r.problem}</p>
+        <p className="text-xs text-emerald-800">✅ <b>ผลดี:</b> {r.benefit}</p>
+        <p className="text-xs text-amber-800">⚠️ <b>ระวัง:</b> {r.caution}</p>
+      </div>;
+    })}
+  </div>;
+}
 
 /** คู่มือในเกม (เมนู 📖) */
 export function GuidePanel() {
@@ -60,6 +83,7 @@ export function GuidePanel() {
       <thead><tr className="text-xs text-slate-500"><th className="py-1">ถ้าเห็น…</th><th>ทำแบบนี้</th></tr></thead>
       <tbody className="divide-y divide-slate-100">{IF_THEN.map(([a, b]) => <tr key={a}><td className="py-1.5 pr-3">{a}</td><td className="font-medium text-emerald-800">{b}</td></tr>)}</tbody>
     </table>}
+    {tab === 'devices' && <DeviceRationaleList />}
     {tab === 'watch' && <table className="w-full text-left text-sm">
       <thead><tr className="text-xs text-slate-500"><th className="py-1">ค่า</th><th>🟢 ช่วงที่ดี</th><th>ถ้าไม่ดี</th></tr></thead>
       <tbody className="divide-y divide-slate-100">{WATCH.map(([a, b, c]) => <tr key={a}><td className="py-1.5 pr-2">{a}</td><td className="pr-2 font-mono text-xs font-semibold text-emerald-700">{b}</td><td className="text-xs text-slate-600">{c}</td></tr>)}</tbody>
