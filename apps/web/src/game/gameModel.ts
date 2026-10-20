@@ -54,6 +54,9 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   const active = s.challenges.filter((c) => c.status === 'active');
   if (active.some((c) => c.kind === 'powerOutage')) return { text: '⚡ ไฟดับ! อุปกรณ์หยุดหมด รอให้ไฟกลับมา แล้วค่อยเช็คน้ำและอากาศ', tone: 'danger' };
   if (active.some((c) => c.kind === 'leak')) return { text: '💧 ถังรั่ว! กด 🔧 ซ่อมถังบนการ์ดเหตุการณ์ แล้วเติมน้ำ', tone: 'danger' };
+  if (s.tank.overflowFlowLpm > 0) {
+    return { text: `💧 น้ำล้น! ปิดเติมน้ำ — เสียน้ำแล้ว ${g.overflowL.toFixed(1)} L (−${g.overflowPenalty} คะแนน)`, tone: 'danger' };
+  }
   const warned = s.challenges.filter((c) => c.status === 'warned').sort((a, b) => a.startS - b.startS)[0];
   if (warned) return { text: `${warned.title} กำลังจะมา — ${ADVICE[warned.kind] ?? 'เตรียมตัวไว้'}`, tone: 'warn' };
 

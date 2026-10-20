@@ -280,7 +280,8 @@ export class Simulation {
     this._env = result.state;
     this._simTimeS += dtS;
     const wasPlaying = this.care.status === 'playing';
-    this.care.step(this._plants, dtS, this._simTimeS, powerW(cmd, cfg));
+    const overflowL = result.state.totalOverflowL - env.totalOverflowL;
+    this.care.step(this._plants, dtS, this._simTimeS, powerW(cmd, cfg), overflowL, cmd.refillPump ? cfg.power.refillPumpW : 0);
     if (wasPlaying && this.care.lost) {
       this.emit({ kind: 'game.over', severity: 'critical', message: this.care.snapshot().lostReason === 'timeout'
         ? 'Game Over — หมดเวลาของด่าน ผักยังไม่ถึงเป้าหมาย'

@@ -224,6 +224,17 @@ Briefing, Loss story และคู่มือ 📖 ใช้ของเด�
 - **P28b (ผู้ใช้ตรวจ 2026-10-20 "ไม่ชอบ เอาแบบเดิม"):** ยกเลิกแถบ Stamina — แผงต้นผักกลับเป็นแบบ P25 (Meter บาง Hydration/Water stress/Light/Nutrient/Root/Oxygen/Damage/Roots in water + ข้อมูลตัวเลข, Mood/สาเหตุ/โตเมื่อวานตาม § 4.10)
 - คงการแก้ Bug: **ต้นตาย** = อยู่ใน `deadPlantIds` **หรือ** Damage ≥ 1 (`isPlantDead` ใน shared) — แสดง 💀 "ตายแล้ว", ไม่แสดงระยะ/สาเหตุ/โตเมื่อวาน ทั้งแผงต้นผักและป้ายในฉาก
 
+### 4.12 P29 — Overflow Penalty Contract (2026-10-20)
+
+เปิดเติมน้ำจนล้นถังทำให้ **เสียคะแนนตามน้ำที่สูญเสีย** แต่ยังเล่นต่อและชนะได้ — ผู้เล่นเลือกได้ว่าจะปลูกให้ผ่าน หรือควบคุมดีเพื่อคะแนนสูง
+
+- นับเฉพาะตอนรอบ `playing` (ด่านและ Free Play): น้ำที่ล้นใน Step นั้น (`totalOverflowL` ที่เพิ่ม) รวมเป็น `game.overflowL` (L)
+- พลังงานที่เสียไป `game.overflowKWh` = กำลังไฟ Refill Pump × เวลาที่ปั๊มทำงานขณะน้ำล้น (ยังนับใน `energyKWh` รวมตามเดิม ไม่หักซ้ำ)
+- `game.overflowPenalty` = round(`overflowL` × `cfg.game.overflowPenaltyPerL`) ไม่เกิน `cfg.game.overflowPenaltyMax`
+  - ค่าเริ่ม 10 คะแนน/L สูงสุด 300 (ปั๊ม 2 L/min → ล้น 1 นาทีจำลอง ≈ −20)
+- คะแนน = max(0, คะแนนดูแล − `overflowPenalty`) ระหว่างเล่น; ตอนเก็บเกี่ยวบวก Harvest bonus ตามเดิม; ไม่ทำให้แพ้ ไม่ลดดาว
+- UI: การ์ด CARE SCORE แสดง "💧 ล้น x.x L · ⚡ y.yyy kWh · −z" เมื่อ `overflowL` > 0; หน้าคะแนน/หน้าผ่านด่านแสดงรายการหักคะแนน; ข้อความผู้ช่วยขณะน้ำล้น (หลังไฟดับ/ถังรั่ว) "💧 น้ำล้น! ปิดเติมน้ำ — เสียน้ำ x L (−z คะแนน)"; แถบเตือนน้ำล้นในฉากบอกว่าเสียคะแนน
+
 ## 5. Functional Requirements
 
 รหัส `FR-xx` ใช้อ้างอิงใน Test และ Commit, คอลัมน์ **M** = Milestone ที่ต้องทำเสร็จ
@@ -380,6 +391,7 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 ### 8.8 P28–P30 — ปรับเงื่อนไขเกม
 
 - [x] AC-42 **P28b / SPEC § 4.11:** แผงต้นผักเป็นแบบ P25 (ไม่มีแถบ Stamina); ต้น Damage ≥ 1 แสดงตายและไม่แสดงสาเหตุ/โตเมื่อวาน/ระยะ ทั้งแผงและป้ายในฉาก; Unit test `isPlantDead` + Browser ไม่มี Console error
+- [x] AC-43 🧪 **P29 / SPEC § 4.12:** น้ำล้นขณะเล่นสะสม `overflowL`/`overflowKWh` และหักคะแนน 10/L สูงสุด 300 ไม่ต่ำกว่า 0; ไม่นับตอน ready/won/lost; ยังเก็บเกี่ยวชนะได้และดาวไม่เปลี่ยน; UI แสดงลิตร/kWh/คะแนนที่เสียจาก Snapshot; Unit tests + Browser ไม่มี Console error
 
 ## 9. Assumptions
 

@@ -76,6 +76,7 @@ export function WinScreen({ onLevels, onClose }: { onLevels: () => void; onClose
           คะแนน {g.score} (โบนัส +{g.harvestBonus}) · ผลผลิต {g.yieldG?.toFixed(0) ?? '—'} g · ใช้เวลา {(g.elapsedS / 86400).toFixed(1)} วัน
           {g.energyBudgetKWh !== null && ` · ไฟ ${g.energyKWh.toFixed(1)}/${g.energyBudgetKWh} kWh`}
         </p>
+        {g.overflowL > 0 && <p className="mt-1 text-sm text-rose-700">💧 น้ำล้น {g.overflowL.toFixed(1)} L · ⚡ {g.overflowKWh.toFixed(3)} kWh · หักคะแนน −{g.overflowPenalty}</p>}
         {gain !== null && <p className="mt-1 text-sm font-semibold text-emerald-700">ผักโตขึ้นเฉลี่ย +{gain.toFixed(1)} g ต่อต้น</p>}
       </div>
       <ul className="grid grid-cols-3 gap-2 text-center text-xs sm:grid-cols-6">

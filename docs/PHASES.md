@@ -328,8 +328,12 @@ tags: [green-oak, roadmap]
 - [x] คงการแก้ Bug ต้นตาย: ย้าย `isPlantDead` (Damage ≥ 1 หรือใน `deadPlantIds`) ไป `packages/shared/src/plantFeedback.ts` ใช้ทั้งแผงต้นผักและป้ายในฉาก + Unit test
 - **ผลตรวจ:** AC-42 ผ่าน; tests 248/248 (35 files), typecheck และ build ผ่าน; Browser: Dialog ต้นผักกลับเป็น Meter แบบเดิม ไม่มี Console error หลังโหลดใหม่
 
-### P29 — น้ำล้นเสียคะแนน
-- [ ] SPEC ก่อน: เปิดเติมน้ำจนล้น → หักคะแนนตามลิตรที่สูญเสีย, แสดงลิตรและพลังงาน (kWh) ที่เสียไป, ยังเล่นต่อและชนะได้ → test/Browser → commit `phase(P29): ...`
+### P29 — น้ำล้นเสียคะแนน ✅
+- [x] SPEC § 4.12 + AC-43 ก่อน
+- [x] sim-core `CareGame.step` รับน้ำล้นต่อ Step และกำลังปั๊มเติมน้ำ → `game.overflowL`, `overflowKWh`, `overflowPenalty` (10 คะแนน/L สูงสุด 300 จาก `cfg.game`); คะแนน = max(0, คะแนนดูแล − หัก); นับเฉพาะ `playing`, ไม่ทำให้แพ้/ไม่ลดดาว; โดสเติมน้ำที่ล้นก็นับ (ผ่านบิต Refill)
+- [x] UI: การ์ด CARE SCORE "💧 ล้น x L · ⚡ y kWh · −z", หน้าคะแนน/หน้าผ่านด่านแสดงรายการหัก, ข้อความผู้ช่วยขณะล้น (หลังไฟดับ/ถังรั่ว), แถบน้ำล้นในฉากบอกคะแนนที่เสีย
+- **ผลตรวจ:** AC-43 ผ่าน; tests 252/252 (35 files), typecheck และ build ผ่าน; Browser (60x, เปิดเติมน้ำค้าง): ล้น 12.3 L → −123 คะแนน, kWh ขึ้น, ผู้ช่วยเตือน, ยัง playing; ปิดปั๊มแล้วข้อความกลับปกติ; ไม่มี Console error
+- **หมายเหตุสมดุล:** ที่ 60x ล้น 6 นาทีจำลองเสีย ~120 คะแนน (ปั๊ม 2 L/min) — ปรับ `overflowPenaltyPerL`/`overflowPenaltyMax` ได้ใน Config ถ้าแรงไป
 
 ### P30 — เปิด LED นานเกินเกิดความเครียด
 - [ ] SPEC ก่อน: เปิดไฟต่อเนื่องนานเกินช่วงพัก (ไม่มีช่วงมืดพอ) → Light stress สะสม ทำให้โตช้า; ลดไฟ/ปิดไฟให้ฟื้น; ตารางไฟ 16 ชม./วันตามสูตรดูแลต้องไม่เกิด Stress → test สมดุลด่าน/Browser → commit `phase(P30): ...`

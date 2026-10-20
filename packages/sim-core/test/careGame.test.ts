@@ -68,3 +68,44 @@ describe('Care score and permanent death — P17', () => {
     expect(dry.plants.every((p) => p.damage === 0)).toBe(true);
   }, 30000);
 });
+
+describe('Overflow penalty — P29', () => {
+  it('deducts points per litre lost (capped, never below 0) and keeps the round winnable', () => {
+    const cfg = makeConfig();
+    const plants = [createPlant(1, 0, 5, 0, cfg)];
+    const mature = plants.map((p) => ({ ...p, biomassG: 100 }));
+    const game = new CareGame(plants, cfg);
+    game.step(mature, 60, 60, 18, 5, 18); // ready: ไม่นับ
+    expect(game.snapshot()).toMatchObject({ overflowL: 0, overflowPenalty: 0 });
+    game.start();
+    game.step(mature, 60, 120, 18, 2, 18);
+    expect(game.snapshot()).toMatchObject({ overflowL: 2, overflowPenalty: 20, score: 980 });
+    expect(game.snapshot().overflowKWh).toBeCloseTo(18 * 60 / 3_600_000, 12);
+    game.step(mature, 60, 180, 0, 0, 0);
+    expect(game.snapshot().overflowKWh).toBeCloseTo(18 * 60 / 3_600_000, 12);
+    game.step(mature, 60, 240, 18, 100, 18);
+    expect(game.snapshot()).toMatchObject({ overflowL: 102, overflowPenalty: 300, score: 700, status: 'playing', canHarvest: true });
+    expect(game.harvest(mature, 240)).toBe(true);
+    expect(game.snapshot()).toMatchObject({ status: 'won', stars: 3, score: 700 + game.snapshot().harvestBonus });
+  });
+
+  it('score floor is zero', () => {
+    const cfg = makeConfig({ game: { overflowPenaltyMax: 5000 } });
+    const p = createPlant(1, 0, 5, 0, cfg);
+    const game = new CareGame([p], cfg); game.start();
+    game.step([{ ...p, health: 10 }], 60, 60, 0, 400, 0);
+    expect(game.snapshot().score).toBe(0);
+  });
+
+  it('simulation counts overflow from a refill pump left on at a full tank', () => {
+    const sim = new Simulation({ seed: 3 });
+    sim.startGame();
+    for (let i = 0; i < 3 * 3600; i += 10) sim.step(10, { ...OFF, refillPump: true });
+    const g = sim.game;
+    expect(sim.env.totalOverflowL).toBeGreaterThan(1);
+    expect(g.overflowL).toBeCloseTo(sim.env.totalOverflowL, 6);
+    expect(g.overflowPenalty).toBe(Math.min(300, Math.round(g.overflowL * 10)));
+    expect(g.overflowKWh).toBeGreaterThan(0);
+    expect(g.status).toBe('playing');
+  });
+});

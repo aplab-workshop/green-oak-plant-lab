@@ -28,7 +28,8 @@ export class CareGame {
       deadPlantIds: [], totalPlants: plants.length, status: 'ready', endedAtS: null,
       canHarvest: false, harvestBonus: 0, yieldG: null, testRun: false,
       targetG: mission?.targetG ?? cfg.plant.harvestAtG, timeLimitS: mission?.timeLimitS ?? null,
-      energyKWh: 0, energyBudgetKWh: mission?.energyBudgetKWh ?? null, stars: 0, lostReason: null };
+      energyKWh: 0, energyBudgetKWh: mission?.energyBudgetKWh ?? null, stars: 0, lostReason: null,
+      overflowL: 0, overflowKWh: 0, overflowPenalty: 0 };
   }
   /** ready → playing; คืน false ถ้าไม่ได้อยู่ ready */
   start(): boolean {
@@ -40,7 +41,11 @@ export class CareGame {
   markTestRun(): void {
     if (this.progress.status === 'playing' && !this.progress.testRun) this.progress = { ...this.progress, testRun: true };
   }
-  step(plants: readonly PlantState[], dtS: number, simTimeS: number, powerW = 0): void {
+  /**
+   * @param overflowL น้ำที่ล้นถังใน Step นี้ (L) — P29
+   * @param overflowW กำลังไฟของปั๊มเติมน้ำขณะน้ำล้นใน Step นี้ (W)
+   */
+  step(plants: readonly PlantState[], dtS: number, simTimeS: number, powerW = 0, overflowL = 0, overflowW = 0): void {
     if (this.progress.status !== 'playing' || dtS <= 0 || !plants.length) return;
     const { targetG } = this.progress;
     const elapsedS = this.progress.elapsedS + dtS;
@@ -54,8 +59,14 @@ export class CareGame {
     const alive = 1 - deadPlantIds.length / plants.length;
     const weight = this.cfg.game.healthWeight;
     const canHarvest = alive > 0 && plants.every((p) => p.damage >= 1 || p.biomassG >= targetG);
-    this.progress = { ...this.progress, score: Math.round(this.cfg.game.maxScore * alive *
-      (weight * averageHealth / 100 + (1 - weight) * growthProgress)), elapsedS, averageHealth,
+    // P29: น้ำล้นหักคะแนนตามลิตร (มีเพดาน) แต่ไม่ทำให้แพ้
+    const g = this.cfg.game;
+    const totalOverflowL = this.progress.overflowL + Math.max(0, overflowL);
+    const overflowPenalty = Math.min(g.overflowPenaltyMax, Math.round(totalOverflowL * g.overflowPenaltyPerL));
+    const careScore = Math.round(g.maxScore * alive * (weight * averageHealth / 100 + (1 - weight) * growthProgress));
+    this.progress = { ...this.progress, score: Math.max(0, careScore - overflowPenalty), elapsedS, averageHealth,
+      overflowL: totalOverflowL, overflowPenalty,
+      overflowKWh: this.progress.overflowKWh + (overflowL > 0 ? overflowW * dtS / 3_600_000 : 0),
       growthProgress, deadPlantIds, totalPlants: plants.length, status: alive === 0 ? 'lost' : 'playing',
       endedAtS: alive === 0 ? simTimeS : null, canHarvest: alive === 0 ? false : canHarvest,
       energyKWh: this.progress.energyKWh + powerW * dtS / 3_600_000, lostReason: alive === 0 ? 'allDead' : null };

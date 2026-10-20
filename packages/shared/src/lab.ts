@@ -92,6 +92,12 @@ export interface CareProgress {
   energyBudgetKWh: number | null;
   /** ดาวเมื่อชนะ 1–3 (0 = ยังไม่ชนะ) */
   stars: number;
+  /** น้ำที่ล้นถังขณะเล่น (L) — P29 */
+  overflowL: number;
+  /** พลังงาน Refill Pump ที่ใช้ขณะน้ำล้น (kWh) — รวมอยู่ใน energyKWh แล้ว */
+  overflowKWh: number;
+  /** คะแนนที่ถูกหักจากน้ำล้น (points) */
+  overflowPenalty: number;
   lostReason: 'allDead' | 'timeout' | null;
 }
 

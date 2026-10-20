@@ -16,6 +16,10 @@ export interface SimConfig {
     harvestBonus: number;
     /** สุขภาพเฉลี่ยขั้นต่ำสำหรับดาวที่ 3 (%) (P21) */
     starHealthPct: number;
+    /** คะแนนที่หักต่อน้ำล้น 1 L ขณะเล่น (points/L) (P29) */
+    overflowPenaltyPerL: number;
+    /** คะแนนที่หักจากน้ำล้นสูงสุดต่อรอบ (points) (P29) */
+    overflowPenaltyMax: number;
   };
   time: {
     /** Fixed time-step (s, เวลาจำลอง) */
@@ -256,7 +260,7 @@ export interface SimConfig {
 }
 
 export const DEFAULT_CONFIG: SimConfig = {
-  game: { healthWeight: 0.8, maxScore: 1000, recordMinS: 86_400, harvestBonus: 500, starHealthPct: 85 },
+  game: { healthWeight: 0.8, maxScore: 1000, recordMinS: 86_400, harvestBonus: 500, starHealthPct: 85, overflowPenaltyPerL: 10, overflowPenaltyMax: 300 },
   time: { dtS: 1, startDay: 14, startHour: 6, maxStepsPerTick: 5000 },
   tank: {
     capacityL: 40,

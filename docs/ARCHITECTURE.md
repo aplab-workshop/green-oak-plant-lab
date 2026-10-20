@@ -760,3 +760,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 
 - P28 เคยเปลี่ยนแผงต้นผักเป็นแถบ Stamina แต่ผู้ใช้ไม่ชอบ → P28b คืนแผงแบบ P25 (`dashboard/PlantDetail.tsx`)
 - คงไว้: `isPlantDead` ใน `packages/shared/src/plantFeedback.ts` (Damage ≥ 1 หรือใน `deadPlantIds`) ใช้ใน `PlantDetail` และ `scene/PlantBadge.tsx` — ต้นตายไม่แสดงระยะ/สาเหตุ/โตเมื่อวาน
+
+### 11.26 Implementation Notes (P29 — Overflow Penalty)
+
+- `Simulation.step` ส่ง `overflowL = totalOverflowL(หลัง) − totalOverflowL(ก่อน)` และ `refillPumpW` (เมื่อบิต Refill เปิด) ให้ `CareGame.step`
+- `CareGame` สะสม `overflowL`/`overflowKWh` เฉพาะ `playing`; `overflowPenalty = min(max, round(L × perL))`; `score = max(0, careScore − penalty)`; Harvest bonus บวกหลังจากนั้นตามเดิม; ดาวไม่ขึ้นกับน้ำล้น
+- Web: `gameModel.helperMessage` เช็ก `tank.overflowFlowLpm > 0` ต่อจากไฟดับ/ถังรั่ว; การ์ดคะแนน, `ScoreDetail`, `WinScreen`, แถบเตือนใน `PlantView` อ่านค่าจาก `snapshot.game`
+

@@ -64,6 +64,7 @@ function ScoreDetail() {
       <p>สุขภาพเฉลี่ยตลอดรอบ <b className="block text-xl">{game.averageHealth.toFixed(1)}%</b></p>
       <p>ความคืบหน้าการเติบโต <b className="block text-xl">{Math.round(game.growthProgress * 100)}%</b></p>
     </div>
+    {game.overflowL > 0 && <p className="rounded-xl bg-rose-50 p-4 text-sm text-rose-800">💧 น้ำล้นถัง {game.overflowL.toFixed(1)} L · ⚡ ไฟที่เสียไปกับปั๊มเติมน้ำ {game.overflowKWh.toFixed(3)} kWh<br /><b>หักคะแนน −{game.overflowPenalty}</b> (10 คะแนนต่อลิตร สูงสุด 300) — ยังเล่นต่อและชนะได้ แต่ควบคุมดีจะได้คะแนนสูงกว่า</p>}
     <p className="text-sm leading-relaxed text-slate-600">คะแนนคิดจากสุขภาพเฉลี่ยตลอดรอบ 80% และการเติบโตสู่ระยะเก็บเกี่ยว 20% แล้วคูณสัดส่วนต้นที่ยังรอด (เต็ม 1,000) เมื่อเก็บเกี่ยวได้รับโบนัสสูงสุด 500 ตามต้นที่รอดและสุขภาพเฉลี่ย ดูแลให้สุขภาพดีต่อเนื่องและเติบโตจึงได้คะแนนสูง การ Pause ไม่เพิ่มคะแนน</p>
     <p className="rounded-xl bg-slate-50 p-4 text-sm">Best: {game.best ? `${game.best.score} คะแนน · รอบ ${(game.best.elapsedS / 86400).toFixed(2)} วัน` : 'ยังไม่มีรอบที่เข้าเกณฑ์'}<br /><span className="text-xs text-slate-500">บันทึกเมื่อจบรอบที่เล่นอย่างน้อย 24 ชั่วโมงจำลอง แยกตาม Lab/ภารกิจ เก็บจนปิด Server; ควรเทียบรอบที่มีระยะเวลาเท่ากัน</span></p>
   </div>;
@@ -143,6 +144,7 @@ export function App() {
         เป้า {game.targetG} g{game.timeLimitS !== null && ` · วัน ${Math.min(game.elapsedS, game.timeLimitS) / 86400 | 0}/${game.timeLimitS / 86400}`}
         {game.energyBudgetKWh !== null && ` · ⚡ ${game.energyKWh.toFixed(1)}/${game.energyBudgetKWh} kWh`}
       </span>}
+      {game && game.overflowL > 0 && <span className="mt-1 block text-[11px] font-semibold text-rose-600">💧 ล้น {game.overflowL.toFixed(1)} L · ⚡ {game.overflowKWh.toFixed(3)} kWh · −{game.overflowPenalty}</span>}
       {game?.testRun && <span className="mt-1 block text-[11px] font-semibold text-amber-700">TEST · ใช้ Auto ระหว่างรอบ ไม่นับ Best</span>}
     </button>
     <ChallengeCard />

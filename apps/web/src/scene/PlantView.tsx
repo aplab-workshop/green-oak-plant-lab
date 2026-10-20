@@ -32,6 +32,7 @@ const CrossSection = ({ unavailable = false }: { unavailable?: boolean }) => (
 
 export function PlantView() {
   const overflowing = useLabStore((s) => !!s.snapshot?.commands.refillPump && (s.snapshot?.tank.overflowFlowLpm ?? 0) > 0);
+  const penalty = useLabStore((s) => s.snapshot?.game.overflowPenalty ?? 0);
   const view = useSceneStore((s) => s.view);
   const [webglUnavailable, setWebglUnavailable] = useState(false);
   return (
@@ -57,7 +58,7 @@ export function PlantView() {
         <CrossSection unavailable={webglUnavailable} />
       )}
       <SceneToolbar webglUnavailable={webglUnavailable} />
-      {overflowing && <div role="status" className="pointer-events-none absolute bottom-24 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 shadow">💧 น้ำล้น — ปิดปั๊มเติมน้ำ</div>}
+      {overflowing && <div role="status" className="pointer-events-none absolute bottom-24 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 shadow">💧 น้ำล้น — ปิดปั๊มเติมน้ำ{penalty > 0 && ` · เสียคะแนน −${penalty}`}</div>}
     </div>
   );
 }

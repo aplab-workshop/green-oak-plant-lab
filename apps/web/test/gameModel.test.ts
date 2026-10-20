@@ -13,7 +13,7 @@ const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', de
 /** Snapshot ที่ทุกอย่างปกติ (กลางวัน ไฟ 80%) */
 function snap(over: Partial<LabSnapshot> = {}, sensors: Partial<LabSnapshot['sensors']> = {}): LabSnapshot {
   return {
-    game: { score: 500, elapsedS: 3600, averageHealth: 100, growthProgress: 0.1, deadPlantIds: [], totalPlants: 3, status: 'playing', endedAtS: null, canHarvest: false, harvestBonus: 0, yieldG: null, testRun: false, targetG: 30, timeLimitS: 8 * 86400, energyKWh: 2, energyBudgetKWh: 18, stars: 0, lostReason: null, best: null },
+    game: { score: 500, elapsedS: 3600, averageHealth: 100, growthProgress: 0.1, deadPlantIds: [], totalPlants: 3, status: 'playing', endedAtS: null, canHarvest: false, harvestBonus: 0, yieldG: null, testRun: false, targetG: 30, timeLimitS: 8 * 86400, energyKWh: 2, energyBudgetKWh: 18, stars: 0, lostReason: null, overflowL: 0, overflowKWh: 0, overflowPenalty: 0, best: null },
     level: L2, levels: [],
     labId: 'lab01', runId: 1, at: 0, simTimeS: 36000, sim: { day: 23, minuteOfDay: 600 }, speed: 360, paused: false,
     plc: { kind: 'mock', mode: 'manual', connection: 'connected', lastOkAt: 0, latencyMs: 0, errorCount: 0, lastError: null },
@@ -49,6 +49,16 @@ describe('helperMessage priority', () => {
     expect(helperMessage(outage).text).toContain('ไฟดับ');
     const leak = snap({ challenges: [{ id: 1, kind: 'leak', title: '💧 ถังรั่ว', status: 'active', startS: 0, endS: null, repaired: false }] });
     expect(helperMessage(leak).text).toContain('ซ่อมถัง');
+  });
+
+  it('overflow comes right after outage/leak and shows litres and penalty (P29)', () => {
+    const base = snap();
+    const over = { ...base, tank: { ...base.tank, overflowFlowLpm: 2 }, game: { ...base.game, overflowL: 3.4, overflowPenalty: 34 }, challenges: [{ id: 1, kind: 'heatWave' as const, title: '🔥 คลื่นความร้อน', status: 'warned' as const, startS: 9e9, endS: 9e9, repaired: false }] };
+    const m = helperMessage(over);
+    expect(m.tone).toBe('danger');
+    expect(m.text).toContain('น้ำล้น');
+    expect(m.text).toContain('3.4 L');
+    expect(m.text).toContain('−34');
   });
 
   it('warns about upcoming events, then harvest, then low water', () => {
