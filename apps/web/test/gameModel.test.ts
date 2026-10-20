@@ -51,6 +51,14 @@ describe('helperMessage priority', () => {
     expect(helperMessage(leak).text).toContain('ซ่อมถัง');
   });
 
+  it('warns to rest the lights after 16 h of light load while LED is on (P30)', () => {
+    const base = snap();
+    const tired = { ...base, plants: base.plants.map((p) => ({ ...p, lightLoadH: 17 })) };
+    expect(helperMessage(tired).text).toContain('เปิดไฟมา 17 ชม.');
+    const off = { ...tired, commands: { ...tired.commands, ledPct: 0 }, sim: { ...tired.sim, minuteOfDay: 23 * 60 } };
+    expect(helperMessage(off).text).not.toContain('เปิดไฟมา');
+  });
+
   it('overflow comes right after outage/leak and shows litres and penalty (P29)', () => {
     const base = snap();
     const over = { ...base, tank: { ...base.tank, overflowFlowLpm: 2 }, game: { ...base.game, overflowL: 3.4, overflowPenalty: 34 }, challenges: [{ id: 1, kind: 'heatWave' as const, title: '🔥 คลื่นความร้อน', status: 'warned' as const, startS: 9e9, endS: 9e9, repaired: false }] };

@@ -1,4 +1,4 @@
-import { isDaytime, type LabSnapshot, type PlayerDevice } from '@gol/shared';
+import { LIGHT_LOAD_WARN_H, isDaytime, isPlantDead, type LabSnapshot, type PlayerDevice } from '@gol/shared';
 
 /**
  * ตรรกะหน้าเกม (SPEC § 4.9) — Pure function จาก Snapshot/History ของ Server ไม่คำนวณพืชเอง
@@ -73,6 +73,8 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   if (r.ecMsCm > 1.6) return { text: `ปุ๋ยเข้มเกิน (EC ${r.ecMsCm.toFixed(2)}) — เติมน้ำเพื่อเจือจาง และหยุดใส่ปุ๋ยก่อน`, tone: 'warn' };
   if (r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
 
+  const tired = cmd.ledPct > 0 ? Math.max(0, ...s.plants.filter((p) => !isPlantDead(p, g.deadPlantIds)).map((p) => p.lightLoadH)) : 0;
+  if (tired >= LIGHT_LOAD_WARN_H) return { text: `เปิดไฟมา ${tired.toFixed(0)} ชม. ผักต้องการช่วงมืด — ปิดหรือลดไฟ 💡 ไม่งั้นจะเครียดและโตช้า`, tone: 'warn' };
   if (r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C — ${own('fan') ? 'เปิด 🌀 พัดลม หรือลดไฟ LED' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
   if (r.rhPct < 55 && !cmd.humidifier && own('humidifier')) return { text: `อากาศแห้ง (${r.rhPct.toFixed(0)}%) — เปิด 🌫️ เครื่องทำหมอก`, tone: 'warn' };
 

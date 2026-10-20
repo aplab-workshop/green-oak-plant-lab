@@ -75,6 +75,8 @@ export interface PlantState {
   ppfd: number;
   dliToday: number;
   dliYesterday: number;
+  /** ชั่วโมงแสงสะสมที่ยังไม่ได้พัก (h) — เกินเกณฑ์เกิด Photoperiod stress (P30) */
+  lightLoadH: number;
   // --- Plant feedback (P25) ---
   /** Biomass ตอนเที่ยงคืนจำลองล่าสุด (g) */
   biomassDayStartG: number;

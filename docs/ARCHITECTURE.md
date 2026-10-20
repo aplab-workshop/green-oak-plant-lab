@@ -767,3 +767,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `CareGame` สะสม `overflowL`/`overflowKWh` เฉพาะ `playing`; `overflowPenalty = min(max, round(L × perL))`; `score = max(0, careScore − penalty)`; Harvest bonus บวกหลังจากนั้นตามเดิม; ดาวไม่ขึ้นกับน้ำล้น
 - Web: `gameModel.helperMessage` เช็ก `tank.overflowFlowLpm > 0` ต่อจากไฟดับ/ถังรั่ว; การ์ดคะแนน, `ScoreDetail`, `WinScreen`, แถบเตือนใน `PlantView` อ่านค่าจาก `snapshot.game`
 
+### 11.27 Implementation Notes (P30 — Photoperiod Stress)
+
+- `plant/light.ts`: `stepLightLoad(load, ppfd, dtS, cfg)` และ `photoperiodStressTarget(load, cfg)`; `stepLightStress(..., lightLoadH)` ใช้ target = max(แสงแรงเกิน/ร้อน/ขาดน้ำ, Photoperiod) แล้วสะสม/ฟื้นด้วย time constant เดิม
+- `stepPlant` อัปเดต `lightLoadH` ต่อต้นจาก PPFD ของต้นนั้น (ต้นมุมได้แสงน้อยกว่า → สะสมช้ากว่าเล็กน้อยเมื่อ PPFD < 250)
+- สมดุล: LED 80 % (320/272 PPFD) สะสม 1 h/h; ตาราง 16/8 → load สูงสุด 16 แล้วมืด 8 ชม. ล้าง 24 → ไม่เกิด Stress; เปิด 24 ชม. → Stress เริ่มหลัง 18 ชม. ถึงเพดาน 0.6 ที่ 26 ชม. (ไม่ถึงเกณฑ์ Damage 0.7)
+- Web: `LIGHT_LOAD_WARN_H` (16) ใน shared ใช้ใน `helperMessage` ก่อนข้อความร้อน/แห้ง
+

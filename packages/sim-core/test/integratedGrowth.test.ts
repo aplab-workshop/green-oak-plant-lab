@@ -27,7 +27,8 @@ describe('Integrated growth / damage / recovery — P12', () => {
   });
 
   it.each([1.5, 24])('AC-25: %s h exposure then 48 h recovery preserves permanent damage', (hours) => {
-    const cfg = makeConfig({ light: { ppfdMax: 650 } });
+    // ไฟต่อเนื่องตลอดการทดสอบ — ปิด Photoperiod stress (P30) เพื่อแยกผลแสงแรงเกิน
+    const cfg = makeConfig({ light: { ppfdMax: 650, photoperiodMaxStress: 0 } });
     const f = plantFixture(cfg, { ledPct: 100 });
     f.runHours(hours);
     const damaged = f.plant.damage;

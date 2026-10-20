@@ -7,7 +7,7 @@ const START = 14 * DAY + 6 * 3600; // Day 14 06:00
 const plant = (id: number, over: Partial<PlantState> = {}): PlantState => ({
   id, position: id - 1, ageDays: 14, stage: 'seedling', biomassG: 6, leafCount: 7, leafAreaCm2: 60, rootLengthCm: 6,
   hydration: 1, waterStress: 0, lightStress: 0, nutrientStress: 0, rootHealth: 1, damage: 0, health: 100,
-  rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0, ppfd: 0, dliToday: 0, dliYesterday: 0, biomassDayStartG: 5, gainYesterdayG: null, stageChangedAtS: null, ...over,
+  rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0, ppfd: 0, dliToday: 0, dliYesterday: 0, lightLoadH: 0, biomassDayStartG: 5, gainYesterdayG: null, stageChangedAtS: null, ...over,
 });
 let nextId = 1;
 const ev = (t: number, kind: string, plantId?: number): EventEntry =>

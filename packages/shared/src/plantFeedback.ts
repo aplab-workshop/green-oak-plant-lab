@@ -14,7 +14,7 @@ export const MOOD_EMOJI: Record<PlantMood, string> = { happy: '😄', ok: '🙂'
 export const CAUSE_INFO: Record<PlantCause, { icon: string; label: string }> = {
   water: { icon: '💧', label: 'ขาดน้ำ' },
   root: { icon: '🫧', label: 'รากหายใจไม่ออก' },
-  light: { icon: '🔥', label: 'แสงแรง/ร้อนเกินไป' },
+  light: { icon: '🔥', label: 'แสงมาก/เปิดไฟนานเกิน' },
   ph: { icon: '⚗️', label: 'pH ไม่เหมาะ ดูดปุ๋ยไม่ได้' },
   nutrient: { icon: '🧪', label: 'ปุ๋ยไม่พอดี (EC)' },
   dark: { icon: '🌑', label: 'มืดเกินไป ไม่ได้แสง' },
@@ -26,6 +26,8 @@ export const STAGE_CELEBRATION: Record<GrowthStage, string> = {
   harvest: '🎉 พร้อมเก็บ!',
 };
 
+/** ชั่วโมงแสงสะสมที่ผู้ช่วยเริ่มเตือนให้พักไฟ (ก่อนเกิด Photoperiod stress ที่ 18 ชม. ใน Config, P30) */
+export const LIGHT_LOAD_WARN_H = 16;
 /** Stress ขั้นต่ำที่นับเป็นสาเหตุ */
 export const CAUSE_STRESS_MIN = 0.25;
 /** PPFD ที่ต้นต่ำกว่านี้ตอนกลางวัน = มืด */

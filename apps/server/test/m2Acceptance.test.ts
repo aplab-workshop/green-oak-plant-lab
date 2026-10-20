@@ -18,7 +18,8 @@ async function hours(t: TestLab, h: number) {
 
 describe('M2 classroom acceptance through PLC, simulation, history and events — P15', () => {
   it('high light command accumulates stress, reduced light clears it, damage remains', async () => {
-    const t = makeLab('lab01', 'manual', 7, { cfg: makeConfig({ light: { ppfdMax: 650 },
+    // ไฟต่อเนื่อง 24 ชม. — ปิด Photoperiod stress (P30) เพื่อแยกผลแสงแรงเกิน
+    const t = makeLab('lab01', 'manual', 7, { cfg: makeConfig({ light: { ppfdMax: 650, photoperiodMaxStress: 0 },
       room: { tempMeanC: 24, tempAmplitudeC: 0 }, air: { ledHeatC: 0 } }) });
     await t.lab.handle({ type: 'setManualLed', value: 100 });
     const exposed = await hours(t, 6);

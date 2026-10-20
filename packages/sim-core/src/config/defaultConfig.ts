@@ -96,6 +96,20 @@ export interface SimConfig {
     /** Time constant สะสม / ฟื้น Light Stress (h, > 0) */
     stressRiseH: number;
     stressRecoveryH: number;
+    // --- Photoperiod stress (P30): ผักต้องการช่วงมืดพัก ---
+    /** PPFD ต่ำกว่านี้ = ได้พัก (µmol/m²/s) */
+    restPpfd: number;
+    /** PPFD ที่สะสมชั่วโมงแสงเต็มอัตรา 1 h/h (µmol/m²/s) */
+    loadRefPpfd: number;
+    /** อัตราล้างชั่วโมงแสงสะสมตอนมืดสนิท (h ต่อ h) */
+    restRecoveryPerH: number;
+    /** ชั่วโมงแสงสะสมที่เริ่มเกิด Stress / ช่วงจนถึงเพดาน (h) */
+    photoperiodMaxH: number;
+    photoperiodSpanH: number;
+    /** เพดาน Photoperiod stress [0,1] — ต่ำกว่า damageStressThreshold เพื่อให้โตช้าแต่ไม่ตาย */
+    photoperiodMaxStress: number;
+    /** เพดานชั่วโมงแสงสะสม (h) */
+    lightLoadMaxH: number;
   };
   nutrient: {
     /** EC เริ่มต้น (mS/cm) */
@@ -298,6 +312,13 @@ export const DEFAULT_CONFIG: SimConfig = {
     stressWaterGain: 1,
     stressRiseH: 2,
     stressRecoveryH: 4,
+    restPpfd: 60,
+    loadRefPpfd: 250,
+    restRecoveryPerH: 3,
+    photoperiodMaxH: 18,
+    photoperiodSpanH: 8,
+    photoperiodMaxStress: 0.6,
+    lightLoadMaxH: 48,
   },
   nutrient: {
     initialEc: 1.2,

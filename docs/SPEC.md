@@ -235,6 +235,20 @@ Briefing, Loss story และคู่มือ 📖 ใช้ของเด�
 - คะแนน = max(0, คะแนนดูแล − `overflowPenalty`) ระหว่างเล่น; ตอนเก็บเกี่ยวบวก Harvest bonus ตามเดิม; ไม่ทำให้แพ้ ไม่ลดดาว
 - UI: การ์ด CARE SCORE แสดง "💧 ล้น x.x L · ⚡ y.yyy kWh · −z" เมื่อ `overflowL` > 0; หน้าคะแนน/หน้าผ่านด่านแสดงรายการหักคะแนน; ข้อความผู้ช่วยขณะน้ำล้น (หลังไฟดับ/ถังรั่ว) "💧 น้ำล้น! ปิดเติมน้ำ — เสียน้ำ x L (−z คะแนน)"; แถบเตือนน้ำล้นในฉากบอกว่าเสียคะแนน
 
+### 4.13 P30 — Photoperiod (LED นานเกิน) Stress Contract (2026-10-20)
+
+ผักต้องการ**ช่วงมืดพัก** — เปิด LED ต่อเนื่องนานเกินทำให้ Light stress สะสม โตช้าลง; ลดไฟหรือปิดไฟช่วยให้ฟื้น (Model เชิงการสอน ยังไม่ปรับเทียบกับข้อมูลจริง)
+
+- `PlantState.lightLoadH` (ชั่วโมงแสงสะสมที่ยังไม่ได้พัก, 0–48) ต่อต้น ตาม PPFD ที่ต้น:
+  - PPFD ≥ `restPpfd` (60): เพิ่ม `dtH × min(1, PPFD / loadRefPpfd)` (`loadRefPpfd` 250) — ไฟแรงสะสมเต็มอัตรา, หรี่ไฟสะสมช้าลง
+  - PPFD < `restPpfd` (ปิดไฟ/หรี่มาก): ลด `dtH × restRecoveryPerH × (1 − PPFD / restPpfd)` (`restRecoveryPerH` 3 → มืด 8 ชม. ล้างได้ 24 ชม.)
+- Photoperiod stress target = min(1, max(0, (`lightLoadH` − `photoperiodMaxH`) / `photoperiodSpanH`)) × `photoperiodMaxStress` (18 ชม., 8 ชม., 0.6)
+  - เพดาน 0.6 ต่ำกว่าเกณฑ์ Damage (0.7) → **ทำให้โตช้า ไม่ทำให้ตาย** เมื่อเป็นสาเหตุเดียว
+- Light stress target = max(เป้าจากแสงแรงเกิน/ร้อน/ขาดน้ำเดิม, Photoperiod stress target); สะสม/ฟื้นด้วยเวลาเดิม (`stressRiseH` 2, `stressRecoveryH` 4)
+- ตารางไฟตามสูตรดูแล 06:00–22:00 (16 ชม.) ที่ LED 80 % **ต้องไม่เกิด Photoperiod stress**; เปิด 24 ชม. เริ่มเครียดหลัง ~18 ชม.
+- พารามิเตอร์อยู่ใน `cfg.light` (`restPpfd`, `loadRefPpfd`, `restRecoveryPerH`, `photoperiodMaxH`, `photoperiodSpanH`, `photoperiodMaxStress`)
+- UI: แผงต้นผักแสดง "แสงสะสม (ยังไม่พัก)" เป็นชั่วโมง; สาเหตุ 🔥 เปลี่ยนชื่อเป็น "แสงมาก/เปิดไฟนานเกิน"; ข้อความผู้ช่วย (ก่อนเรื่องร้อน/แห้ง) เมื่อมีต้นที่ยังรอด `lightLoadH` ≥ 16 และไฟเปิดอยู่: "เปิดไฟมา x ชม. ผักต้องการช่วงมืด — ปิดหรือลดไฟ"
+
 ## 5. Functional Requirements
 
 รหัส `FR-xx` ใช้อ้างอิงใน Test และ Commit, คอลัมน์ **M** = Milestone ที่ต้องทำเสร็จ
@@ -392,6 +406,7 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 
 - [x] AC-42 **P28b / SPEC § 4.11:** แผงต้นผักเป็นแบบ P25 (ไม่มีแถบ Stamina); ต้น Damage ≥ 1 แสดงตายและไม่แสดงสาเหตุ/โตเมื่อวาน/ระยะ ทั้งแผงและป้ายในฉาก; Unit test `isPlantDead` + Browser ไม่มี Console error
 - [x] AC-43 🧪 **P29 / SPEC § 4.12:** น้ำล้นขณะเล่นสะสม `overflowL`/`overflowKWh` และหักคะแนน 10/L สูงสุด 300 ไม่ต่ำกว่า 0; ไม่นับตอน ready/won/lost; ยังเก็บเกี่ยวชนะได้และดาวไม่เปลี่ยน; UI แสดงลิตร/kWh/คะแนนที่เสียจาก Snapshot; Unit tests + Browser ไม่มี Console error
+- [x] AC-44 🧪 **P30 / SPEC § 4.13:** เปิด LED 80 % ต่อเนื่อง → `lightLoadH` > 18 แล้ว Light stress เพิ่ม (≤ 0.6) และโตช้ากว่าตาราง 16 ชม.; ตาราง 06–22 ไม่เกิด Photoperiod stress; ปิด/หรี่ไฟแล้ว `lightLoadH` และ Stress ลดลง; ไม่ทำให้ตายเมื่อเป็นสาเหตุเดียว; สูตรดูแลยังผ่าน L1–L4 ตามเดิม; UI แสดงชั่วโมงแสงสะสม/ข้อความผู้ช่วย; Unit tests + Browser ไม่มี Console error
 
 ## 9. Assumptions
 

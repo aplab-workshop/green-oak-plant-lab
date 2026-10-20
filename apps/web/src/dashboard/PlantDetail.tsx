@@ -107,6 +107,7 @@ export function PlantDetail() {
             <Row label="Leaf count / area" value={`${p.leafCount} · ${fmt(p.leafAreaCm2, 0)} cm²`} />
             <Row label="Root length" value={`${fmt(p.rootLengthCm, 1)} cm`} />
             <Row label="PPFD at plant" value={`${fmt(p.ppfd, 0)} µmol/m²/s`} />
+            <Row label="แสงสะสม (ยังไม่พัก)" value={`${fmt(p.lightLoadH, 1)} h`} />
             <Row label="DLI today / yesterday" value={`${fmt(p.dliToday, 1)} / ${fmt(p.dliYesterday, 1)}`} />
             <Row label="Water demand" value={`${fmt(p.demandLPerDay, 2)} L/day`} />
           </div>

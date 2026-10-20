@@ -41,8 +41,10 @@ describe('Light Stress / Low Light — P9', () => {
   });
 
   it('AC-17: low light reduces growth with identical water and air temperature', () => {
-    const dim = plantFixture(DEFAULT_CONFIG, { ledPct: 12.5 }); // 50 PPFD
-    const lit = plantFixture(DEFAULT_CONFIG); // 250 PPFD
+    // ไฟต่อเนื่อง 72 ชม. — ปิด Photoperiod stress (P30) เพื่อแยกผลของแสงน้อยอย่างเดียว
+    const cfg = makeConfig({ light: { photoperiodMaxStress: 0 } });
+    const dim = plantFixture(cfg, { ledPct: 12.5 }); // 50 PPFD
+    const lit = plantFixture(cfg); // 250 PPFD
     dim.runHours(72);
     lit.runHours(72);
     expect(dim.plant.biomassG).toBeLessThan(lit.plant.biomassG * 0.8);
@@ -78,5 +80,61 @@ describe('Light Stress / Low Light — P9', () => {
     expect(f.plant.dliYesterday).toBeCloseTo(before.dliToday + 650 / 1e6, 9);
     expect(f.plant.lightStress).toBeGreaterThanOrEqual(before.lightStress);
     expect(f.plant.lightStress).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('Photoperiod stress (LED นานเกิน) — P30', () => {
+  const LED80 = 80; // 320 PPFD ที่ต้นกลาง < stressStartPpfd → ไม่มี Stress จากแสงแรง
+
+  it('lights on 24 h builds light load past 18 h and slows growth versus a 16 h schedule', () => {
+    const always = plantFixture(DEFAULT_CONFIG, { ledPct: LED80 });
+    const schedule = plantFixture(DEFAULT_CONFIG);
+    let maxScheduleLoad = 0;
+    for (let i = 0; i < 4 * 86400; i += 10) {
+      always.step(10);
+      const h = hourOfDay(schedule.env.simTimeS);
+      schedule.env.ledPct = h >= 6 && h < 22 ? LED80 : 0;
+      schedule.step(10);
+      maxScheduleLoad = Math.max(maxScheduleLoad, schedule.plant.lightLoadH);
+    }
+    expect(always.plant.lightLoadH).toBeGreaterThan(18);
+    expect(always.plant.lightStress).toBeGreaterThan(0.3);
+    expect(always.plant.lightStress).toBeLessThanOrEqual(DEFAULT_CONFIG.light.photoperiodMaxStress + 1e-9);
+    expect(always.plant.damage).toBe(0); // เพดาน 0.6 < เกณฑ์ Damage 0.7
+    expect(schedule.plant.lightStress).toBe(0);
+    expect(maxScheduleLoad).toBeLessThan(DEFAULT_CONFIG.light.photoperiodMaxH);
+    // ต่อวัน 16 ชม. ได้แสงน้อยกว่า แต่ไม่เครียด → โตใกล้เคียงหรือดีกว่าเปิดตลอด
+    expect(schedule.plant.biomassG / 16).toBeGreaterThan(always.plant.biomassG / 24);
+  });
+
+  it('turning the lights off or dimming hard clears the load, then stress recovers', () => {
+    const f = plantFixture(DEFAULT_CONFIG, { ledPct: LED80 });
+    for (let i = 0; i < 30 * 3600; i += 10) f.step(10);
+    const stressed = f.plant;
+    expect(stressed.lightStress).toBeGreaterThan(0.2);
+    f.env.ledPct = 0;
+    // มืดล้างได้ 3 ชม.แสงต่อ 1 ชม. → สะสม 30 ชม. ต้องมืด 10 ชม.
+    for (let i = 0; i < 8 * 3600; i += 10) f.step(10);
+    expect(f.plant.lightLoadH).toBeCloseTo(6, 6);
+    for (let i = 0; i < 2 * 3600; i += 10) f.step(10);
+    expect(f.plant.lightLoadH).toBe(0);
+    for (let i = 0; i < 12 * 3600; i += 10) f.step(10);
+    expect(f.plant.lightStress).toBeLessThan(0.05);
+    // หรี่ไฟเหลือ 10% (40 PPFD < restPpfd) ก็ล้างได้แต่ช้ากว่าปิดสนิท
+    const dim = plantFixture(DEFAULT_CONFIG, { ledPct: LED80 });
+    for (let i = 0; i < 20 * 3600; i += 10) dim.step(10);
+    const before = dim.plant.lightLoadH;
+    dim.env.ledPct = 10;
+    for (let i = 0; i < 4 * 3600; i += 10) dim.step(10);
+    expect(dim.plant.lightLoadH).toBeLessThan(before);
+    expect(dim.plant.lightLoadH).toBeGreaterThan(Math.max(0, before - 12));
+  });
+
+  it('dimmer light accumulates load more slowly', () => {
+    const bright = plantFixture(DEFAULT_CONFIG, { ledPct: LED80 });
+    const half = plantFixture(DEFAULT_CONFIG, { ledPct: 40 }); // 160 PPFD
+    for (let i = 0; i < 10 * 3600; i += 10) { bright.step(10); half.step(10); }
+    expect(bright.plant.lightLoadH).toBeCloseTo(10, 6);
+    expect(half.plant.lightLoadH).toBeCloseTo(10 * 160 / 250, 6);
   });
 });

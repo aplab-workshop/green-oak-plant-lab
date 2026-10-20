@@ -4,7 +4,7 @@ import { SECONDS_PER_DAY } from '../clock';
 import { clamp } from '../math';
 import { dliIncrement, positionFactor, ppfdAt } from '../environment/light';
 import { morphology, stepBiomass } from './growth';
-import { stepLightStress } from './light';
+import { stepLightLoad, stepLightStress } from './light';
 import { stepNutrientStress } from './nutrient';
 import { stepRootHealth } from './root';
 import { combinedStress } from './stress';
@@ -59,6 +59,7 @@ export function createPlant(id: number, position: number, biomassG: number, simT
     ppfd: 0,
     dliToday: 0,
     dliYesterday: 0,
+    lightLoadH: 0,
     biomassDayStartG: biomassG,
     gainYesterdayG: null,
     stageChangedAtS: null,
@@ -108,7 +109,8 @@ export function stepPlant(
   const supplyRatio = req.supplyRatio * clamp(tankFactor, 0, 1);
   const hydration = stepHydration(p.hydration, supplyRatio, req.factor, p.damage, dtS, cfg);
   const stress = waterStress(hydration, cfg);
-  const lightStress = stepLightStress(p.lightStress, req.ppfd, e.airTempC, hydration, dtS, cfg);
+  const lightLoadH = stepLightLoad(p.lightLoadH, req.ppfd, dtS, cfg);
+  const lightStress = stepLightStress(p.lightStress, req.ppfd, e.airTempC, hydration, dtS, cfg, lightLoadH);
   const nutrientStress = stepNutrientStress(p.nutrientStress, e.ecMsCm, e.ph, dtS, cfg);
   const rootHealth = stepRootHealth(p.rootHealth, e.estimatedOxygen, req.rootSubmerged, dtS, cfg);
   const maximum = combinedStress(stress, lightStress, nutrientStress, rootHealth).maximum;
@@ -147,6 +149,7 @@ export function stepPlant(
     ppfd: req.ppfd,
     dliToday: crossesMidnight ? 0 : p.dliToday + inc,
     dliYesterday: crossesMidnight ? p.dliToday + inc : p.dliYesterday,
+    lightLoadH,
     biomassDayStartG: crossesMidnight ? biomassG : p.biomassDayStartG,
     gainYesterdayG: crossesMidnight ? biomassG - p.biomassDayStartG : p.gainYesterdayG,
     stageChangedAtS: m.stage !== p.stage ? e.simTimeS + dtS : p.stageChangedAtS,
