@@ -24,7 +24,7 @@ export class CareGame {
   get status(): CareProgress['status'] { return this.progress.status; }
   constructor(plants: readonly PlantState[], private readonly cfg: SimConfig, mission?: Mission) {
     this.initial = plants.map((p) => p.biomassG);
-    this.progress = { score: 0, elapsedS: 0, averageHealth: 100, growthProgress: 0,
+    this.progress = { score: 0, elapsedS: 0, averageHealth: 100, growthProgress: 0, harvestProgress: 0,
       deadPlantIds: [], totalPlants: plants.length, status: 'ready', endedAtS: null,
       canHarvest: false, harvestBonus: 0, yieldG: null, testRun: false,
       targetG: mission?.targetG ?? cfg.plant.harvestAtG, timeLimitS: mission?.timeLimitS ?? null,
@@ -57,6 +57,11 @@ export class CareGame {
       return sum + (p.damage >= 1 ? 0 : clamp((p.biomassG - initial) / Math.max(1, targetG - initial), 0, 1));
     }, 0) / plants.length;
     const alive = 1 - deadPlantIds.length / plants.length;
+    // P35: ต้นที่รอดซึ่งไกลเป้าที่สุดเป็นตัวกำหนดว่าเก็บเกี่ยวได้หรือยัง
+    const living = plants.map((p, i) => ({ p, initial: this.initial[i]! })).filter(({ p }) => p.damage < 1);
+    const harvestProgress = living.length
+      ? Math.min(...living.map(({ p, initial }) => clamp((p.biomassG - initial) / Math.max(1e-9, targetG - initial), 0, 1)))
+      : 0;
     const weight = this.cfg.game.healthWeight;
     const canHarvest = alive > 0 && plants.every((p) => p.damage >= 1 || p.biomassG >= targetG);
     // P29: น้ำล้นหักคะแนนตามลิตร (มีเพดาน) แต่ไม่ทำให้แพ้
@@ -67,7 +72,7 @@ export class CareGame {
     this.progress = { ...this.progress, score: Math.max(0, careScore - overflowPenalty), elapsedS, averageHealth,
       overflowL: totalOverflowL, overflowPenalty,
       overflowKWh: this.progress.overflowKWh + (overflowL > 0 ? overflowW * dtS / 3_600_000 : 0),
-      growthProgress, deadPlantIds, totalPlants: plants.length, status: alive === 0 ? 'lost' : 'playing',
+      growthProgress, harvestProgress, deadPlantIds, totalPlants: plants.length, status: alive === 0 ? 'lost' : 'playing',
       endedAtS: alive === 0 ? simTimeS : null, canHarvest: alive === 0 ? false : canHarvest,
       energyKWh: this.progress.energyKWh + powerW * dtS / 3_600_000, lostReason: alive === 0 ? 'allDead' : null };
     const limit = this.progress.timeLimitS;

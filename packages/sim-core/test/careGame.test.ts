@@ -109,3 +109,34 @@ describe('Overflow penalty — P29', () => {
     expect(g.status).toBe('playing');
   });
 });
+
+describe('Harvest progress and growth rate — P35', () => {
+  it('harvestProgress is the least-advanced living plant and reaches 1 exactly when harvest is allowed', () => {
+    const cfg = makeConfig();
+    const plants = [createPlant(1, 0, 5, 0, cfg), createPlant(2, 1, 10, 0, cfg)];
+    const game = new CareGame(plants, cfg, { targetG: 20, timeLimitS: null, energyBudgetKWh: null });
+    game.start();
+    game.step([{ ...plants[0]!, biomassG: 12.5 }, { ...plants[1]!, biomassG: 12 }], 60, 60);
+    expect(game.snapshot().harvestProgress).toBeCloseTo(0.2, 12); // ต้น 2: (12−10)/(20−10)
+    expect(game.snapshot().canHarvest).toBe(false);
+    game.step([{ ...plants[0]!, biomassG: 20 }, { ...plants[1]!, damage: 1, health: 0 }], 60, 120);
+    expect(game.snapshot()).toMatchObject({ harvestProgress: 1, canHarvest: true }); // ต้นที่ตายไม่นับ
+  });
+
+  it('growthGPerH matches the biomass change and efficiency is ~1 under the care recipe at noon', () => {
+    const sim = new Simulation({ seed: 3 });
+    const fan = (s: Simulation) => ({ ...OFF, ledPct: 80, fan: s.env.airTempC > 25 });
+    for (let i = 0; i < 6 * 360; i++) sim.step(10, fan(sim));
+    const before = sim.plants.map((p) => p.biomassG);
+    sim.step(10, fan(sim));
+    sim.plants.forEach((p, i) => {
+      expect(p.growthGPerH).toBeCloseTo((p.biomassG - before[i]!) * 360, 9);
+      expect(p.growthGPerH).toBeGreaterThan(0);
+    });
+    expect(sim.plants[1]!.growthEfficiency).toBeGreaterThan(0.8);
+    expect(sim.plants[1]!.growthEfficiency).toBeLessThanOrEqual(sim.cfg.plant.lightFactorMax);
+    const dark = new Simulation({ seed: 3 });
+    for (let i = 0; i < 360; i++) dark.step(10, OFF);
+    expect(dark.plants.every((p) => p.growthGPerH === 0 && p.growthEfficiency === 0)).toBe(true);
+  });
+});

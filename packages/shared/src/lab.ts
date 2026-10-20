@@ -69,6 +69,8 @@ export interface CareProgress {
   elapsedS: number;
   averageHealth: number;
   growthProgress: number;
+  /** ความคืบหน้าสู่การเก็บเกี่ยว 0–1 = ต่ำสุดของต้นที่รอด (B − B₀)/(เป้า − B₀) — P35 */
+  harvestProgress: number;
   deadPlantIds: number[];
   totalPlants: number;
   /** ready = รอกด Start, playing = กำลังดูแล, won = เก็บเกี่ยวแล้ว, lost = ตายครบ (SPEC § 4.5) */

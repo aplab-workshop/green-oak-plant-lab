@@ -15,6 +15,7 @@ import { PlantView } from '../scene/PlantView';
 import { LevelSelect as LevelSelectScreen, WinScreen } from '../game/LevelScreens';
 import { HelperBubble } from '../game/HelperBubble';
 import { LevelWatch } from '../game/LevelWatch';
+import { GrowthMeter } from '../game/GrowthMeter';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 
@@ -178,7 +179,7 @@ export function App() {
         <div className="scene-window"><PlantView /></div>
         {gameMode && <LevelWatch />}
         <AutoPauseBanner />
-        {!wide && <div className="garden-hud">{scoreCards}{sensorCard}</div>}
+        {!wide && <div className="garden-hud">{scoreCards}{sensorCard}<GrowthMeter variant="compact" /></div>}
         <aside className="hud-card plant-card">
           <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-emerald-800">ผักของคุณ</span><PlantSelector /></div>
           <button className="mt-3 flex w-full items-center justify-between text-left" onClick={() => open('plant')} aria-label="ขยายข้อมูลต้นผัก">
@@ -187,7 +188,8 @@ export function App() {
         </aside>
         {/* จอกว้าง: การ์ดคะแนนและแผงซ้ายเรียงในคอลัมน์เดียว ไม่ซ้อนกันแม้การ์ดสูงขึ้น; ซ่อนการ์ดสภาพแวดล้อมเมื่อเปิดแผง Sensors (ค่าซ้ำ) */}
         {wide && <><div className="workspace-left">{scoreCards}{!panels.includes('sensors') && sensorCard}{pinned('sensors')}{pinned('plant')}</div>
-          <div className="workspace-right" style={panels.includes('trends') ? undefined : { bottom: 90 }}>{pinned('actuators')}</div>{pinned('trends')}</>}
+          <div className="workspace-right" style={panels.includes('trends') ? undefined : { bottom: 90 }}>{pinned('actuators')}</div>
+          <GrowthMeter variant="vertical" />{pinned('trends')}</>}
         {lost && <button className="loss-banner" onClick={() => setSeenLoss('')}>Game Over · {game.lostReason === 'timeout' ? 'หมดเวลาด่าน' : 'ต้นไม้ตายหมด'} — ดูผลรอบนี้</button>}
         {gameMode && !lost && <HelperBubble />}
         <nav className="garden-dock" aria-label="รายละเอียดสวน">

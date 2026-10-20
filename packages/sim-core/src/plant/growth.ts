@@ -39,17 +39,21 @@ export interface GrowthInput {
   humidAirStress?: number;
 }
 
-/** Biomass ใหม่หลัง dt (ไม่ลดลง) */
-export function stepBiomass(biomassG: number, u: GrowthInput, dtS: number, cfg: SimConfig): number {
-  const p = cfg.plant;
-  const rate =
-    p.growthRatePerDay *
-    biomassG *
-    Math.max(0, 1 - biomassG / p.maxBiomassG) *
-    lightFactor(u.ppfd, cfg) *
+/**
+ * ประสิทธิภาพการโตเทียบศักยภาพของต้นขนาดนั้น (P35) = f_light · f_temp · growthFactor · (1 − Damage)
+ * 1 ≈ โตเต็มที่ที่แสงอ้างอิง; สูงสุด lightFactorMax
+ */
+export function growthEfficiency(u: GrowthInput, cfg: SimConfig): number {
+  return lightFactor(u.ppfd, cfg) *
     temperatureFactor(u.airTempC, cfg) *
     combinedStress(u.waterStress, u.lightStress, u.nutrientStress, u.rootHealth, u.dryAirStress, u.humidAirStress).growthFactor *
     (1 - clamp(u.damage, 0, 1));
+}
+
+/** Biomass ใหม่หลัง dt (ไม่ลดลง) */
+export function stepBiomass(biomassG: number, u: GrowthInput, dtS: number, cfg: SimConfig): number {
+  const p = cfg.plant;
+  const rate = p.growthRatePerDay * biomassG * Math.max(0, 1 - biomassG / p.maxBiomassG) * growthEfficiency(u, cfg);
   return biomassG + rate * (dtS / 86_400);
 }
 

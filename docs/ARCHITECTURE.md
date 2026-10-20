@@ -798,3 +798,9 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `dashboard/deviceRationale.ts`: `DEVICE_RATIONALE: Record<ActuatorKey, {problem, benefit, caution}>` + `PLAYER_DEVICE_KEY` (PlayerDevice → ActuatorKey); ใช้ใน `scene/DeviceInfo.tsx` และ `GuidePanel` แท็บ `devices` — ข้อความสอนอย่างเดียว ตรงกับ SPEC § 4.15–4.16 และ Scenario tests
 - `guideContent.ts`/`gameModel.helperMessage` อัปเดตข้อความตาม Model P29–P33; ไม่เปลี่ยนโครง Layout
 
+### 11.32 Implementation Notes (P35 — Growth Meter)
+
+- `plant/growth.ts`: `growthEfficiency(u, cfg)` = f_light·f_temp·growthFactor·(1 − Damage); `stepBiomass` ใช้ตัวนี้ (คณิตเดิม) → `stepPlant` เก็บ `growthGPerH` = ΔB·3600/dt และ `growthEfficiency`; ต้นตาย = 0
+- `CareGame`: `harvestProgress` = min ของต้นที่ Damage < 1 ของ clamp((B − B₀)/(เป้า − B₀)) — สอดคล้อง `canHarvest` (ทุกต้นที่รอดถึงเป้า)
+- Web: `game/growthModel.ts` + `game/GrowthMeter.tsx`; ป้ายลอยใช้ `key={floor(simTimeS/3600)}` ให้ CSS animation เล่นใหม่เฉพาะเมื่อชั่วโมงจำลองเปลี่ยน; CSS `.growth-meter-v` วางหลัง `.workspace-right` แล้วใช้ `:has(.workspace-panel) +` เลื่อนซ้ายเมื่อเปิดแผงควบคุม
+

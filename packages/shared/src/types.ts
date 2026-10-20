@@ -80,6 +80,10 @@ export interface PlantState {
   /** ความเครียดจากอากาศแห้ง (VPD สูง) / ชื้นจัด (VPD ต่ำ) 0–1 — ลด Growth อย่างเดียว (P33) */
   dryAirStress: number;
   humidAirStress: number;
+  /** อัตราโตจริงของ Step ล่าสุด (g ต่อชั่วโมงจำลอง) — P35 */
+  growthGPerH: number;
+  /** ประสิทธิภาพการโตเทียบศักยภาพ = f_light·f_temp·growthFactor·(1 − Damage), 0–lightFactorMax — P35 */
+  growthEfficiency: number;
   // --- Plant feedback (P25) ---
   /** Biomass ตอนเที่ยงคืนจำลองล่าสุด (g) */
   biomassDayStartG: number;

@@ -6,6 +6,7 @@ import { dliIncrement, positionFactor, ppfdAt } from '../environment/light';
 import { morphology, stepBiomass } from './growth';
 import { stepLightLoad, stepLightStress } from './light';
 import { stepAirStress } from './air';
+import { growthEfficiency } from './growth';
 import { stepNutrientStress } from './nutrient';
 import { stepRootHealth } from './root';
 import { combinedStress } from './stress';
@@ -63,6 +64,8 @@ export function createPlant(id: number, position: number, biomassG: number, simT
     lightLoadH: 0,
     dryAirStress: 0,
     humidAirStress: 0,
+    growthGPerH: 0,
+    growthEfficiency: 0,
     biomassDayStartG: biomassG,
     gainYesterdayG: null,
     stageChangedAtS: null,
@@ -108,7 +111,7 @@ export function stepPlant(
   dtS: number,
   cfg: SimConfig,
 ): PlantState {
-  if (p.damage >= 1) return { ...p, health: 0, demandLPerDay: 0, supplyRatio: 0 };
+  if (p.damage >= 1) return { ...p, health: 0, demandLPerDay: 0, supplyRatio: 0, growthGPerH: 0, growthEfficiency: 0 };
   const supplyRatio = req.supplyRatio * clamp(tankFactor, 0, 1);
   const hydration = stepHydration(p.hydration, supplyRatio, req.factor, p.damage, dtS, cfg);
   const stress = waterStress(hydration, cfg);
@@ -119,13 +122,9 @@ export function stepPlant(
   const air = stepAirStress(p.dryAirStress, p.humidAirStress, e.vpdKPa, dtS, cfg);
   const maximum = combinedStress(stress, lightStress, nutrientStress, rootHealth, air.dry, air.humid).maximum;
   const damage = stepDamage(p.damage, maximum, dtS, cfg);
-  const biomassG = stepBiomass(
-    p.biomassG,
-    { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, nutrientStress, rootHealth, damage,
-      dryAirStress: air.dry, humidAirStress: air.humid },
-    dtS,
-    cfg,
-  );
+  const growthInput = { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, nutrientStress, rootHealth, damage,
+    dryAirStress: air.dry, humidAirStress: air.humid };
+  const biomassG = stepBiomass(p.biomassG, growthInput, dtS, cfg);
   const m = morphology(biomassG, cfg);
 
   const crossesMidnight =
@@ -157,6 +156,8 @@ export function stepPlant(
     lightLoadH,
     dryAirStress: air.dry,
     humidAirStress: air.humid,
+    growthGPerH: dtS > 0 ? (biomassG - p.biomassG) * 3600 / dtS : p.growthGPerH,
+    growthEfficiency: growthEfficiency(growthInput, cfg),
     biomassDayStartG: crossesMidnight ? biomassG : p.biomassDayStartG,
     gainYesterdayG: crossesMidnight ? biomassG - p.biomassDayStartG : p.gainYesterdayG,
     stageChangedAtS: m.stage !== p.stage ? e.simTimeS + dtS : p.stageChangedAtS,

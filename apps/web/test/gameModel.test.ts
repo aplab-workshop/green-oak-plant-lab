@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest';
 import type { LabSnapshot, LevelInfo, PlantState } from '@gol/shared';
 import { canControl, goalProgress, helperMessage } from '../src/game/gameModel';
 import { formatRemaining, watchDials, watchGoal } from '../src/game/watchModel';
+import { growthLevel, growthMeter } from '../src/game/growthModel';
 
 const plant = (id: number, over: Partial<PlantState> = {}): PlantState => ({
   id, position: id - 1, ageDays: 14, stage: 'seedling', biomassG: 8, leafCount: 7, leafAreaCm2: 50, rootLengthCm: 6,
   hydration: 1, waterStress: 0, lightStress: 0, nutrientStress: 0, rootHealth: 1, damage: 0, health: 100,
-  rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0.1, ppfd: 300, dliToday: 5, dliYesterday: 12, lightLoadH: 4, dryAirStress: 0, humidAirStress: 0, ...over,
+  rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0.1, ppfd: 300, dliToday: 5, dliYesterday: 12, lightLoadH: 4, dryAirStress: 0, humidAirStress: 0, growthGPerH: 0.2, growthEfficiency: 1, ...over,
 } as PlantState);
 
 const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', description: '', targetG: 30, startBiomassG: 15, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'] };
@@ -14,7 +15,7 @@ const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', de
 /** Snapshot ที่ทุกอย่างปกติ (กลางวัน ไฟ 80%) */
 function snap(over: Partial<LabSnapshot> = {}, sensors: Partial<LabSnapshot['sensors']> = {}): LabSnapshot {
   return {
-    game: { score: 500, elapsedS: 3600, averageHealth: 100, growthProgress: 0.1, deadPlantIds: [], totalPlants: 3, status: 'playing', endedAtS: null, canHarvest: false, harvestBonus: 0, yieldG: null, testRun: false, targetG: 30, timeLimitS: 8 * 86400, energyKWh: 2, energyBudgetKWh: 18, stars: 0, lostReason: null, overflowL: 0, overflowKWh: 0, overflowPenalty: 0, best: null },
+    game: { score: 500, elapsedS: 3600, averageHealth: 100, growthProgress: 0.1, harvestProgress: 0.25, deadPlantIds: [], totalPlants: 3, status: 'playing', endedAtS: null, canHarvest: false, harvestBonus: 0, yieldG: null, testRun: false, targetG: 30, timeLimitS: 8 * 86400, energyKWh: 2, energyBudgetKWh: 18, stars: 0, lostReason: null, overflowL: 0, overflowKWh: 0, overflowPenalty: 0, best: null },
     level: L2, levels: [],
     labId: 'lab01', runId: 1, at: 0, simTimeS: 36000, sim: { day: 23, minuteOfDay: 600 }, speed: 360, paused: false,
     plc: { kind: 'mock', mode: 'manual', connection: 'connected', lastOkAt: 0, latencyMs: 0, errorCount: 0, lastError: null },
@@ -161,6 +162,29 @@ describe('level watch HUD (P31)', () => {
     expect(watchGoal(snap({ level: null }))).toBeNull();
     expect(formatRemaining(8 * 86400 - 3600)).toBe('7 วัน 23 ชม.');
     expect(formatRemaining(5 * 3600 + 59)).toBe('5 ชม.');
+  });
+});
+
+describe('growth meter (P35)', () => {
+  it('classifies efficiency into 4 levels and night rest', () => {
+    expect(growthLevel(1, false)).toBe('good');
+    expect(growthLevel(0.7, false)).toBe('good');
+    expect(growthLevel(0.5, false)).toBe('slow');
+    expect(growthLevel(0.1, false)).toBe('verySlow');
+    expect(growthLevel(0, false)).toBe('none');
+    expect(growthLevel(0, true)).toBe('night');
+    expect(growthLevel(0.5, true)).toBe('slow');
+  });
+
+  it('uses server harvest progress and the smallest living plant rate', () => {
+    const base = snap();
+    const g = growthMeter({ ...base, plants: [{ ...base.plants[0]!, growthGPerH: 0.3, growthEfficiency: 1 }, { ...base.plants[1]!, growthGPerH: 0.08, growthEfficiency: 0.4 }, base.plants[2]!] })!;
+    expect(g).toMatchObject({ progress: 0.25, ready: false, rateGPerH: 0.08, level: 'slow', label: 'โตช้า', hourKey: 10 });
+    const night = growthMeter(snap({ sim: { day: 23, minuteOfDay: 23 * 60 }, commands: { ...base.commands, ledPct: 0 }, plants: base.plants.map((p) => ({ ...p, growthGPerH: 0, growthEfficiency: 0 })) }))!;
+    expect(night.level).toBe('night');
+    const ready = growthMeter(snap({ game: { ...base.game, harvestProgress: 1, canHarvest: true } }))!;
+    expect(ready.ready).toBe(true);
+    expect(growthMeter(snap({ game: { ...base.game, status: 'ready' } }))!).toMatchObject({ rateGPerH: 0, level: 'none' });
   });
 });
 
