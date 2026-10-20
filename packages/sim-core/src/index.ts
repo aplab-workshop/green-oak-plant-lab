@@ -15,6 +15,7 @@ export * from './events';
 export * from './plant/water';
 export * from './plant/growth';
 export * from './plant/light';
+export * from './plant/air';
 export * from './plant/nutrient';
 export * from './plant/root';
 export * from './plant/plant';

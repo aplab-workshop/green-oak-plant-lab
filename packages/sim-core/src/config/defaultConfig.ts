@@ -111,6 +111,20 @@ export interface SimConfig {
     /** เพดานชั่วโมงแสงสะสม (h) */
     lightLoadMaxH: number;
   };
+  /** Air (VPD) stress (P33) — ค่าเชิงการสอน ตั้งให้สูตรดูแล (VPD 0.93–1.6 kPa) ไม่เกิด Stress */
+  airStress: {
+    /** VPD ที่เริ่มเกิด Dry stress / ถึงเพดาน (kPa) */
+    dryStartKPa: number;
+    dryFullKPa: number;
+    /** VPD ที่เริ่มเกิด Humid stress / ถึงเพดาน (kPa), full < start */
+    humidStartKPa: number;
+    humidFullKPa: number;
+    /** เพดาน Stress [0,1] — ต่ำกว่า damageStressThreshold เพื่อไม่ให้เกิด Damage */
+    maxStress: number;
+    /** Time constant สะสม / ฟื้น (h) */
+    riseH: number;
+    recoveryH: number;
+  };
   nutrient: {
     /** EC เริ่มต้น (mS/cm) */
     initialEc: number;
@@ -320,6 +334,7 @@ export const DEFAULT_CONFIG: SimConfig = {
     photoperiodMaxStress: 0.6,
     lightLoadMaxH: 48,
   },
+  airStress: { dryStartKPa: 1.7, dryFullKPa: 2.5, humidStartKPa: 0.5, humidFullKPa: 0.2, maxStress: 0.5, riseH: 6, recoveryH: 6 },
   nutrient: {
     initialEc: 1.2,
     tapEc: 0.2,

@@ -786,3 +786,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Scenario tests `deviceRationale.test.ts` ใช้ `Simulation` จริง (dt 10 s) เทียบเปิด/ไม่เปิดด้วย Seed 5; ทดสอบเฉพาะทิศทาง/ขนาดผลตาม SPEC § 4.15 ไม่ผูกค่าตัวเลขละเอียด
 - การทดสอบผลของแสงต้องเปิดพัดลม เพราะ LED 80 % เพิ่มอุณหภูมิจนความร้อนเป็นปัจจัยจำกัด (`temperatureFactor` 25–33 °C) ก่อนแสง
 
+### 11.30 Implementation Notes (P33 — Air / VPD Stress)
+
+- `plant/air.ts`: `dryAirStressTarget`, `humidAirStressTarget`, `stepAirStress` ใช้ `e.vpdKPa` ของ `PlantEnvironment` (VPD จากอุณหภูมิ/RH อากาศก่อน Step) และ `stepStress` (Exponential approach → ไม่ขึ้นกับ Tick)
+- `combinedStress(water, light, nutrient, root, dryAir = 0, humidAir = 0)`: `waterGroup = max(water, 1 − root, dryAir)`, `nutrientGroup = max(nutrient, humidAir)`; `maximum` รวมทุกตัว → Health เห็นผล แต่ `maxStress` 0.5 < `damageStressThreshold` 0.7 จึงไม่สร้าง Damage
+- เหตุผลการจัดกลุ่ม: อากาศแห้งเพิ่มการคายน้ำ/ปิดปากใบ (สาเหตุเดียวกับขาดน้ำ), อากาศชื้นจัดลดการคายน้ำที่ลำเลียงธาตุอาหาร (สาเหตุเดียวกับธาตุอาหารไม่พอ)
+- Web: `airComfort` (shared) ใช้ใน `watchModel` (หน้าปัด `air`) และ `helperMessage`; `AIR_DRY_VPD`/`AIR_HUMID_VPD` ตรงกับ `cfg.airStress` ค่าเริ่ม
+

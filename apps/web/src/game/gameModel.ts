@@ -1,4 +1,4 @@
-import { LIGHT_LOAD_WARN_H, isDaytime, isPlantDead, type LabSnapshot, type PlayerDevice } from '@gol/shared';
+import { LIGHT_LOAD_WARN_H, airComfort, isDaytime, isPlantDead, type LabSnapshot, type PlayerDevice } from '@gol/shared';
 
 /**
  * ตรรกะหน้าเกม (SPEC § 4.9) — Pure function จาก Snapshot/History ของ Server ไม่คำนวณพืชเอง
@@ -76,7 +76,14 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   const tired = cmd.ledPct > 0 ? Math.max(0, ...s.plants.filter((p) => !isPlantDead(p, g.deadPlantIds)).map((p) => p.lightLoadH)) : 0;
   if (tired >= LIGHT_LOAD_WARN_H) return { text: `เปิดไฟมา ${tired.toFixed(0)} ชม. ผักต้องการช่วงมืด — ปิดหรือลดไฟ 💡 ไม่งั้นจะเครียดและโตช้า`, tone: 'warn' };
   if (r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C — ${own('fan') ? 'เปิด 🌀 พัดลม หรือลดไฟ LED' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
-  if (r.rhPct < 55 && !cmd.humidifier && own('humidifier')) return { text: `อากาศแห้ง (${r.rhPct.toFixed(0)}%) — เปิด 🌫️ เครื่องทำหมอก`, tone: 'warn' };
+  // P33: ใช้ VPD — แห้งเปิดหมอก, ชื้นจัดขณะเปิดหมอกให้ปิด
+  const comfort = airComfort(r.vpdKPa);
+  if (comfort === 'dry' && !cmd.humidifier) {
+    return { text: `อากาศแห้ง (RH ${r.rhPct.toFixed(0)}%) ผักโตช้าแม้น้ำพอ — ${own('humidifier') ? 'เปิด 🌫️ เครื่องทำหมอก' : 'ผู้ช่วยฟาร์มจะเปิดหมอกให้'}`, tone: 'warn' };
+  }
+  if (comfort === 'humid' && cmd.humidifier && own('humidifier')) {
+    return { text: `อากาศชื้นจัด (RH ${r.rhPct.toFixed(0)}%) ผักลำเลียงธาตุอาหารได้น้อย — ปิด 🌫️ เครื่องทำหมอก`, tone: 'warn' };
+  }
 
   const day = isDaytime(s.sim.minuteOfDay);
   if (day && cmd.ledPct === 0) return { text: 'กลางวันแล้ว ผักต้องการแสง — กด 💡 80%', tone: 'warn' };

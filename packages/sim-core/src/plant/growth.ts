@@ -34,6 +34,9 @@ export interface GrowthInput {
   nutrientStress: number;
   rootHealth: number;
   damage: number;
+  /** P33 */
+  dryAirStress?: number;
+  humidAirStress?: number;
 }
 
 /** Biomass ใหม่หลัง dt (ไม่ลดลง) */
@@ -45,7 +48,7 @@ export function stepBiomass(biomassG: number, u: GrowthInput, dtS: number, cfg: 
     Math.max(0, 1 - biomassG / p.maxBiomassG) *
     lightFactor(u.ppfd, cfg) *
     temperatureFactor(u.airTempC, cfg) *
-    combinedStress(u.waterStress, u.lightStress, u.nutrientStress, u.rootHealth).growthFactor *
+    combinedStress(u.waterStress, u.lightStress, u.nutrientStress, u.rootHealth, u.dryAirStress, u.humidAirStress).growthFactor *
     (1 - clamp(u.damage, 0, 1));
   return biomassG + rate * (dtS / 86_400);
 }

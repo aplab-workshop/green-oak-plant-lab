@@ -1,5 +1,9 @@
 import {
+  AIR_COMFORT_LABEL,
+  AIR_DRY_VPD,
+  AIR_HUMID_VPD,
   LIGHT_LOAD_STRESS_H,
+  airComfort,
   LIGHT_LOAD_WARN_H,
   SENSOR_RANGES,
   isDaytime,
@@ -15,7 +19,7 @@ import { canControl, goalProgress } from './gameModel';
  */
 
 export interface WatchDial {
-  key: 'water' | 'ppfd' | 'lightLoad' | 'ec' | 'temp' | 'rh' | 'ph';
+  key: 'water' | 'ppfd' | 'lightLoad' | 'ec' | 'temp' | 'air' | 'ph';
   icon: string;
   label: string;
   value: number;
@@ -76,7 +80,13 @@ export function watchDials(s: LabSnapshot): WatchDial[] {
 
   if (canControl(s, 'nutrient')) out.push(sensorDial('ec', 'ecMsCm', '🧪', 'EC (ปุ๋ย)', r.ecMsCm, '', 2, 1, [0, 2.5]));
   if (canControl(s, 'fan')) out.push(sensorDial('temp', 'airTempC', '🌡️', 'อุณหภูมิ', r.airTempC, '°C', 1, 0, [10, 35]));
-  if (canControl(s, 'humidifier')) out.push(sensorDial('rh', 'rhPct', '💨', 'ความชื้น', r.rhPct, '%', 0, 0, [30, 100]));
+  if (canControl(s, 'humidifier')) {
+    // P33: อากาศอธิบายเป็นคำ แห้ง/เหมาะสม/ชื้นจัด (เข็มตาม VPD) พร้อม RH %
+    const comfort = airComfort(r.vpdKPa);
+    out.push({ key: 'air', icon: '💨', label: 'อากาศ', value: r.vpdKPa, display: AIR_COMFORT_LABEL[comfort],
+      rangeText: `RH ${r.rhPct.toFixed(0)}%`, scale: [0, 3], ok: [AIR_HUMID_VPD, AIR_DRY_VPD], warn: SENSOR_RANGES.vpdKPa!.warn,
+      status: comfort === 'ok' ? 'ok' : sensorStatus('vpdKPa', r.vpdKPa) === 'alarm' ? 'alarm' : 'warn' });
+  }
   if (canControl(s, 'phDown')) out.push(sensorDial('ph', 'ph', '⚗️', 'pH', r.ph, '', 2, 1, [4, 8]));
   return out;
 }

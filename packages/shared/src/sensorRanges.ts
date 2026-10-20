@@ -22,7 +22,8 @@ export const SENSOR_RANGES: Partial<Record<SensorKey, SensorRange>> = {
   ph: { ok: [5.5, 6.5], warn: [5.0, 7.0] },
   ecMsCm: { ok: [0.8, 1.6], warn: [0.5, 2.2] },
   waterLevelPct: { ok: [65, 100], warn: [55, 100] },
-  vpdKPa: { ok: [0.4, 1.2], warn: [0.2, 1.6] },
+  // P33: ตรงกับเกณฑ์ Air stress (แห้ง > 1.7, ชื้นจัด < 0.5 kPa)
+  vpdKPa: { ok: [0.5, 1.7], warn: [0.3, 2.3] },
 };
 
 export function sensorStatus(key: SensorKey, value: number): SensorStatus {

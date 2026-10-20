@@ -96,6 +96,8 @@ export function PlantDetail() {
           <Meter label="Water stress" value={p.waterStress} color="#f59e0b" hint="ความเครียดจากการขาดน้ำ ลดลงได้เมื่อได้น้ำกลับมา" />
           <Meter label="Light stress" value={p.lightStress} color="#eab308" hint="สะสมจากแสงเกินร่วมกับความร้อน/ขาดน้ำ; ลดแสงแล้วค่อยฟื้น" />
           <Meter label="Nutrient stress" value={p.nutrientStress} color="#8b5cf6" hint="EC/pH นอกช่วงทำให้สะสม Stress และ Growth ลดลง" />
+          <Meter label="Dry air stress" value={p.dryAirStress} color="#d97706" hint="อากาศแห้ง (VPD สูง) ต่อเนื่อง ลด Growth แม้น้ำพอ; เปิดหมอกแล้วค่อยฟื้น" />
+          <Meter label="Humid air stress" value={p.humidAirStress} color="#0891b2" hint="อากาศชื้นจัด (VPD ต่ำ) ต่อเนื่อง ลำเลียงธาตุอาหารได้น้อย ลด Growth; ปิดหมอกแล้วค่อยฟื้น" />
           <Meter label="Root health" value={p.rootHealth} color="#059669" hint="สุขภาพรากจากน้ำที่เข้าถึงและ Oxygen; Root stress = 100% − Root health" />
           {oxygen !== undefined && <Meter label="Estimated Oxygen" value={oxygen} color="#06b6d4" hint="ดัชนีของ Model 0–100% ไม่ใช่ค่าจาก DO Sensor หรือ mg/L" />}
           <Meter label="Accumulated damage" value={p.damage} color="#dc2626" hint="ความเสียหายถาวร ไม่ลดลง" />

@@ -77,6 +77,9 @@ export interface PlantState {
   dliYesterday: number;
   /** ชั่วโมงแสงสะสมที่ยังไม่ได้พัก (h) — เกินเกณฑ์เกิด Photoperiod stress (P30) */
   lightLoadH: number;
+  /** ความเครียดจากอากาศแห้ง (VPD สูง) / ชื้นจัด (VPD ต่ำ) 0–1 — ลด Growth อย่างเดียว (P33) */
+  dryAirStress: number;
+  humidAirStress: number;
   // --- Plant feedback (P25) ---
   /** Biomass ตอนเที่ยงคืนจำลองล่าสุด (g) */
   biomassDayStartG: number;

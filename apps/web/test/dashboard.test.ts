@@ -30,6 +30,8 @@ const plant = (over: Partial<PlantState> = {}): PlantState => ({
   dliToday: 0,
   dliYesterday: 0,
   lightLoadH: 0,
+  dryAirStress: 0,
+  humidAirStress: 0,
   biomassDayStartG: 5,
   gainYesterdayG: null,
   stageChangedAtS: null,

@@ -6,7 +6,7 @@ import { formatRemaining, watchDials, watchGoal } from '../src/game/watchModel';
 const plant = (id: number, over: Partial<PlantState> = {}): PlantState => ({
   id, position: id - 1, ageDays: 14, stage: 'seedling', biomassG: 8, leafCount: 7, leafAreaCm2: 50, rootLengthCm: 6,
   hydration: 1, waterStress: 0, lightStress: 0, nutrientStress: 0, rootHealth: 1, damage: 0, health: 100,
-  rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0.1, ppfd: 300, dliToday: 5, dliYesterday: 12, lightLoadH: 4, ...over,
+  rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0.1, ppfd: 300, dliToday: 5, dliYesterday: 12, lightLoadH: 4, dryAirStress: 0, humidAirStress: 0, ...over,
 } as PlantState);
 
 const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', description: '', targetG: 30, startBiomassG: 15, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'] };
@@ -60,6 +60,16 @@ describe('helperMessage priority', () => {
     expect(helperMessage(off).text).not.toContain('เปิดไฟมา');
   });
 
+  it('helper uses VPD: dry → turn on mist, humid while misting → turn it off (P33)', () => {
+    const L3: LevelInfo = { id: 'L3', title: 'คลื่นความร้อน', description: '', targetG: 60, startBiomassG: 30, timeLimitDays: 10, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'] };
+    expect(helperMessage(snap({ level: L3 }, { vpdKPa: 2.0, rhPct: 40 })).text).toContain('เปิด 🌫️');
+    const misting = snap({ level: L3, commands: { ...snap().commands, humidifier: true } }, { vpdKPa: 0.3, rhPct: 92 });
+    expect(helperMessage(misting).text).toContain('ปิด 🌫️');
+    expect(helperMessage(snap({ level: L3 }, { vpdKPa: 1.2, rhPct: 50 })).text).not.toContain('🌫️');
+    // ด่านที่หมอกล็อก: บอกว่าผู้ช่วยดูแล
+    expect(helperMessage(snap({}, { vpdKPa: 2.0, rhPct: 40 })).text).toContain('ผู้ช่วยฟาร์ม');
+  });
+
   it('overflow comes right after outage/leak and shows litres and penalty (P29)', () => {
     const base = snap();
     const over = { ...base, tank: { ...base.tank, overflowFlowLpm: 2 }, game: { ...base.game, overflowL: 3.4, overflowPenalty: 34 }, challenges: [{ id: 1, kind: 'heatWave' as const, title: '🔥 คลื่นความร้อน', status: 'warned' as const, startS: 9e9, endS: 9e9, repaired: false }] };
@@ -108,7 +118,7 @@ describe('level watch HUD (P31)', () => {
   it('picks dials from the devices the level unlocks', () => {
     expect(watchDials(snap({ level: L1 })).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad']);
     expect(watchDials(snap()).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad', 'ec']);
-    expect(watchDials(snap({ level: L4 })).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad', 'ec', 'temp', 'rh', 'ph']);
+    expect(watchDials(snap({ level: L4 })).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad', 'ec', 'temp', 'air', 'ph']);
     expect(watchDials(snap({ level: null }))).toEqual([]);
   });
 
@@ -128,6 +138,14 @@ describe('level watch HUD (P31)', () => {
     const base = snap();
     const tired = { ...base, plants: [{ ...base.plants[0]!, lightLoadH: 17 }, { ...base.plants[1]!, lightLoadH: 30, damage: 1 }, base.plants[2]!] };
     expect(watchDials(tired).find((x) => x.key === 'lightLoad')).toMatchObject({ value: 17, status: 'warn' });
+  });
+
+  it('air dial explains VPD as dry / ok / humid with RH below (P33)', () => {
+    const air = (vpdKPa: number, rhPct: number) => watchDials(snap({ level: L4 }, { vpdKPa, rhPct })).find((x) => x.key === 'air')!;
+    expect(air(1.0, 65)).toMatchObject({ display: 'เหมาะสม', status: 'ok', rangeText: 'RH 65%' });
+    expect(air(2.0, 40)).toMatchObject({ display: 'แห้ง', status: 'warn' });
+    expect(air(2.6, 25)).toMatchObject({ display: 'แห้ง', status: 'alarm' });
+    expect(air(0.35, 92)).toMatchObject({ display: 'ชื้นจัด', status: 'warn' });
   });
 
   it('goal card shows smallest living plant, start weight and time left', () => {

@@ -7,13 +7,16 @@ import type { GrowthStage, PlantState } from './types';
  */
 
 export type PlantMood = 'happy' | 'ok' | 'worried' | 'sick' | 'dead';
-export type PlantCause = 'water' | 'root' | 'light' | 'ph' | 'nutrient' | 'dark';
+export type PlantCause = 'water' | 'root' | 'dryAir' | 'light' | 'ph' | 'nutrient' | 'humidAir' | 'dark';
+export type AirComfort = 'dry' | 'ok' | 'humid';
 
 export const MOOD_EMOJI: Record<PlantMood, string> = { happy: '😄', ok: '🙂', worried: '😟', sick: '😵', dead: '💀' };
 
 export const CAUSE_INFO: Record<PlantCause, { icon: string; label: string }> = {
   water: { icon: '💧', label: 'ขาดน้ำ' },
   root: { icon: '🫧', label: 'รากหายใจไม่ออก' },
+  dryAir: { icon: '🏜️', label: 'อากาศแห้ง (VPD สูง) โตช้า' },
+  humidAir: { icon: '💦', label: 'อากาศชื้นจัด (VPD ต่ำ) ลำเลียงธาตุอาหารได้น้อย' },
   light: { icon: '🔥', label: 'แสงมาก/เปิดไฟนานเกิน' },
   ph: { icon: '⚗️', label: 'pH ไม่เหมาะ ดูดปุ๋ยไม่ได้' },
   nutrient: { icon: '🧪', label: 'ปุ๋ยไม่พอดี (EC)' },
@@ -30,6 +33,14 @@ export const STAGE_CELEBRATION: Record<GrowthStage, string> = {
 export const LIGHT_LOAD_WARN_H = 16;
 /** ชั่วโมงแสงสะสมที่เริ่มเกิด Photoperiod stress — ตรงกับ cfg.light.photoperiodMaxH ค่าเริ่ม (P30/P31) */
 export const LIGHT_LOAD_STRESS_H = 18;
+/** VPD ที่ถือว่าแห้ง / ชื้นจัด (kPa) — ตรงกับ cfg.airStress ค่าเริ่ม (P33) */
+export const AIR_DRY_VPD = 1.7;
+export const AIR_HUMID_VPD = 0.5;
+export const AIR_COMFORT_LABEL: Record<AirComfort, string> = { dry: 'แห้ง', ok: 'เหมาะสม', humid: 'ชื้นจัด' };
+
+/** VPD → คำที่ผู้เล่นเข้าใจ (P33) */
+export const airComfort = (vpdKPa: number): AirComfort => (vpdKPa > AIR_DRY_VPD ? 'dry' : vpdKPa < AIR_HUMID_VPD ? 'humid' : 'ok');
+
 /** Stress ขั้นต่ำที่นับเป็นสาเหตุ */
 export const CAUSE_STRESS_MIN = 0.25;
 /** PPFD ที่ต้นต่ำกว่านี้ตอนกลางวัน = มืด */
@@ -54,17 +65,20 @@ export function plantMood(p: Pick<PlantState, 'health' | 'damage'>, dead = false
   return 'sick';
 }
 
-/** สาเหตุหลักของต้นที่ยังไม่ตาย: Stress สูงสุด ≥ เกณฑ์ (ค่าเท่ากันเรียง น้ำ → ราก → แสง → ปุ๋ย/pH), มิฉะนั้นมืด หรือไม่มี */
+/** สาเหตุหลักของต้นที่ยังไม่ตาย: Stress สูงสุด ≥ เกณฑ์ (ค่าเท่ากันเรียง น้ำ → ราก → อากาศแห้ง → แสง → ปุ๋ย/pH → ชื้นจัด), มิฉะนั้นมืด หรือไม่มี */
 export function plantCause(
-  p: Pick<PlantState, 'waterStress' | 'rootHealth' | 'lightStress' | 'nutrientStress' | 'ppfd' | 'damage'>,
+  p: Pick<PlantState, 'waterStress' | 'rootHealth' | 'lightStress' | 'nutrientStress' | 'ppfd' | 'damage'> &
+    Partial<Pick<PlantState, 'dryAirStress' | 'humidAirStress'>>,
   env: { ph: number; minuteOfDay: number },
 ): PlantCause | null {
   if (p.damage >= 1) return null;
   const candidates: [PlantCause, number][] = [
     ['water', p.waterStress],
     ['root', 1 - p.rootHealth],
+    ['dryAir', p.dryAirStress ?? 0],
     ['light', p.lightStress],
     [sensorStatus('ph', env.ph) === 'ok' ? 'nutrient' : 'ph', p.nutrientStress],
+    ['humidAir', p.humidAirStress ?? 0],
   ];
   let best: [PlantCause, number] | null = null;
   for (const c of candidates) if (c[1] >= CAUSE_STRESS_MIN && (!best || c[1] > best[1])) best = c;

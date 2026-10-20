@@ -133,3 +133,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - ผู้ใช้สั่งปรับเกมให้เห็น "ปัญหา → อุปกรณ์ → ผลดี/ผลข้างเคียง" (แผน P32–P34 ใน PHASES); P32 เสร็จและ commit: ตาราง SPEC § 4.15 + Scenario tests 12 ข้อ ยืนยัน Model เดิมตรงครบ ไม่แก้ Model; tests 272/272
 - ถัดไป P33 VPD/Air stress สำหรับ Humidifier → P34 คู่มือ/ผู้ช่วย — รอผู้ใช้ตรวจรับ P32; `docs/GAME-GUIDE.md` ต้องถามผู้ใช้ก่อน commit (มีการจัดรูปของผู้ใช้ค้าง)
 
+### สถานะเพิ่มเติม 2026-10-20 — P33 Air (VPD) stress
+- เสร็จและ commit แล้ว: `dryAirStress`/`humidAirStress` (SPEC § 4.16) ลด Growth อย่างเดียว ฟื้นได้ ไม่หักซ้ำกับน้ำ/ธาตุอาหาร; UI แห้ง/เหมาะสม/ชื้นจัด; tests 282/282 + typecheck/build ผ่าน
+- ถัดไป P34 คู่มือ/ผู้ช่วย/ข้อมูลอุปกรณ์ — รอผู้ใช้ตรวจรับ P33; ต้องถามก่อน commit `docs/GAME-GUIDE.md` (มีการจัดรูปของผู้ใช้ค้าง)
+

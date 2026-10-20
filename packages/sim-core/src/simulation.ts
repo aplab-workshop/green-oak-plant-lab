@@ -56,6 +56,8 @@ interface PlantFlags {
   light: boolean;
   nutrient: boolean;
   root: boolean;
+  dryAir: boolean;
+  humidAir: boolean;
   stage: PlantState['stage'];
 }
 
@@ -141,7 +143,7 @@ export class Simulation {
       const variation = 1 + initialBiomassSpread * (2 * growthRng.next() - 1);
       return createPlant(i + 1, i, initialBiomassG * variation, this._simTimeS, cfg);
     });
-    this.flags = this._plants.map((p) => ({ dead: false, stressed: false, wilting: false, damageLevel: 0, light: false, nutrient: false, root: false, stage: p.stage }));
+    this.flags = this._plants.map((p) => ({ dead: false, stressed: false, wilting: false, damageLevel: 0, light: false, nutrient: false, root: false, dryAir: false, humidAir: false, stage: p.stage }));
     this.care = new CareGame(this._plants, cfg, this.round.mission);
     this.rootsExposed = false;
     this.overflowing = false;
@@ -355,6 +357,7 @@ export class Simulation {
       f.wilting = wilting;
       for (const [key, stress, label] of [
         ['light', p.lightStress, 'Light'], ['nutrient', p.nutrientStress, 'Nutrient'], ['root', 1 - p.rootHealth, 'Root'],
+        ['dryAir', p.dryAirStress, 'Dry air'], ['humidAir', p.humidAirStress, 'Humid air'],
       ] as const) {
         if (!f[key] && stress >= cfg.events.stressOn) {
           f[key] = true;

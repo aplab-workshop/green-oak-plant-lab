@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isCelebrating, isDaytime, isPlantDead, plantCause, plantMood, showGainBadge } from '../src';
+import { airComfort, isCelebrating, isDaytime, isPlantDead, plantCause, plantMood, showGainBadge } from '../src';
 
 const calm = { waterStress: 0, rootHealth: 1, lightStress: 0, nutrientStress: 0, ppfd: 300, damage: 0 };
 const day = { ph: 6.0, minuteOfDay: 600 };
@@ -71,3 +71,21 @@ describe('isPlantDead', () => {
     expect(isPlantDead({ id: 1, damage: 0.99 })).toBe(false);
   });
 });
+
+describe('air comfort and air causes (P33)', () => {
+  it('maps VPD to dry / ok / humid', () => {
+    expect(airComfort(1.8)).toBe('dry');
+    expect(airComfort(1.7)).toBe('ok');
+    expect(airComfort(1.0)).toBe('ok');
+    expect(airComfort(0.5)).toBe('ok');
+    expect(airComfort(0.4)).toBe('humid');
+  });
+  it('dry air sits after root, humid air after nutrient in tie order', () => {
+    expect(plantCause({ ...calm, dryAirStress: 0.4 }, day)).toBe('dryAir');
+    expect(plantCause({ ...calm, humidAirStress: 0.4 }, day)).toBe('humidAir');
+    expect(plantCause({ ...calm, rootHealth: 0.6, dryAirStress: 0.4 }, day)).toBe('root');
+    expect(plantCause({ ...calm, dryAirStress: 0.4, lightStress: 0.4 }, day)).toBe('dryAir');
+    expect(plantCause({ ...calm, nutrientStress: 0.4, humidAirStress: 0.4 }, day)).toBe('nutrient');
+  });
+});
+
