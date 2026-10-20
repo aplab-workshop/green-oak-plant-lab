@@ -13,6 +13,7 @@ export interface SimEvent {
     | `plant.${'light' | 'nutrient' | 'root'}_stress_cleared`
     | 'plant.wilting'
     | 'plant.damage'
+    | 'plant.stage'
     | 'tank.roots_exposed'
     | 'tank.roots_covered'
     | 'tank.overflow'

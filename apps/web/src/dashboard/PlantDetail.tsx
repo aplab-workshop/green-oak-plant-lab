@@ -1,5 +1,5 @@
 import { Sprout } from 'lucide-react';
-import type { PlantState } from '@gol/shared';
+import { CAUSE_INFO, MOOD_EMOJI, plantCause, plantMood, type PlantState } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { fmt, pct } from '../lib/format';
 import { healthColor } from '../scene/plantVisuals';
@@ -66,6 +66,9 @@ export function PlantDetail() {
   const selected = useLabStore((s) => s.selectedPlantId);
   const p = plants?.find((x) => x.id === selected) ?? plants?.[0];
   const dead = useLabStore((s) => p ? s.snapshot?.game?.deadPlantIds.includes(p.id) : false);
+  const ph = useLabStore((s) => s.snapshot?.sensors.ph);
+  const minuteOfDay = useLabStore((s) => s.snapshot?.sim.minuteOfDay);
+  const cause = p && ph !== undefined && minuteOfDay !== undefined && !dead ? plantCause(p, { ph, minuteOfDay }) : null;
 
   return (
     <Panel title="Plant" icon={<Sprout className="h-3.5 w-3.5" />} right={<PlantSelector />}>
@@ -73,7 +76,7 @@ export function PlantDetail() {
         <div className="space-y-2 px-3 py-2">
           <div className="flex items-baseline justify-between">
             <div>
-              <div className="text-sm font-semibold text-slate-800">Plant {p.id}</div>
+              <div className="text-sm font-semibold text-slate-800">{MOOD_EMOJI[plantMood(p, !!dead)]} Plant {p.id}</div>
               <div className={`text-[11px] ${dead ? 'text-rose-600' : 'text-slate-500'}`}>{dead ? 'ตายแล้ว · เริ่มรอบใหม่เพื่อปลูกอีกครั้ง' : STAGE_LABEL[p.stage]}</div>
             </div>
             <div className="text-right">
@@ -84,6 +87,10 @@ export function PlantDetail() {
             </div>
           </div>
 
+          <div className={`rounded-md px-2 py-1 text-xs ${cause ? 'bg-amber-50 text-amber-900' : 'bg-emerald-50 text-emerald-800'}`}>
+            {dead ? '💀 ตายแล้ว' : cause ? `${CAUSE_INFO[cause].icon} ${CAUSE_INFO[cause].label}` : '✅ ไม่มีปัญหาเด่น'}
+            {p.gainYesterdayG !== null && <span className="float-right font-semibold">โตเมื่อวาน +{fmt(p.gainYesterdayG, 1)} g</span>}
+          </div>
           <Meter label="Hydration" value={p.hydration} color="#0ea5e9" hint="ปริมาณน้ำในต้น 100% = เต็มที่" />
           <Meter label="Water stress" value={p.waterStress} color="#f59e0b" hint="ความเครียดจากการขาดน้ำ ลดลงได้เมื่อได้น้ำกลับมา" />
           <Meter label="Light stress" value={p.lightStress} color="#eab308" hint="สะสมจากแสงเกินร่วมกับความร้อน/ขาดน้ำ; ลดแสงแล้วค่อยฟื้น" />

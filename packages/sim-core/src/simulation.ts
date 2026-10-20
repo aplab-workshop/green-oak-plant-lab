@@ -56,7 +56,10 @@ interface PlantFlags {
   light: boolean;
   nutrient: boolean;
   root: boolean;
+  stage: PlantState['stage'];
 }
+
+const STAGE_NAME: Record<PlantState['stage'], string> = { seedling: 'ต้นกล้า', vegetative: 'ใบอ่อน (กำลังโต)', harvest: 'พร้อมเก็บเกี่ยว' };
 
 /** จุดเริ่มของรอบตามด่าน (SPEC § 4.6) — ว่าง = Free Play ตาม Config */
 export interface RoundStart {
@@ -138,7 +141,7 @@ export class Simulation {
       const variation = 1 + initialBiomassSpread * (2 * growthRng.next() - 1);
       return createPlant(i + 1, i, initialBiomassG * variation, this._simTimeS, cfg);
     });
-    this.flags = this._plants.map(() => ({ dead: false, stressed: false, wilting: false, damageLevel: 0, light: false, nutrient: false, root: false }));
+    this.flags = this._plants.map((p) => ({ dead: false, stressed: false, wilting: false, damageLevel: 0, light: false, nutrient: false, root: false, stage: p.stage }));
     this.care = new CareGame(this._plants, cfg, this.round.mission);
     this.rootsExposed = false;
     this.overflowing = false;
@@ -324,6 +327,10 @@ export class Simulation {
     this._plants.forEach((p, i) => {
       const f = this.flags[i]!;
       const name = `Plant ${p.id}`;
+      if (p.stage !== f.stage) {
+        f.stage = p.stage;
+        this.emit({ kind: 'plant.stage', severity: 'info', plantId: p.id, message: `${name}: เข้าสู่ระยะ ${STAGE_NAME[p.stage]}` });
+      }
       if (p.damage >= 1 && !f.dead) {
         f.dead = true;
         this.emit({ kind: 'plant.died', severity: 'critical', plantId: p.id, message: `${name}: ตายแล้ว (Damage 100%)` });

@@ -29,6 +29,9 @@ const plant = (over: Partial<PlantState> = {}): PlantState => ({
   ppfd: 0,
   dliToday: 0,
   dliYesterday: 0,
+  biomassDayStartG: 5,
+  gainYesterdayG: null,
+  stageChangedAtS: null,
   ...over,
 });
 
@@ -81,6 +84,27 @@ describe('plantVisuals', () => {
     expect(values.map((v) => v.curl)).toEqual([0, 0.5, 1, 0.2, 0]);
     expect(values.every((v) => v.droop === 0)).toBe(true);
     expect(plantVisuals(plant({ ppfd: 2000 }))).toEqual(plantVisuals(plant()));
+  });
+});
+
+describe('plantVisuals P25 colours', () => {
+  it('each stress kind tints leaves differently', () => {
+    const colours = [
+      leafColor(0, 0),
+      leafColor(0.8, 0),
+      leafColor(0, 0, 0.8),
+      leafColor(0, 0, 0, 0.8),
+      leafColor(0, 0.5),
+    ];
+    expect(new Set(colours).size).toBe(colours.length);
+  });
+
+  it('dead plant is dark brown, fully drooped and flagged to fall over', () => {
+    const v = plantVisuals(plant({ damage: 1, health: 0 }));
+    expect(v.dead).toBe(true);
+    expect(v.droop).toBe(1);
+    expect(v.leafColor).toBe(leafColor(0, 1));
+    expect(plantVisuals(plant()).dead).toBe(false);
   });
 });
 

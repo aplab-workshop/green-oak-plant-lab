@@ -2,6 +2,7 @@ import { Component, Suspense, lazy, useState, type ReactNode } from 'react';
 import { TankCrossSection } from '../dashboard/TankCrossSection';
 import { DeviceInfo } from './DeviceInfo';
 import { SceneToolbar } from './SceneToolbar';
+import { PlantBadges } from './PlantBadge';
 import { useSceneStore } from './sceneStore';
 import { useLabStore } from '../store/labStore';
 
@@ -46,6 +47,7 @@ export function PlantView() {
           <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-400">กำลังโหลด 3D…</div>}>
             <Scene3D />
           </Suspense>
+          <PlantBadges />
           <DeviceInfo />
           <p className="pointer-events-none absolute bottom-2 left-2 rounded bg-white/80 px-2 py-0.5 text-[10px] text-slate-500">
             ลากเพื่อหมุน · Scroll เพื่อ Zoom · คลิกขวาลากเพื่อ Pan · คลิกต้นผักหรืออุปกรณ์เพื่อดูข้อมูล · ดับเบิลคลิกต้นผักเพื่อซูม

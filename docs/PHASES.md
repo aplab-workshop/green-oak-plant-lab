@@ -185,7 +185,7 @@ tags: [green-oak, roadmap]
 
 - ทุก Phase: ทำให้เกณฑ์ผ่านครบ → `npm test` + `npm run typecheck` → อัปเดต Checklist/AC/Implementation Notes ตามจริง → commit `phase(Px): ...` → หยุดให้ผู้ใช้ตรวจ
 - Unit tests ของแต่ละกลไกทำใน Phase นั้น ไม่เลื่อนไปรวมท้าย Milestone
-- P8–P15 และส่วนต่อ P16–P24b เสร็จ; ถัดไป P25 Plant Feedback; **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
+- P8–P15 และส่วนต่อ P16–P25 เสร็จ (Garden Game v2 ครบ P21–P25); **หยุดให้ผู้ใช้ตรวจ Layout/อุปกรณ์ และ Dashboard/ระบบเกม** ก่อนปรับรอบถัดไป; tag `m2` หลังผู้ใช้ตรวจรับเท่านั้น; ยังไม่เริ่ม M3
 
 ---
 
@@ -302,8 +302,14 @@ tags: [green-oak, roadmap]
 - **ผลตรวจ:** AC-40 ผ่าน; tests 236/236, typecheck และ build ผ่าน; Browser จอกว้าง: Layout เดิม + ข้อความผู้ช่วยห่าง Dock 22 px, การ์ดเลือกด่านเปิด/เลือกแล้วปิดเอง → Briefing เด้ง, Free Play ไม่มีข้อความผู้ช่วย; มือถือ 375×812: ข้อความผู้ช่วยห่าง Dock 8 px (เดิมทับ 2 px แก้แล้ว); ไม่มี Server error
 - **ยังไม่ได้ตรวจใน Browser:** หน้าผ่านด่านกับข้อมูลจริง (ต้องเล่นจนชนะ)
 
-### P25 — Plant Feedback
-- [ ] Mood + ไอคอนสาเหตุต่อต้น (กฎใน shared + test), "+g วันนี้", ฉลองเปลี่ยนระยะ, เหี่ยว/เหลือง/ตายชัดขึ้น; ภาพตาม State จาก Server → commit `phase(P25): ...`
+### P25 — Plant Feedback ✅
+- [x] ผู้ใช้ตรวจรับ P24b และสั่งเริ่ม P25 (2026-10-20); SPEC § 4.10 + AC-41 ก่อน
+- [x] sim-core: `PlantState` เพิ่ม `biomassDayStartG`, `gainYesterdayG` (อัปเดตตอนเที่ยงคืนจำลอง), `stageChangedAtS` + Event `plant.stage`; ไม่เปลี่ยนสมการพืช
+- [x] shared `plantFeedback.ts`: `plantMood`, `plantCause` (💧/🫧/🔥/⚗️/🧪/🌑), `isDaytime` (ย้ายจาก web), `showGainBadge`, `isCelebrating` + Unit tests
+- [x] ฉาก 3D: ป้ายเหนือแต่ละต้น (Mood + สาเหตุ, แถบ Damage, "+x.x g" ช่วง 00:00–03:00, "🎉 ใบอ่อน!/พร้อมเก็บ!" + วงแหวนทอง 3 ชม.จำลอง); สีใบแยกตาม Stress (น้ำ/ปุ๋ย-pH/แสง/Damage); ต้นตายน้ำตาลเข้ม ใบตก เอนล้ม; แผงต้นผักแสดง Mood/สาเหตุ/โตเมื่อวาน
+- **ผลตรวจ:** AC-41 ผ่าน; tests 247/247 (35 files), typecheck และ build ผ่าน; Browser (3600x): ป้ายครบ 6 ต้น, กลางวันไฟปิด → 🌑, เที่ยงคืนขึ้น "+0.8…+1.7 g" และหายหลัง 03:00, ต้นที่ 5 ถึง 15 g → "🎉 ใบอ่อน!" + วงแหวนทอง, โหลดหน้าใหม่ไม่มี Console error
+- **แก้ระหว่างทาง:** ป้ายแบบ drei `Html` สร้าง React root แยกต่อป้าย → ป้ายต้นที่ 1 ว่างและมี Error "synchronously unmount a root" จึงเปลี่ยนเป็น DOM ชั้นเดียวเหนือ Canvas ที่ Lettuce เขียนตำแหน่งจอทุกเฟรม; ข้อความ "+g เมื่อวาน" ยาวทับกันบนจอแคบ จึงย่อเป็น "+x.x g"
+- **ยังไม่ได้ตรวจใน Browser:** ภาพต้นตาย (เอนล้ม/น้ำตาลเข้ม) และสีใบตาม Stress แต่ละชนิด — ตรวจด้วย Unit test ของ `plantVisuals`; ภาพตัดขวาง 2D ยังไม่มีป้าย
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 

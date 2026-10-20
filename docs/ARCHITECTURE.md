@@ -748,3 +748,11 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `game/HelperBubble.tsx` เรียก `helperMessage()` (Pure, มีเทสต์) แสดงเหนือ `.garden-dock` (`bottom: 112px`, จอ ≤ 900 px `106px`); ไม่แสดงใน Free Play และตอน Game Over
 - `store/api.sendCommand`: เมื่อ HTTP ตอบ OK แต่ Snapshot เก่ากว่าที่ WebSocket ส่งมาแล้ว ถือว่าสำเร็จ (เดิมคืน false ทำให้ UI ที่รอผลค้าง)
 
+### 11.24 Implementation Notes (P25 — Plant Feedback)
+
+- **sim-core `stepPlant`:** ตอนข้ามเที่ยงคืน `gainYesterdayG = biomass − biomassDayStartG` แล้วตั้ง `biomassDayStartG` ใหม่ (จุดเดียวกับ DLI rollover); `stageChangedAtS` = เวลาจำลองหลัง Step ที่ `morphology().stage` เปลี่ยน; `Simulation.detectEvents` เก็บ `stage` ใน PlantFlags แล้ว emit `plant.stage`
+- **shared `plantFeedback.ts`:** อ่าน State อย่างเดียว; สาเหตุ = Stress สูงสุด ≥ `CAUSE_STRESS_MIN` (0.25) ลำดับ น้ำ → ราก → แสง → ปุ๋ย/pH (แยก pH ด้วยช่วง ok ของ `SENSOR_RANGES`), ไม่มีแล้วกลางวัน PPFD < 50 = มืด; ป้าย "+g" และฉลองผูกกับ `minuteOfDay`/`simTimeS` (Pause = ค้าง)
+- **ป้ายในฉาก (`scene/PlantBadge.tsx`):** `PlantBadges` เป็น DOM ชั้นเดียวใน `PlantView` เหนือ Canvas; แต่ละต้นลงทะเบียน Element ใน `badgeElements`; `Lettuce` คำนวณตำแหน่งจากกลุ่มเหนือทรงพุ่ม (สูงตาม scale/droop) แล้ว `project(camera)` เขียน `style.transform` ทุกเฟรม — ไม่ใช้ drei `Html` (สร้าง React root ต่อป้าย ทำให้ Error unmount/ป้ายว่างใน React 19 dev)
+- Selector ของป้ายคืนสตริง `mood|cause|gain|stage|damage` (primitive) ตามกฎ Zustand; `CelebrationRing` เป็น Mesh วงแหวนทองรอบกระถาง
+- **`plantVisuals`:** `leafColor(water, damage, nutrient, light)` ผสมทีละ Stress (เหลืองเขียว/เหลืองซีด/ซีดขาว/น้ำตาล), Damage ≥ 1 = น้ำตาลเข้ม; `dead` ทำให้ droop = 1 และ Lettuce เอนกลุ่มใบ 0.55 rad (damp)
+

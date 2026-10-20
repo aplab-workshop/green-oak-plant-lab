@@ -166,3 +166,15 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
 @media (max-width: 900px) {
   .helper-bubble { bottom: 106px; font-size: 12px; }
 }
+
+/* ===== P25: Plant feedback ป้ายเหนือผัก ===== */
+.plant-badge-layer { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
+.plant-badge-anchor { position: absolute; top: 0; left: 0; will-change: transform; }
+.plant-badge { display: flex; flex-direction: column; align-items: center; gap: 2px; transform: translate(-50%, -100%); }
+.plant-badge-face { display: flex; align-items: center; gap: 1px; border-radius: 999px; background: #ffffffe0; padding: 1px 5px; font-size: 15px; line-height: 1.2; box-shadow: 0 2px 8px #0f172a26; }
+.plant-badge-cause { font-size: 12px; }
+.plant-badge-damage { width: 30px; height: 4px; overflow: hidden; border-radius: 999px; background: #ffffffcc; }
+.plant-badge-damage > div { height: 100%; background: #dc2626; }
+.plant-badge-gain { border-radius: 999px; background: #059669; padding: 1px 6px; font-size: 10px; font-weight: 700; color: white; white-space: nowrap; }
+.plant-badge-party { border-radius: 999px; background: #f59e0b; padding: 1px 7px; font-size: 11px; font-weight: 700; color: #451a03; white-space: nowrap; }
+

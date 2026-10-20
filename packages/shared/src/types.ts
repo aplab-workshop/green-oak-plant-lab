@@ -75,4 +75,11 @@ export interface PlantState {
   ppfd: number;
   dliToday: number;
   dliYesterday: number;
+  // --- Plant feedback (P25) ---
+  /** Biomass ตอนเที่ยงคืนจำลองล่าสุด (g) */
+  biomassDayStartG: number;
+  /** Biomass ที่เพิ่มในวันจำลองที่แล้ว (g); null จนกว่าจะผ่านเที่ยงคืนแรกของรอบ */
+  gainYesterdayG: number | null;
+  /** เวลาจำลองที่เปลี่ยนระยะล่าสุด (s); null ถ้ายังไม่เคยเปลี่ยน */
+  stageChangedAtS: number | null;
 }

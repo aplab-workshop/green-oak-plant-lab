@@ -1,11 +1,9 @@
-import type { LabSnapshot, PlayerDevice } from '@gol/shared';
+import { isDaytime, type LabSnapshot, type PlayerDevice } from '@gol/shared';
 
 /**
  * ตรรกะหน้าเกม (SPEC § 4.9) — Pure function จาก Snapshot/History ของ Server ไม่คำนวณพืชเอง
  */
 
-/** กลางวันตามเวลาจำลอง (06:00–22:00 เหมือนสูตรดูแล) */
-export const isDaytime = (minuteOfDay: number): boolean => minuteOfDay >= 360 && minuteOfDay < 1320;
 
 /** ผู้เล่นคุมอุปกรณ์นี้ได้ในด่านปัจจุบัน (Free Play = ได้ทุกอย่าง) */
 export const canControl = (s: LabSnapshot, d: PlayerDevice): boolean => !s.level || s.level.playerDevices.includes(d);

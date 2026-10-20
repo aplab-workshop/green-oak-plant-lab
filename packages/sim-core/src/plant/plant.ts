@@ -59,6 +59,9 @@ export function createPlant(id: number, position: number, biomassG: number, simT
     ppfd: 0,
     dliToday: 0,
     dliYesterday: 0,
+    biomassDayStartG: biomassG,
+    gainYesterdayG: null,
+    stageChangedAtS: null,
   };
 }
 
@@ -144,5 +147,8 @@ export function stepPlant(
     ppfd: req.ppfd,
     dliToday: crossesMidnight ? 0 : p.dliToday + inc,
     dliYesterday: crossesMidnight ? p.dliToday + inc : p.dliYesterday,
+    biomassDayStartG: crossesMidnight ? biomassG : p.biomassDayStartG,
+    gainYesterdayG: crossesMidnight ? biomassG - p.biomassDayStartG : p.gainYesterdayG,
+    stageChangedAtS: m.stage !== p.stage ? e.simTimeS + dtS : p.stageChangedAtS,
   };
 }

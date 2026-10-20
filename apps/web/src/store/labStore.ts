@@ -3,7 +3,7 @@ import type { EventEntry, HistorySample, LabSnapshot, ScenarioInfo } from '@gol/
 
 const MAX_EVENTS = 1000;
 
-interface LabState {
+export interface LabState {
   labIds: string[];
   labId: string | null;
   snapshot: LabSnapshot | null;

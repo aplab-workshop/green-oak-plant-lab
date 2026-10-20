@@ -101,3 +101,9 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - อย่าแยก Layout โหมดด่านอีกโดยไม่ถามผู้ใช้; ถัดไป P25 Plant Feedback — รอผู้ใช้ตรวจรับ P24b ก่อน; ยังไม่ tag m2
 - ตรวจ UI ใน Browser อย่าเลือกด่านใน Lab ที่ผู้ใช้เล่นค้าง (selectLevel รีเซ็ตรอบ); dev server ใช้ ?lab= เลือก Lab
 
+### สถานะเพิ่มเติม 2026-10-20 — P25 Plant Feedback
+- เสร็จและ commit แล้ว: Mood/สาเหตุ/"+g"/ฉลองเปลี่ยนระยะเหนือผัก (SPEC § 4.10), กฎใน `packages/shared/src/plantFeedback.ts`, ข้อมูลใหม่ใน `PlantState`; tests 247/247 + typecheck/build ผ่าน
+- ป้าย 3D ใช้ DOM overlay (`scene/PlantBadge.tsx`) — **อย่าใช้ drei `Html` กับป้ายจำนวนมาก** (React root ต่อป้ายทำให้ Error ใน React 19 dev)
+- Dev server มี Lab เดียว (lab01) — ทดสอบแล้วรอบ L1 ของ lab01 เดินไปถึงวัน 18; Browser pane ต้องแสดงอยู่ (ซ่อนแล้ว rAF หยุด ป้ายไม่อัปเดต)
+- Garden Game v2 (P21–P25) ครบ — รอผู้ใช้ตรวจรับ P25 และตัดสินใจ tag `m2`; ยังไม่เริ่ม M3
+

@@ -9,9 +9,12 @@ import { createLeafGeometry, createLeafMaterial } from './leafGeometry';
 import { hash01, leafLayout } from './leafLayout';
 import { POT, cm } from './layout';
 import { useSceneStore } from './sceneStore';
+import { CelebrationRing, badgeElements } from './PlantBadge';
 
 const MAX_LEAVES = 32;
 const LEAF_BASE_Y = POT.topY + 0.004;
+/** ต้นที่ตายเอนล้ม (rad) */
+const DEAD_TILT = 0.55;
 
 interface Props {
   plantId: number;
@@ -26,6 +29,8 @@ interface Smoothed {
   scale: number;
   curl: number;
   rootM: number;
+  /** มุมเอนล้มของต้นที่ตาย (rad) */
+  tilt: number;
   color: Color;
 }
 
@@ -123,12 +128,15 @@ export function Lettuce({ plantId, x, z }: Props) {
   useEffect(() => () => material.dispose(), [material]);
 
   const mesh = useRef<InstancedMesh>(null);
+  const leaves = useRef<Group>(null);
+  const badge = useRef<Group>(null);
+  const badgePos = useMemo(() => new Vector3(), []);
   const dummy = useMemo(() => new Object3D(), []);
   const target = useMemo(() => new Color(), []);
-  const smoothed = useRef<Smoothed>({ droop: 0, wilt: 0, scale: 1, curl: 0, rootM: 0.05, color: new Color('#2e9e52') });
+  const smoothed = useRef<Smoothed>({ droop: 0, wilt: 0, scale: 1, curl: 0, rootM: 0.05, tilt: 0, color: new Color('#2e9e52') });
   const initialised = useRef(false);
 
-  useFrame((_, dt) => {
+  useFrame(({ camera, size }, dt) => {
     const plant = useLabStore.getState().snapshot?.plants.find((p) => p.id === plantId);
     const m = mesh.current;
     if (!plant || !m) return;
@@ -136,7 +144,7 @@ export function Lettuce({ plantId, x, z }: Props) {
     const s = smoothed.current;
     target.set(v.leafColor);
     if (!initialised.current) {
-      Object.assign(s, { droop: v.droop, wilt: v.wilted ? 1 : 0, scale: v.scale, curl: v.curl, rootM: cm(v.rootLengthCm) });
+      Object.assign(s, { droop: v.droop, wilt: v.wilted ? 1 : 0, scale: v.scale, curl: v.curl, rootM: cm(v.rootLengthCm), tilt: v.dead ? DEAD_TILT : 0 });
       s.color.copy(target);
       initialised.current = true;
     }
@@ -147,6 +155,19 @@ export function Lettuce({ plantId, x, z }: Props) {
     s.curl = MathUtils.damp(s.curl, v.curl, 2, k);
     s.rootM = MathUtils.damp(s.rootM, cm(v.rootLengthCm), 2, k);
     s.color.lerp(target, 1 - Math.exp(-2.5 * k));
+    s.tilt = MathUtils.damp(s.tilt, v.dead ? DEAD_TILT : 0, 1.5, k);
+    if (leaves.current) leaves.current.rotation.z = s.tilt;
+    // ป้ายลอยเหนือทรงพุ่ม สูงตามขนาดต้น
+    if (badge.current) {
+      badge.current.position.y = POT.topY + 0.03 + 0.03 * s.scale * (1 - 0.5 * s.droop);
+      const el = badgeElements.get(plantId);
+      if (el) {
+        badge.current.getWorldPosition(badgePos).project(camera);
+        const visible = badgePos.z < 1 && Math.abs(badgePos.x) < 1.1 && Math.abs(badgePos.y) < 1.1;
+        el.style.display = visible ? '' : 'none';
+        if (visible) el.style.transform = `translate(${((badgePos.x + 1) / 2) * size.width}px, ${((1 - badgePos.y) / 2) * size.height}px)`;
+      }
+    }
 
     uniforms.uBend.value = 0.25 + 1.3 * s.droop;
     uniforms.uWilt.value = s.wilt;
@@ -175,6 +196,9 @@ export function Lettuce({ plantId, x, z }: Props) {
   return (
     <group position={[x, 0, z]}>
       <NetPot selected={selected} />
+      <CelebrationRing plantId={plantId} />
+      <group ref={badge} />
+      <group ref={leaves} position={[0, LEAF_BASE_Y, 0]}><group position={[0, -LEAF_BASE_Y, 0]}>
       <instancedMesh
         ref={mesh}
         args={[geometry, material, MAX_LEAVES]}
@@ -190,6 +214,7 @@ export function Lettuce({ plantId, x, z }: Props) {
         }}
         onPointerOut={() => setHovered(false)}
       />
+      </group></group>
       {showRoots && <Roots plantId={plantId} smoothed={smoothed} low={low} />}
     </group>
   );

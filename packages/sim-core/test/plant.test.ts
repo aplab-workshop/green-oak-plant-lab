@@ -184,6 +184,34 @@ describe('Growth baseline', () => {
     expect(sim.plants[0]!.dliYesterday).toBeGreaterThan(10);
   });
 
+  it('P25: records daily gain at midnight and stage changes with a plant.stage event (deterministic)', () => {
+    const fresh = new Simulation({ seed: 7 });
+    expect(fresh.plants[0]!.gainYesterdayG).toBeNull();
+    expect(fresh.plants[0]!.stageChangedAtS).toBeNull();
+    expect(fresh.plants[0]!.biomassDayStartG).toBe(fresh.plants[0]!.biomassG);
+
+    const a = new Simulation({ seed: 7 });
+    const b = new Simulation({ seed: 7 });
+    const { events } = run(a, 24 * 10, goodCare(80), 10);
+    run(b, 24 * 10, goodCare(80), 10);
+    expect(a.plants).toEqual(b.plants);
+
+    a.plants.forEach((p) => {
+      expect(p.gainYesterdayG).toBeGreaterThan(0);
+      expect(p.biomassDayStartG).toBeLessThanOrEqual(p.biomassG);
+    });
+    const changed = a.plants.filter((p) => p.stage !== 'seedling');
+    expect(changed.length).toBeGreaterThan(0);
+    for (const p of changed) {
+      const e = events.filter((x) => x.kind === 'plant.stage' && x.plantId === p.id).at(-1);
+      expect(e?.simTimeS).toBe(p.stageChangedAtS);
+    }
+    // ต้นที่ยังเป็นต้นกล้าไม่มี Event เปลี่ยนระยะ
+    for (const p of a.plants.filter((x) => x.stage === 'seedling')) {
+      expect(events.some((x) => x.kind === 'plant.stage' && x.plantId === p.id)).toBe(false);
+    }
+  });
+
   it('low light slows growth', () => {
     const bright = new Simulation({ seed: 7 });
     const dim = new Simulation({ seed: 7 });
