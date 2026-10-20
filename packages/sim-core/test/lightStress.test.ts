@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CONFIG, Simulation, hourOfDay, makeConfig, stepLightStress } from '../src';
-import { OFF } from './helpers';
+import { OFF, noSunConfig } from './helpers';
 import { plantFixture } from './plantFixture';
 
 describe('Light Stress / Low Light — P9', () => {
@@ -34,7 +34,7 @@ describe('Light Stress / Low Light — P9', () => {
   });
 
   it('AC-17: centre and corner exposures use their own PPFD in Simulation', () => {
-    const sim = new Simulation();
+    const sim = new Simulation({ cfg: noSunConfig() });
     for (let i = 0; i < 7200; i++) sim.step(1, { ...OFF, ledPct: 100 });
     expect(sim.plants[1]!.lightStress).toBeGreaterThan(sim.plants[0]!.lightStress);
     expect(sim.plants[0]!.lightStress).toBe(0); // 340 PPFD < 350

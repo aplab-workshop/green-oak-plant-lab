@@ -146,3 +146,8 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - เสร็จและ commit แล้ว: แถบ Growth 0–100 % สู่เก็บเกี่ยว + อัตราโต/คำ 4 ระดับ + ป้ายลอยตามชั่วโมงจำลอง (SPEC § 4.18); `harvestProgress`, `growthGPerH`, `growthEfficiency` จาก Server; tests 289/289
 - รอผู้ใช้ตรวจรับ P32–P35 และตัดสินใจ tag `m2` / เริ่ม M3
 
+### สถานะเพิ่มเติม 2026-10-20 — P36 แสงแดด
+- ผู้ใช้สั่งวางระบบด่านใหม่ (แผน P36–P37 ใน PHASES): P36 เสร็จและ commit — แดดทุกด่าน PPFD = แดด + LED (SPEC § 4.19), สูตรเติมไฟ ~300, Ladder Auto ปรับตาม D102; tests 293/293
+- เทสต์กลไกที่ต้องการ "LED ปิด = มืด" ให้ใช้ `noSunConfig()`/`flatRoomConfig()` จาก `packages/sim-core/test/helpers.ts`
+- ถัดไป P37 ด่าน 1 ใหม่ (Refill + LED, ที่เหลือปิดสนิท, เริ่มน้ำ 0 %, น้ำรั่วหยุดเอง) — รอผู้ใช้ตรวจรับ P36
+

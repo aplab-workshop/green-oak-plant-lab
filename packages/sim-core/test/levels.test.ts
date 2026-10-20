@@ -3,7 +3,7 @@ import type { ActuatorCommands } from '@gol/shared';
 import { CareGame, LEVELS, Simulation, createPlant, levelRound, makeConfig, type LevelDef } from '../src';
 
 /**
- * สูตรดูแลตาม GAME-GUIDE: LED 06–22 น., Refill <70→90%, Fan >25.5/<24.5 °C, Humidifier <55/>70%, A+B EC <1.0→1.2
+ * สูตรดูแลตาม GAME-GUIDE: LED 06–22 น. เติมให้ PPFD ~300 (P36 มีแดด), Refill <70→90%, Fan >25.5/<24.5 °C, Humidifier <55/>70%, A+B EC <1.0→1.2
  * + รับมือเหตุการณ์ (SPEC § 4.8): คลื่นความร้อน LED 40%, pH Down >6.6→6.3, ซ่อมถังทันทีที่รั่ว
  */
 function playGuide(level: LevelDef, ledPct: number, seed = 1) {
@@ -16,7 +16,9 @@ function playGuide(level: LevelDef, ledPct: number, seed = 1) {
       const r = sim.readSensors(false);
       const minute = (sim.simTimeS % 86_400) / 60;
       const heat = sim.challenges.some((c) => c.kind === 'heatWave' && c.status === 'active');
-      cmd.ledPct = minute >= 360 && minute < 1320 ? (heat ? Math.min(ledPct, 40) : ledPct) : 0;
+      // P36: เติม LED เท่าที่แดดขาดให้ PPFD กลางถัง ~300 (ทีละ 5 %), ไม่เกิน ledPct ที่กำหนด
+      const topUp = Math.min(ledPct, Math.max(0, Math.round((300 - sim.env.sunPpfd) / 4 / 5) * 5));
+      cmd.ledPct = minute >= 360 && minute < 1320 ? (heat ? Math.min(topUp, 40) : topUp) : 0;
       cmd.refillPump = r.waterLevelPct < 70 ? true : r.waterLevelPct >= 90 ? false : cmd.refillPump;
       cmd.fan = r.airTempC > 25.5 ? true : r.airTempC < 24.5 ? false : cmd.fan;
       cmd.humidifier = r.rhPct < 55 ? true : r.rhPct > 70 ? false : cmd.humidifier;

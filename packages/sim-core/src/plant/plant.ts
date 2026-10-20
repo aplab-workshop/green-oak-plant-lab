@@ -35,6 +35,8 @@ export interface PlantEnvironment {
   ph: number;
   /** Estimated Oxygen Status [0,1] ของถังก่อน Step */
   estimatedOxygen: number;
+  /** PPFD จากแดด (เท่ากันทุกตำแหน่ง) — P36; ไม่ระบุ = 0 */
+  sunPpfd?: number;
 }
 
 export function createPlant(id: number, position: number, biomassG: number, simTimeS: number, cfg: SimConfig): PlantState {
@@ -83,7 +85,7 @@ export interface PlantWaterRequest {
 
 export function plantWaterRequest(p: PlantState, e: PlantEnvironment, cfg: SimConfig): PlantWaterRequest {
   if (p.damage >= 1) return { demandLPerDay: 0, rootSubmerged: p.rootSubmerged, supplyRatio: 0, factor: 0, ppfd: 0 };
-  const ppfd = ppfdAt(e.ledPct, positionFactor(p.position, cfg), cfg);
+  const ppfd = ppfdAt(e.ledPct, positionFactor(p.position, cfg), cfg) + (e.sunPpfd ?? 0);
   const factor = transpirationFactor(e.vpdKPa, ppfd, cfg);
   const rootSubmerged = rootSubmergedFraction(e.waterHeightCm, p.rootLengthCm, cfg);
   return {

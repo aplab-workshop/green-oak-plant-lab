@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { CareGame } from '../src/careGame';
 import { createPlant, makeConfig, plantWaterRequest, Simulation, stepPlant } from '../src';
 import { plantFixture } from './plantFixture';
-import { OFF } from './helpers';
+import { OFF, noSunConfig } from './helpers';
 
 describe('Care score and permanent death — P17', () => {
   it('rewards sustained health and growth, penalizes deaths, and locks defeat', () => {
@@ -124,7 +124,7 @@ describe('Harvest progress and growth rate — P35', () => {
   });
 
   it('growthGPerH matches the biomass change and efficiency is ~1 under the care recipe at noon', () => {
-    const sim = new Simulation({ seed: 3 });
+    const sim = new Simulation({ seed: 3, cfg: noSunConfig() });
     const fan = (s: Simulation) => ({ ...OFF, ledPct: 80, fan: s.env.airTempC > 25 });
     for (let i = 0; i < 6 * 360; i++) sim.step(10, fan(sim));
     const before = sim.plants.map((p) => p.biomassG);
@@ -135,7 +135,7 @@ describe('Harvest progress and growth rate — P35', () => {
     });
     expect(sim.plants[1]!.growthEfficiency).toBeGreaterThan(0.8);
     expect(sim.plants[1]!.growthEfficiency).toBeLessThanOrEqual(sim.cfg.plant.lightFactorMax);
-    const dark = new Simulation({ seed: 3 });
+    const dark = new Simulation({ seed: 3, cfg: noSunConfig() });
     for (let i = 0; i < 360; i++) dark.step(10, OFF);
     expect(dark.plants.every((p) => p.growthGPerH === 0 && p.growthEfficiency === 0)).toBe(true);
   });

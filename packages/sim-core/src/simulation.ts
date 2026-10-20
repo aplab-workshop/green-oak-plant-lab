@@ -13,6 +13,7 @@ import {
 import { levelPct, waterHeightCm } from './environment/tank';
 import { createPlant, plantWaterRequest, stepPlant, type PlantEnvironment, type PlantState } from './plant/plant';
 import { rootSupplyRatio } from './plant/water';
+import { sunPpfd } from './environment/light';
 import { readSensors, readSimInfo } from './sensors';
 import { CareGame, type Mission } from './careGame';
 import { powerW } from './environment/power';
@@ -254,6 +255,7 @@ export class Simulation {
       ecMsCm: envEc(env),
       ph: env.ph,
       estimatedOxygen: env.estimatedOxygen,
+      sunPpfd: sunPpfd(this._simTimeS, cfg),
     };
 
     // 1) พืชขอน้ำตามความต้องการและรากที่แช่น้ำ
@@ -299,7 +301,7 @@ export class Simulation {
   }
 
   readSimInfo(): SimInfo {
-    return readSimInfo(this._simTimeS);
+    return { ...readSimInfo(this._simTimeS), sunPpfd: sunPpfd(this._simTimeS, this.cfg) };
   }
 
   /** ดึง Event ที่เกิดขึ้นตั้งแต่ครั้งก่อน */

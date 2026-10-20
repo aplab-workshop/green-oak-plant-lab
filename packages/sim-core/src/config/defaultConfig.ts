@@ -79,6 +79,17 @@ export interface SimConfig {
     /** Time constant อุณหภูมิน้ำ (h) */
     waterTempTauH: number;
   };
+  /** แสงแดดผ่านหลังคาโรงเรือน (P36) — PPFD ที่ต้น = แดด + LED */
+  sun: {
+    /** PPFD สูงสุดจากแดดที่ระดับยอดพืช (µmol/m²/s); 0 = ไม่มีแดด */
+    peakPpfd: number;
+    /** ชั่วโมงพระอาทิตย์ขึ้น / แสงสูงสุด / ตก (เวลาจำลอง 0–24) */
+    riseHour: number;
+    peakHour: number;
+    setHour: number;
+    /** ความร้อนจากแดดที่เพิ่มให้อากาศตอนแดดสูงสุด (°C) — พัดลมลดได้เหมือนความร้อน LED */
+    heatC: number;
+  };
   light: {
     /** PPFD ที่ยอดพืชเมื่อ LED 100% ตำแหน่งกลาง (µmol/m²/s) */
     ppfdMax: number;
@@ -314,6 +325,7 @@ export const DEFAULT_CONFIG: SimConfig = {
     rhMaxPct: 98,
     waterTempTauH: 6,
   },
+  sun: { peakPpfd: 300, riseHour: 6, peakHour: 13, setHour: 19, heatC: 2 },
   light: {
     ppfdMax: 400,
     // Net Pot 2 แถว × 3 คอลัมน์: คอลัมน์กลางได้แสงเต็ม มุมได้ 85%

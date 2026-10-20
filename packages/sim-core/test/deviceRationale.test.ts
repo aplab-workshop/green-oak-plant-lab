@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ActuatorCommands } from '@gol/shared';
-import { Simulation, hourOfDay, levelPct, makeConfig, type SimConfig } from '../src';
-import { OFF } from './helpers';
+import { Simulation, hourOfDay, levelPct, type SimConfig } from '../src';
+import { OFF, noSunConfig } from './helpers';
 
 /**
  * P32 / SPEC § 4.15 — เหตุผลของอุปกรณ์แต่ละตัว: ปัญหา → อุปกรณ์ → ผลดี → ผลข้างเคียง
@@ -24,10 +24,11 @@ const basic = (sim: Simulation, led = 80): Partial<ActuatorCommands> => ({
 const avg = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
 const biomass = (sim: Simulation) => avg(sim.plants.map((p) => p.biomassG));
 const ec = (sim: Simulation) => sim.readSensors(false).ecMsCm;
-const sim = (cfg?: SimConfig) => new Simulation({ seed: 5, ...(cfg ? { cfg } : {}) });
+// แยกผลของอุปกรณ์: ปิดแดด (P36) ให้ "LED ปิด = มืด" และไม่มีความร้อนจากแดดปน
+const sim = (cfg?: SimConfig) => new Simulation({ seed: 5, cfg: cfg ?? noSunConfig() });
 
 describe('Ventilation Fan (M100)', () => {
-  const cfg = makeConfig({ room: { tempMeanC: 23, tempAmplitudeC: 0 } });
+  const cfg = noSunConfig({ room: { tempMeanC: 23, tempAmplitudeC: 0 } });
 
   it('cools LED heat toward room temperature (never below) and so restores growth', () => {
     const hot = sim(cfg), fan = sim(cfg);
@@ -53,7 +54,7 @@ describe('Ventilation Fan (M100)', () => {
 });
 
 describe('Humidifier (M101)', () => {
-  const dry = makeConfig({ room: { tempMeanC: 24, tempAmplitudeC: 0, rhPct: 35 } });
+  const dry = noSunConfig({ room: { tempMeanC: 24, tempAmplitudeC: 0, rhPct: 35 } });
 
   it('raises RH in dry air and lowers the plants water demand', () => {
     const off = sim(dry), on = sim(dry);
@@ -67,7 +68,7 @@ describe('Humidifier (M101)', () => {
 
 describe('Water Refill Pump (M102)', () => {
   it('low water exposes roots → hydration drops and growth slows; refilling restores it', () => {
-    const cfg = makeConfig({ tank: { initialLevelPct: 45 } });
+    const cfg = noSunConfig({ tank: { initialLevelPct: 45 } });
     const dryTank = sim(cfg), refilled = sim(cfg);
     run(dryTank, 24, (s) => ({ ledPct: lightOn(s) }));
     run(refilled, 24, (s) => basic(s));
@@ -91,7 +92,7 @@ describe('Water Refill Pump (M102)', () => {
 
 describe('Nutrient Pump A+B (M103/M104)', () => {
   it('low EC causes nutrient stress; dosing A+B together back into range recovers it', () => {
-    const cfg = makeConfig({ nutrient: { initialEc: 0.3 } });
+    const cfg = noSunConfig({ nutrient: { initialEc: 0.3 } });
     const hungry = sim(cfg), fed = sim(cfg);
     run(hungry, 24, (s) => basic(s));
     run(fed, 24, (s) => { const dose = ec(s) < 1.2; return { ...basic(s), nutrientA: dose, nutrientB: dose }; });
@@ -102,9 +103,9 @@ describe('Nutrient Pump A+B (M103/M104)', () => {
   });
 
   it('extra nutrient inside the good range is no growth bonus; too much causes stress', () => {
-    const ok = sim(makeConfig({ nutrient: { initialEc: 1.2 } }));
-    const richer = sim(makeConfig({ nutrient: { initialEc: 1.5 } }));
-    const tooMuch = sim(makeConfig({ nutrient: { initialEc: 2.8 } }));
+    const ok = sim(noSunConfig({ nutrient: { initialEc: 1.2 } }));
+    const richer = sim(noSunConfig({ nutrient: { initialEc: 1.5 } }));
+    const tooMuch = sim(noSunConfig({ nutrient: { initialEc: 2.8 } }));
     for (const s of [ok, richer, tooMuch]) run(s, 24, (x) => basic(x));
     expect(biomass(richer)).toBeCloseTo(biomass(ok), 9);
     expect(avg(tooMuch.plants.map((p) => p.nutrientStress))).toBeGreaterThan(0.3);
@@ -126,7 +127,7 @@ describe('Air Pump (M105)', () => {
 });
 
 describe('pH Down Pump (M106)', () => {
-  const alkaline = makeConfig({ nutrient: { initialPh: 8.0 } });
+  const alkaline = noSunConfig({ nutrient: { initialPh: 8.0 } });
 
   it('high pH causes nutrient stress even with good EC; dosing pH Down into range recovers', () => {
     const high = sim(alkaline), fixed = sim(alkaline);
@@ -160,7 +161,7 @@ describe('Grow Light (D200)', () => {
   });
 
   it('strong light adds heat, water demand and light stress', () => {
-    const cfg = makeConfig({ room: { tempMeanC: 24, tempAmplitudeC: 0 } });
+    const cfg = noSunConfig({ room: { tempMeanC: 24, tempAmplitudeC: 0 } });
     const off = sim(cfg), full = sim(cfg);
     run(off, 4, () => ({ ledPct: 0 }));
     run(full, 4, () => ({ ledPct: 100 }));

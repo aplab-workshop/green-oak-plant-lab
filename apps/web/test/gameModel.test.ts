@@ -108,7 +108,10 @@ describe('helperMessage priority', () => {
   it('thirsty plant, light schedule, air pump and the all-good message', () => {
     const thirsty = snap({ plants: [plant(1), plant(2, { waterStress: 0.5 })] });
     expect(helperMessage(thirsty).text).toContain('ต้นที่ 2');
-    expect(helperMessage(snap({ commands: { ...snap().commands, ledPct: 0 } })).text).toContain('กลางวัน');
+    expect(helperMessage(snap({ commands: { ...snap().commands, ledPct: 0 } }, { ppfd: 120 })).text).toContain('กลางวันแสงน้อย');
+    // P36: เที่ยงแดดแรง LED ปิดก็พอ ไม่ต้องเตือน; แดด+LED เกิน 350 ให้ลดไฟ
+    expect(helperMessage(snap({ commands: { ...snap().commands, ledPct: 0 }, sim: { day: 23, minuteOfDay: 780, sunPpfd: 300 } }, { ppfd: 300 })).tone).toBe('good');
+    expect(helperMessage(snap({ sim: { day: 23, minuteOfDay: 780, sunPpfd: 300 } }, { ppfd: 620 })).text).toContain('ลด 💡 LED');
     expect(helperMessage(snap({ sim: { day: 23, minuteOfDay: 23 * 60 } })).text).toContain('กลางคืน');
     expect(helperMessage(snap({ commands: { ...snap().commands, airPump: false } })).text).toContain('ปั๊มลม');
     expect(helperMessage(snap())).toMatchObject({ tone: 'good' });

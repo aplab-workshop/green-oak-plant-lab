@@ -71,8 +71,16 @@ describe('MockPlcAdapter', () => {
     expect((await mock.readCommands()).commands.refillPump).toBe(true); // ยังเติมจนถึง 90
     await mock.writeSensors({ ...w, sensors: { ...w.sensors, waterLevelPct: 91 } });
     expect((await mock.readCommands()).commands.refillPump).toBe(false);
-    // 06:00 → LED 80 %, 23:00 → 0 %
-    expect((await mock.readCommands()).commands.ledPct).toBe(80);
+    // P36: กลางวันเติม LED ทีละ 5 % จน PPFD เข้า 270–330, เกินแล้วลด, กลางคืน 0 %
+    const day = { ...w, sim: { ...w.sim, minuteOfDay: 9 * 60 } };
+    await mock.writeSensors({ ...day, sensors: { ...day.sensors, ppfd: 100 } });
+    const up1 = (await mock.readCommands()).commands.ledPct;
+    await mock.writeSensors({ ...day, sensors: { ...day.sensors, ppfd: 100 } });
+    expect((await mock.readCommands()).commands.ledPct).toBe(up1 + 5);
+    await mock.writeSensors({ ...day, sensors: { ...day.sensors, ppfd: 300 } });
+    expect((await mock.readCommands()).commands.ledPct).toBe(up1 + 5); // อยู่ในช่วง → คงไว้
+    await mock.writeSensors({ ...day, sensors: { ...day.sensors, ppfd: 400 } });
+    expect((await mock.readCommands()).commands.ledPct).toBe(up1); // แดดแรง → ลด
     await mock.writeSensors({ ...w, sim: { ...w.sim, minuteOfDay: 23 * 60 } });
     const night = await mock.readCommands();
     expect(night.commands.ledPct).toBe(0);

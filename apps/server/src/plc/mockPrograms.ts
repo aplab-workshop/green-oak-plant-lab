@@ -8,7 +8,8 @@ import type { DeviceMemory } from './DeviceMemory';
  *   Refill  : SET M102 ถ้า D106 < 70   | RST ถ้า D106 ≥ 90
  *   Fan     : SET M100 ถ้า D100 > 255  | RST ถ้า D100 < 245
  *   Humid.  : SET M101 ถ้า D101 < 550  | RST ถ้า D101 > 700
- *   LED     : D200 = 80 เมื่อ D111 อยู่ระหว่าง 06:00–22:00 (360–1319) มิฉะนั้น 0
+ *   LED     : 06:00–22:00 (D111 360–1319) เติมแสงให้ PPFD (D102) อยู่ ~270–330:
+ *             D102 < 270 → D200 += 5 · D102 > 330 → D200 −= 5 (0–100) · นอกเวลา D200 = 0 (P36: มีแดดร่วม)
  *   Nutrient: SET M103,M104 ถ้า D105 < 100 | RST ถ้า D105 ≥ 120
  *   Air pump: M105 ON ตลอด (SM400)
  *   pH Down : SET M106 ถ้า D104 > 660  | RST ถ้า D104 ≤ 630
@@ -24,7 +25,11 @@ export function autoProgramScan(mem: DeviceMemory): void {
   setReset(100, d(100) > 255, d(100) < 245);
   setReset(101, d(101) < 550, d(101) > 700);
   const minute = d(111);
-  mem.setD(LED_COMMAND_REGISTER.address, minute >= 360 && minute < 1320 ? 80 : 0);
+  // P36: แดดให้แสงด้วย จึงเติม LED เท่าที่ขาด (ปรับทีละ 5 % ต่อ Scan)
+  const led = d(LED_COMMAND_REGISTER.address);
+  const ppfd = d(102);
+  const day = minute >= 360 && minute < 1320;
+  mem.setD(LED_COMMAND_REGISTER.address, !day ? 0 : ppfd < 270 ? Math.min(100, led + 5) : ppfd > 330 ? Math.max(0, led - 5) : led);
   const ecLow = d(105) < 100;
   const ecOk = d(105) >= 120;
   setReset(103, ecLow, ecOk);

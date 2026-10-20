@@ -90,7 +90,10 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   }
 
   const day = isDaytime(s.sim.minuteOfDay);
-  if (day && cmd.ledPct === 0) return { text: 'กลางวันแล้ว ผักต้องการแสง — กด 💡 80%', tone: 'warn' };
+  // P36: มีแดดร่วม — ดู PPFD จริงแทนการเปิดไฟคงที่
+  const sun = s.sim.sunPpfd ?? 0;
+  if (day && r.ppfd < 200) return { text: `กลางวันแสงน้อย (PPFD ${r.ppfd.toFixed(0)}${sun > 0 ? ` · แดด ${sun.toFixed(0)}` : ''}) — เพิ่ม 💡 LED ให้ถึง ~300`, tone: 'warn' };
+  if (r.ppfd > 350 && cmd.ledPct > 0) return { text: `แสงเกิน (PPFD ${r.ppfd.toFixed(0)}${sun > 0 ? ` · แดด ${sun.toFixed(0)}` : ''}) ใบจะม้วน — ลด 💡 LED`, tone: 'warn' };
   if (!day && cmd.ledPct > 0) return { text: 'กลางคืนแล้ว ปิด 💡 ไฟเพื่อประหยัดงบไฟ (ผักพักผ่อน)', tone: 'info' };
   if (!cmd.airPump) return { text: 'ปั๊มลมปิดอยู่ รากต้องการอากาศ — เปิด 🫧 ปั๊มลม', tone: 'warn' };
 

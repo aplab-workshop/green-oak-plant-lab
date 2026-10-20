@@ -3,7 +3,7 @@ import {
   DEFAULT_CONFIG, Simulation, envEc, hourOfDay, levelPct, makeConfig,
   nutrientStressTarget, stepPh, stepSalt,
 } from '../src';
-import { OFF } from './helpers';
+import { OFF, noSunConfig } from './helpers';
 import { plantFixture } from './plantFixture';
 
 describe('Nutrient Stress — P10', () => {
@@ -99,7 +99,8 @@ describe('Empirical pH equilibrium — P10 / AC-20', () => {
   });
 
   it('AC-20 / AC-25: healthy plants grow within bounds during a managed 30-day Simulation', () => {
-    const sim = new Simulation({ seed: 7 });
+    // ไฟ LED คงที่ 06–22 ตามสูตรเดิม — ปิดแดด (P36) เพื่อแยกผล pH/EC
+    const sim = new Simulation({ seed: 7, cfg: noSunConfig() });
     let minimum = sim.env.ph;
     let maximum = sim.env.ph;
     for (let i = 0; i < 30 * 86400; i++) {

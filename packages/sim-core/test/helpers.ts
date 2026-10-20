@@ -19,8 +19,14 @@ export const OFF: ActuatorCommands = {
   phDown: false,
 };
 
-/** Config ที่อุณหภูมิห้องคงที่ 26 °C เพื่อให้คาดค่าได้ง่าย */
-export const flatRoomConfig = (): SimConfig => makeConfig({ room: { tempMeanC: 26, tempAmplitudeC: 0 } });
+/** ปิดแสงแดด (P36) — ใช้กับเทสต์กลไก LED/อากาศ/พืชที่ต้องการให้ "LED ปิด = มืด" */
+export const NO_SUN = { peakPpfd: 0, heatC: 0 } as const;
+
+/** Config ที่อุณหภูมิห้องคงที่ 26 °C และไม่มีแดด เพื่อให้คาดค่าได้ง่าย */
+export const flatRoomConfig = (): SimConfig => makeConfig({ room: { tempMeanC: 26, tempAmplitudeC: 0 }, sun: NO_SUN });
+
+/** Config เริ่มต้นแต่ไม่มีแดด (P36) — เทสต์กลไกที่ไม่ได้ทดสอบแสงแดด */
+export const noSunConfig = (o: Parameters<typeof makeConfig>[0] = {}): SimConfig => makeConfig({ ...o, sun: NO_SUN });
 
 export interface RunOptions {
   cfg: SimConfig;

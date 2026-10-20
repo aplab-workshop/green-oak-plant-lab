@@ -804,3 +804,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `CareGame`: `harvestProgress` = min ของต้นที่ Damage < 1 ของ clamp((B − B₀)/(เป้า − B₀)) — สอดคล้อง `canHarvest` (ทุกต้นที่รอดถึงเป้า)
 - Web: `game/growthModel.ts` + `game/GrowthMeter.tsx`; ป้ายลอยใช้ `key={floor(simTimeS/3600)}` ให้ CSS animation เล่นใหม่เฉพาะเมื่อชั่วโมงจำลองเปลี่ยน; CSS `.growth-meter-v` วางหลัง `.workspace-right` แล้วใช้ `:has(.workspace-panel) +` เลื่อนซ้ายเมื่อเปิดแผงควบคุม
 
+### 11.33 Implementation Notes (P36 — Sunlight)
+
+- `environment/light.ts`: `sunPpfd(t, cfg)` ครึ่งคลื่น sine (rise → peak → set) และ `sunFraction`; `stepEnvironment` ส่ง `sunFrac` ให้ `stepAir` และบวกแดดใน PAR Sensor; `Simulation.step` ใส่ `sunPpfd` ใน `PlantEnvironment` (ไม่ระบุ = 0 เพื่อให้ Fixture เดิมใช้ได้)
+- `SimInfo.sunPpfd` (optional) มาจาก `Simulation.readSimInfo()`; `SimInfoKey` จำกัดเป็น `minuteOfDay | day` เพื่อไม่เขียนแดดลง PLC
+- Mock Ladder Auto: ปรับ D200 ทีละ 5 % ตาม D102 แทนค่าคงที่ 80 % (กันแสงเกินตอนแดดแรง)
+- Test helpers: `NO_SUN`, `noSunConfig()`, `flatRoomConfig()` (ไม่มีแดด) สำหรับเทสต์กลไกที่ต้องการแยกผลแดด
+

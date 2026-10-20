@@ -3,7 +3,7 @@ import type { SimConfig } from '../config/defaultConfig';
 import { SECONDS_PER_DAY } from '../clock';
 import { clamp, vpdKPa } from '../math';
 import { stepAir, stepWaterTemp, roomTempC } from './air';
-import { dliIncrement, ppfdAt } from './light';
+import { dliIncrement, ppfdAt, sunFraction, sunPpfd } from './light';
 import { ecFrom, stepPh, stepSalt } from './nutrient';
 import { powerW } from './power';
 import { evaporationL, levelPct, stepTank } from './tank';
@@ -24,6 +24,8 @@ export interface EnvironmentState {
   ledPct: number;
   /** PPFD ที่ตำแหน่ง Sensor (กลางถัง) */
   ppfd: number;
+  /** PPFD จากแดดในส่วนนี้ (P36) */
+  sunPpfd: number;
   /** DLI สะสมตั้งแต่ 00:00 เวลาจำลอง ที่ตำแหน่ง Sensor */
   dliToday: number;
   dliYesterday: number;
@@ -72,6 +74,7 @@ export function initialEnvironment(cfg: SimConfig, simTimeS: number): Environmen
     estimatedOxygen: volume > 0 ? cfg.root.initialOxygen : 0,
     ledPct: 0,
     ppfd: 0,
+    sunPpfd: 0,
     dliToday: 0,
     dliYesterday: 0,
     refillFlowLpm: 0,
@@ -98,7 +101,8 @@ export function stepEnvironment(
   // --- Air ---
   const air = stepAir(
     s,
-    { simTimeS: u.simTimeS, ledPct, fan: cmd.fan, humidifier: cmd.humidifier, roomTempDeltaC: u.roomTempDeltaC, roomRhDeltaPct: u.roomRhDeltaPct },
+    { simTimeS: u.simTimeS, ledPct, fan: cmd.fan, humidifier: cmd.humidifier, roomTempDeltaC: u.roomTempDeltaC, roomRhDeltaPct: u.roomRhDeltaPct,
+      sunFrac: sunFraction(u.simTimeS, cfg) },
     dtS,
     cfg,
   );
@@ -134,7 +138,9 @@ export function stepEnvironment(
   const estimatedOxygen = stepOxygen(s.estimatedOxygen, cmd.airPump, waterTempC, levelPct(tank.volumeL, cfg), dtS, cfg);
 
   // --- Light & DLI (reset ตอนข้ามเที่ยงคืนเวลาจำลอง) ---
-  const ppfd = ppfdAt(ledPct, 1, cfg);
+  // P36: PAR Sensor (กลางถัง) วัดแดด + LED
+  const sun = sunPpfd(u.simTimeS, cfg);
+  const ppfd = ppfdAt(ledPct, 1, cfg) + sun;
   let dliToday = s.dliToday;
   let dliYesterday = s.dliYesterday;
   const crossesMidnight =
@@ -158,6 +164,7 @@ export function stepEnvironment(
       estimatedOxygen,
       ledPct,
       ppfd,
+      sunPpfd: sun,
       dliToday,
       dliYesterday,
       refillFlowLpm: cmd.refillPump ? cfg.tank.refillFlowLpm : 0,

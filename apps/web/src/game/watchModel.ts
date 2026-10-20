@@ -68,7 +68,7 @@ export function watchDials(s: LabSnapshot): WatchDial[] {
 
   const dark = s.commands.ledPct <= 0 && !isDaytime(s.sim.minuteOfDay);
   out.push({ key: 'ppfd', icon: '☀️', label: 'แสง (PPFD)', value: r.ppfd, display: dark ? 'มืด' : r.ppfd.toFixed(0),
-    rangeText: fmtRange(PPFD_OK, ''), scale: [0, 500], ok: PPFD_OK, warn: PPFD_WARN,
+    rangeText: s.sim.sunPpfd ? `${fmtRange(PPFD_OK, '')} ☀️${s.sim.sunPpfd.toFixed(0)}` : fmtRange(PPFD_OK, ''), scale: [0, 500], ok: PPFD_OK, warn: PPFD_WARN,
     status: dark ? 'neutral' : statusIn(r.ppfd, PPFD_OK, PPFD_WARN) });
 
   const alive = s.plants.filter((p) => !isPlantDead(p, s.game.deadPlantIds));

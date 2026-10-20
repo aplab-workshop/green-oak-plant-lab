@@ -19,6 +19,8 @@ export interface SimInfo {
   minuteOfDay: number;
   /** วันนับจากเพาะ */
   day: number;
+  /** PPFD จากแดดตอนนี้ (µmol/m²/s) — P36; ไม่มีใน D-register */
+  sunPpfd?: number;
 }
 
 /** คำสั่ง Actuator ที่อ่านจาก PLC */

@@ -22,7 +22,8 @@ export interface WordRegister<K extends string> {
 }
 
 export type SensorKey = keyof SensorReadings;
-export type SimInfoKey = keyof SimInfo;
+/** ค่าที่เขียนลง PLC (D111/D112) — sunPpfd (P36) ใช้แสดงผลเท่านั้น */
+export type SimInfoKey = 'minuteOfDay' | 'day';
 
 export const SENSOR_REGISTERS: readonly WordRegister<SensorKey>[] = [
   { key: 'airTempC', address: 100, label: 'Air Temperature', unit: '°C', scale: 10, min: -100, max: 600 },

@@ -146,13 +146,13 @@ describe('Challenge effects on the model', () => {
     const before = out.env.waterVolumeL;
     run(out, 3600, all);
     expect(out.powerOutage).toBe(true);
-    expect(out.env.ppfd).toBe(0);
+    expect(out.env.ppfd).toBe(out.env.sunPpfd); // LED ดับ เหลือแต่แดด (P36)
     expect(out.env.powerW).toBe(0);
     expect(out.env.waterVolumeL).toBeLessThanOrEqual(before); // ปั๊มเติมน้ำไม่ทำงาน
     expect(out.env.estimatedOxygen).toBeLessThan(flat.root.initialOxygen); // ปั๊มลมดับ
     run(out, 2.5 * 3600, all);
     expect(out.powerOutage).toBe(false);
-    expect(out.env.ppfd).toBeGreaterThan(0);
+    expect(out.env.ppfd).toBeGreaterThan(out.env.sunPpfd);
   });
 
   it('alkaline tap water raises pH more when refilling', () => {

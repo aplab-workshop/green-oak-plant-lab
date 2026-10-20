@@ -14,7 +14,7 @@ import {
   type PlantState,
   type SimEvent,
 } from '../src';
-import { OFF } from './helpers';
+import { OFF, noSunConfig } from './helpers';
 
 const cfg = DEFAULT_CONFIG;
 type CmdFn = (sim: Simulation) => Partial<ActuatorCommands>;
@@ -63,7 +63,7 @@ describe('Root water access (FR-22)', () => {
 
 describe('Plant water stress — AC-03 / AC-04 / AC-05', () => {
   it('AC-03: roots out of water → hydration falls and water stress rises', () => {
-    const sim = new Simulation({ seed: 3 });
+    const sim = new Simulation({ seed: 3, cfg: noSunConfig() });
     sim.setWaterLevelPct(30); // 6 cm ต่ำกว่าปลายราก
     const { history } = run(sim, 3, { ledPct: 80 });
 
@@ -82,7 +82,7 @@ describe('Plant water stress — AC-03 / AC-04 / AC-05', () => {
   });
 
   it('AC-04: refilling in time lowers water stress with no permanent damage', () => {
-    const sim = new Simulation({ seed: 3 });
+    const sim = new Simulation({ seed: 3, cfg: noSunConfig() });
     sim.setWaterLevelPct(30);
     run(sim, 1.5, { ledPct: 80 });
     const stressed = sim.plants.map((p) => p.waterStress);
@@ -107,7 +107,7 @@ describe('Plant water stress — AC-03 / AC-04 / AC-05', () => {
   });
 
   it('AC-05: long shortage causes permanent damage that does not heal after refill', () => {
-    const sim = new Simulation({ seed: 3 });
+    const sim = new Simulation({ seed: 3, cfg: noSunConfig() });
     sim.setWaterLevelPct(30);
     const dry = run(sim, 12, { ledPct: 80 });
     const damageAtRefill = sim.plants.map((p) => p.damage);
@@ -136,8 +136,8 @@ describe('Plant water stress — AC-03 / AC-04 / AC-05', () => {
   });
 
   it('plants wilt more slowly in the dark than under strong light', () => {
-    const lit = new Simulation({ seed: 3 });
-    const dark = new Simulation({ seed: 3 });
+    const lit = new Simulation({ seed: 3, cfg: noSunConfig() });
+    const dark = new Simulation({ seed: 3, cfg: noSunConfig() });
     lit.setWaterLevelPct(30);
     dark.setWaterLevelPct(30);
     run(lit, 2, { ledPct: 100 });
@@ -167,7 +167,7 @@ describe('Growth baseline', () => {
   });
 
   it('well-managed plants grow over 10 days and consume tank water', () => {
-    const sim = new Simulation({ seed: 7 });
+    const sim = new Simulation({ seed: 7, cfg: noSunConfig() });
     const start = sim.plants.map((p) => ({ ...p }));
     run(sim, 24 * 10, goodCare(80), 10);
 
@@ -185,13 +185,13 @@ describe('Growth baseline', () => {
   });
 
   it('P25: records daily gain at midnight and stage changes with a plant.stage event (deterministic)', () => {
-    const fresh = new Simulation({ seed: 7 });
+    const fresh = new Simulation({ seed: 7, cfg: noSunConfig() });
     expect(fresh.plants[0]!.gainYesterdayG).toBeNull();
     expect(fresh.plants[0]!.stageChangedAtS).toBeNull();
     expect(fresh.plants[0]!.biomassDayStartG).toBe(fresh.plants[0]!.biomassG);
 
-    const a = new Simulation({ seed: 7 });
-    const b = new Simulation({ seed: 7 });
+    const a = new Simulation({ seed: 7, cfg: noSunConfig() });
+    const b = new Simulation({ seed: 7, cfg: noSunConfig() });
     const { events } = run(a, 24 * 10, goodCare(80), 10);
     run(b, 24 * 10, goodCare(80), 10);
     expect(a.plants).toEqual(b.plants);
@@ -213,15 +213,15 @@ describe('Growth baseline', () => {
   });
 
   it('low light slows growth', () => {
-    const bright = new Simulation({ seed: 7 });
-    const dim = new Simulation({ seed: 7 });
+    const bright = new Simulation({ seed: 7, cfg: noSunConfig() });
+    const dim = new Simulation({ seed: 7, cfg: noSunConfig() });
     run(bright, 24 * 5, goodCare(80), 10);
     run(dim, 24 * 5, goodCare(15), 10);
     expect(avg(dim.plants.map((p) => p.biomassG))).toBeLessThan(avg(bright.plants.map((p) => p.biomassG)) * 0.8);
   });
 
   it('corner plants receive less light than centre plants (shared tank, own PPFD)', () => {
-    const sim = new Simulation();
+    const sim = new Simulation({ cfg: noSunConfig() });
     run(sim, 0.1, { ledPct: 100 });
     const [corner, centre] = sim.plants;
     expect(corner!.ppfd).toBe(340);
@@ -231,16 +231,16 @@ describe('Growth baseline', () => {
 
 describe('Simulation', () => {
   it('is deterministic for the same seed and varies initial size by seed', () => {
-    const a = new Simulation({ seed: 11 });
-    const b = new Simulation({ seed: 11 });
+    const a = new Simulation({ seed: 11, cfg: noSunConfig() });
+    const b = new Simulation({ seed: 11, cfg: noSunConfig() });
     run(a, 1, { ledPct: 60 });
     run(b, 1, { ledPct: 60 });
     expect(a.snapshot()).toEqual(b.snapshot());
-    expect(new Simulation({ seed: 12 }).plants[0]!.biomassG).not.toBe(new Simulation({ seed: 11 }).plants[0]!.biomassG);
+    expect(new Simulation({ seed: 12, cfg: noSunConfig() }).plants[0]!.biomassG).not.toBe(new Simulation({ seed: 11, cfg: noSunConfig() }).plants[0]!.biomassG);
   });
 
   it('reset restores the initial state', () => {
-    const sim = new Simulation({ seed: 5 });
+    const sim = new Simulation({ seed: 5, cfg: noSunConfig() });
     const initial = sim.snapshot();
     sim.setWaterLevelPct(20);
     run(sim, 2, { ledPct: 100 });
@@ -268,7 +268,7 @@ describe('Simulation', () => {
 
   it('starts at day 14, 06:00 with the configured plant count', () => {
     const sim = new Simulation();
-    expect(sim.readSimInfo()).toEqual({ day: 14, minuteOfDay: 360 });
+    expect(sim.readSimInfo()).toEqual({ day: 14, minuteOfDay: 360, sunPpfd: 0 }); // 06:00 แดดยังไม่ขึ้น (P36)
     expect(sim.plants).toHaveLength(6);
   });
 });

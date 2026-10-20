@@ -18,6 +18,8 @@ export interface AirInput {
   roomTempDeltaC?: number;
   /** เหตุการณ์: RH ห้องเปลี่ยน (%) */
   roomRhDeltaPct?: number;
+  /** สัดส่วนแดดเทียบสูงสุด 0–1 (P36) */
+  sunFrac?: number;
 }
 
 export interface AirState {
@@ -27,7 +29,7 @@ export interface AirState {
 
 /**
  * อุณหภูมิและความชื้นอากาศแบบ First-order (FR-06)
- *   T_eq  = T_room + ΔT_LED·LED·(1 − η_fan·fan)
+ *   T_eq  = T_room + (ΔT_LED·LED + ΔT_sun·sun)·(1 − η_fan·fan)   (P36: ความร้อนจากแดด)
  *   RH_eq = RH_room + G_hum·hum·(1 − L_fan·fan) + M_enc·(1 − fan) − k·(T − T_room)
  * Fan ทำให้อุณหภูมิต่ำกว่าห้องไม่ได้
  */
@@ -38,7 +40,7 @@ export function stepAir(s: AirState, u: AirInput, dtS: number, cfg: SimConfig): 
   const hum = u.humidifier ? 1 : 0;
   const led = clamp(u.ledPct, 0, 100) / 100;
 
-  const tEq = tRoom + a.ledHeatC * led * (1 - a.fanEfficiency * fan);
+  const tEq = tRoom + (a.ledHeatC * led + cfg.sun.heatC * clamp(u.sunFrac ?? 0, 0, 1)) * (1 - a.fanEfficiency * fan);
   const airTempC = approach(s.airTempC, tEq, dtS, a.tempTauMin * 60);
 
   const rhEq = clamp(
