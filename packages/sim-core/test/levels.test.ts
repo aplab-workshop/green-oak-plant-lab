@@ -93,3 +93,48 @@ describe('Levels & missions — P21 (SPEC § 4.6)', () => {
     expect(d.snapshot().stars).toBe(3);
   });
 });
+
+describe('Ignored plant factors — P38 (SPEC § 4.21)', () => {
+  const L1 = LEVELS.find((l) => l.id === 'L1')!;
+  const grow = (cfg: Parameters<typeof makeConfig>[0], round = levelRound(L1)) => {
+    const sim = new Simulation({ cfg: makeConfig(cfg), seed: 4 });
+    sim.reset(round);
+    const cmd: ActuatorCommands = { fan: false, humidifier: false, ledPct: 0, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
+    for (let s = 0; s < 2 * 86400; s += 10) {
+      const lvl = sim.readSensors(false).waterLevelPct;
+      cmd.refillPump = lvl < 70 ? true : lvl >= 90 ? false : cmd.refillPump;
+      cmd.ledPct = 60;
+      sim.step(10, cmd);
+    }
+    return sim;
+  };
+
+  it('L1: temperature, humidity and EC/pH do not change plant growth or stress', () => {
+    const base = grow({});
+    const hot = grow({ room: { tempMeanC: 31, tempAmplitudeC: 0, rhPct: 25 } });
+    const salty = grow({ nutrient: { initialEc: 3.5, initialPh: 8.5 } });
+    const mass = (s: Simulation) => s.plants.map((p) => p.biomassG);
+    expect(hot.env.airTempC).toBeGreaterThan(base.env.airTempC + 4);
+    // ต่างกันได้เพียงเศษเล็กน้อยจากจังหวะเติมน้ำ (น้ำระเหยตามอุณหภูมิ = กลไกน้ำที่ผู้เล่นคุม)
+    mass(hot).forEach((g, i) => expect(g).toBeCloseTo(mass(base)[i]!, 3));
+    mass(salty).forEach((g, i) => expect(g).toBeCloseTo(mass(base)[i]!, 3));
+    for (const s of [base, hot, salty]) {
+      expect(s.plants.every((p) => p.nutrientStress === 0 && p.dryAirStress === 0 && p.humidAirStress === 0)).toBe(true);
+    }
+  });
+
+  it('L1: water and light still matter; other levels keep every factor', () => {
+    const base = grow({});
+    const dim = (() => {
+      const sim = new Simulation({ cfg: makeConfig(), seed: 4 });
+      sim.reset(levelRound(L1));
+      for (let s = 0; s < 2 * 86400; s += 10) sim.step(10, { fan: false, humidifier: false, ledPct: 0, refillPump: sim.readSensors(false).waterLevelPct < 80, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+      return sim;
+    })();
+    expect(dim.plants[1]!.biomassG).toBeLessThan(base.plants[1]!.biomassG);
+    const L2 = LEVELS.find((l) => l.id === 'L2')!;
+    const l2 = grow({}, levelRound(L2));
+    const l2hot = grow({ room: { tempMeanC: 31, tempAmplitudeC: 0 } }, levelRound(L2));
+    expect(l2hot.plants[1]!.biomassG).toBeLessThan(l2.plants[1]!.biomassG);
+  });
+});

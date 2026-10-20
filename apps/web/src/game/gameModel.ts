@@ -1,4 +1,4 @@
-import { LIGHT_LOAD_WARN_H, airComfort, isDaytime, isPlantDead, type LabSnapshot, type PlayerDevice } from '@gol/shared';
+import { LIGHT_LOAD_WARN_H, airComfort, isDaytime, isPlantDead, type LabSnapshot, type PlantFactor, type PlayerDevice } from '@gol/shared';
 
 /**
  * ตรรกะหน้าเกม (SPEC § 4.9) — Pure function จาก Snapshot/History ของ Server ไม่คำนวณพืชเอง
@@ -78,23 +78,25 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   const thirsty = s.plants.filter((p) => !dead.has(p.id) && p.waterStress > 0.3).sort((a, b) => b.waterStress - a.waterStress)[0];
   if (thirsty) return { text: `ต้นที่ ${thirsty.id} ขาดน้ำ ใบเริ่มตก — เช็คระดับน้ำและรากว่าแช่น้ำพอไหม`, tone: 'warn' };
 
-  if (r.ecMsCm < 0.8) return { text: `ผักหิวปุ๋ย (EC ${r.ecMsCm.toFixed(2)}) — ${own('nutrient') ? 'กด 🧪 ใส่ปุ๋ย แล้วรอดูค่า' : lockedOff ? 'ด่านนี้ไม่ใช้ปุ๋ย — อย่าให้น้ำล้นหรือรั่วนาน เพราะพาปุ๋ยออก' : 'ผู้ช่วยฟาร์มกำลังเติมปุ๋ยให้'}`, tone: 'warn' };
-  if (r.ecMsCm > 1.6) return { text: `ปุ๋ยเข้มเกิน (EC ${r.ecMsCm.toFixed(2)}) — เติมน้ำเพื่อเจือจาง และหยุดใส่ปุ๋ยก่อน`, tone: 'warn' };
-  if (r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) ผักใช้ปุ๋ยได้น้อย — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส แล้วรอดู' : lockedOff ? 'ด่านนี้ไม่ใช้ pH Down' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
-  if (r.ph < 5.5) {
+  // P38: ไม่พูดถึงปัจจัยที่ด่านนี้ไม่นับผลต่อผัก
+  const counts = (f: PlantFactor) => !(s.level?.ignoredFactors ?? []).includes(f);
+  if (counts('nutrient') && r.ecMsCm < 0.8) return { text: `ผักหิวปุ๋ย (EC ${r.ecMsCm.toFixed(2)}) — ${own('nutrient') ? 'กด 🧪 ใส่ปุ๋ย แล้วรอดูค่า' : lockedOff ? 'ด่านนี้ไม่ใช้ปุ๋ย — อย่าให้น้ำล้นหรือรั่วนาน เพราะพาปุ๋ยออก' : 'ผู้ช่วยฟาร์มกำลังเติมปุ๋ยให้'}`, tone: 'warn' };
+  if (counts('nutrient') && r.ecMsCm > 1.6) return { text: `ปุ๋ยเข้มเกิน (EC ${r.ecMsCm.toFixed(2)}) — เติมน้ำเพื่อเจือจาง และหยุดใส่ปุ๋ยก่อน`, tone: 'warn' };
+  if (counts('nutrient') && r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) ผักใช้ปุ๋ยได้น้อย — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส แล้วรอดู' : lockedOff ? 'ด่านนี้ไม่ใช้ pH Down' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
+  if (counts('nutrient') && r.ph < 5.5) {
     const stop = cmd.phDown && own('phDown') ? 'ปิด ⚗️ pH Down ก่อน แล้ว' : '';
     return { text: `pH ต่ำเกิน (${r.ph.toFixed(2)}) ผักเครียด — ${stop}เติมน้ำ 🚰 เล็กน้อยให้ pH ขยับขึ้น`, tone: 'warn' };
   }
 
   const tired = cmd.ledPct > 0 ? Math.max(0, ...s.plants.filter((p) => !isPlantDead(p, g.deadPlantIds)).map((p) => p.lightLoadH)) : 0;
   if (tired >= LIGHT_LOAD_WARN_H) return { text: `เปิดไฟมา ${tired.toFixed(0)} ชม. ผักต้องการช่วงมืด — ปิดหรือลดไฟ 💡 ไม่งั้นจะเครียดและโตช้า`, tone: 'warn' };
-  if (r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C ผักโตช้า — ${own('fan') ? 'เปิด 🌀 พัดลม (เย็นได้ถึงอุณหภูมิห้อง) หรือลดไฟ LED' : lockedOff ? 'ด่านนี้ไม่มีพัดลม — ลดไฟ LED ตอนแดดแรง' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
+  if (counts('temperature') && r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C ผักโตช้า — ${own('fan') ? 'เปิด 🌀 พัดลม (เย็นได้ถึงอุณหภูมิห้อง) หรือลดไฟ LED' : lockedOff ? 'ด่านนี้ไม่มีพัดลม — ลดไฟ LED ตอนแดดแรง' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
   // P33: ใช้ VPD — แห้งเปิดหมอก, ชื้นจัดขณะเปิดหมอกให้ปิด
   const comfort = airComfort(r.vpdKPa);
-  if (comfort === 'dry' && !cmd.humidifier) {
+  if (counts('air') && comfort === 'dry' && !cmd.humidifier) {
     return { text: `อากาศแห้ง (RH ${r.rhPct.toFixed(0)}%) ผักโตช้าแม้น้ำพอ — ${own('humidifier') ? 'เปิด 🌫️ เครื่องทำหมอก' : lockedOff ? 'ด่านนี้ไม่มีหมอก — ลดไฟ LED ช่วงร้อนจะช่วยได้' : 'ผู้ช่วยฟาร์มจะเปิดหมอกให้'}`, tone: 'warn' };
   }
-  if (comfort === 'humid' && cmd.humidifier && own('humidifier')) {
+  if (counts('air') && comfort === 'humid' && cmd.humidifier && own('humidifier')) {
     return { text: `อากาศชื้นจัด (RH ${r.rhPct.toFixed(0)}%) ผักลำเลียงธาตุอาหารได้น้อย — ปิด 🌫️ เครื่องทำหมอก`, tone: 'warn' };
   }
 

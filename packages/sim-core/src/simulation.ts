@@ -1,4 +1,4 @@
-import type { ActuatorCommands, SensorReadings, SimInfo } from '@gol/shared';
+import type { ActuatorCommands, PlantFactor, SensorReadings, SimInfo } from '@gol/shared';
 import { DEFAULT_CONFIG, type SimConfig } from './config/defaultConfig';
 import { simTimeFrom } from './clock';
 import { clamp, vpdKPa } from './math';
@@ -11,7 +11,7 @@ import {
   type EnvironmentState,
 } from './environment/environment';
 import { levelPct, waterHeightCm } from './environment/tank';
-import { createPlant, plantWaterRequest, stepPlant, type PlantEnvironment, type PlantState } from './plant/plant';
+import { createPlant, plantWaterRequest, stepPlant, type IgnoredFactors, type PlantEnvironment, type PlantState } from './plant/plant';
 import { rootSupplyRatio } from './plant/water';
 import { sunPpfd } from './environment/light';
 import { readSensors, readSimInfo } from './sensors';
@@ -75,6 +75,8 @@ export interface RoundStart {
   challengePlan?: ChallengePlan[];
   /** ระดับน้ำเริ่มรอบ (%) — ปุ๋ยในถังคงเท่ากับ EC เริ่มต้นที่ระดับปกติ (P37 ด่าน 1 เริ่ม 0 %) */
   startWaterPct?: number;
+  /** ปัจจัยที่ไม่มีผลต่อผักในรอบนี้ (P38) */
+  ignoredFactors?: readonly PlantFactor[];
 }
 
 /** คำสั่งระหว่างไฟดับ: ทุกอย่าง OFF รวม Air Pump และ LED */
@@ -109,6 +111,8 @@ export class Simulation {
   private events: SimEvent[] = [];
   disturbance: Disturbance = { leakLph: 0 };
   private round: RoundStart = {};
+  /** P38: ปัจจัยที่ไม่นับของรอบนี้ (null = นับทั้งหมด) */
+  private ignore: IgnoredFactors | null = null;
   private _challenges: ChallengeState[] = [];
 
   constructor(opts: SimulationOptions = {}) {
@@ -136,6 +140,8 @@ export class Simulation {
   reset(round?: RoundStart): void {
     if (round) this.round = round;
     const cfg = this.cfg;
+    const ig = this.round.ignoredFactors ?? [];
+    this.ignore = ig.length ? { temperature: ig.includes('temperature'), air: ig.includes('air'), nutrient: ig.includes('nutrient') } : null;
     this._simTimeS = this.startTimeS;
     this._env = initialEnvironment(cfg, this._simTimeS);
     if (this.round.startWaterPct !== undefined) {
@@ -262,6 +268,7 @@ export class Simulation {
       ph: env.ph,
       estimatedOxygen: env.estimatedOxygen,
       sunPpfd: sunPpfd(this._simTimeS, cfg),
+      ...(this.ignore ? { ignore: this.ignore } : {}),
     };
 
     // 1) พืชขอน้ำตามความต้องการและรากที่แช่น้ำ

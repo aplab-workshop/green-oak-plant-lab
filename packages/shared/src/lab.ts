@@ -156,7 +156,12 @@ export interface LevelInfo {
   playerDevices: PlayerDevice[];
   /** อุปกรณ์ที่ล็อก: 'off' = ปิดสนิท (ด่าน 1, P37) · 'helper' = ผู้ช่วยฟาร์มคุมให้ */
   lockedMode: 'off' | 'helper';
+  /** ปัจจัยที่ไม่มีผลต่อผักในด่านนี้ (ผู้เล่นคุมไม่ได้) — P38 */
+  ignoredFactors: PlantFactor[];
 }
+
+/** ปัจจัยสิ่งแวดล้อมที่ด่านเลือกไม่นับผลต่อผักได้ (P38 / SPEC § 4.21) */
+export type PlantFactor = 'temperature' | 'air' | 'nutrient';
 
 /** สถานะด่านใน Snapshot — รวมรายละเอียดด่านเพื่อให้หน้าเลือกด่านไม่ต้องเก็บค่าซ้ำ (P24) */
 export interface LevelProgress extends LevelInfo { unlocked: boolean; bestStars: number }

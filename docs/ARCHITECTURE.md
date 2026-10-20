@@ -819,3 +819,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `farmHelper.ts`: พารามิเตอร์ `lockedMode`; `LabSession` ส่ง `level.lockedMode` และข้ามโดสผู้ช่วยเมื่อ 'off'
 - `LabSession` Auto-pause: `redAtStart` (ข้ามค่าที่แดงตอน startGame จนกลับมาไม่แดง) + `RED_WATCH_DEVICE` (หยุดเฉพาะค่าที่ด่านให้คุมอุปกรณ์แก้)
 
+### 11.35 Implementation Notes (P38 — Ignored Plant Factors)
+
+- `Simulation.reset` แปลง `round.ignoredFactors` เป็น `IgnoredFactors` แล้วใส่ใน `PlantEnvironment.ignore` ทุก Step (null = นับทั้งหมด, ไม่เพิ่ม Object ในด่านปกติ)
+- `stepPlant`: `plantTempC = optimalTempC(cfg)` (กลางช่วงโตเต็มที่ของ `tempCardinalC`) เมื่อไม่นับอุณหภูมิ ใช้ทั้ง Growth และ Light stress; ออกซิเจนราก `max(oxygen, healthyOxygen)`; air stress/nutrient stress = 0; `plantWaterRequest` ใช้ `referenceVpdKPa` เมื่อไม่นับอุณหภูมิ/อากาศ
+- Environment จริงไม่เปลี่ยน (อุณหภูมิ, RH, EC, pH, ออกซิเจนในถัง) — ยังแสดงใน Sensor/PLC ตามเดิม
+- Web: `helperMessage` ใช้ `counts(factor)` จาก `level.ignoredFactors`
+

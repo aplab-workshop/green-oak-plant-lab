@@ -10,7 +10,7 @@ const plant = (id: number, over: Partial<PlantState> = {}): PlantState => ({
   rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0.1, ppfd: 300, dliToday: 5, dliYesterday: 12, lightLoadH: 4, dryAirStress: 0, humidAirStress: 0, growthGPerH: 0.2, growthEfficiency: 1, ...over,
 } as PlantState);
 
-const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', description: '', targetG: 30, startBiomassG: 15, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'], lockedMode: 'helper' };
+const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', description: '', targetG: 30, startBiomassG: 15, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'], lockedMode: 'helper', ignoredFactors: [] };
 
 /** Snapshot ที่ทุกอย่างปกติ (กลางวัน ไฟ 80%) */
 function snap(over: Partial<LabSnapshot> = {}, sensors: Partial<LabSnapshot['sensors']> = {}): LabSnapshot {
@@ -62,7 +62,7 @@ describe('helperMessage priority', () => {
   });
 
   it('helper uses VPD: dry → turn on mist, humid while misting → turn it off (P33)', () => {
-    const L3: LevelInfo = { id: 'L3', title: 'คลื่นความร้อน', description: '', targetG: 60, startBiomassG: 30, timeLimitDays: 10, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'], lockedMode: 'helper' };
+    const L3: LevelInfo = { id: 'L3', title: 'คลื่นความร้อน', description: '', targetG: 60, startBiomassG: 30, timeLimitDays: 10, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'], lockedMode: 'helper', ignoredFactors: [] };
     expect(helperMessage(snap({ level: L3 }, { vpdKPa: 2.0, rhPct: 40 })).text).toContain('เปิด 🌫️');
     const misting = snap({ level: L3, commands: { ...snap().commands, humidifier: true } }, { vpdKPa: 0.3, rhPct: 92 });
     expect(helperMessage(misting).text).toContain('ปิด 🌫️');
@@ -72,7 +72,7 @@ describe('helperMessage priority', () => {
   });
 
   it('low pH tells the player to stop pH Down and dilute (P34)', () => {
-    const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'], lockedMode: 'helper' };
+    const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'], lockedMode: 'helper', ignoredFactors: [] };
     const low = snap({ level: L4, commands: { ...snap().commands, phDown: true } }, { ph: 5.1 });
     expect(helperMessage(low).text).toContain('pH ต่ำเกิน');
     expect(helperMessage(low).text).toContain('ปิด ⚗️ pH Down');
@@ -80,13 +80,22 @@ describe('helperMessage priority', () => {
   });
 
   it('P37: self-stopping leaks ask for compensating refills, not repair; locked-off devices are not promised by the helper', () => {
-    const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 10, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'], lockedMode: 'off' };
+    const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 10, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'], lockedMode: 'off', ignoredFactors: ['temperature', 'air', 'nutrient'] };
     const leak = snap({ level: L1, challenges: [{ id: 1, kind: 'leak', title: '💧 ถังรั่ว', status: 'active', startS: 0, endS: 9e9, repaired: false, repairable: false }] }, { waterLevelPct: 60 });
     expect(helperMessage(leak)).toMatchObject({ tone: 'danger' });
     expect(helperMessage(leak).text).toContain('เติมน้ำชดเชย');
     expect(helperMessage(leak).text).not.toContain('ซ่อม');
-    expect(helperMessage(snap({ level: L1 }, { airTempC: 29 })).text).toContain('ด่านนี้ไม่มีพัดลม');
-    expect(helperMessage(snap({ level: L1 }, { ecMsCm: 0.5 })).text).toContain('ด่านนี้ไม่ใช้ปุ๋ย');
+    // ปิดอุปกรณ์แต่ยังนับปัจจัย → บอกว่าด่านนี้ไม่มีอุปกรณ์นั้น
+    const counted = { ...L1, ignoredFactors: [] };
+    expect(helperMessage(snap({ level: counted }, { airTempC: 29 })).text).toContain('ด่านนี้ไม่มีพัดลม');
+    expect(helperMessage(snap({ level: counted }, { ecMsCm: 0.5 })).text).toContain('ด่านนี้ไม่ใช้ปุ๋ย');
+  });
+
+  it('P38: factors the level ignores never appear in helper advice', () => {
+    const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 6, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'], lockedMode: 'off', ignoredFactors: ['temperature', 'air', 'nutrient'] };
+    for (const sensors of [{ airTempC: 30 }, { ecMsCm: 0.4 }, { ecMsCm: 2.4 }, { ph: 7.1 }, { ph: 5.1 }, { vpdKPa: 2.4, rhPct: 30 }]) {
+      expect(helperMessage(snap({ level: L1 }, sensors))).toMatchObject({ tone: 'good' });
+    }
   });
 
   it('overflow comes right after outage/leak and shows litres and penalty (P29)', () => {
@@ -134,8 +143,8 @@ describe('helperMessage priority', () => {
 });
 
 describe('level watch HUD (P31)', () => {
-  const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 8, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'], lockedMode: 'helper' };
-  const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'], lockedMode: 'helper' };
+  const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 8, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'], lockedMode: 'helper', ignoredFactors: [] };
+  const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'], lockedMode: 'helper', ignoredFactors: [] };
 
   it('picks dials from the devices the level unlocks', () => {
     expect(watchDials(snap({ level: L1 })).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad']);

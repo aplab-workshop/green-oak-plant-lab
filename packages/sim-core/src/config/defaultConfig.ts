@@ -278,6 +278,8 @@ export interface SimConfig {
     transpirationRefPpfd: number;
     /** สัดส่วน Transpiration ตอนมืด (Stomata ปิดบางส่วน) */
     transpirationDarkFraction: number;
+    /** VPD อ้างอิง (kPa) ที่ใช้คิดความต้องการน้ำเมื่อด่านไม่นับอุณหภูมิ/อากาศ (P38) */
+    referenceVpdKPa: number;
     /** สัดส่วนรากที่ต้องแช่น้ำเพื่อดูดน้ำได้เต็มที่ */
     rootCriticalFraction: number;
     /** อัตราสูญเสีย Hydration เมื่อขาดน้ำสนิทที่สภาวะอ้างอิง (1/h) */
@@ -412,6 +414,7 @@ export const DEFAULT_CONFIG: SimConfig = {
     transpirationLPerM2Day: 3.3,
     transpirationRefPpfd: 250,
     transpirationDarkFraction: 0.3,
+    referenceVpdKPa: 1.0,
     rootCriticalFraction: 0.3,
     hydrationLossPerH: 0.12,
     hydrationRecoveryPerH: 0.5,

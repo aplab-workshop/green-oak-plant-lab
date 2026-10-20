@@ -36,9 +36,9 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
   it('starts at L1 with only L1 unlocked; locked levels and devices are rejected', async () => {
     const t = levelLab();
     const snap = t.lab.snapshot();
-    expect(snap.level).toMatchObject({ id: 'L1', targetG: 10, timeLimitDays: 10, playerDevices: ['led', 'refillPump'], lockedMode: 'off' });
+    expect(snap.level).toMatchObject({ id: 'L1', targetG: 10, timeLimitDays: 6, playerDevices: ['led', 'refillPump'], lockedMode: 'off', ignoredFactors: ['temperature', 'air', 'nutrient'] });
     expect(snap.levels.map((l) => [l.id, l.unlocked])).toEqual([['L1', true], ['L2', false], ['L3', false], ['L4', false]]);
-    expect(snap.game).toMatchObject({ status: 'ready', targetG: 10, timeLimitS: 10 * 86_400 });
+    expect(snap.game).toMatchObject({ status: 'ready', targetG: 10, timeLimitS: 6 * 86_400 });
     expect(snap.tank.waterLevelPct).toBe(0); // P37: เริ่มถังว่าง
     await expect(t.lab.handle({ type: 'selectLevel', levelId: 'L2' })).rejects.toMatchObject({ statusCode: 409 });
     for (const key of ['fan', 'humidifier', 'nutrientA', 'nutrientB', 'airPump'] as const) {

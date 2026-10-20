@@ -37,7 +37,22 @@ export interface PlantEnvironment {
   estimatedOxygen: number;
   /** PPFD จากแดด (เท่ากันทุกตำแหน่ง) — P36; ไม่ระบุ = 0 */
   sunPpfd?: number;
+  /** ปัจจัยที่ด่านนี้ไม่นับผลต่อผัก — P38 */
+  ignore?: IgnoredFactors;
 }
+
+/** ปัจจัยที่ไม่มีผลต่อผักในด่าน (ผู้เล่นคุมไม่ได้) — P38 / SPEC § 4.21 */
+export interface IgnoredFactors {
+  temperature?: boolean;
+  air?: boolean;
+  nutrient?: boolean;
+}
+
+const NO_IGNORE: Readonly<IgnoredFactors> = Object.freeze({});
+const NO_AIR_STRESS = Object.freeze({ dry: 0, humid: 0 });
+
+/** อุณหภูมิที่เหมาะที่สุด = กลางช่วงที่โตเต็มที่ของ tempCardinalC */
+export const optimalTempC = (cfg: SimConfig): number => (cfg.plant.tempCardinalC[1] + cfg.plant.tempCardinalC[2]) / 2;
 
 export function createPlant(id: number, position: number, biomassG: number, simTimeS: number, cfg: SimConfig): PlantState {
   const m = morphology(biomassG, cfg);
@@ -86,7 +101,9 @@ export interface PlantWaterRequest {
 export function plantWaterRequest(p: PlantState, e: PlantEnvironment, cfg: SimConfig): PlantWaterRequest {
   if (p.damage >= 1) return { demandLPerDay: 0, rootSubmerged: p.rootSubmerged, supplyRatio: 0, factor: 0, ppfd: 0 };
   const ppfd = ppfdAt(e.ledPct, positionFactor(p.position, cfg), cfg) + (e.sunPpfd ?? 0);
-  const factor = transpirationFactor(e.vpdKPa, ppfd, cfg);
+  // P38: ด่านที่ไม่นับอุณหภูมิ/อากาศ ใช้ VPD อ้างอิง — อากาศที่คุมไม่ได้ไม่เปลี่ยนความต้องการน้ำ
+  const vpd = e.ignore?.temperature || e.ignore?.air ? cfg.plant.referenceVpdKPa : e.vpdKPa;
+  const factor = transpirationFactor(vpd, ppfd, cfg);
   const rootSubmerged = rootSubmergedFraction(e.waterHeightCm, p.rootLengthCm, cfg);
   return {
     demandLPerDay: waterDemandLPerDay(p.leafAreaCm2, factor, cfg),
@@ -117,14 +134,19 @@ export function stepPlant(
   const supplyRatio = req.supplyRatio * clamp(tankFactor, 0, 1);
   const hydration = stepHydration(p.hydration, supplyRatio, req.factor, p.damage, dtS, cfg);
   const stress = waterStress(hydration, cfg);
+  // P38: ปัจจัยที่ด่านคุมไม่ได้ไม่มีผลต่อผัก (สิ่งแวดล้อมจริงยังเปลี่ยนตามเดิม)
+  const ignore = e.ignore ?? NO_IGNORE;
+  const plantTempC = ignore.temperature ? optimalTempC(cfg) : e.airTempC;
   const lightLoadH = stepLightLoad(p.lightLoadH, req.ppfd, dtS, cfg);
-  const lightStress = stepLightStress(p.lightStress, req.ppfd, e.airTempC, hydration, dtS, cfg, lightLoadH);
-  const nutrientStress = stepNutrientStress(p.nutrientStress, e.ecMsCm, e.ph, dtS, cfg);
-  const rootHealth = stepRootHealth(p.rootHealth, e.estimatedOxygen, req.rootSubmerged, dtS, cfg);
-  const air = stepAirStress(p.dryAirStress, p.humidAirStress, e.vpdKPa, dtS, cfg);
+  const lightStress = stepLightStress(p.lightStress, req.ppfd, plantTempC, hydration, dtS, cfg, lightLoadH);
+  const nutrientStress = ignore.nutrient ? 0 : stepNutrientStress(p.nutrientStress, e.ecMsCm, e.ph, dtS, cfg);
+  // P38: น้ำอุ่นจากอากาศที่คุมไม่ได้ไม่ทำให้รากขาดออกซิเจน
+  const oxygen = ignore.temperature ? Math.max(e.estimatedOxygen, cfg.root.healthyOxygen) : e.estimatedOxygen;
+  const rootHealth = stepRootHealth(p.rootHealth, oxygen, req.rootSubmerged, dtS, cfg);
+  const air = ignore.air ? NO_AIR_STRESS : stepAirStress(p.dryAirStress, p.humidAirStress, e.vpdKPa, dtS, cfg);
   const maximum = combinedStress(stress, lightStress, nutrientStress, rootHealth, air.dry, air.humid).maximum;
   const damage = stepDamage(p.damage, maximum, dtS, cfg);
-  const growthInput = { ppfd: req.ppfd, airTempC: e.airTempC, waterStress: stress, lightStress, nutrientStress, rootHealth, damage,
+  const growthInput = { ppfd: req.ppfd, airTempC: plantTempC, waterStress: stress, lightStress, nutrientStress, rootHealth, damage,
     dryAirStress: air.dry, humidAirStress: air.humid };
   const biomassG = stepBiomass(p.biomassG, growthInput, dtS, cfg);
   const m = morphology(biomassG, cfg);

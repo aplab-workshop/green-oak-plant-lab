@@ -122,5 +122,6 @@ describe('Empirical pH equilibrium — P10 / AC-20', () => {
       expect(p.damage).toBeLessThan(0.01);
       expect(p.health).toBeLessThanOrEqual(100 * (1 - p.damage));
     }
-  }, 60000);
+    // 2.6 ล้าน Step — ขณะรันพร้อมเทสต์อื่นเกิน 60 s ได้ (พบ 68 s ใน P38)
+  }, 180000);
 });
