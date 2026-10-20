@@ -781,3 +781,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - CSS `.level-watch`: จอกว้าง `top 12 / left 262 / right 330` (ระหว่างคอลัมน์การ์ดกับแผงควบคุม), ≤ 1099 px ถัดคอลัมน์ `garden-hud`, ≤ 600 px ใต้แถวการ์ด; `.garden-stage:has(.level-watch) .autopause-banner` เลื่อนลง
 - `LevelInfo.startBiomassG` ย้ายจาก `LevelDef` มาเป็นข้อมูลที่ Server ส่งใน `levels`/`level`
 
+### 11.29 Implementation Notes (P32 — Device Rationale)
+
+- Scenario tests `deviceRationale.test.ts` ใช้ `Simulation` จริง (dt 10 s) เทียบเปิด/ไม่เปิดด้วย Seed 5; ทดสอบเฉพาะทิศทาง/ขนาดผลตาม SPEC § 4.15 ไม่ผูกค่าตัวเลขละเอียด
+- การทดสอบผลของแสงต้องเปิดพัดลม เพราะ LED 80 % เพิ่มอุณหภูมิจนความร้อนเป็นปัจจัยจำกัด (`temperatureFactor` 25–33 °C) ก่อนแสง
+
