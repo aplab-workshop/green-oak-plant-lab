@@ -10,6 +10,7 @@ import {
   type LevelId,
   type ActiveDose,
   type DoseDevice,
+  type PlayerDevice,
   deviceOfBit,
   playerDeviceOfDose,
   sensorStatus,
@@ -81,6 +82,10 @@ const HELPER_NUTRIENT_BELOW = 1.0;
 
 /** ค่าที่ Auto-pause ตรวจ "สีแดงครั้งแรก" (SPEC § 4.8) */
 const RED_WATCH = ['waterLevelPct', 'ecMsCm', 'ph', 'airTempC', 'rhPct'] as const;
+/** P37: หยุดเกมเฉพาะค่าที่ผู้เล่นแก้ได้ด้วยอุปกรณ์ที่ด่านปลดล็อก */
+const RED_WATCH_DEVICE: Record<(typeof RED_WATCH)[number], PlayerDevice> = {
+  waterLevelPct: 'refillPump', ecMsCm: 'nutrient', ph: 'phDown', airTempC: 'fan', rhPct: 'humidifier',
+};
 
 /** คำสั่งที่มีผลระหว่างไฟดับ (แสดงใน Snapshot) */
 const OUTAGE_COMMANDS: Readonly<ActuatorCommands> = Object.freeze({
@@ -129,6 +134,8 @@ export class LabSession {
   private autoPauseReason: string | null = null;
   /** ค่าที่เคยแดงแล้วในรอบนี้ (หยุดครั้งแรกครั้งเดียวต่อค่า) */
   private readonly redSeen = new Set<string>();
+  /** P37: ค่าที่แดงอยู่แล้วตอนเริ่มรอบ (เช่นด่าน 1 เริ่มถังว่าง) — ไม่หยุดเกมจนกว่าค่าจะกลับมาไม่แดงก่อน */
+  private readonly redAtStart = new Set<string>();
   private readonly bestStars = new Map<LevelId, number>();
 
   private get recordKey(): string {
@@ -230,7 +237,13 @@ export class LabSession {
     if (!this.autoPauseActive) return;
     const r = this.sim.readSensors(false);
     for (const key of RED_WATCH) {
-      if (this.redSeen.has(key) || sensorStatus(key, r[key]) !== 'alarm') continue;
+      if (this.level && !this.level.playerDevices.includes(RED_WATCH_DEVICE[key])) continue;
+      const red = sensorStatus(key, r[key]) === 'alarm';
+      if (this.redAtStart.has(key)) {
+        if (!red) this.redAtStart.delete(key);
+        continue;
+      }
+      if (this.redSeen.has(key) || !red) continue;
       this.redSeen.add(key);
       const reg = SENSOR_REGISTERS.find((x) => x.key === key)!;
       this.autoPause(`${reg.label} เป็นสีแดง (${r[key].toFixed(key === 'ph' || key === 'ecMsCm' ? 2 : 1)} ${reg.unit})`);
@@ -343,9 +356,10 @@ export class LabSession {
 
     let next = this.failsafe || !this.lastCommands ? { ...FAILSAFE_COMMANDS } : { ...this.lastCommands };
     if (this.level && !this.failsafe) {
-      next = applyFarmHelper(next, this.applied, this.lastSensors, this.level.playerDevices);
+      next = applyFarmHelper(next, this.applied, this.lastSensors, this.level.playerDevices, this.level.lockedMode);
       // Nutrient / pH Down ที่ล็อก: ผู้ช่วยสั่งครั้งละ 1 โดส (นับเวลาจำลอง) แทนการเปิดค้างระหว่างรอบ Poll
-      const lockedDevice = (d: 'nutrient' | 'phDown') => !this.level!.playerDevices.includes(d);
+      // P37: ด่านที่ล็อกแบบ 'off' ไม่มีโดสผู้ช่วย
+      const lockedDevice = (d: 'nutrient' | 'phDown') => this.level!.lockedMode === 'helper' && !this.level!.playerDevices.includes(d);
       if (lockedDevice('nutrient') && this.lastSensors.ecMsCm < HELPER_NUTRIENT_BELOW && !this.doses.has('nutrient')) {
         this.startDose('nutrient', 'helper');
       }
@@ -395,6 +409,10 @@ export class LabSession {
       case 'startGame':
         if (!this.sim.startGame()) throw new LabCommandError('เริ่มได้เฉพาะรอบที่ยังไม่เริ่ม — Reset เพื่อเริ่มรอบใหม่', 409);
         if (this.usingAuto) this.sim.markTestRun();
+        {
+          const r = this.sim.readSensors(false);
+          for (const key of RED_WATCH) if (sensorStatus(key, r[key]) === 'alarm') this.redAtStart.add(key);
+        }
         this.clock.resume();
         this.log('game.start', 'info', 'เริ่มปลูก — ดูแลผักให้โตจนเก็บเกี่ยวได้');
         return;
@@ -478,6 +496,7 @@ export class LabSession {
     if (saveRecord) this.saveRecord();
     this.doses.clear();
     this.redSeen.clear();
+    this.redAtStart.clear();
     this.autoPauseReason = null;
     this.sim.reset(round);
     this.clock.reset(this.sim.startTimeS);

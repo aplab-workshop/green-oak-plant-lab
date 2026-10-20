@@ -133,6 +133,8 @@ export interface ChallengeView {
   /** เวลาจำลองที่จบ — null = จนกว่าจะซ่อม */
   endS: number | null;
   repaired: boolean;
+  /** กดซ่อมได้หรือไม่ (ถังรั่วที่ไม่หยุดเอง) — P37: รั่วในด่าน 1 หยุดเอง ซ่อมไม่ได้ */
+  repairable: boolean;
 }
 
 /** โดสที่กำลังทำงานหรือรอคิว (เวลาจำลอง) */
@@ -152,6 +154,8 @@ export interface LevelInfo {
   timeLimitDays: number;
   energyBudgetKWh: number;
   playerDevices: PlayerDevice[];
+  /** อุปกรณ์ที่ล็อก: 'off' = ปิดสนิท (ด่าน 1, P37) · 'helper' = ผู้ช่วยฟาร์มคุมให้ */
+  lockedMode: 'off' | 'helper';
 }
 
 /** สถานะด่านใน Snapshot — รวมรายละเอียดด่านเพื่อให้หน้าเลือกด่านไม่ต้องเก็บค่าซ้ำ (P24) */

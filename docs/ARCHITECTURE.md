@@ -811,3 +811,11 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Mock Ladder Auto: ปรับ D200 ทีละ 5 % ตาม D102 แทนค่าคงที่ 80 % (กันแสงเกินตอนแดดแรง)
 - Test helpers: `NO_SUN`, `noSunConfig()`, `flatRoomConfig()` (ไม่มีแดด) สำหรับเทสต์กลไกที่ต้องการแยกผลแดด
 
+### 11.34 Implementation Notes (P37 — Level 1 Redesign)
+
+- `levels.ts`: L1 `lockedMode: 'off'`, `startWaterPct: 0`, `timeLimitDays: 10`, `challenges: { kinds: ['leak'], count: [2, 3], windowDays: [1, 6], leakHours: [4, 6] }`; ด่านอื่น `lockedMode: 'helper'`
+- `Simulation.reset`: `startWaterPct` ตั้งปริมาตรน้ำเท่านั้น (saltMass จาก `initialLevelPct` เดิม = ปุ๋ยรองก้นถัง); `repairLeak` ซ่อมได้เฉพาะ leak ที่ `durationS === null`
+- `challenges.ts`: `durationOf(..., spec)` ใช้ `leakHours`; `challengeViews` ใส่ `repairable`
+- `farmHelper.ts`: พารามิเตอร์ `lockedMode`; `LabSession` ส่ง `level.lockedMode` และข้ามโดสผู้ช่วยเมื่อ 'off'
+- `LabSession` Auto-pause: `redAtStart` (ข้ามค่าที่แดงตอน startGame จนกลับมาไม่แดง) + `RED_WATCH_DEVICE` (หยุดเฉพาะค่าที่ด่านให้คุมอุปกรณ์แก้)
+

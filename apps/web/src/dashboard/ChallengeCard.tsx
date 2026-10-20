@@ -35,7 +35,10 @@ export function ChallengeCard() {
               <b>{c.title}</b>
               <span className="whitespace-nowrap">{challengeLine(c, simTimeS)}</span>
             </div>
-            {c.kind === 'leak' && c.status === 'active' && (
+            {c.kind === 'leak' && c.status === 'active' && !c.repairable && (
+              <p className="mt-1 text-[11px]">💧 รั่วแล้วหยุดเอง ซ่อมไม่ได้ — เปิดปั๊มเติมน้ำชดเชย</p>
+            )}
+            {c.kind === 'leak' && c.status === 'active' && c.repairable && (
               <button
                 type="button"
                 onClick={() => void sendCommand({ type: 'repairLeak' })}

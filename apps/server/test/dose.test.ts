@@ -126,7 +126,7 @@ describe('Dose commands — P22 / AC-38', () => {
     expect(own.snapshot().doses).toEqual([]);
   });
 
-  it('farm helper keeps EC sane at 3600x after heavy refilling (regression P21 → P22)', async () => {
+  it('P37: L1 (locked devices OFF) gets no helper nutrient doses even after heavy refilling', async () => {
     const clock = new FakeClock();
     const t: TestLab = {
       clock,
@@ -139,10 +139,10 @@ describe('Dose commands — P22 / AC-38', () => {
     // เติมน้ำ 5 โดสจนล้น → EC ถูกเจือจางต่ำกว่า 1.0
     for (let i = 0; i < 5; i++) await t.lab.handle({ type: 'dose', device: 'refill' });
     await runReal(t, 24_000); // 1 วันจำลอง
-    const ec = envEc(t.lab.sim.env);
-    expect(ec).toBeGreaterThan(0.8);
-    expect(ec).toBeLessThan(1.6);
-    expect(t.lab.events.list().some((e) => e.message.startsWith('ผู้ช่วยฟาร์ม: ใส่ปุ๋ย'))).toBe(true);
+    // ถังเริ่มว่าง 5 โดสได้ ~50 % → EC ยังเข้มจากปุ๋ยรองก้น (ด่าน 1 ต้องเติมถึง 65 % ขึ้นไปเอง)
+    expect(envEc(t.lab.sim.env)).toBeGreaterThan(1.6);
+    expect(t.lab.events.list().some((e) => e.message.startsWith('ผู้ช่วยฟาร์ม: ใส่ปุ๋ย'))).toBe(false);
+    expect(t.lab.snapshot().doses.every((d) => d.device === 'refill')).toBe(true);
   }, 30000);
 
   it('reset and PLC mode change clear pending doses', async () => {

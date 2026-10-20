@@ -18,9 +18,16 @@ function levelLab(mode: 'manual' | 'auto' = 'manual', fast = false): TestLab {
 async function winL1(t: TestLab): Promise<void> {
   await t.lab.handle({ type: 'startGame' });
   await t.lab.handle({ type: 'setSpeed', speed: 3600 });
-  if (t.mock.mode === 'manual') await t.lab.handle({ type: 'setManualLed', value: 80 });
+  if (t.mock.mode === 'manual') {
+    await t.lab.handle({ type: 'setManualLed', value: 80 });
+    await t.lab.handle({ type: 'setManualBit', key: 'refillPump', value: true }); // P37: เริ่มถังว่าง
+  }
   for (let i = 0; i < 40 && t.lab.snapshot().game.status === 'playing'; i++) {
     await runReal(t, 1000);
+    if (t.mock.mode === 'manual') {
+      const lvl = t.lab.snapshot().tank.waterLevelPct;
+      if (lvl >= 85 || lvl < 70) await t.lab.handle({ type: 'setManualBit', key: 'refillPump', value: lvl < 70 });
+    }
     if (t.lab.snapshot().game.canHarvest) await t.lab.handle({ type: 'harvest' });
   }
 }
@@ -29,9 +36,10 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
   it('starts at L1 with only L1 unlocked; locked levels and devices are rejected', async () => {
     const t = levelLab();
     const snap = t.lab.snapshot();
-    expect(snap.level).toMatchObject({ id: 'L1', targetG: 10, timeLimitDays: 8, playerDevices: ['led', 'refillPump'] });
+    expect(snap.level).toMatchObject({ id: 'L1', targetG: 10, timeLimitDays: 10, playerDevices: ['led', 'refillPump'], lockedMode: 'off' });
     expect(snap.levels.map((l) => [l.id, l.unlocked])).toEqual([['L1', true], ['L2', false], ['L3', false], ['L4', false]]);
-    expect(snap.game).toMatchObject({ status: 'ready', targetG: 10, timeLimitS: 8 * 86_400 });
+    expect(snap.game).toMatchObject({ status: 'ready', targetG: 10, timeLimitS: 10 * 86_400 });
+    expect(snap.tank.waterLevelPct).toBe(0); // P37: เริ่มถังว่าง
     await expect(t.lab.handle({ type: 'selectLevel', levelId: 'L2' })).rejects.toMatchObject({ statusCode: 409 });
     for (const key of ['fan', 'humidifier', 'nutrientA', 'nutrientB', 'airPump'] as const) {
       await expect(t.lab.handle({ type: 'setManualBit', key, value: true })).rejects.toMatchObject({ statusCode: 409 });
@@ -62,6 +70,22 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
     // อุปกรณ์ที่ผู้เล่นคุม → ใช้ค่าจาก PLC
     const player = applyFarmHelper(off, off, s({ airTempC: 30, waterLevelPct: 10 }), ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump']);
     expect(player).toEqual(off);
+  });
+
+  it('P37: L1 locked devices stay OFF (no helper fan/mist/doses) while the Air Pump stays ON', async () => {
+    const off: ActuatorCommands = { fan: false, humidifier: false, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false, ledPct: 40 };
+    const s = (over: Partial<SensorReadings>) => ({ airTempC: 25, rhPct: 60, ecMsCm: 1.1, waterLevelPct: 80, ph: 6, ...over }) as SensorReadings;
+    const plcOn = { ...off, fan: true, humidifier: true, nutrientA: true, nutrientB: true, phDown: true };
+    expect(applyFarmHelper(plcOn, off, s({ airTempC: 30, rhPct: 30, ecMsCm: 0.3 }), ['led', 'refillPump'], 'off'))
+      .toEqual({ ...off, airPump: true });
+    const t = levelLab();
+    t.mock.memory.setM(100, true); // แม้ PLC สั่ง Fan
+    await t.lab.handle({ type: 'startGame' });
+    await t.lab.handle({ type: 'setSpeed', speed: 3600 });
+    await runReal(t, 3000);
+    const snap = t.lab.snapshot();
+    expect(snap.commands).toMatchObject({ fan: false, humidifier: false, nutrientA: false, nutrientB: false, phDown: false, airPump: true });
+    expect(snap.doses).toEqual([]); // EC ต่ำตอนถังว่างก็ไม่มีโดสผู้ช่วย
   });
 
   it('winning L1 unlocks L2 and records stars; selecting levels resets to ready', async () => {

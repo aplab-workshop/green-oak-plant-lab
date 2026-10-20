@@ -46,6 +46,8 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   const r = s.sensors;
   const cmd = s.commands;
   const own = (d: PlayerDevice) => canControl(s, d);
+  // P37: ด่านที่ล็อกแบบ 'off' ไม่มีผู้ช่วยฟาร์มคุมอุปกรณ์นั้น
+  const lockedOff = s.level?.lockedMode === 'off';
   if (g.status === 'ready') return { text: 'อ่านภารกิจแล้วกด "เริ่มปลูก 🌱" เพื่อเริ่มด่าน', tone: 'info' };
   if (g.status === 'won') return { text: `เก่งมาก! เก็บเกี่ยวได้ ${g.yieldG?.toFixed(0) ?? 0} g ${'⭐'.repeat(g.stars)} — ไปด่านถัดไปได้เลย`, tone: 'good' };
   if (g.status === 'lost') return { text: 'รอบนี้ยังไม่สำเร็จ ดูสาเหตุแล้วลองปลูกใหม่อีกครั้งนะ', tone: 'danger' };
@@ -53,12 +55,19 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
 
   const active = s.challenges.filter((c) => c.status === 'active');
   if (active.some((c) => c.kind === 'powerOutage')) return { text: '⚡ ไฟดับ! อุปกรณ์หยุดหมด รอให้ไฟกลับมา แล้วค่อยเช็คน้ำและอากาศ', tone: 'danger' };
-  if (active.some((c) => c.kind === 'leak')) return { text: '💧 ถังรั่ว! กด 🔧 ซ่อมถังบนการ์ดเหตุการณ์ แล้วเติมน้ำ', tone: 'danger' };
+  const leak = active.find((c) => c.kind === 'leak');
+  if (leak?.repairable) return { text: '💧 ถังรั่ว! กด 🔧 ซ่อมถังบนการ์ดเหตุการณ์ แล้วเติมน้ำ', tone: 'danger' };
+  if (leak) {
+    return { text: `💧 ถังรั่ว (หยุดเอง) น้ำ ${r.waterLevelPct.toFixed(0)}% — เปิด 🚰 เติมน้ำชดเชยให้อยู่ 65–100% (อย่าให้ล้น)`, tone: r.waterLevelPct < 65 ? 'danger' : 'warn' };
+  }
   if (s.tank.overflowFlowLpm > 0) {
     return { text: `💧 น้ำล้น! ปิดเติมน้ำ — เสียน้ำแล้ว ${g.overflowL.toFixed(1)} L (−${g.overflowPenalty} คะแนน)`, tone: 'danger' };
   }
   const warned = s.challenges.filter((c) => c.status === 'warned').sort((a, b) => a.startS - b.startS)[0];
-  if (warned) return { text: `${warned.title} กำลังจะมา — ${ADVICE[warned.kind] ?? 'เตรียมตัวไว้'}`, tone: 'warn' };
+  if (warned) {
+    const advice = warned.kind === 'leak' && !warned.repairable ? 'เติมน้ำให้ใกล้ 90% ไว้ก่อน แล้วคอยเติมชดเชยตอนรั่ว' : ADVICE[warned.kind] ?? 'เตรียมตัวไว้';
+    return { text: `${warned.title} กำลังจะมา — ${advice}`, tone: 'warn' };
+  }
 
   if (g.canHarvest) return { text: '🎉 ผักทุกต้นถึงเป้าแล้ว กด "เก็บเกี่ยว" ได้เลย!', tone: 'good' };
 
@@ -69,9 +78,9 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   const thirsty = s.plants.filter((p) => !dead.has(p.id) && p.waterStress > 0.3).sort((a, b) => b.waterStress - a.waterStress)[0];
   if (thirsty) return { text: `ต้นที่ ${thirsty.id} ขาดน้ำ ใบเริ่มตก — เช็คระดับน้ำและรากว่าแช่น้ำพอไหม`, tone: 'warn' };
 
-  if (r.ecMsCm < 0.8) return { text: `ผักหิวปุ๋ย (EC ${r.ecMsCm.toFixed(2)}) — ${own('nutrient') ? 'กด 🧪 ใส่ปุ๋ย แล้วรอดูค่า' : 'ผู้ช่วยฟาร์มกำลังเติมปุ๋ยให้'}`, tone: 'warn' };
+  if (r.ecMsCm < 0.8) return { text: `ผักหิวปุ๋ย (EC ${r.ecMsCm.toFixed(2)}) — ${own('nutrient') ? 'กด 🧪 ใส่ปุ๋ย แล้วรอดูค่า' : lockedOff ? 'ด่านนี้ไม่ใช้ปุ๋ย — อย่าให้น้ำล้นหรือรั่วนาน เพราะพาปุ๋ยออก' : 'ผู้ช่วยฟาร์มกำลังเติมปุ๋ยให้'}`, tone: 'warn' };
   if (r.ecMsCm > 1.6) return { text: `ปุ๋ยเข้มเกิน (EC ${r.ecMsCm.toFixed(2)}) — เติมน้ำเพื่อเจือจาง และหยุดใส่ปุ๋ยก่อน`, tone: 'warn' };
-  if (r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) ผักใช้ปุ๋ยได้น้อย — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส แล้วรอดู' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
+  if (r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) ผักใช้ปุ๋ยได้น้อย — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส แล้วรอดู' : lockedOff ? 'ด่านนี้ไม่ใช้ pH Down' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
   if (r.ph < 5.5) {
     const stop = cmd.phDown && own('phDown') ? 'ปิด ⚗️ pH Down ก่อน แล้ว' : '';
     return { text: `pH ต่ำเกิน (${r.ph.toFixed(2)}) ผักเครียด — ${stop}เติมน้ำ 🚰 เล็กน้อยให้ pH ขยับขึ้น`, tone: 'warn' };
@@ -79,11 +88,11 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
 
   const tired = cmd.ledPct > 0 ? Math.max(0, ...s.plants.filter((p) => !isPlantDead(p, g.deadPlantIds)).map((p) => p.lightLoadH)) : 0;
   if (tired >= LIGHT_LOAD_WARN_H) return { text: `เปิดไฟมา ${tired.toFixed(0)} ชม. ผักต้องการช่วงมืด — ปิดหรือลดไฟ 💡 ไม่งั้นจะเครียดและโตช้า`, tone: 'warn' };
-  if (r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C ผักโตช้า — ${own('fan') ? 'เปิด 🌀 พัดลม (เย็นได้ถึงอุณหภูมิห้อง) หรือลดไฟ LED' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
+  if (r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C ผักโตช้า — ${own('fan') ? 'เปิด 🌀 พัดลม (เย็นได้ถึงอุณหภูมิห้อง) หรือลดไฟ LED' : lockedOff ? 'ด่านนี้ไม่มีพัดลม — ลดไฟ LED ตอนแดดแรง' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
   // P33: ใช้ VPD — แห้งเปิดหมอก, ชื้นจัดขณะเปิดหมอกให้ปิด
   const comfort = airComfort(r.vpdKPa);
   if (comfort === 'dry' && !cmd.humidifier) {
-    return { text: `อากาศแห้ง (RH ${r.rhPct.toFixed(0)}%) ผักโตช้าแม้น้ำพอ — ${own('humidifier') ? 'เปิด 🌫️ เครื่องทำหมอก' : 'ผู้ช่วยฟาร์มจะเปิดหมอกให้'}`, tone: 'warn' };
+    return { text: `อากาศแห้ง (RH ${r.rhPct.toFixed(0)}%) ผักโตช้าแม้น้ำพอ — ${own('humidifier') ? 'เปิด 🌫️ เครื่องทำหมอก' : lockedOff ? 'ด่านนี้ไม่มีหมอก — ลดไฟ LED ช่วงร้อนจะช่วยได้' : 'ผู้ช่วยฟาร์มจะเปิดหมอกให้'}`, tone: 'warn' };
   }
   if (comfort === 'humid' && cmd.humidifier && own('humidifier')) {
     return { text: `อากาศชื้นจัด (RH ${r.rhPct.toFixed(0)}%) ผักลำเลียงธาตุอาหารได้น้อย — ปิด 🌫️ เครื่องทำหมอก`, tone: 'warn' };

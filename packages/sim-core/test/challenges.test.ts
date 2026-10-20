@@ -67,7 +67,7 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     });
   });
 
-  it('L3 has 1–2 heat waves starting around noon; L1, L2 and Free Play have none', () => {
+  it('L3 has 1–2 heat waves starting around noon; L2 and Free Play have none', () => {
     for (const seed of [1, 2, 3, 4, 5]) {
       const plan = planChallenges(L3.challenges!, seed, roundStart, cfg);
       expect(plan.length).toBeGreaterThanOrEqual(1);
@@ -82,12 +82,42 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
       }
     }
     const sim = new Simulation();
-    for (const id of ['L1', 'L2'] as const) {
-      sim.reset(levelRound(LEVELS.find((l) => l.id === id)!));
-      expect(sim.challenges).toEqual([]);
-    }
+    sim.reset(levelRound(LEVELS.find((l) => l.id === 'L2')!));
+    expect(sim.challenges).toEqual([]);
     sim.reset({});
     expect(sim.challenges).toEqual([]);
+  });
+
+  it('P37: L1 has 2–3 self-stopping leaks (4–6 h) that cannot be repaired', () => {
+    const L1 = LEVELS.find((l) => l.id === 'L1')!;
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const plan = planChallenges(L1.challenges!, seed, roundStart, cfg);
+      expect(plan.length).toBeGreaterThanOrEqual(2);
+      expect(plan.length).toBeLessThanOrEqual(3);
+      for (const p of plan) {
+        expect(p.kind).toBe('leak');
+        expect(p.durationS! / 3600).toBeGreaterThanOrEqual(4);
+        expect(p.durationS! / 3600).toBeLessThanOrEqual(6);
+      }
+    }
+    const sim = new Simulation();
+    sim.reset(levelRound(L1));
+    const first = sim.challenges[0]!;
+    while (sim.simTimeS < first.startS + 600) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+    expect(sim.challengeViews().find((c) => c.id === first.id)).toMatchObject({ status: 'active', repairable: false });
+    expect(sim.repairLeak()).toBe(false);
+    while (sim.simTimeS < first.startS + first.durationS! + 60) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+    expect(sim.challenges.find((c) => c.id === first.id)!.status).toBe('done');
+  });
+
+  it('P37: L1 starts with an empty tank whose nutrient residue gives the start EC once filled to 85 %', () => {
+    const sim = new Simulation({ seed: 1 });
+    sim.reset(levelRound(LEVELS.find((l) => l.id === 'L1')!));
+    expect(sim.env.waterVolumeL).toBe(0);
+    const off = { fan: false, humidifier: false, ledPct: 0, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
+    while (sim.readSensors(false).waterLevelPct < 85) sim.step(10, off);
+    expect(sim.readSensors(false).ecMsCm).toBeGreaterThan(1.0);
+    expect(sim.readSensors(false).ecMsCm).toBeLessThan(1.4);
   });
 });
 

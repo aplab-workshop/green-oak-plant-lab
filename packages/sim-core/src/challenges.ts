@@ -19,6 +19,8 @@ export interface ChallengeSpec {
   windowDays: readonly [number, number];
   /** ค่าคงที่เฉพาะด่าน ผสมกับ Seed ให้ตารางต่างกันในแต่ละด่าน */
   salt: number;
+  /** ถังรั่วหยุดเองหลัง [ต่ำสุด, สูงสุด] ชั่วโมง (ซ่อมไม่ได้) — ไม่ระบุ = รั่วจนกว่าจะซ่อม (P37) */
+  leakHours?: readonly [number, number];
 }
 
 /** เหตุการณ์ที่วางแผนไว้ (เวลาจำลองแบบสัมบูรณ์) */
@@ -68,7 +70,7 @@ export const NO_EFFECTS: Readonly<ChallengeEffects> = Object.freeze({
 const randInt = (rng: Rng, lo: number, hi: number) => lo + Math.floor(rng.next() * (hi - lo + 1));
 
 /** ระยะเวลาของเหตุการณ์ (s) — null = จนกว่าจะซ่อม */
-function durationOf(kind: ChallengeKind, rng: Rng, cfg: SimConfig): number | null {
+function durationOf(kind: ChallengeKind, rng: Rng, cfg: SimConfig, spec: ChallengeSpec): number | null {
   const c = cfg.challenges;
   switch (kind) {
     case 'heatWave':
@@ -80,7 +82,7 @@ function durationOf(kind: ChallengeKind, rng: Rng, cfg: SimConfig): number | nul
     case 'alkalineTap':
       return c.alkalineTapHours * 3600;
     case 'leak':
-      return null;
+      return spec.leakHours ? randInt(rng, spec.leakHours[0], spec.leakHours[1]) * 3600 : null;
   }
 }
 
@@ -124,7 +126,7 @@ export function planChallenges(spec: ChallengeSpec, seed: number, roundStartS: n
     id: i + 1,
     kind,
     startS: day0 + days[i]! * SECONDS_PER_DAY + startHourOf(kind, rng) * 3600,
-    durationS: durationOf(kind, rng, cfg),
+    durationS: durationOf(kind, rng, cfg, spec),
   }));
 }
 
@@ -159,6 +161,7 @@ export function challengeViews(states: readonly ChallengeState[]): ChallengeView
       startS: s.startS,
       endS: s.endedAtS ?? (s.durationS === null ? null : s.startS + s.durationS),
       repaired: s.repaired,
+      repairable: s.kind === 'leak' && s.durationS === null,
     }));
 }
 
@@ -172,7 +175,9 @@ export function challengeMessage(s: ChallengeState, phase: 'warning' | 'start' |
       case 'heatWave':
         return `พยากรณ์ ${t}: อีก 6 ชั่วโมงห้องจะร้อนขึ้น ${c.heatWaveDeltaC} °C นาน ~${hours} ชม. — เตรียมเปิดพัดลมและลดไฟ LED`;
       case 'leak':
-        return `แจ้งเตือน ${t}: ข้อต่อถังเริ่มหลวม อีก 6 ชั่วโมงอาจรั่ว — เติมน้ำให้พร้อมและเตรียมกดซ่อมถัง`;
+        return s.durationS === null
+          ? `แจ้งเตือน ${t}: ข้อต่อถังเริ่มหลวม อีก 6 ชั่วโมงอาจรั่ว — เติมน้ำให้พร้อมและเตรียมกดซ่อมถัง`
+          : `แจ้งเตือน ${t}: อีก 6 ชั่วโมงถังจะรั่ว ~${hours} ชม. (หยุดเอง) — เติมน้ำให้พร้อมแล้วคอยเติมชดเชย`;
       case 'powerOutage':
         return `การไฟฟ้าแจ้ง ${t}: อีก 6 ชั่วโมงไฟจะดับ ~${hours} ชม. ทุกอุปกรณ์จะหยุด — เติมน้ำและปุ๋ยให้พอก่อน`;
       case 'dryAir':
@@ -186,7 +191,9 @@ export function challengeMessage(s: ChallengeState, phase: 'warning' | 'start' |
       case 'heatWave':
         return `${t} มาแล้ว! ห้องร้อนขึ้น ${c.heatWaveDeltaC} °C`;
       case 'leak':
-        return `${t}! น้ำไหลออก ${c.leakLph} L/h — กดปุ่ม "ซ่อมถัง"`;
+        return s.durationS === null
+          ? `${t}! น้ำไหลออก ${c.leakLph} L/h — กดปุ่ม "ซ่อมถัง"`
+          : `${t}! น้ำไหลออก ${c.leakLph} L/h นาน ~${hours} ชม. — เปิดปั๊มเติมน้ำชดเชย`;
       case 'powerOutage':
         return `${t}! อุปกรณ์ทุกตัวหยุด รวมไฟ LED และปั๊มลม`;
       case 'dryAir':

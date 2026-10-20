@@ -23,7 +23,11 @@ export function LevelBriefing() {
     <div>
       <p className="mb-1 font-semibold">🎮 อุปกรณ์ที่คุณคุม</p>
       <p className="flex flex-wrap gap-1.5">{level.playerDevices.map((d) => <span key={d} className="rounded-full bg-white px-2.5 py-1 text-xs ring-1 ring-emerald-200">{DEVICE_LABEL[d]}</span>)}</p>
-      {locked.length > 0 && <p className="mt-1.5 text-xs text-slate-500">🔒 ผู้ช่วยฟาร์มดูแลให้: {locked.map((d) => DEVICE_LABEL[d]).join(' · ')}</p>}
+      {locked.length > 0 && level.lockedMode === 'helper' && <p className="mt-1.5 text-xs text-slate-500">🔒 ผู้ช่วยฟาร์มดูแลให้: {locked.map((d) => DEVICE_LABEL[d]).join(' · ')}</p>}
+      {level.lockedMode === 'off' && <p className="mt-1.5 text-xs text-slate-500">
+        🔒 ปิดไว้ ไม่ใช้ในด่านนี้: {(['fan', 'humidifier', 'nutrient', 'phDown'] as const).filter((d) => !level.playerDevices.includes(d)).map((d) => DEVICE_LABEL[d]).join(' · ')}
+        {!level.playerDevices.includes('airPump') && ` · ${DEVICE_LABEL.airPump} เปิดตลอด`}
+      </p>}
     </div>
     <div>
       <p className="mb-1 font-semibold">✅ ต้องทำ</p>
@@ -55,7 +59,7 @@ function DeviceRationaleList() {
       const r = DEVICE_RATIONALE[PLAYER_DEVICE_KEY[d]];
       const locked = !!level && !level.playerDevices.includes(d);
       return <div key={d} className="rounded-xl bg-slate-50 px-3 py-2">
-        <p className="font-semibold text-slate-800">{DEVICE_LABEL[d]}{locked && <span className="ml-2 text-xs font-normal text-slate-500">🔒 ด่านนี้ผู้ช่วยฟาร์มดูแล</span>}</p>
+        <p className="font-semibold text-slate-800">{DEVICE_LABEL[d]}{locked && <span className="ml-2 text-xs font-normal text-slate-500">{level?.lockedMode === 'off' && d !== 'airPump' ? '🔒 ด่านนี้ปิดไว้ ไม่ใช้' : '🔒 ด่านนี้ผู้ช่วยฟาร์มดูแล'}</span>}</p>
         <p className="text-xs text-slate-700">🩺 <b>ปัญหา:</b> {r.problem}</p>
         <p className="text-xs text-emerald-800">✅ <b>ผลดี:</b> {r.benefit}</p>
         <p className="text-xs text-amber-800">⚠️ <b>ระวัง:</b> {r.caution}</p>

@@ -73,6 +73,8 @@ export interface RoundStart {
   challenges?: ChallengeSpec;
   /** ตารางเหตุการณ์ที่กำหนดเอง (Test/Scenario) — มาก่อน challenges */
   challengePlan?: ChallengePlan[];
+  /** ระดับน้ำเริ่มรอบ (%) — ปุ๋ยในถังคงเท่ากับ EC เริ่มต้นที่ระดับปกติ (P37 ด่าน 1 เริ่ม 0 %) */
+  startWaterPct?: number;
 }
 
 /** คำสั่งระหว่างไฟดับ: ทุกอย่าง OFF รวม Air Pump และ LED */
@@ -136,6 +138,10 @@ export class Simulation {
     const cfg = this.cfg;
     this._simTimeS = this.startTimeS;
     this._env = initialEnvironment(cfg, this._simTimeS);
+    if (this.round.startWaterPct !== undefined) {
+      // ถังเริ่มที่ระดับของด่าน แต่ปุ๋ยรองก้นถังเท่าเดิม → เติมถึงระดับปกติแล้วได้ EC เริ่มต้น
+      this._env = { ...this._env, waterVolumeL: (Math.min(100, Math.max(0, this.round.startWaterPct)) / 100) * cfg.tank.capacityL };
+    }
     const growthRng = new Rng(this.seed);
     this.noiseRng = new Rng(this.seed + 0x9e3779b9);
     const { count, initialBiomassSpread } = cfg.plant;
@@ -171,9 +177,9 @@ export class Simulation {
     return outageAt(this._challenges, this._simTimeS);
   }
 
-  /** ซ่อมถังรั่ว — คืน false ถ้าไม่มีการรั่วที่กำลังเกิด */
+  /** ซ่อมถังรั่ว — คืน false ถ้าไม่มีการรั่วที่ซ่อมได้กำลังเกิด (รั่วที่หยุดเองซ่อมไม่ได้ — P37) */
   repairLeak(): boolean {
-    const leak = this._challenges.find((c) => c.kind === 'leak' && c.status === 'active');
+    const leak = this._challenges.find((c) => c.kind === 'leak' && c.status === 'active' && c.durationS === null);
     if (!leak) return false;
     leak.status = 'done';
     leak.endedAtS = this._simTimeS;

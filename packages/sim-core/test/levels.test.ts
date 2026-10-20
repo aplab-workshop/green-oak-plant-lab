@@ -24,6 +24,14 @@ function playGuide(level: LevelDef, ledPct: number, seed = 1) {
       cmd.humidifier = r.rhPct < 55 ? true : r.rhPct > 70 ? false : cmd.humidifier;
       cmd.nutrientA = cmd.nutrientB = r.ecMsCm < 1.0 ? true : r.ecMsCm >= 1.2 ? false : cmd.nutrientA;
       cmd.phDown = r.ph > 6.6 ? true : r.ph <= 6.3 ? false : cmd.phDown;
+      // P37: ด่านที่ล็อกแบบ 'off' — อุปกรณ์ที่ไม่ได้ปลดล็อกปิดสนิท (ปั๊มลมเปิด)
+      if (level.lockedMode === 'off') {
+        const own = (d: (typeof level.playerDevices)[number]) => level.playerDevices.includes(d);
+        if (!own('fan')) cmd.fan = false;
+        if (!own('humidifier')) cmd.humidifier = false;
+        if (!own('nutrient')) cmd.nutrientA = cmd.nutrientB = false;
+        if (!own('phDown')) cmd.phDown = false;
+      }
       if (sim.challenges.some((c) => c.kind === 'leak' && c.status === 'active')) sim.repairLeak();
     }
     sim.step(1, cmd);

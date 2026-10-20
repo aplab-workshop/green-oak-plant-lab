@@ -10,7 +10,7 @@ const plant = (id: number, over: Partial<PlantState> = {}): PlantState => ({
   rootSubmerged: 1, supplyRatio: 1, demandLPerDay: 0.1, ppfd: 300, dliToday: 5, dliYesterday: 12, lightLoadH: 4, dryAirStress: 0, humidAirStress: 0, growthGPerH: 0.2, growthEfficiency: 1, ...over,
 } as PlantState);
 
-const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', description: '', targetG: 30, startBiomassG: 15, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'] };
+const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', description: '', targetG: 30, startBiomassG: 15, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'], lockedMode: 'helper' };
 
 /** Snapshot ที่ทุกอย่างปกติ (กลางวัน ไฟ 80%) */
 function snap(over: Partial<LabSnapshot> = {}, sensors: Partial<LabSnapshot['sensors']> = {}): LabSnapshot {
@@ -47,9 +47,9 @@ describe('helperMessage priority', () => {
 
   it('fail-safe, outage and leak beat everything else while playing', () => {
     expect(helperMessage(snap({ failsafe: true }, { waterLevelPct: 40 })).text).toContain('Fail-safe');
-    const outage = snap({ challenges: [{ id: 1, kind: 'powerOutage', title: '⚡ ไฟดับ', status: 'active', startS: 0, endS: 9e9, repaired: false }] }, { waterLevelPct: 40 });
+    const outage = snap({ challenges: [{ id: 1, kind: 'powerOutage', title: '⚡ ไฟดับ', status: 'active', startS: 0, endS: 9e9, repaired: false, repairable: false }] }, { waterLevelPct: 40 });
     expect(helperMessage(outage).text).toContain('ไฟดับ');
-    const leak = snap({ challenges: [{ id: 1, kind: 'leak', title: '💧 ถังรั่ว', status: 'active', startS: 0, endS: null, repaired: false }] });
+    const leak = snap({ challenges: [{ id: 1, kind: 'leak', title: '💧 ถังรั่ว', status: 'active', startS: 0, endS: null, repaired: false, repairable: true }] });
     expect(helperMessage(leak).text).toContain('ซ่อมถัง');
   });
 
@@ -62,7 +62,7 @@ describe('helperMessage priority', () => {
   });
 
   it('helper uses VPD: dry → turn on mist, humid while misting → turn it off (P33)', () => {
-    const L3: LevelInfo = { id: 'L3', title: 'คลื่นความร้อน', description: '', targetG: 60, startBiomassG: 30, timeLimitDays: 10, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'] };
+    const L3: LevelInfo = { id: 'L3', title: 'คลื่นความร้อน', description: '', targetG: 60, startBiomassG: 30, timeLimitDays: 10, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'], lockedMode: 'helper' };
     expect(helperMessage(snap({ level: L3 }, { vpdKPa: 2.0, rhPct: 40 })).text).toContain('เปิด 🌫️');
     const misting = snap({ level: L3, commands: { ...snap().commands, humidifier: true } }, { vpdKPa: 0.3, rhPct: 92 });
     expect(helperMessage(misting).text).toContain('ปิด 🌫️');
@@ -72,16 +72,26 @@ describe('helperMessage priority', () => {
   });
 
   it('low pH tells the player to stop pH Down and dilute (P34)', () => {
-    const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'] };
+    const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'], lockedMode: 'helper' };
     const low = snap({ level: L4, commands: { ...snap().commands, phDown: true } }, { ph: 5.1 });
     expect(helperMessage(low).text).toContain('pH ต่ำเกิน');
     expect(helperMessage(low).text).toContain('ปิด ⚗️ pH Down');
     expect(helperMessage(snap({ level: L4 }, { ph: 5.1 })).text).not.toContain('ปิด ⚗️');
   });
 
+  it('P37: self-stopping leaks ask for compensating refills, not repair; locked-off devices are not promised by the helper', () => {
+    const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 10, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'], lockedMode: 'off' };
+    const leak = snap({ level: L1, challenges: [{ id: 1, kind: 'leak', title: '💧 ถังรั่ว', status: 'active', startS: 0, endS: 9e9, repaired: false, repairable: false }] }, { waterLevelPct: 60 });
+    expect(helperMessage(leak)).toMatchObject({ tone: 'danger' });
+    expect(helperMessage(leak).text).toContain('เติมน้ำชดเชย');
+    expect(helperMessage(leak).text).not.toContain('ซ่อม');
+    expect(helperMessage(snap({ level: L1 }, { airTempC: 29 })).text).toContain('ด่านนี้ไม่มีพัดลม');
+    expect(helperMessage(snap({ level: L1 }, { ecMsCm: 0.5 })).text).toContain('ด่านนี้ไม่ใช้ปุ๋ย');
+  });
+
   it('overflow comes right after outage/leak and shows litres and penalty (P29)', () => {
     const base = snap();
-    const over = { ...base, tank: { ...base.tank, overflowFlowLpm: 2 }, game: { ...base.game, overflowL: 3.4, overflowPenalty: 34 }, challenges: [{ id: 1, kind: 'heatWave' as const, title: '🔥 คลื่นความร้อน', status: 'warned' as const, startS: 9e9, endS: 9e9, repaired: false }] };
+    const over = { ...base, tank: { ...base.tank, overflowFlowLpm: 2 }, game: { ...base.game, overflowL: 3.4, overflowPenalty: 34 }, challenges: [{ id: 1, kind: 'heatWave' as const, title: '🔥 คลื่นความร้อน', status: 'warned' as const, startS: 9e9, endS: 9e9, repaired: false, repairable: false }] };
     const m = helperMessage(over);
     expect(m.tone).toBe('danger');
     expect(m.text).toContain('น้ำล้น');
@@ -90,7 +100,7 @@ describe('helperMessage priority', () => {
   });
 
   it('warns about upcoming events, then harvest, then low water', () => {
-    const warned = snap({ challenges: [{ id: 1, kind: 'heatWave', title: '🔥 คลื่นความร้อน', status: 'warned', startS: 40000, endS: 60000, repaired: false }] });
+    const warned = snap({ challenges: [{ id: 1, kind: 'heatWave', title: '🔥 คลื่นความร้อน', status: 'warned', startS: 40000, endS: 60000, repaired: false, repairable: false }] });
     expect(helperMessage(warned).text).toContain('พัดลม');
     const s = snap();
     expect(helperMessage({ ...s, game: { ...s.game, canHarvest: true } }).text).toContain('เก็บเกี่ยว');
@@ -124,8 +134,8 @@ describe('helperMessage priority', () => {
 });
 
 describe('level watch HUD (P31)', () => {
-  const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 8, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'] };
-  const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'] };
+  const L1: LevelInfo = { id: 'L1', title: 'ต้นกล้าแรก', description: '', targetG: 10, startBiomassG: 5, timeLimitDays: 8, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'], lockedMode: 'helper' };
+  const L4: LevelInfo = { id: 'L4', title: 'ฟาร์มของฉัน', description: '', targetG: 100, startBiomassG: 5, timeLimitDays: 35, energyBudgetKWh: 60, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'], lockedMode: 'helper' };
 
   it('picks dials from the devices the level unlocks', () => {
     expect(watchDials(snap({ level: L1 })).map((d) => d.key)).toEqual(['water', 'ppfd', 'lightLoad']);

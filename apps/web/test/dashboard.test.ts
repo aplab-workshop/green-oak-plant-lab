@@ -138,7 +138,7 @@ describe('formatDoseRemaining (P22)', () => {
 });
 
 describe('challenge countdown (P23)', () => {
-  const base = { id: 1, title: '🔥 คลื่นความร้อน', startS: 10_000, endS: 30_000, repaired: false } as const;
+  const base = { id: 1, title: '🔥 คลื่นความร้อน', startS: 10_000, endS: 30_000, repaired: false, repairable: false } as const;
 
   it('formats simulated hours as h:mm', () => {
     expect(formatHours(5.5 * 3600)).toBe('5:30');
@@ -150,7 +150,7 @@ describe('challenge countdown (P23)', () => {
     expect(challengeLine({ ...base, kind: 'heatWave', status: 'warned' }, 10_000 - 3 * 3600)).toBe('อีก 3:00 ชม.');
     expect(challengeLine({ ...base, kind: 'heatWave', status: 'active' }, 30_000 - 1800)).toBe('เหลือ 0:30 ชม.');
     expect(challengeLine({ ...base, kind: 'leak', status: 'active', endS: null }, 12_000)).toBe('กำลังเกิด — กดซ่อม');
-    expect(challengeLine({ ...base, kind: 'leak', status: 'done', repaired: true }, 40_000)).toBe('ซ่อมแล้ว');
+    expect(challengeLine({ ...base, kind: 'leak', status: 'done', repaired: true, repairable: false }, 40_000)).toBe('ซ่อมแล้ว');
     expect(challengeLine({ ...base, kind: 'dryAir', status: 'done' }, 40_000)).toBe('จบแล้ว');
   });
 });
