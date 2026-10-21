@@ -213,7 +213,11 @@ export class LabSession {
 
   private drainSimEvents(): void {
     for (const e of this.sim.drainEvents()) {
-      if (e.kind === 'game.over' || e.kind === 'game.won') this.saveRecord();
+      if (e.kind === 'game.over' || e.kind === 'game.won') {
+        this.saveRecord();
+        // P39: เก็บเกี่ยวอัตโนมัติ/จบรอบใน Step → หยุดเวลาเหมือนกดเก็บเกี่ยวเอง
+        this.clock.pause();
+      }
       this.events.add({ at: this.now(), ...e });
       if (e.kind === 'challenge.warning' || e.kind === 'challenge.start') this.autoPause(e.message);
     }

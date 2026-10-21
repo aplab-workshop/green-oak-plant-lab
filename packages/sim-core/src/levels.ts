@@ -15,9 +15,9 @@ export interface LevelDef extends LevelInfo {
 export const LEVELS: readonly LevelDef[] = [
   // P37 (SPEC § 4.20): คุม Refill + LED, อุปกรณ์อื่นปิดสนิท, เริ่มถังว่าง, รั่วเป็นช่วง ๆ หยุดเอง
   { id: 'L1', title: 'ต้นกล้าแรก', description: 'เติมน้ำจากถังว่างและคุมแสงตามช่วงเวลา (แดด + LED) ระวังน้ำรั่วและน้ำล้น',
-    // P38 วัดแล้ว (ไม่นับความร้อน): สูตรดูแลถึง 10 g ≤ 5.03 วัน, แดดอย่างเดียวไม่เปิด LED ≥ 7.1 วัน
-    // → 6 วัน: ต้องคุมไฟจริงจึงผ่าน และสูตรดูแลเหลือเวลา ~16 %
-    startBiomassG: 5, startDay: 14, targetG: 10, timeLimitDays: 6, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'],
+    // P39 (ผู้ใช้: สั้นลงเหลือ 3 วัน, ลดเป้า) วัด Seed 1–5: สูตรดูแล ต้นเล็กสุด ≥ 6.89 g ที่ 2.55 วัน,
+    // แดดอย่างเดียว ≤ 6.46 g ที่ 3 วัน → เป้า 6.8 g: ต้องคุมไฟจริง และสูตรดูแลเหลือเวลา ≥ 15 %
+    startBiomassG: 5, startDay: 14, targetG: 6.8, timeLimitDays: 3, energyBudgetKWh: 20, playerDevices: ['led', 'refillPump'],
     lockedMode: 'off', startWaterPct: 0,
     // P38: คุมได้แค่น้ำกับแสง — อุณหภูมิ/ความชื้น/EC-pH ไม่มีผลต่อผักในด่านนี้
     ignoredFactors: ['temperature', 'air', 'nutrient'],

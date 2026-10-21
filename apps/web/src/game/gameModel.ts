@@ -69,7 +69,8 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
     return { text: `${warned.title} กำลังจะมา — ${advice}`, tone: 'warn' };
   }
 
-  if (g.canHarvest) return { text: '🎉 ผักทุกต้นถึงเป้าแล้ว กด "เก็บเกี่ยว" ได้เลย!', tone: 'good' };
+  // P39: ถึงเป้าแล้วเก็บเกี่ยวอัตโนมัติ (ข้อความนี้แทบไม่ปรากฏ — กันกรณี Snapshot ระหว่าง Step)
+  if (g.canHarvest) return { text: '🎉 ผักทุกต้นถึงเป้าแล้ว — กำลังเก็บเกี่ยวอัตโนมัติ', tone: 'good' };
 
   if (r.waterLevelPct < 65) {
     return { text: `น้ำเหลือ ${r.waterLevelPct.toFixed(0)}% — ${own('refillPump') ? 'กด 🚰 เติมน้ำ (+10% ต่อกด)' : 'ผู้ช่วยฟาร์มกำลังเติมให้'}`, tone: r.waterLevelPct < 55 ? 'danger' : 'warn' };

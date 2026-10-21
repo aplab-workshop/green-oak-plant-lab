@@ -24,7 +24,7 @@ describe('Garden game flow on LabSession — P20 (SPEC § 4.5)', () => {
     expect(t.lab.snapshot()).toMatchObject({ paused: true, game: { status: 'ready' } });
   });
 
-  it('rejects harvest before plants are ready; harvest wins, stops time and records Best', async () => {
+  it('rejects harvest before plants are ready; reaching the target auto-harvests, stops time and records Best', async () => {
     const early = makeLab('lab01', 'manual', 1, {}, false);
     await early.lab.handle({ type: 'startGame' });
     await expect(early.lab.handle({ type: 'harvest' })).rejects.toMatchObject({ statusCode: 409 });
@@ -35,8 +35,8 @@ describe('Garden game flow on LabSession — P20 (SPEC § 4.5)', () => {
     await t.lab.handle({ type: 'startGame' });
     await t.lab.handle({ type: 'setSpeed', speed: 60 });
     await runReal(t, 2000);
-    expect(t.lab.snapshot().game.canHarvest).toBe(true);
-    await t.lab.handle({ type: 'harvest' });
+    // P39: ถึงเป้าแล้วเก็บเกี่ยวอัตโนมัติ — กดซ้ำได้ 409
+    await expect(t.lab.handle({ type: 'harvest' })).rejects.toMatchObject({ statusCode: 409 });
     const won = t.lab.snapshot();
     expect(won).toMatchObject({ paused: true, game: { status: 'won', canHarvest: false, testRun: false } });
     expect(won.game.yieldG).toBeGreaterThan(0);

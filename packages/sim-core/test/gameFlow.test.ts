@@ -17,7 +17,7 @@ describe('Garden game flow — P20 (SPEC § 4.5)', () => {
     expect(game.snapshot()).toMatchObject({ status: 'playing', elapsedS: 3600 });
   });
 
-  it('allows harvest only when every surviving plant reaches harvestAtG, then freezes the round', () => {
+  it('auto-harvests (P39) only when every surviving plant reaches harvestAtG, then freezes the round', () => {
     const game = new CareGame(seedlings(), cfg); game.start();
     const [a, b] = seedlings();
     const half = [{ ...a!, biomassG: 100 }, { ...b!, biomassG: 60 }];
@@ -27,12 +27,10 @@ describe('Garden game flow — P20 (SPEC § 4.5)', () => {
     // ต้นที่ 2 ตาย → ต้นที่รอดทุกต้นถึง 100 g → เก็บเกี่ยวได้ แต่คะแนนลด
     const oneDead = [{ ...a!, biomassG: 120 }, { ...b!, biomassG: 60, damage: 1, health: 0 }];
     game.step(oneDead, 3600, 7200);
-    const before = game.snapshot();
-    expect(before).toMatchObject({ status: 'playing', canHarvest: true });
-    expect(game.harvest(oneDead, 7200)).toBe(true);
     const won = game.snapshot();
-    const bonus = Math.round(cfg.game.harvestBonus * 0.5 * before.averageHealth / 100);
-    expect(won).toMatchObject({ status: 'won', endedAtS: 7200, yieldG: 120, harvestBonus: bonus, score: before.score + bonus, canHarvest: false });
+    const bonus = Math.round(cfg.game.harvestBonus * 0.5 * won.averageHealth / 100);
+    expect(won).toMatchObject({ status: 'won', endedAtS: 7200, yieldG: 120, harvestBonus: bonus, canHarvest: false });
+    expect(won.score - won.harvestBonus).toBeLessThan(1000); // คะแนนดูแลลดเพราะต้นตาย
     game.step(oneDead, 3600, 10800);
     expect(game.harvest(oneDead, 10800)).toBe(false);
     expect(game.snapshot()).toEqual(won);
@@ -41,9 +39,9 @@ describe('Garden game flow — P20 (SPEC § 4.5)', () => {
   it('perfect care earns 1000 + full harvest bonus', () => {
     const game = new CareGame(seedlings(), cfg); game.start();
     const mature = seedlings().map((p) => ({ ...p, biomassG: 100 }));
-    game.step(mature, 3600, 3600);
-    expect(game.harvest(mature, 3600)).toBe(true);
-    expect(game.snapshot()).toMatchObject({ score: cfg.game.maxScore + cfg.game.harvestBonus, yieldG: 200 });
+    game.step(mature, 3600, 3600); // ถึงเป้า → เก็บเกี่ยวอัตโนมัติ (P39)
+    expect(game.harvest(mature, 3600)).toBe(false);
+    expect(game.snapshot()).toMatchObject({ status: 'won', score: cfg.game.maxScore + cfg.game.harvestBonus, yieldG: 200 });
   });
 
   it('cannot harvest when every plant is dead; testRun is sticky only while playing', () => {

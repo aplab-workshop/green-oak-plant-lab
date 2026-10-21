@@ -11,7 +11,8 @@ describe('Care score and permanent death — P17', () => {
     const good = new CareGame(plants, cfg), poor = new CareGame(plants, cfg);
     good.start(); poor.start();
     expect(good.snapshot().score).toBe(0);
-    const mature = plants.map((p) => ({ ...p, biomassG: 100 }));
+    // ต่ำกว่าเป้าเล็กน้อย — ถึงเป้าแล้วเก็บเกี่ยวอัตโนมัติ (P39) ซึ่งไม่ใช่สิ่งที่เทสต์นี้ตรวจ
+    const mature = plants.map((p) => ({ ...p, biomassG: 99.99 }));
     good.step(mature, 3600, 3600);
     poor.step(mature.map((p) => ({ ...p, health: 40 })), 3600, 3600);
     expect(good.snapshot().score).toBe(1000);
@@ -73,20 +74,24 @@ describe('Overflow penalty — P29', () => {
   it('deducts points per litre lost (capped, never below 0) and keeps the round winnable', () => {
     const cfg = makeConfig();
     const plants = [createPlant(1, 0, 5, 0, cfg)];
+    const almost = plants.map((p) => ({ ...p, biomassG: 99.99 })); // ยังไม่ถึงเป้า (ไม่เก็บเกี่ยวอัตโนมัติ)
     const mature = plants.map((p) => ({ ...p, biomassG: 100 }));
     const game = new CareGame(plants, cfg);
-    game.step(mature, 60, 60, 18, 5, 18); // ready: ไม่นับ
+    game.step(almost, 60, 60, 18, 5, 18); // ready: ไม่นับ
     expect(game.snapshot()).toMatchObject({ overflowL: 0, overflowPenalty: 0 });
     game.start();
-    game.step(mature, 60, 120, 18, 2, 18);
+    game.step(almost, 60, 120, 18, 2, 18);
     expect(game.snapshot()).toMatchObject({ overflowL: 2, overflowPenalty: 20, score: 980 });
     expect(game.snapshot().overflowKWh).toBeCloseTo(18 * 60 / 3_600_000, 12);
-    game.step(mature, 60, 180, 0, 0, 0);
+    game.step(almost, 60, 180, 0, 0, 0);
     expect(game.snapshot().overflowKWh).toBeCloseTo(18 * 60 / 3_600_000, 12);
-    game.step(mature, 60, 240, 18, 100, 18);
-    expect(game.snapshot()).toMatchObject({ overflowL: 102, overflowPenalty: 300, score: 700, status: 'playing', canHarvest: true });
-    expect(game.harvest(mature, 240)).toBe(true);
-    expect(game.snapshot()).toMatchObject({ status: 'won', stars: 3, score: 700 + game.snapshot().harvestBonus });
+    game.step(almost, 60, 240, 18, 100, 18);
+    expect(game.snapshot()).toMatchObject({ overflowL: 102, overflowPenalty: 300, score: 700, status: 'playing' });
+    // ถึงเป้า → เก็บเกี่ยวอัตโนมัติ (P39) ดาวไม่ลดเพราะน้ำล้น
+    game.step(mature, 60, 300, 0, 0, 0);
+    const won = game.snapshot();
+    expect(won).toMatchObject({ status: 'won', stars: 3, endedAtS: 300 });
+    expect(won.score).toBe(700 + won.harvestBonus);
   });
 
   it('score floor is zero', () => {
@@ -120,7 +125,8 @@ describe('Harvest progress and growth rate — P35', () => {
     expect(game.snapshot().harvestProgress).toBeCloseTo(0.2, 12); // ต้น 2: (12−10)/(20−10)
     expect(game.snapshot().canHarvest).toBe(false);
     game.step([{ ...plants[0]!, biomassG: 20 }, { ...plants[1]!, damage: 1, health: 0 }], 60, 120);
-    expect(game.snapshot()).toMatchObject({ harvestProgress: 1, canHarvest: true }); // ต้นที่ตายไม่นับ
+    // ต้นที่ตายไม่นับ → ถึงเป้า → เก็บเกี่ยวอัตโนมัติ (P39)
+    expect(game.snapshot()).toMatchObject({ harvestProgress: 1, status: 'won', endedAtS: 120 });
   });
 
   it('growthGPerH matches the biomass change and efficiency is ~1 under the care recipe at noon', () => {

@@ -75,6 +75,11 @@ export class CareGame {
       growthProgress, harvestProgress, deadPlantIds, totalPlants: plants.length, status: alive === 0 ? 'lost' : 'playing',
       endedAtS: alive === 0 ? simTimeS : null, canHarvest: alive === 0 ? false : canHarvest,
       energyKWh: this.progress.energyKWh + powerW * dtS / 3_600_000, lostReason: alive === 0 ? 'allDead' : null };
+    // P39: ผักที่รอดถึงเป้าครบ → เก็บเกี่ยวอัตโนมัติ จบรอบทันที
+    if (this.progress.status === 'playing' && this.progress.canHarvest) {
+      this.harvest(plants, simTimeS);
+      return;
+    }
     const limit = this.progress.timeLimitS;
     if (this.progress.status === 'playing' && limit !== null && elapsedS >= limit && !this.harvest(plants, simTimeS)) {
       this.progress = { ...this.progress, score: 0, status: 'lost', endedAtS: simTimeS, canHarvest: false, lostReason: 'timeout' };

@@ -826,3 +826,9 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Environment จริงไม่เปลี่ยน (อุณหภูมิ, RH, EC, pH, ออกซิเจนในถัง) — ยังแสดงใน Sensor/PLC ตามเดิม
 - Web: `helperMessage` ใช้ `counts(factor)` จาก `level.ignoredFactors`
 
+### 11.36 Implementation Notes (P39 — Auto-harvest)
+
+- `CareGame.step`: หลังคำนวณคะแนน ถ้า `canHarvest` → `harvest(plants, simTimeS)` แล้ว return (ก่อนตรวจหมดเวลา); `Simulation.step` เห็น status won → `emitWon()` ตามเดิม
+- `LabSession.drainSimEvents`: Event `game.won`/`game.over` → `saveRecord()` + `clock.pause()`; คำสั่ง `harvest` ยังอยู่ (409 เมื่อจบแล้ว)
+- ด่าน 1: `targetG: 6.8`, `timeLimitDays: 3`
+
