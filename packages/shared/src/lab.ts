@@ -217,8 +217,8 @@ export interface LabSnapshot {
   challenges: ChallengeView[];
   /** แถบแจ้งเตือนที่ไม่หยุดเกม: น้ำต่ำ (P43), EC นอกช่วง (P44) — [] = ไม่มี */
   alerts: string[];
-  /** Mascot วิ่งมาเตะถัง (ถังรั่วแบบ surprise, P41) — progress 0–1 ตามเวลาจำลอง, 0.5 = เตะถัง; null = ไม่มีในฉาก */
-  mascot: { progress: number } | null;
+  /** Mascot วิ่งมาก่อเหตุ (surprise, P41/P46) — progress 0–1 ตามเวลาจำลอง, 0.5 = เตะถัง/ปล่อยของ; kind = ชนิดเหตุการณ์; null = ไม่มีในฉาก */
+  mascot: { progress: number; kind: ChallengeKind } | null;
   /** ผู้ช่วยหยุดเกม — reason = เหตุผลที่หยุดล่าสุด (ล้างเมื่อ Resume) */
   autoPause: { enabled: boolean; reason: string | null };
 }

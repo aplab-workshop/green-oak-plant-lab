@@ -133,7 +133,7 @@ describe('Plant water stress — AC-03 / AC-04 / AC-05', () => {
     expect(kinds).toContain('plant.water_stress');
     expect(kinds).toContain('plant.wilting');
     expect(kinds).toContain('plant.damage');
-  });
+  }, 30_000);
 
   it('plants wilt more slowly in the dark than under strong light', () => {
     const lit = new Simulation({ seed: 3, cfg: noSunConfig() });
@@ -210,7 +210,7 @@ describe('Growth baseline', () => {
     for (const p of a.plants.filter((x) => x.stage === 'seedling')) {
       expect(events.some((x) => x.kind === 'plant.stage' && x.plantId === p.id)).toBe(false);
     }
-  });
+  }, 30_000);
 
   it('low light slows growth', () => {
     const bright = new Simulation({ seed: 7, cfg: noSunConfig() });

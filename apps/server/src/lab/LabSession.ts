@@ -16,9 +16,10 @@ import {
   sensorStatus,
   SENSOR_RANGES,
   SENSOR_REGISTERS,
+  airComfort,
 } from '@gol/shared';
 import {
-  LEVELS, SimClock, Simulation, envEc, findLevel, levelInfo, levelPct, levelRound, waterHeightCm,
+  LEVELS, SimClock, Simulation, findLevel, levelInfo, levelPct, levelRound, waterHeightCm,
   type LevelDef, type RoundStart, type SimulationOptions,
 } from '@gol/sim-core';
 import { applyFarmHelper } from './farmHelper';
@@ -82,6 +83,33 @@ const HELPER_PH_DOWN_ABOVE = 6.6;
 const HELPER_NUTRIENT_BELOW = 1.0;
 
 /** ค่าที่ Auto-pause ตรวจ "สีแดงครั้งแรก" (SPEC § 4.8) */
+type Out = 'low' | 'high';
+/** แถบเตือนค่านอกช่วงของด่านแบบแจ้งเตือน — แสดงเฉพาะด่านที่ผู้เล่นคุมอุปกรณ์นั้น (P44 EC, P46 อุณหภูมิ/อากาศ) */
+const RANGE_ALERTS: { event: string; device: PlayerDevice; out: (r: SensorReadings) => Out | null; text: (r: SensorReadings, o: Out) => string }[] = [
+  {
+    event: 'tank.ec_alert', device: 'nutrient',
+    out: (r) => outOf(r.ecMsCm, SENSOR_RANGES.ecMsCm!.ok),
+    text: (r, o) => o === 'low'
+      ? `🧪 EC ${r.ecMsCm.toFixed(2)} ต่ำ ผักหิวปุ๋ย — กด 🧪 ใส่ปุ๋ย`
+      : `🧪 EC ${r.ecMsCm.toFixed(2)} เข้มเกิน — เติมน้ำ 🚰 เจือจาง และหยุดใส่ปุ๋ย`,
+  },
+  {
+    event: 'air.temp_alert', device: 'fan',
+    out: (r) => outOf(r.airTempC, SENSOR_RANGES.airTempC!.ok),
+    text: (r, o) => o === 'high'
+      ? `🌡️ ร้อน ${r.airTempC.toFixed(1)} °C — เปิด 🌀 พัดลม หรือลดไฟ LED`
+      : `🌡️ เย็น ${r.airTempC.toFixed(1)} °C — ปิด 🌀 พัดลม`,
+  },
+  {
+    event: 'air.vpd_alert', device: 'humidifier',
+    out: (r) => { const c = airComfort(r.vpdKPa); return c === 'dry' ? 'high' : c === 'humid' ? 'low' : null; },
+    text: (r, o) => o === 'high'
+      ? `💨 อากาศแห้ง (VPD ${r.vpdKPa.toFixed(1)} kPa) — เปิด 🌫️ หมอก`
+      : `💦 อากาศชื้นจัด (VPD ${r.vpdKPa.toFixed(1)} kPa) — ปิด 🌫️ หมอก`,
+  },
+];
+const outOf = (v: number, [lo, hi]: readonly [number, number]): Out | null => (v < lo ? 'low' : v > hi ? 'high' : null);
+
 const RED_WATCH = ['waterLevelPct', 'ecMsCm', 'ph', 'airTempC', 'rhPct'] as const;
 /** P37: หยุดเกมเฉพาะค่าที่ผู้เล่นแก้ได้ด้วยอุปกรณ์ที่ด่านปลดล็อก */
 const RED_WATCH_DEVICE: Record<(typeof RED_WATCH)[number], PlayerDevice> = {
@@ -141,8 +169,8 @@ export class LabSession {
   private waterReached = false;
   /** P43: น้ำต่ำกว่า waterAlertPct อยู่ → แถบแจ้งเตือน (ไม่หยุดเกม) */
   private waterLow = false;
-  /** P44: EC นอกช่วงดีอยู่ (ด่านแบบแจ้งเตือนที่ผู้เล่นคุมปุ๋ย) */
-  private ecOut: 'low' | 'high' | null = null;
+  /** P44/P46: ค่าที่นอกช่วงอยู่ (Event kind ของกฎ → low/high) ในด่านแบบแจ้งเตือน */
+  private readonly rangeOut = new Map<string, 'low' | 'high'>();
   private readonly bestStars = new Map<LevelId, number>();
 
   private get recordKey(): string {
@@ -245,14 +273,14 @@ export class LabSession {
   }
 
   /**
-   * ด่านแบบแจ้งเตือน: น้ำ < waterAlertPct (P43) และ EC นอกช่วงดีเมื่อผู้เล่นคุมปุ๋ย (P44)
+   * ด่านแบบแจ้งเตือน: น้ำ < waterAlertPct (P43) และค่านอกช่วงของอุปกรณ์ที่ผู้เล่นคุม — EC (P44), อุณหภูมิ/อากาศ (P46)
    * → แถบแจ้งเตือน + Event log ครั้งละหนึ่งครั้งต่อการออกนอกช่วง (ไม่หยุดเกม)
    */
   private checkAlerts(): void {
     const lim = this.level?.waterAlertPct ?? null;
     if (lim === null || this.sim.game.status !== 'playing') {
       this.waterLow = false;
-      this.ecOut = null;
+      this.rangeOut.clear();
       return;
     }
     const r = this.sim.readSensors(false);
@@ -263,34 +291,27 @@ export class LabSession {
       this.waterLow = true;
       this.log('tank.low_water', 'warning', this.waterAlertText(r.waterLevelPct, lim));
     }
-    const ec = this.ecOutOf(r.ecMsCm);
-    if (ec && ec !== this.ecOut) this.log('tank.ec_alert', 'warning', this.ecAlertText(r.ecMsCm, ec));
-    this.ecOut = ec;
-  }
-
-  /** EC นอกช่วงดี — เฉพาะด่านที่ผู้เล่นคุมปุ๋ย */
-  private ecOutOf(ec: number): 'low' | 'high' | null {
-    if (!this.level?.playerDevices.includes('nutrient')) return null;
-    const [lo, hi] = SENSOR_RANGES.ecMsCm!.ok;
-    return ec < lo ? 'low' : ec > hi ? 'high' : null;
+    for (const rule of RANGE_ALERTS) {
+      const out = this.level?.playerDevices.includes(rule.device) ? rule.out(r) : null;
+      if (out && out !== this.rangeOut.get(rule.event)) this.log(rule.event, 'warning', rule.text(r, out));
+      if (out) this.rangeOut.set(rule.event, out);
+      else this.rangeOut.delete(rule.event);
+    }
   }
 
   private waterAlertText(w: number, lim: number): string {
     return `💧 น้ำเหลือ ${Math.floor(w)}% ต่ำกว่า ${lim}% — เปิด 🚰 เติมน้ำ`;
   }
 
-  private ecAlertText(ec: number, out: 'low' | 'high'): string {
-    return out === 'low'
-      ? `🧪 EC ${ec.toFixed(2)} ต่ำ ผักหิวปุ๋ย — กด 🧪 ใส่ปุ๋ย`
-      : `🧪 EC ${ec.toFixed(2)} เข้มเกิน — เติมน้ำ 🚰 เจือจาง และหยุดใส่ปุ๋ย`;
-  }
-
-  private alerts(waterPct: number, ec: number): string[] {
+  private alerts(r: SensorReadings): string[] {
     const lim = this.level?.waterAlertPct ?? null;
     if (lim === null) return [];
     const out: string[] = [];
-    if (this.waterLow) out.push(this.waterAlertText(waterPct, lim));
-    if (this.ecOut) out.push(this.ecAlertText(ec, this.ecOut));
+    if (this.waterLow) out.push(this.waterAlertText(r.waterLevelPct, lim));
+    for (const rule of RANGE_ALERTS) {
+      const o = this.rangeOut.get(rule.event);
+      if (o) out.push(rule.text(r, o));
+    }
     return out;
   }
 
@@ -563,7 +584,7 @@ export class LabSession {
     this.redAtStart.clear();
     this.waterReached = false;
     this.waterLow = false;
-    this.ecOut = null;
+    this.rangeOut.clear();
     this.autoPauseReason = null;
     this.sim.reset(round);
     this.clock.reset(this.sim.startTimeS);
@@ -635,8 +656,8 @@ export class LabSession {
       disturbance: s.disturbance,
       doses: [...this.doses.values()].map((d) => ({ ...d })),
       challenges: this.sim.challengeViews(),
-      alerts: this.alerts(levelPct(s.env.waterVolumeL, cfg), envEc(s.env)),
-      mascot: (() => { const p = this.sim.mascotProgress; return p === null ? null : { progress: p }; })(),
+      alerts: this.alerts(this.sim.readSensors(false)),
+      mascot: this.sim.mascot,
       autoPause: { enabled: this.autoPauseEnabled, reason: this.autoPauseReason },
     };
   }

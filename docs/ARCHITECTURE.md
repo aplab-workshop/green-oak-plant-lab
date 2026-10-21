@@ -863,3 +863,11 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `IgnoredFactors.ph`: `stepPlant` ใช้ pH กลางช่วงเหมาะของ `phCardinal` แทน pH จริงตอนคิด Nutrient stress (`nutrient` ยังปิดทั้งก้อน); `plantCause(..., { ignorePh })` ให้สาเหตุเป็น "ปุ๋ย" ไม่ใช่ "pH"
 - `LabSession.checkAlerts()` รวมน้ำ + EC; `autoPauseActive` เป็นเท็จในด่านที่มี `waterAlertPct` (ไม่หยุดเกมทั้งเหตุการณ์และค่าแดง); Snapshot `alerts: string[]` — ฝั่ง Web join เป็น string ใน selector (ไม่คืน array ใหม่)
 - ด่าน 2 ทับ Config ผ่าน `LevelDef.cfg` เท่านั้น: ปุ๋ยไหลช้าลง 5 เท่าและโดสยาวขึ้น 5 เท่า (EC +0.15 ต่อโดสเท่าเดิม), `phDropPerDoseMin` ÷5 ให้ pH ต่อโดสเท่าเดิม
+
+### 11.42 Implementation Notes (P46 — Level 3)
+
+- `ChallengeSpec.leakDays` → `days: ScheduledDay[]` (มี `kind`): `planDays` สร้างทุกรายการแล้วเรียงตามเวลาก่อนให้ `id`; รายการในวันเดียวกันต้องวางช่วงไม่ให้ Mascot ซ้อน (เทสต์ตรวจ `next.startS − mascotEnterS ≥ startS + mascotExitS`)
+- `mascotState()` ใช้กับทุกชนิดที่ `surprise` → Snapshot `mascot: { progress, kind }`; `scene/Mascot.tsx` วาดของที่ถือ (🔥/🌵) เป็น `CanvasTexture` จาก Emoji ครั้งเดียว ชูเหนือหัวแล้วขยาย/จางตอน progress 0.5–0.58 (ขับด้วย progress จาก Server)
+- `LabSession` แถบเตือนเป็นตาราง `RANGE_ALERTS` (EC/อุณหภูมิ/VPD) + `rangeOut` (Map) — เพิ่มค่าใหม่ได้โดยเพิ่มแถว; แสดงเฉพาะด่านที่ผู้เล่นคุมอุปกรณ์ของค่านั้น
+- ไม่มีด่านที่ใช้ผู้ช่วยฟาร์มคุม pH Down แล้ว (ด่าน 1–3 `lockedMode: 'off'`, ด่าน 4 คุมเอง) — `farmHelper` ยังอยู่สำหรับด่าน 4 แบบ `helper` และ Free Play/อนาคต
+- เทสต์ยาวบางข้อเพิ่ม timeout 30 s (ล้มเพราะเครื่องโหลดตอนรันทั้งชุด ไม่ใช่ผิด)

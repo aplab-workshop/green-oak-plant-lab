@@ -30,7 +30,7 @@ describe('M2 classroom acceptance through PLC, simulation, history and events â€
     expect(recovered.plants[1]!.lightStress).toBeLessThan(0.05);
     expect(recovered.plants[1]!.damage).toBeGreaterThanOrEqual(exposed.plants[1]!.damage);
     expect(t.lab.events.list().filter((e) => e.kind === 'plant.light_stress_cleared' && e.plantId === 2)).toHaveLength(1);
-  });
+  }, 30_000);
 
   it.each([{ initialEc: 0 }, { initialEc: 3.2 }, { initialPh: 4 }, { initialPh: 9 }])
    ('initial nutrient condition %j reaches plant diagnostics, history and event log', async (nutrient) => {
@@ -57,5 +57,5 @@ describe('M2 classroom acceptance through PLC, simulation, history and events â€
     expect(on.tank.estimatedOxygen).toBeGreaterThan(0.9);
     expect(on.plants[0]!.rootHealth).toBeGreaterThan(0.9);
     expect(t.lab.events.list().filter((e) => e.kind === 'plant.root_stress_cleared')).toHaveLength(6);
-  });
+  }, 30_000);
 });

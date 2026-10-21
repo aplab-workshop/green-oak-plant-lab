@@ -112,13 +112,13 @@ describe('Dose commands — P22 / AC-38', () => {
     expect(lab.snapshot().doses).toHaveLength(1);
   });
 
-  it('farm helper doses pH Down when pH > 6.6 in levels where M106 is locked', async () => {
+  it('P46: no helper pH Down where M106 is locked OFF (L3); L4 owns pH Down — the helper never doses for the player', async () => {
     const clock = new FakeClock();
     const lab = new LabSession({ labId: 'lab01', adapter: new MockPlcAdapter('manual', clock.now), now: clock.now, level: 'L3', sensorNoise: false });
     lab.sim.setPh(7.0);
     await lab.poll();
-    expect(lab.snapshot().doses).toEqual([{ device: 'phDown', remainingS: 120, totalS: 120 }]);
-    expect(lab.events.list().some((e) => e.message.startsWith('ผู้ช่วยฟาร์ม'))).toBe(true);
+    expect(lab.snapshot().doses).toEqual([]);
+    expect(lab.events.list().some((e) => e.message.startsWith('ผู้ช่วยฟาร์ม'))).toBe(false);
     // L4 ผู้เล่นคุม pH Down เอง ผู้ช่วยไม่ยุ่ง
     const own = new LabSession({ labId: 'lab02', adapter: new MockPlcAdapter('manual', clock.now), now: clock.now, level: 'L4', sensorNoise: false });
     own.sim.setPh(7.0);

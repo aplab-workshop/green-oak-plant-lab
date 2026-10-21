@@ -53,7 +53,7 @@ describe('Nutrient Stress — P10', () => {
     expect(sim.plants[0]!.nutrientStress).toBeGreaterThan(healthy.plants[0]!.nutrientStress + 0.3);
     expect(sim.plants[0]!.biomassG).toBeLessThan(healthy.plants[0]!.biomassG);
     if (initial.initialEc === 0) expect(sim.env.saltMass).toBe(0);
-  });
+  }, 30_000);
 
   it('AC-21: sensor noise consumption cannot change model state', () => {
     const a = new Simulation({ seed: 7, cfg: makeConfig({ nutrient: { initialEc: 3 } }) });

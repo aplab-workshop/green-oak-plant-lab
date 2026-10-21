@@ -22,16 +22,18 @@ export interface ChallengeSpec {
   /** ถังรั่วหยุดเองหลัง [ต่ำสุด, สูงสุด] ชั่วโมง (ซ่อมไม่ได้) — ไม่ระบุ = รั่วจนกว่าจะซ่อม (P37) */
   leakHours?: readonly [number, number];
   /**
-   * ตารางถังรั่วรายวัน (P41) — ถ้ามี ใช้แทนการสุ่มวันตาม count/windowDays (ให้ count/windowDays สรุปตรงกับตารางนี้)
-   * แต่ละวันแบ่ง [fromHour, toHour) เป็น count ช่วงเท่ากัน สุ่มเวลาเริ่มในแต่ละช่วงไม่ให้ทับกัน
+   * ตารางเหตุการณ์รายวัน (P41, หลายชนิด P46) — ถ้ามี ใช้แทนการสุ่มวันตาม count/windowDays (ให้ count/windowDays สรุปตรงกับตารางนี้)
+   * แต่ละรายการแบ่ง [fromHour, toHour) เป็น count ช่วงเท่ากัน สุ่มเวลาเริ่มในแต่ละช่วง — รายการในวันเดียวกันต้องวางช่วงไม่ให้ทับกันเอง
    */
-  leakDays?: readonly LeakDay[];
-  /** ไม่เตือนล่วงหน้า — ถังรั่วมี Mascot วิ่งมาเตะ แล้วประกาศหลัง Mascot ออก (P41) */
+  days?: readonly ScheduledDay[];
+  /** ไม่เตือนล่วงหน้า — Mascot วิ่งมาก่อเหตุ แล้วประกาศหลัง Mascot ออก (P41/P46) */
   surprise?: boolean;
 }
 
-/** ถังรั่วของวันหนึ่งในตารางรายวัน */
-export interface LeakDay {
+/** เหตุการณ์ของวันหนึ่งในตารางรายวัน */
+export interface ScheduledDay {
+  /** ชนิดเหตุการณ์ (ค่าเริ่ม 'leak') — P46 */
+  kind?: ChallengeKind;
   /** วันของรอบ (0 = วันเริ่มรอบ) */
   day: number;
   count: number;
@@ -119,7 +121,7 @@ const startHourOf = (kind: ChallengeKind, rng: Rng): number =>
  */
 export function planChallenges(spec: ChallengeSpec, seed: number, roundStartS: number, cfg: SimConfig): ChallengePlan[] {
   const rng = new Rng((Math.imul(seed, 2654435761) ^ Math.imul(spec.salt + 1, 40503)) >>> 0);
-  if (spec.leakDays) return planLeakDays(spec.leakDays, rng, roundStartS, cfg, spec.surprise === true);
+  if (spec.days) return planDays(spec.days, rng, roundStartS, cfg, spec.surprise === true);
   const n = randInt(rng, spec.count[0], spec.count[1]);
   if (n <= 0 || spec.kinds.length === 0) return [];
 
@@ -155,10 +157,10 @@ export function planChallenges(spec: ChallengeSpec, seed: number, roundStartS: n
   }));
 }
 
-/** ถังรั่วตามตารางรายวัน — ช่วงละ 1 ครั้ง เวลาเริ่มสุ่มรายนาที ให้รั่ว + Mascot วิ่งออกจบในช่วงของตัวเอง */
-function planLeakDays(days: readonly LeakDay[], rng: Rng, roundStartS: number, cfg: SimConfig, surprise: boolean): ChallengePlan[] {
+/** เหตุการณ์ตามตารางรายวัน — ช่วงละ 1 ครั้ง เวลาเริ่มสุ่มรายนาที ให้เหตุการณ์ + Mascot วิ่งออกจบในช่วงของตัวเอง; เรียงตามเวลาแล้วให้ id */
+function planDays(days: readonly ScheduledDay[], rng: Rng, roundStartS: number, cfg: SimConfig, surprise: boolean): ChallengePlan[] {
   const day0 = Math.floor(roundStartS / SECONDS_PER_DAY) * SECONDS_PER_DAY;
-  const plans: ChallengePlan[] = [];
+  const plans: Omit<ChallengePlan, 'id'>[] = [];
   for (const d of days) {
     const slotS = ((d.toHour - d.fromHour) * 3600) / d.count;
     for (let i = 0; i < d.count; i++) {
@@ -166,10 +168,10 @@ function planLeakDays(days: readonly LeakDay[], rng: Rng, roundStartS: number, c
       const slot0 = day0 + d.day * SECONDS_PER_DAY + d.fromHour * 3600 + i * slotS;
       const room = Math.max(0, slotS - durationS - cfg.challenges.mascotExitS);
       const startS = slot0 + randInt(rng, 0, Math.floor(room / 60)) * 60;
-      plans.push({ id: plans.length + 1, kind: 'leak', startS, durationS, ...(surprise ? { surprise: true } : {}) });
+      plans.push({ kind: d.kind ?? 'leak', startS, durationS, ...(surprise ? { surprise: true } : {}) });
     }
   }
-  return plans;
+  return plans.sort((a, b) => a.startS - b.startS).map((p, i) => ({ id: i + 1, ...p }));
 }
 
 export const toState = (p: ChallengePlan): ChallengeState => ({ ...p, status: 'scheduled', endedAtS: null, repaired: false, announced: false });
@@ -248,20 +250,24 @@ export function challengeMessage(s: ChallengeState, phase: 'warning' | 'start' |
 }
 
 /**
- * ช่วง Mascot วิ่งมาเตะถังของถังรั่วแบบ surprise (P41 / SPEC § 4.24)
- * progress 0–1 ตลอด [startS − enter, startS + exit), 0.5 = เตะถัง; null = ไม่มี Mascot ในฉาก
+ * ช่วง Mascot วิ่งมาก่อเหตุแบบ surprise (P41 / SPEC § 4.24; ทุกชนิด P46 / § 4.29)
+ * progress 0–1 ตลอด [startS − enter, startS + exit), 0.5 = เตะถัง/ปล่อยของ; null = ไม่มี Mascot ในฉาก
  */
-export function mascotProgress(states: readonly ChallengeState[], t: number, cfg: SimConfig): number | null {
+export function mascotState(states: readonly ChallengeState[], t: number, cfg: SimConfig): { progress: number; kind: ChallengeKind } | null {
   const { mascotEnterS: enter, mascotExitS: exit } = cfg.challenges;
   for (const s of states) {
-    if (s.kind !== 'leak' || !s.surprise || s.repaired) continue;
+    if (!s.surprise || s.repaired) continue;
     if (t >= s.startS - enter && t < s.startS + exit) {
       // ครึ่งแรก = วิ่งเข้า, ครึ่งหลัง = วิ่งออก (ยืดตาม enter/exit แต่ละช่วง)
-      return t < s.startS ? 0.5 * (t - (s.startS - enter)) / enter : 0.5 + 0.5 * (t - s.startS) / exit;
+      const progress = t < s.startS ? 0.5 * (t - (s.startS - enter)) / enter : 0.5 + 0.5 * (t - s.startS) / exit;
+      return { progress, kind: s.kind };
     }
   }
   return null;
 }
+
+export const mascotProgress = (states: readonly ChallengeState[], t: number, cfg: SimConfig): number | null =>
+  mascotState(states, t, cfg)?.progress ?? null;
 
 /** ไฟดับ ณ เวลา t หรือไม่ (ใช้ได้ก่อน step เพื่อหยุดนับโดส) */
 export const outageAt = (states: readonly ChallengeState[], t: number): boolean =>

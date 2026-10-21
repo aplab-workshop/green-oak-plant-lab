@@ -38,7 +38,7 @@ const rejected409 = async (p: Promise<unknown>) => {
 
 describe('Events & auto-pause in LabSession — P23 / AC-39', () => {
   it('auto-pauses on the 6 h warning and again when the event starts', async () => {
-    const t = await labWith('L3', [{ kind: 'heatWave', afterS: 8 * 3600, durationS: 6 * 3600 }]);
+    const t = await labWith('L4', [{ kind: 'heatWave', afterS: 8 * 3600, durationS: 6 * 3600 }]);
     await t.lab.handle({ type: 'setSpeed', speed: 360 });
     expect(t.lab.snapshot().challenges).toEqual([]);
 
@@ -61,7 +61,7 @@ describe('Events & auto-pause in LabSession — P23 / AC-39', () => {
   }, 30000);
 
   it('does not pause when disabled, nor in Free Play', async () => {
-    const off = await labWith('L3', [{ kind: 'heatWave', afterS: 3600, durationS: 3600 }]);
+    const off = await labWith('L4', [{ kind: 'heatWave', afterS: 3600, durationS: 3600 }]);
     await off.lab.handle({ type: 'setAutoPause', enabled: false });
     await off.lab.handle({ type: 'setSpeed', speed: 360 });
     await runReal(off, 40_000); // 4 ชม.
@@ -134,6 +134,24 @@ describe('Events & auto-pause in LabSession — P23 / AC-39', () => {
     expect(snap.paused).toBe(false);
     expect(t.lab.events.list().filter((e) => e.kind === 'game.autopause')).toHaveLength(0);
   });
+
+  it('P46: L3 heat wave (surprise) → hot and dry-air alerts without pausing; L2 (no fan/mist) never shows them', async () => {
+    const t = await labWith('L3', [{ kind: 'heatWave', afterS: 2 * 3600, durationS: 6 * 3600, surprise: true }]);
+    await t.lab.handle({ type: 'setManualLed', value: 100 });
+    await t.lab.handle({ type: 'setSpeed', speed: 720 });
+    for (let ms = 0; ms < 40_000 && !t.lab.snapshot().alerts.some((a) => a.includes('ร้อน')); ms += 500) await runReal(t, 500);
+    const snap = t.lab.snapshot();
+    expect(snap.paused).toBe(false);
+    expect(snap.alerts.join()).toMatch(/🌡️ ร้อน \d+\.\d °C/);
+    expect(t.lab.events.list().some((e) => e.kind === 'air.temp_alert')).toBe(true);
+    expect(t.lab.events.list().filter((e) => e.kind === 'game.autopause')).toHaveLength(0);
+    const l2 = await labWith('L2', [{ kind: 'heatWave', afterS: 600, durationS: 6 * 3600, surprise: true }]);
+    await l2.lab.handle({ type: 'setManualLed', value: 100 });
+    await l2.lab.handle({ type: 'setSpeed', speed: 720 });
+    await runReal(l2, 15_000);
+    expect(l2.lab.snapshot().sensors.airTempC).toBeGreaterThan(25);
+    expect(l2.lab.snapshot().alerts.some((a) => a.includes('ร้อน') || a.includes('อากาศ'))).toBe(false);
+  }, 60000);
 
   it('P42: L1 plays at 720x with a slower refill pump; other levels keep 144x and the default pump', async () => {
     const t = await labWith('L1', []);

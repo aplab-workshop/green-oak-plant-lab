@@ -22,7 +22,7 @@ import {
   challengeViews,
   effectsOf,
   outageAt,
-  mascotProgress,
+  mascotState,
   planChallenges,
   toState,
   type ChallengePlan,
@@ -242,7 +242,12 @@ export class Simulation {
 
   /** ความคืบหน้าของ Mascot ที่วิ่งมาเตะถัง (P41) — null = ไม่มีในฉาก */
   get mascotProgress(): number | null {
-    return mascotProgress(this._challenges, this._simTimeS, this.cfg);
+    return this.mascot?.progress ?? null;
+  }
+
+  /** Mascot ในฉาก (P46: ทุกชนิดเหตุการณ์ surprise) — null = ไม่มี */
+  get mascot() {
+    return mascotState(this._challenges, this._simTimeS, this.cfg);
   }
 
   /** เริ่มรอบเกม ready → playing (SPEC § 4.5) */

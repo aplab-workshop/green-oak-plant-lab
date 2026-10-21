@@ -29,7 +29,7 @@ export const LEVELS: readonly LevelDef[] = [
     // P38: คุมได้แค่น้ำกับแสง — อุณหภูมิ/ความชื้น/EC-pH ไม่มีผลต่อผักในด่านนี้
     ignoredFactors: ['temperature', 'air', 'nutrient'],
     // P43: วันแรกรั่ว 2 ครั้ง, วันที่ 2–5 วันละ 4 ครั้ง ครั้งละ 2–3 ชม. — Mascot มาเตะ ไม่เตือนล่วงหน้า
-    challenges: { kinds: ['leak'], count: [18, 18], windowDays: [0, 4], salt: 1, surprise: true, leakDays: [
+    challenges: { kinds: ['leak'], count: [18, 18], windowDays: [0, 4], salt: 1, surprise: true, days: [
       { day: 0, count: 2, hours: [2, 3], fromHour: 10, toHour: 20 },
       ...[1, 2, 3, 4].map((day) => ({ day, count: 4, hours: [2, 3] as const, fromHour: 6, toHour: 22 })),
     ] } },
@@ -45,13 +45,33 @@ export const LEVELS: readonly LevelDef[] = [
     cfg: { tank: { refillFlowLpm: 0.4 }, dose: { refillS: 600, nutrientS: 150 },
       nutrient: { initialEc: 0.6, doseFlowLpm: 0.01, phDropPerDoseMin: 0.004 },
       challenges: { leakLph: 3, mascotEnterS: 2400, mascotExitS: 2400 } },
-    challenges: { kinds: ['leak'], count: [10, 10], windowDays: [0, 4], salt: 2, surprise: true, leakDays: [
+    challenges: { kinds: ['leak'], count: [10, 10], windowDays: [0, 4], salt: 2, surprise: true, days: [
       { day: 0, count: 2, hours: [2, 3], fromHour: 10, toHour: 20 },
       ...[1, 2, 3, 4].map((day) => ({ day, count: 2, hours: [2, 3] as const, fromHour: 6, toHour: 22 })),
     ] } },
-  { id: 'L3', title: 'คลื่นความร้อน', description: 'ไฟ LED ทำให้ร้อน ใช้พัดลมและหมอกคุมอากาศ',
-    startBiomassG: 30, startDay: 28, targetG: 60, timeLimitDays: 10, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'],
-    lockedMode: 'helper', ignoredFactors: [], playSpeed: 144, waterAlertPct: null, challenges: { kinds: ['heatWave'], count: [1, 2], windowDays: [1, 7], salt: 3 } },
+  // P46 (SPEC § 4.29): แบบด่าน 1–2 — คุม Refill + LED + ปุ๋ย + Fan + Humidifier, pH Down ปิด, 720x, แจ้งเตือนไม่หยุดเกม,
+  // Mascot พาคลื่นความร้อน 🔥 / อากาศแห้ง 🌵 มา (ไม่เตือน) และเตะถังรั่ววันละ 1 ครั้ง
+  { id: 'L3', title: 'คลื่นความร้อน', description: 'Mascot พาความร้อนและอากาศแห้งมา ใช้พัดลม หมอก และลดไฟคุมอากาศ พร้อมดูแลน้ำและปุ๋ย',
+    // วัด Seed 1–5: สูตรดูแล (พัดลม/หมอก, คลื่นความร้อนลดไฟ 40 %) ต้นเล็กสุด ≈ 40.8 g ที่ 4.25 วัน (ไฟ 6.2 kWh);
+    // ไม่ใช้พัดลม/หมอก ≤ 39.5 g, ไม่เปิด LED 35.8 g ที่ 5 วัน → เป้า 40 g
+    startBiomassG: 30, startDay: 28, targetG: 40, timeLimitDays: 5, energyBudgetKWh: 35, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'],
+    lockedMode: 'off', playSpeed: 720, waterAlertPct: 65,
+    // P46: นับ น้ำ + แสง + EC + อุณหภูมิ + อากาศ (pH ไม่มี pH Down → ไม่มีผลต่อผัก)
+    ignoredFactors: ['ph'],
+    cfg: { tank: { refillFlowLpm: 0.4 }, dose: { refillS: 600, nutrientS: 150 },
+      nutrient: { doseFlowLpm: 0.01, phDropPerDoseMin: 0.004 },
+      challenges: { leakLph: 3, mascotEnterS: 2400, mascotExitS: 2400 } },
+    challenges: { kinds: ['leak', 'heatWave', 'dryAir'], count: [9, 9], windowDays: [0, 4], salt: 3, surprise: true, days: [
+      { day: 0, count: 1, hours: [2, 3], fromHour: 10, toHour: 16 },
+      ...[1, 3].flatMap((day) => [
+        { kind: 'heatWave' as const, day, count: 1, hours: [6, 6] as const, fromHour: 10, toHour: 19 },
+        { day, count: 1, hours: [2, 3] as const, fromHour: 19, toHour: 23 },
+      ]),
+      ...[2, 4].flatMap((day) => [
+        { kind: 'dryAir' as const, day, count: 1, hours: [6, 8] as const, fromHour: 7, toHour: 17 },
+        { day, count: 1, hours: [2, 3] as const, fromHour: 17, toHour: 22 },
+      ]),
+    ] } },
   { id: 'L4', title: 'ฟาร์มของฉัน', description: 'ดูแลทุกอย่างเองตั้งแต่ต้นกล้าจนเก็บเกี่ยว 100 g ภายในงบไฟ',
     startBiomassG: 5, startDay: 14, targetG: 100, timeLimitDays: 35, energyBudgetKWh: 60,
     playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier', 'airPump', 'phDown'],

@@ -67,18 +67,28 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     });
   });
 
-  it('L3 has 1–2 heat waves starting around noon; Free Play has none', () => {
+  it('P46: L3 brings heat waves (days 2, 4) and dry air (days 3, 5) plus one leak a day, no mascot overlaps; Free Play has none', () => {
+    const c3 = makeConfig(L3.cfg);
+    const start = 28 * SECONDS_PER_DAY + 6 * 3600;
+    const day0 = 28 * SECONDS_PER_DAY;
     for (const seed of [1, 2, 3, 4, 5]) {
-      const plan = planChallenges(L3.challenges!, seed, roundStart, cfg);
-      expect(plan.length).toBeGreaterThanOrEqual(1);
-      expect(plan.length).toBeLessThanOrEqual(2);
-      for (const p of plan) {
-        expect(p.kind).toBe('heatWave');
-        const hour = (p.startS % SECONDS_PER_DAY) / 3600;
-        expect(hour).toBeGreaterThanOrEqual(11);
-        expect(hour).toBeLessThanOrEqual(13);
-        expect(p.durationS! / 3600).toBeGreaterThanOrEqual(6);
-        expect(p.durationS! / 3600).toBeLessThanOrEqual(8);
+      const plan = planChallenges(L3.challenges!, seed, start, c3);
+      const dayOf = (p: ChallengePlan) => Math.floor((p.startS - day0) / SECONDS_PER_DAY);
+      expect(plan.map((p) => `${dayOf(p)}${p.kind[0]}`)).toEqual(['0l', '1h', '1l', '2d', '2l', '3h', '3l', '4d', '4l']);
+      for (const [i, p] of plan.entries()) {
+        expect(p.surprise).toBe(true);
+        const hour = ((p.startS - day0) % SECONDS_PER_DAY) / 3600;
+        if (p.kind === 'heatWave') {
+          expect(hour).toBeGreaterThanOrEqual(10);
+          expect(hour).toBeLessThanOrEqual(12.5);
+          expect(p.durationS).toBe(6 * 3600);
+        }
+        if (p.kind === 'dryAir') expect(p.durationS! / 3600).toBeGreaterThanOrEqual(6);
+        // Mascot ไม่ซ้อนกัน: ตัวถัดไปเริ่มวิ่งเข้าหลังตัวนี้วิ่งออกแล้ว
+        const next = plan[i + 1];
+        if (next) expect(next.startS - c3.challenges.mascotEnterS).toBeGreaterThanOrEqual(p.startS + c3.challenges.mascotExitS);
+        // เหตุการณ์เดียวกันไม่ทับกัน
+        if (next && p.kind === 'leak') expect(next.startS).toBeGreaterThanOrEqual(p.startS + p.durationS!);
       }
     }
     const sim = new Simulation();
@@ -186,6 +196,23 @@ describe('Challenge lifecycle', () => {
     expect(makeConfig(L2.cfg).challenges.leakLph).toBe(3);
   });
 
+  it('P46: a surprise heat wave has a mascot carrying it (kind heatWave) and starts heating at startS', () => {
+    const sim = new Simulation({ cfg: flat });
+    sim.reset({});
+    const start = sim.startTimeS + 8 * 3600;
+    sim.reset({ challengePlan: [{ id: 1, kind: 'heatWave', startS: start, durationS: 6 * 3600, surprise: true }] });
+    while (sim.simTimeS < start - 300) sim.step(60, OFF);
+    expect(sim.mascot).toMatchObject({ kind: 'heatWave' });
+    expect(sim.challengeViews()).toEqual([]);
+    const before = sim.env.airTempC;
+    while (sim.simTimeS < start + 660) sim.step(60, OFF);
+    expect(sim.mascot).toBeNull();
+    expect(sim.challengeViews()).toMatchObject([{ kind: 'heatWave', status: 'active' }]);
+    while (sim.simTimeS < start + 3 * 3600) sim.step(60, OFF);
+    expect(sim.env.airTempC).toBeGreaterThan(before + 3);
+    expect(sim.drainEvents().filter((e) => e.kind.startsWith('challenge.')).map((e) => e.kind)).toEqual(['challenge.start']);
+  });
+
   it('P42: a level config override applies only to its round (L1 refill 0.4 L/min, mascot 2,400 s)', () => {
     const sim = new Simulation();
     sim.reset(levelRound(LEVELS.find((l) => l.id === 'L1')!));
@@ -201,9 +228,9 @@ describe('Challenge lifecycle', () => {
     expect(sim.cfg.tank.refillFlowLpm).toBe(DEFAULT_CONFIG.tank.refillFlowLpm);
   });
 
-  it('P41/P44: only Level 1–2 leaks are surprises; other levels still warn', () => {
-    for (const id of ['L1', 'L2']) expect(LEVELS.find((l) => l.id === id)!.challenges!.surprise).toBe(true);
-    for (const l of LEVELS.filter((x) => x.id !== 'L1' && x.id !== 'L2')) expect(l.challenges?.surprise).toBeFalsy();
+  it('P41/P44/P46: Level 1–3 events are surprises; Level 4 still warns', () => {
+    for (const id of ['L1', 'L2', 'L3']) expect(LEVELS.find((l) => l.id === id)!.challenges!.surprise).toBe(true);
+    expect(LEVELS.find((l) => l.id === 'L4')!.challenges?.surprise).toBeFalsy();
     const sim = simWith('leak', 8 * 3600, null);
     run(sim, 2.5 * 3600);
     expect(sim.challengeViews()).toMatchObject([{ kind: 'leak', status: 'warned' }]);

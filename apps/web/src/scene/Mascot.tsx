@@ -1,7 +1,8 @@
-import { Suspense, useRef } from 'react';
+import { Suspense, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Billboard, useTexture } from '@react-three/drei';
-import { MathUtils, SRGBColorSpace, type Group, type Mesh, type MeshBasicMaterial } from 'three';
+import { CanvasTexture, MathUtils, SRGBColorSpace, type Group, type Mesh, type MeshBasicMaterial } from 'three';
+import type { ChallengeKind } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { TANK } from './layout';
 
@@ -35,8 +36,26 @@ function pointAt(d: number): [number, number] {
   return PATH[PATH.length - 1]!;
 }
 
+/** ของที่ Mascot ถือมา (P46 / SPEC § 4.29) — ถังรั่วไม่ถือ (เตะถัง) */
+const PROP_EMOJI: Partial<Record<ChallengeKind, string>> = { heatWave: '🔥', dryAir: '🌵' };
+const PROP_SIZE = 0.09;
+
+/** Emoji → Texture (วาดครั้งเดียว) */
+function emojiTexture(emoji: string): CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d')!;
+  g.font = '104px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(emoji, 64, 70);
+  const t = new CanvasTexture(c);
+  t.colorSpace = SRGBColorSpace;
+  return t;
+}
+
 /**
- * Mascot AP LAB วิ่งมาเตะถังให้รั่วแล้ววิ่งออก (P41 / SPEC § 4.24)
+ * Mascot AP LAB วิ่งมาเตะถังให้รั่ว / ถือคลื่นความร้อน 🔥 หรืออากาศแห้ง 🌵 มาปล่อย แล้ววิ่งออก (P41 § 4.24, P46 § 4.29)
  * ขับด้วย snapshot.mascot.progress จาก Server (เวลาจำลอง) — หยุดเมื่อ Pause; ฝั่ง Web แค่ทำให้ลื่นระหว่าง Snapshot
  */
 function MascotSprite() {
@@ -48,10 +67,14 @@ function MascotSprite() {
   const body = useRef<Mesh>(null);
   const mat = useRef<MeshBasicMaterial>(null);
   const shown = useRef<number | null>(null);
+  const prop = useRef<Mesh>(null);
+  const propMat = useRef<MeshBasicMaterial>(null);
+  const propTex = useMemo(() => Object.fromEntries(Object.entries(PROP_EMOJI).map(([k, e]) => [k, emojiTexture(e!)])) as Partial<Record<ChallengeKind, CanvasTexture>>, []);
 
   useFrame((_, dt) => {
-    const target = useLabStore.getState().snapshot?.mascot?.progress ?? null;
-    if (!root.current || !body.current || !mat.current) return;
+    const mascot = useLabStore.getState().snapshot?.mascot ?? null;
+    const target = mascot?.progress ?? null;
+    if (!root.current || !body.current || !mat.current || !prop.current || !propMat.current) return;
     if (target === null) {
       shown.current = null;
       root.current.visible = false;
@@ -83,6 +106,19 @@ function MascotSprite() {
     // ปรากฏ/หายแบบเด้งที่ขอบเกาะ
     const pop = MathUtils.smoothstep(p, 0, 0.04) * (1 - MathUtils.smoothstep(p, 0.96, 1));
     body.current.scale.set((entering ? -1 : 1) * HEIGHT * aspect * pop, HEIGHT * pop, 1);
+    // ของที่ถือ: ชูเหนือหัวตอนวิ่งเข้า, ตอนปล่อย (0.5) ขยายแล้วจางหาย — วิ่งออกมือเปล่า
+    const pt = mascot ? propTex[mascot.kind] : undefined;
+    const release = MathUtils.clamp((p - 0.5) / 0.08, 0, 1);
+    prop.current.visible = !!pt && release < 1;
+    if (pt) {
+      if (propMat.current.map !== pt) {
+        propMat.current.map = pt;
+        propMat.current.needsUpdate = true;
+      }
+      propMat.current.opacity = 1 - release;
+      prop.current.position.y = HEIGHT + 0.02 + hop + release * 0.08;
+      prop.current.scale.setScalar(PROP_SIZE * pop * (1 + release * 1.5));
+    }
   });
 
   return <group ref={root} visible={false}>
@@ -90,6 +126,10 @@ function MascotSprite() {
       <mesh ref={body} raycast={() => null}>
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial ref={mat} map={run} transparent alphaTest={0.5} toneMapped={false} side={2} />
+      </mesh>
+      <mesh ref={prop} visible={false} raycast={() => null}>
+        <planeGeometry args={[1, 1]} />
+        <meshBasicMaterial ref={propMat} transparent depthWrite={false} toneMapped={false} />
       </mesh>
     </Billboard>
     {/* เงาใต้เท้า */}
