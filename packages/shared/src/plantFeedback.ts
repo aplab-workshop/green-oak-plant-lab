@@ -6,11 +6,16 @@ import type { GrowthStage, PlantState } from './types';
  * ใช้ร่วมกันระหว่างฉาก 3D, แผงต้นผัก และข้อความผู้ช่วย
  */
 
-export type PlantMood = 'happy' | 'ok' | 'worried' | 'sick' | 'dead';
+export type PlantMood = 'happy' | 'ok' | 'worried' | 'sick' | 'dead' | 'sleeping' | 'tired';
 export type PlantCause = 'water' | 'root' | 'dryAir' | 'light' | 'ph' | 'nutrient' | 'humidAir' | 'dark';
 export type AirComfort = 'dry' | 'ok' | 'humid';
 
-export const MOOD_EMOJI: Record<PlantMood, string> = { happy: '😄', ok: '🙂', worried: '😟', sick: '😵', dead: '💀' };
+export const MOOD_EMOJI: Record<PlantMood, string> = { happy: '😄', ok: '🙂', worried: '😟', sick: '😵', dead: '💀', sleeping: '😴', tired: '🥵' };
+/** คำอธิบายหน้ากลางคืน (P45) */
+export const NIGHT_MOOD_LABEL: Partial<Record<PlantMood, string>> = {
+  sleeping: '😴 ผักกำลังหลับ (22:00–06:00)',
+  tired: '🥵 ผักง่วงแต่ยังโดนแสง — ปิดไฟตอนกลางคืน',
+};
 
 export const CAUSE_INFO: Record<PlantCause, { icon: string; label: string }> = {
   water: { icon: '💧', label: 'ขาดน้ำ' },
@@ -43,6 +48,8 @@ export const airComfort = (vpdKPa: number): AirComfort => (vpdKPa > AIR_DRY_VPD 
 
 /** Stress ขั้นต่ำที่นับเป็นสาเหตุ */
 export const CAUSE_STRESS_MIN = 0.25;
+/** PPFD ที่ต้นได้ตอนกลางคืนตั้งแต่ค่านี้ = โดนแสงตอนหลับ (P45) */
+export const NIGHT_LIGHT_PPFD = 10;
 /** PPFD ที่ต้นต่ำกว่านี้ตอนกลางวัน = มืด */
 export const DARK_PPFD = 50;
 /** แสดงป้าย "+g เมื่อวาน" ช่วงต้นวันจำลอง (นาที) */
@@ -57,12 +64,16 @@ export const isDaytime = (minuteOfDay: number): boolean => minuteOfDay >= 360 &&
 export const isPlantDead = (p: Pick<PlantState, 'id' | 'damage'>, deadPlantIds: readonly number[] = []): boolean =>
   p.damage >= 1 || deadPlantIds.includes(p.id);
 
-export function plantMood(p: Pick<PlantState, 'health' | 'damage'>, dead = false): PlantMood {
+/**
+ * หน้าของผัก — ส่ง minuteOfDay เพื่อใช้กฎกลางคืน (P45 / SPEC § 4.28):
+ * โดนแสง ≥ NIGHT_LIGHT_PPFD → tired, มืดและสุขภาพดี/พอใช้ → sleeping, ต้นที่มีปัญหาคงหน้าเดิม
+ */
+export function plantMood(p: Pick<PlantState, 'health' | 'damage'> & Partial<Pick<PlantState, 'ppfd'>>, dead = false, minuteOfDay?: number): PlantMood {
   if (dead || p.damage >= 1) return 'dead';
-  if (p.health >= 85) return 'happy';
-  if (p.health >= 65) return 'ok';
-  if (p.health >= 40) return 'worried';
-  return 'sick';
+  const day = p.health >= 85 ? 'happy' : p.health >= 65 ? 'ok' : p.health >= 40 ? 'worried' : 'sick';
+  if (minuteOfDay === undefined || isDaytime(minuteOfDay)) return day;
+  if ((p.ppfd ?? 0) >= NIGHT_LIGHT_PPFD) return 'tired';
+  return day === 'happy' || day === 'ok' ? 'sleeping' : day;
 }
 
 /** สาเหตุหลักของต้นที่ยังไม่ตาย: Stress สูงสุด ≥ เกณฑ์ (ค่าเท่ากันเรียง น้ำ → ราก → อากาศแห้ง → แสง → ปุ๋ย/pH → ชื้นจัด), มิฉะนั้นมืด หรือไม่มี */

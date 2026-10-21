@@ -14,6 +14,19 @@ describe('plantMood', () => {
     expect(plantMood({ health: 0, damage: 1 })).toBe('dead');
     expect(plantMood({ health: 95, damage: 0 }, true)).toBe('dead');
   });
+
+  it('P45: at night healthy plants sleep 😴, lit plants are tired 🥵, troubled plants keep their face', () => {
+    const night = 23 * 60, noon = 12 * 60;
+    expect(plantMood({ health: 90, damage: 0, ppfd: 0 }, false, night)).toBe('sleeping');
+    expect(plantMood({ health: 70, damage: 0, ppfd: 5 }, false, 3 * 60)).toBe('sleeping');
+    expect(plantMood({ health: 90, damage: 0, ppfd: 120 }, false, night)).toBe('tired');
+    expect(plantMood({ health: 30, damage: 0.5, ppfd: 120 }, false, night)).toBe('tired');
+    expect(plantMood({ health: 50, damage: 0.2, ppfd: 0 }, false, night)).toBe('worried');
+    expect(plantMood({ health: 0, damage: 1, ppfd: 120 }, false, night)).toBe('dead');
+    expect(plantMood({ health: 90, damage: 0, ppfd: 0 }, false, noon)).toBe('happy');
+    expect(plantMood({ health: 90, damage: 0, ppfd: 0 }, false, 6 * 60)).toBe('happy');
+    expect(plantMood({ health: 90, damage: 0, ppfd: 0 }, false, 22 * 60)).toBe('sleeping');
+  });
 });
 
 describe('plantCause', () => {

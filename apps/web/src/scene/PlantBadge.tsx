@@ -1,6 +1,7 @@
 import {
   CAUSE_INFO,
   MOOD_EMOJI,
+  NIGHT_MOOD_LABEL,
   STAGE_CELEBRATION,
   isCelebrating,
   isPlantDead,
@@ -29,7 +30,7 @@ function badgeKey(s: LabState, plantId: number): string {
   const p = snap?.plants.find((x) => x.id === plantId);
   if (!snap || !p) return '';
   const dead = isPlantDead(p, snap.game.deadPlantIds);
-  const mood = plantMood(p, dead);
+  const mood = plantMood(p, dead, snap.sim.minuteOfDay);
   const cause = dead ? '' : (plantCause(p, { ph: snap.sensors.ph, minuteOfDay: snap.sim.minuteOfDay, ignorePh: !!snap.level?.ignoredFactors.includes('ph') }) ?? '');
   const gain = !dead && showGainBadge(p, snap.sim.minuteOfDay) ? p.gainYesterdayG!.toFixed(1) : '';
   const party = !dead && isCelebrating(p, snap.simTimeS) ? p.stage : '';
@@ -47,7 +48,7 @@ function PlantBadge({ plantId }: { plantId: number }) {
       <div className="plant-badge" aria-label={`Plant ${plantId}`}>
         {party && <div className="plant-badge-party">{STAGE_CELEBRATION[party]}</div>}
         {gain && <div className="plant-badge-gain" title="โตเมื่อวาน">+{gain} g</div>}
-        <div className="plant-badge-face" title={causeInfo?.label}>
+        <div className="plant-badge-face" title={causeInfo?.label ?? NIGHT_MOOD_LABEL[mood]}>
           <span>{MOOD_EMOJI[mood]}</span>
           {causeInfo && <span className="plant-badge-cause">{causeInfo.icon}</span>}
         </div>

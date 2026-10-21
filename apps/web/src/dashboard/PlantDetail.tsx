@@ -1,5 +1,5 @@
 import { Sprout } from 'lucide-react';
-import { CAUSE_INFO, MOOD_EMOJI, isPlantDead, plantCause, plantMood, type PlantState } from '@gol/shared';
+import { CAUSE_INFO, MOOD_EMOJI, NIGHT_MOOD_LABEL, isPlantDead, plantCause, plantMood, type PlantState } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { fmt, pct } from '../lib/format';
 import { healthColor } from '../scene/plantVisuals';
@@ -78,7 +78,7 @@ export function PlantDetail() {
         <div className="space-y-2 px-3 py-2">
           <div className="flex items-baseline justify-between">
             <div>
-              <div className="text-sm font-semibold text-slate-800">{MOOD_EMOJI[plantMood(p, dead)]} Plant {p.id}</div>
+              <div className="text-sm font-semibold text-slate-800"><span title={NIGHT_MOOD_LABEL[plantMood(p, dead, minuteOfDay)]}>{MOOD_EMOJI[plantMood(p, dead, minuteOfDay)]}</span> Plant {p.id}</div>
               <div className={`text-[11px] ${dead ? 'text-rose-600' : 'text-slate-500'}`}>{dead ? 'ตายแล้ว · เริ่มรอบใหม่เพื่อปลูกอีกครั้ง' : STAGE_LABEL[p.stage]}</div>
             </div>
             <div className="text-right">

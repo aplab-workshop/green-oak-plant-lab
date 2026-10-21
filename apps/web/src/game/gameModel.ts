@@ -106,7 +106,8 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   const sun = s.sim.sunPpfd ?? 0;
   if (day && r.ppfd < 200) return { text: `กลางวันแสงน้อย (PPFD ${r.ppfd.toFixed(0)}${sun > 0 ? ` · แดด ${sun.toFixed(0)}` : ''}) — เพิ่ม 💡 LED ให้ถึง ~300`, tone: 'warn' };
   if (r.ppfd > 350 && cmd.ledPct > 0) return { text: `แสงเกิน (PPFD ${r.ppfd.toFixed(0)}${sun > 0 ? ` · แดด ${sun.toFixed(0)}` : ''}) ใบจะม้วน — ลด 💡 LED`, tone: 'warn' };
-  if (!day && cmd.ledPct > 0) return { text: 'กลางคืนแล้ว ปิด 💡 ไฟเพื่อประหยัดงบไฟ (ผักพักผ่อน)', tone: 'info' };
+  // P45: ผักเหนื่อย 🥵 เมื่อโดนแสงตอนหลับ
+  if (!day && cmd.ledPct > 0) return { text: '🥵 กลางคืนแล้ว ผักกำลังจะนอนแต่ไฟยังเปิด — ปิด 💡 LED ให้ผักพัก (ประหยัดงบไฟด้วย)', tone: 'warn' };
   if (!cmd.airPump) return { text: 'ปั๊มลมปิดอยู่ รากต้องการอากาศ — เปิด 🫧 ปั๊มลม', tone: 'warn' };
 
   const goal = goalProgress(s);

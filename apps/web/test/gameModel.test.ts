@@ -132,6 +132,7 @@ describe('helperMessage priority', () => {
     expect(helperMessage(snap({ commands: { ...snap().commands, ledPct: 0 }, sim: { day: 23, minuteOfDay: 780, sunPpfd: 300 } }, { ppfd: 300 })).tone).toBe('good');
     expect(helperMessage(snap({ sim: { day: 23, minuteOfDay: 780, sunPpfd: 300 } }, { ppfd: 620 })).text).toContain('ลด 💡 LED');
     expect(helperMessage(snap({ sim: { day: 23, minuteOfDay: 23 * 60 } })).text).toContain('กลางคืน');
+    expect(helperMessage(snap({ sim: { day: 23, minuteOfDay: 23 * 60 } }))).toMatchObject({ tone: 'warn', text: expect.stringContaining('🥵') });
     expect(helperMessage(snap({ commands: { ...snap().commands, airPump: false } })).text).toContain('ปั๊มลม');
     expect(helperMessage(snap())).toMatchObject({ tone: 'good' });
   });
