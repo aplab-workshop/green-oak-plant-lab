@@ -560,6 +560,7 @@ export class LabSession {
         volumeL: s.env.waterVolumeL,
         capacityL: cfg.tank.capacityL,
         overflowFlowLpm: commands.refillPump ? s.env.overflowFlowLpm : 0,
+        leakLph: this.sim.totalLeakLph,
         heightCm: cfg.tank.heightCm,
         potBottomCm: cfg.tank.potBottomCm,
         estimatedOxygen: s.env.estimatedOxygen,
@@ -571,6 +572,7 @@ export class LabSession {
       disturbance: s.disturbance,
       doses: [...this.doses.values()].map((d) => ({ ...d })),
       challenges: this.sim.challengeViews(),
+      mascot: (() => { const p = this.sim.mascotProgress; return p === null ? null : { progress: p }; })(),
       autoPause: { enabled: this.autoPauseEnabled, reason: this.autoPauseReason },
     };
   }

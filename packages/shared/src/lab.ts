@@ -197,6 +197,8 @@ export interface LabSnapshot {
     capacityL: number;
     /** อัตราน้ำล้นจริงจาก Model (L/min); ไม่ใช่ PLC sensor */
     overflowFlowLpm: number;
+    /** อัตรารั่วจริง (L/h) รวม Scenario + เหตุการณ์ถังรั่ว — ใช้วาดน้ำหยด (P41) */
+    leakLph: number;
     heightCm: number;
     potBottomCm: number;
     /** Estimated Oxygen Status [0,1] ไร้หน่วย ไม่ใช่ Sensor DO */
@@ -209,6 +211,8 @@ export interface LabSnapshot {
   doses: ActiveDose[];
   /** เหตุการณ์ที่เตือนแล้ว/กำลังเกิด/จบแล้วในรอบนี้ (SPEC § 4.8) */
   challenges: ChallengeView[];
+  /** Mascot วิ่งมาเตะถัง (ถังรั่วแบบ surprise, P41) — progress 0–1 ตามเวลาจำลอง, 0.5 = เตะถัง; null = ไม่มีในฉาก */
+  mascot: { progress: number } | null;
   /** ผู้ช่วยหยุดเกม — reason = เหตุผลที่หยุดล่าสุด (ล้างเมื่อ Resume) */
   autoPause: { enabled: boolean; reason: string | null };
 }

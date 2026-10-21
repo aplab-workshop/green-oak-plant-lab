@@ -22,8 +22,8 @@ const snapshot = (runId = 0, at = 100, labId = 'lab01'): LabSnapshot => ({
     nutrientA: false, nutrientB: false, airPump: true, phDown: false },
   sensors: { airTempC: 25, rhPct: 65, ppfd: 200, waterTempC: 24, ph: 6, ecMsCm: 1.2,
     waterLevelPct: 80, flowLpm: 0, powerW: 100, vpdKPa: 1, dli: 5 },
-  tank: { waterLevelPct: 80, waterHeightCm: 24, volumeL: 48, capacityL: 60, overflowFlowLpm: 0, heightCm: 30, potBottomCm: 25, estimatedOxygen: 0.95 },
-  plants: [], scenario: null, disturbance: { leakLph: 0 }, doses: [], challenges: [], autoPause: { enabled: true, reason: null },
+  tank: { waterLevelPct: 80, waterHeightCm: 24, volumeL: 48, capacityL: 60, overflowFlowLpm: 0, leakLph: 0, heightCm: 30, potBottomCm: 25, estimatedOxygen: 0.95 },
+  plants: [], scenario: null, disturbance: { leakLph: 0 }, doses: [], challenges: [], mascot: null, autoPause: { enabled: true, reason: null },
 });
 const response = (body: unknown, runId = 0) => new Response(JSON.stringify(body), { headers: { 'X-Lab-Run-Id': String(runId) } });
 function deferred() {

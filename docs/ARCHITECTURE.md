@@ -837,3 +837,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `SIM_SPEEDS` (sim-core) และ `SPEED_VALUES`/zod (shared) เพิ่ม 144; `UI_SPEEDS` (shared) คือปุ่มที่ `SimControls` แสดง — ความเร็วอื่นยังใช้ผ่าน API ได้
 - ที่ Tick 100 ms: 144x = 14.4 Step ต่อ Tick (ต่ำกว่า `maxStepsPerTick` มาก)
 
+### 11.38 Implementation Notes (P41 — Mascot Leak Prank)
+
+- `ChallengeSpec.surprise` → `ChallengePlan.surprise`: ข้าม `warned` (scheduled → active ที่ `startS`), ผลรั่วเริ่มทันที แต่ `announce()` (Event `challenge.start` → Auto-pause ใน LabSession) รอถึง `startS + mascotExitS`; `ChallengeState.announced` คุม `challengeViews` ไม่ให้การ์ดโผล่ก่อน
+- `ChallengeSpec.leakDays` (ด่าน 1): `planLeakDays` แบ่ง [fromHour, toHour) ของแต่ละวันเป็น count ช่อง สุ่มเวลาเริ่มรายนาทีให้ `start + duration + mascotExitS` อยู่ในช่องตัวเอง → ไม่ทับกัน และ Deterministic ตาม Seed เหมือนเดิม
+- `mascotProgress(states, t, cfg)` คำนวณจากเวลาจำลองล้วน → Snapshot `mascot.progress`; `tank.leakLph` = `Simulation.totalLeakLph` (Scenario + เหตุการณ์) ใช้วาดน้ำหยด — `disturbance.leakLph` ยังเป็นค่า Scenario อย่างเดียวตามเดิม
+- `scene/Mascot.tsx`: Sprite (`public/mascot/run.png`, `happy.png` ตัดจาก Pose Reference Sheet ด้วย Flood fill พื้นขาว) บน `Billboard` ล็อกแกน X/Z; ทางวิ่ง 3 จุดตามทางเดินหิน; ฝั่ง Web แค่ `damp` ค่าระหว่าง Snapshot (200 ms) และไม่ล้ำหน้า Server; การเด้งคำนวณจากระยะที่วิ่ง ไม่ใช่เวลาจริง จึงหยุดตาม Pause
+- ไฟล์ต้นฉบับ `AP_LAB_Mascot/` (~14 MB) ไม่ได้ commit — commit เฉพาะ Sprite ที่ตัดแล้ว (~140 KB)

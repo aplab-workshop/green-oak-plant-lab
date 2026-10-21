@@ -22,6 +22,7 @@ import {
   challengeViews,
   effectsOf,
   outageAt,
+  mascotProgress,
   planChallenges,
   toState,
   type ChallengePlan,
@@ -199,13 +200,17 @@ export class Simulation {
     const t = this._simTimeS;
     const warnAhead = this.cfg.challenges.warnAheadS;
     for (const c of this._challenges) {
-      if (c.status === 'scheduled' && t >= c.startS - warnAhead) {
+      if (c.status === 'scheduled' && !c.surprise && t >= c.startS - warnAhead) {
         c.status = 'warned';
         this.emit({ kind: 'challenge.warning', severity: 'warning', message: challengeMessage(c, 'warning', this.cfg) });
       }
-      if (c.status === 'warned' && t >= c.startS) {
+      if ((c.status === 'warned' || (c.status === 'scheduled' && c.surprise)) && t >= c.startS) {
         c.status = 'active';
-        this.emit({ kind: 'challenge.start', severity: 'critical', message: challengeMessage(c, 'start', this.cfg) });
+        if (!c.surprise) this.announce(c);
+      }
+      // surprise (P41): ผลเริ่มที่ startS แต่ประกาศ/Auto-pause หลัง Mascot วิ่งออกจากฉาก
+      if (c.surprise && !c.announced && c.status !== 'scheduled' && t >= c.startS + this.cfg.challenges.mascotExitS) {
+        this.announce(c);
       }
       if (c.status === 'active' && c.durationS !== null && t >= c.startS + c.durationS) {
         c.status = 'done';
@@ -213,6 +218,21 @@ export class Simulation {
         this.emit({ kind: 'challenge.end', severity: 'info', message: challengeMessage(c, 'end', this.cfg) });
       }
     }
+  }
+
+  private announce(c: ChallengeState): void {
+    c.announced = true;
+    this.emit({ kind: 'challenge.start', severity: 'critical', message: challengeMessage(c, 'start', this.cfg) });
+  }
+
+  /** อัตรารั่วจริงตอนนี้ (L/h) = Scenario + เหตุการณ์ถังรั่ว */
+  get totalLeakLph(): number {
+    return this.disturbance.leakLph + effectsOf(this._challenges, this.cfg).leakLph;
+  }
+
+  /** ความคืบหน้าของ Mascot ที่วิ่งมาเตะถัง (P41) — null = ไม่มีในฉาก */
+  get mascotProgress(): number | null {
+    return mascotProgress(this._challenges, this._simTimeS, this.cfg);
   }
 
   /** เริ่มรอบเกม ready → playing (SPEC § 4.5) */

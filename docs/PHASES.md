@@ -438,6 +438,15 @@ tags: [green-oak, roadmap]
 - [x] GAME-GUIDE: ขั้นเริ่มเล่นและตารางความเร็ว (1x +0.1 %, 144x +12 %, 1440x ล้นถัง) ต่อ 1 วินาทีจริงของสวิตช์เติมน้ำ
 - **ผลตรวจ:** AC-54 ผ่าน; tests 300/300 (39 files), typecheck และ build ผ่าน; Browser: แถบ Speed มี 1x/144x/1440x ทดสอบ, กด 144x → Server speed 144; ไม่มี Console error (นอกจาก WebSocket ตอน Dev server รีสตาร์ท); ตั้ง lab01 กลับ 1x ไว้ให้ผู้ใช้
 
+### P41 — Mascot แกล้งทำถังรั่ว (ด่าน 1) ✅
+- [x] ผู้ใช้ (2026-10-21): Mascot AP LAB วิ่งเข้ามาทำถังรั่วแล้ววิ่งออก ไม่เตือนล่วงหน้า รั่ว 2–4 ชม. (เลือก "เฉพาะด่าน 1") → SPEC § 4.24 + AC-55 ก่อน
+- [x] พบว่าด่าน 3 วันเจอรั่วแค่ 0–1 ครั้ง (ช่วงวัน 1–6 ห่าง 2 วัน) → ผู้ใช้กำหนดตารางใหม่: วันแรก 1 ครั้ง 3 ชม., วันที่สอง 3 ครั้ง 2–3 ชม. (`leakDays`) — แก้ Spec ก่อน
+- [x] sim-core: `ChallengeSpec.surprise` + `leakDays`, ประกาศ `challenge.start` หลัง Mascot ออก, `mascotProgress()`, `totalLeakLph`
+- [x] Snapshot `mascot` + `tank.leakLph`; Sprite Mascot (ตัดพื้นหลัง) ใน `apps/web/public/mascot/` + `scene/Mascot.tsx` + น้ำหยด; คู่มือ/GAME-GUIDE/คำอธิบายด่าน 1 พูดถึง Mascot
+- [x] เทสต์: ตารางรั่วด่าน 1 (Seed 1–8: วัน 0 ×1 3 ชม., วัน 1 ×3 2–3 ชม. ไม่ทับกัน), surprise ไม่มี warning/การ์ดก่อน Mascot ออก, ด่านอื่นยังเตือน
+- **ผลตรวจ:** AC-55 ผ่าน; tests 302/302 (39 files), typecheck และ build ผ่าน; Browser (lab01): Mascot วิ่งตามทางเดินหินหันซ้าย → ท่าดีใจหน้าถังตอน progress 0.5 (leakLph 1.5, ยังไม่มีการ์ด) → ออก แล้วการ์ด "💧 ถังรั่ว … ~3 ชม." + หยุดอัตโนมัติ; Console มีแค่ WebSocket ตอน Dev server รีสตาร์ท
+- **หมายเหตุ:** เทสต์ยาวบางข้อ (AC-05, m2Acceptance) เคยเกิน timeout 5 s ตอนรันพร้อม Dev server/Browser — รันเดี่ยวและรันซ้ำผ่าน; รีเซ็ต lab01 เป็นด่าน 1 พร้อมเล่น (1x, หยุดอัตโนมัติเปิด)
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

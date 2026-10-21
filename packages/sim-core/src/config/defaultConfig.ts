@@ -217,6 +217,9 @@ export interface SimConfig {
     heatWaveHours: [number, number];
     /** ถังรั่ว (L/h) จนกว่าจะซ่อม */
     leakLph: number;
+    /** Mascot วิ่งเข้ามาก่อนเตะถัง / วิ่งออกหลังเตะ (s จำลอง) — ถังรั่วแบบ surprise (P41) */
+    mascotEnterS: number;
+    mascotExitS: number;
     /** ไฟดับ [ต่ำสุด, สูงสุด] (h) */
     outageHours: [number, number];
     /** อากาศแห้ง: RH ห้องเปลี่ยน (%, ติดลบ) และระยะเวลา (h) */
@@ -390,6 +393,8 @@ export const DEFAULT_CONFIG: SimConfig = {
     heatWaveDeltaC: 5,
     heatWaveHours: [6, 8],
     leakLph: 1.5,
+    mascotEnterS: 600,
+    mascotExitS: 600,
     outageHours: [2, 3],
     dryAirRhDeltaPct: -20,
     dryAirHours: 12,

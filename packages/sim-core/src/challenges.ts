@@ -21,6 +21,25 @@ export interface ChallengeSpec {
   salt: number;
   /** ถังรั่วหยุดเองหลัง [ต่ำสุด, สูงสุด] ชั่วโมง (ซ่อมไม่ได้) — ไม่ระบุ = รั่วจนกว่าจะซ่อม (P37) */
   leakHours?: readonly [number, number];
+  /**
+   * ตารางถังรั่วรายวัน (P41) — ถ้ามี ใช้แทนการสุ่มวันตาม count/windowDays (ให้ count/windowDays สรุปตรงกับตารางนี้)
+   * แต่ละวันแบ่ง [fromHour, toHour) เป็น count ช่วงเท่ากัน สุ่มเวลาเริ่มในแต่ละช่วงไม่ให้ทับกัน
+   */
+  leakDays?: readonly LeakDay[];
+  /** ไม่เตือนล่วงหน้า — ถังรั่วมี Mascot วิ่งมาเตะ แล้วประกาศหลัง Mascot ออก (P41) */
+  surprise?: boolean;
+}
+
+/** ถังรั่วของวันหนึ่งในตารางรายวัน */
+export interface LeakDay {
+  /** วันของรอบ (0 = วันเริ่มรอบ) */
+  day: number;
+  count: number;
+  /** ระยะเวลาต่อครั้ง [ต่ำสุด, สูงสุด] ชั่วโมง (จำนวนเต็ม) */
+  hours: readonly [number, number];
+  /** ช่วงเวลาของวันที่เกิดได้ (ชั่วโมง) */
+  fromHour: number;
+  toHour: number;
 }
 
 /** เหตุการณ์ที่วางแผนไว้ (เวลาจำลองแบบสัมบูรณ์) */
@@ -30,6 +49,8 @@ export interface ChallengePlan {
   startS: number;
   /** null = ไม่จบเอง (ถังรั่วจนกว่าจะซ่อม) */
   durationS: number | null;
+  /** ไม่เตือนล่วงหน้า (P41) */
+  surprise?: boolean;
 }
 
 export type ChallengeStatus = 'scheduled' | 'warned' | 'active' | 'done';
@@ -39,6 +60,8 @@ export interface ChallengeState extends ChallengePlan {
   /** เวลาที่จบจริง (หมดเวลา/ซ่อม) */
   endedAtS: number | null;
   repaired: boolean;
+  /** ผู้เล่นรู้แล้ว (มี Event challenge.start) — เหตุการณ์ surprise ประกาศหลัง Mascot ออก */
+  announced: boolean;
 }
 
 export const CHALLENGE_TITLE: Record<ChallengeKind, string> = {
@@ -96,6 +119,7 @@ const startHourOf = (kind: ChallengeKind, rng: Rng): number =>
  */
 export function planChallenges(spec: ChallengeSpec, seed: number, roundStartS: number, cfg: SimConfig): ChallengePlan[] {
   const rng = new Rng((Math.imul(seed, 2654435761) ^ Math.imul(spec.salt + 1, 40503)) >>> 0);
+  if (spec.leakDays) return planLeakDays(spec.leakDays, rng, roundStartS, cfg, spec.surprise === true);
   const n = randInt(rng, spec.count[0], spec.count[1]);
   if (n <= 0 || spec.kinds.length === 0) return [];
 
@@ -127,10 +151,28 @@ export function planChallenges(spec: ChallengeSpec, seed: number, roundStartS: n
     kind,
     startS: day0 + days[i]! * SECONDS_PER_DAY + startHourOf(kind, rng) * 3600,
     durationS: durationOf(kind, rng, cfg, spec),
+    ...(spec.surprise ? { surprise: true } : {}),
   }));
 }
 
-export const toState = (p: ChallengePlan): ChallengeState => ({ ...p, status: 'scheduled', endedAtS: null, repaired: false });
+/** ถังรั่วตามตารางรายวัน — ช่วงละ 1 ครั้ง เวลาเริ่มสุ่มรายนาที ให้รั่ว + Mascot วิ่งออกจบในช่วงของตัวเอง */
+function planLeakDays(days: readonly LeakDay[], rng: Rng, roundStartS: number, cfg: SimConfig, surprise: boolean): ChallengePlan[] {
+  const day0 = Math.floor(roundStartS / SECONDS_PER_DAY) * SECONDS_PER_DAY;
+  const plans: ChallengePlan[] = [];
+  for (const d of days) {
+    const slotS = ((d.toHour - d.fromHour) * 3600) / d.count;
+    for (let i = 0; i < d.count; i++) {
+      const durationS = randInt(rng, d.hours[0], d.hours[1]) * 3600;
+      const slot0 = day0 + d.day * SECONDS_PER_DAY + d.fromHour * 3600 + i * slotS;
+      const room = Math.max(0, slotS - durationS - cfg.challenges.mascotExitS);
+      const startS = slot0 + randInt(rng, 0, Math.floor(room / 60)) * 60;
+      plans.push({ id: plans.length + 1, kind: 'leak', startS, durationS, ...(surprise ? { surprise: true } : {}) });
+    }
+  }
+  return plans;
+}
+
+export const toState = (p: ChallengePlan): ChallengeState => ({ ...p, status: 'scheduled', endedAtS: null, repaired: false, announced: false });
 
 /** ผลรวมของเหตุการณ์ที่ active */
 export function effectsOf(states: readonly ChallengeState[], cfg: SimConfig): ChallengeEffects {
@@ -149,10 +191,10 @@ export function effectsOf(states: readonly ChallengeState[], cfg: SimConfig): Ch
   return e;
 }
 
-/** มุมมองที่ส่งให้ผู้เล่น — เฉพาะที่ถูกเตือนแล้ว */
+/** มุมมองที่ส่งให้ผู้เล่น — เฉพาะที่ถูกเตือนแล้ว (surprise: หลังประกาศ) */
 export function challengeViews(states: readonly ChallengeState[]): ChallengeView[] {
   return states
-    .filter((s) => s.status !== 'scheduled')
+    .filter((s) => s.status !== 'scheduled' && (!s.surprise || s.announced))
     .map((s) => ({
       id: s.id,
       kind: s.kind,
@@ -203,6 +245,22 @@ export function challengeMessage(s: ChallengeState, phase: 'warning' | 'start' |
     }
   }
   return s.repaired ? `${t}: ซ่อมเรียบร้อย น้ำหยุดรั่วแล้ว` : `${t} จบแล้ว กลับสู่สภาวะปกติ`;
+}
+
+/**
+ * ช่วง Mascot วิ่งมาเตะถังของถังรั่วแบบ surprise (P41 / SPEC § 4.24)
+ * progress 0–1 ตลอด [startS − enter, startS + exit), 0.5 = เตะถัง; null = ไม่มี Mascot ในฉาก
+ */
+export function mascotProgress(states: readonly ChallengeState[], t: number, cfg: SimConfig): number | null {
+  const { mascotEnterS: enter, mascotExitS: exit } = cfg.challenges;
+  for (const s of states) {
+    if (s.kind !== 'leak' || !s.surprise || s.repaired) continue;
+    if (t >= s.startS - enter && t < s.startS + exit) {
+      // ครึ่งแรก = วิ่งเข้า, ครึ่งหลัง = วิ่งออก (ยืดตาม enter/exit แต่ละช่วง)
+      return t < s.startS ? 0.5 * (t - (s.startS - enter)) / enter : 0.5 + 0.5 * (t - s.startS) / exit;
+    }
+  }
+  return null;
 }
 
 /** ไฟดับ ณ เวลา t หรือไม่ (ใช้ได้ก่อน step เพื่อหยุดนับโดส) */

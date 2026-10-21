@@ -9,6 +9,7 @@ import { Lettuce } from './Lettuce';
 import { Sensors } from './Sensors';
 import { Tank } from './Tank';
 import { Greenhouse } from './Greenhouse';
+import { Mascot } from './Mascot';
 import { potPosition } from './layout';
 import { useSceneStore } from './sceneStore';
 
@@ -136,6 +137,7 @@ export default function Scene3D() {
       <Plants />
       <Actuators />
       <Sensors />
+      <Mascot />
     </Canvas>
   );
 }

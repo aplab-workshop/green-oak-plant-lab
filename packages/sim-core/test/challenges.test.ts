@@ -88,22 +88,31 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     expect(sim.challenges).toEqual([]);
   });
 
-  it('P37: L1 has 2–3 self-stopping leaks (4–6 h) that cannot be repaired', () => {
+  it('P37/P41: L1 leaks once on day 1 (3 h) and three times on day 2 (2–3 h), self-stopping and not repairable', () => {
     const L1 = LEVELS.find((l) => l.id === 'L1')!;
-    for (const seed of [1, 2, 3, 4, 5]) {
+    for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
       const plan = planChallenges(L1.challenges!, seed, roundStart, cfg);
-      expect(plan.length).toBeGreaterThanOrEqual(2);
-      expect(plan.length).toBeLessThanOrEqual(3);
-      for (const p of plan) {
+      const day0 = Math.floor(roundStart / SECONDS_PER_DAY) * SECONDS_PER_DAY;
+      const dayOf = (p: ChallengePlan) => Math.floor((p.startS - day0) / SECONDS_PER_DAY);
+      expect(plan.map(dayOf)).toEqual([0, 1, 1, 1]);
+      expect(plan[0]!.durationS).toBe(3 * 3600);
+      for (const [i, p] of plan.entries()) {
         expect(p.kind).toBe('leak');
-        expect(p.durationS! / 3600).toBeGreaterThanOrEqual(4);
-        expect(p.durationS! / 3600).toBeLessThanOrEqual(6);
+        expect(p.surprise).toBe(true);
+        expect(p.durationS! / 3600).toBeGreaterThanOrEqual(2);
+        expect(p.durationS! / 3600).toBeLessThanOrEqual(3);
+        const hour = ((p.startS - day0) % SECONDS_PER_DAY) / 3600;
+        expect(hour).toBeGreaterThanOrEqual(i === 0 ? 10 : 7);
+        // ไม่ทับกัน: ครั้งถัดไปเริ่มหลังครั้งนี้หยุดรั่วและ Mascot ออกแล้ว
+        const next = plan[i + 1];
+        if (next) expect(next.startS).toBeGreaterThanOrEqual(p.startS + p.durationS! + cfg.challenges.mascotExitS);
       }
+      expect(plan[3]!.startS + plan[3]!.durationS!).toBeLessThanOrEqual(day0 + SECONDS_PER_DAY + 22 * 3600);
     }
     const sim = new Simulation();
     sim.reset(levelRound(L1));
     const first = sim.challenges[0]!;
-    while (sim.simTimeS < first.startS + 600) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+    while (sim.simTimeS < first.startS + 660) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
     expect(sim.challengeViews().find((c) => c.id === first.id)).toMatchObject({ status: 'active', repairable: false });
     expect(sim.repairLeak()).toBe(false);
     while (sim.simTimeS < first.startS + first.durationS! + 60) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
@@ -134,6 +143,45 @@ describe('Challenge lifecycle', () => {
     expect(sim.challengeViews()[0]!.status).toBe('done');
     const kinds = sim.drainEvents().map((e) => e.kind).filter((k) => k.startsWith('challenge.'));
     expect(kinds).toEqual(['challenge.warning', 'challenge.start', 'challenge.end']);
+  });
+
+  it('P41: surprise leak has no warning; mascot runs in, kicks at startS, leaves, then the leak is announced', () => {
+    const sim = new Simulation({ cfg: flat });
+    sim.reset({});
+    const start = sim.startTimeS + 8 * 3600;
+    const plan: ChallengePlan[] = [{ id: 1, kind: 'leak', startS: start, durationS: 3 * 3600, surprise: true }];
+    sim.reset({ challengePlan: plan });
+    const until = (t: number) => { while (sim.simTimeS < t) sim.step(60, OFF); };
+    until(start - 900);
+    expect(sim.mascotProgress).toBeNull();
+    expect(sim.challengeViews()).toEqual([]);
+    until(start - 300);
+    expect(sim.mascotProgress!).toBeCloseTo(0.25, 2);
+    expect(sim.totalLeakLph).toBe(0);
+    until(start + 120);
+    // เตะแล้ว: น้ำรั่วจริงแต่ยังไม่ประกาศ (Mascot กำลังวิ่งออก)
+    expect(sim.mascotProgress!).toBeGreaterThan(0.5);
+    expect(sim.totalLeakLph).toBeGreaterThan(0);
+    expect(sim.challengeViews()).toEqual([]);
+    until(start + 660);
+    expect(sim.mascotProgress).toBeNull();
+    expect(sim.challengeViews()).toMatchObject([{ kind: 'leak', status: 'active', repairable: false }]);
+    until(start + 3 * 3600 + 120);
+    expect(sim.challengeViews()[0]!.status).toBe('done');
+    const events = sim.drainEvents().filter((e) => e.kind.startsWith('challenge.'));
+    expect(events.map((e) => e.kind)).toEqual(['challenge.start', 'challenge.end']);
+    expect(events[0]!.simTimeS).toBeGreaterThanOrEqual(start + 600);
+    expect(events[0]!.message).toContain('~3 ชม.');
+  });
+
+  it('P41: only Level 1 leaks are surprises; other levels still warn', () => {
+    expect(LEVELS.find((l) => l.id === 'L1')!.challenges!.surprise).toBe(true);
+    for (const l of LEVELS.filter((x) => x.id !== 'L1')) expect(l.challenges?.surprise).toBeFalsy();
+    const sim = simWith('leak', 8 * 3600, null);
+    run(sim, 2.5 * 3600);
+    expect(sim.challengeViews()).toMatchObject([{ kind: 'leak', status: 'warned' }]);
+    run(sim, 6 * 3600);
+    expect(sim.mascotProgress).toBeNull();
   });
 });
 

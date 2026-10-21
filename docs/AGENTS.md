@@ -168,3 +168,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - เสร็จและ commit แล้ว: แถบ Speed แสดง 1x / 144x / 1440x (ทดสอบ) (SPEC § 4.23); Server ยังรับ 60/360/3600 สำหรับเทสต์; tests 300/300
 - รอผู้ใช้ตรวจรับ P39–P40 และบอกกติกาด่าน 2
 
+### สถานะเพิ่มเติม 2026-10-21 — P41 Mascot ทำถังรั่ว
+- เสร็จและ commit แล้ว: ด่าน 1 ถังรั่วแบบ surprise ไม่เตือน — Mascot AP LAB วิ่งมาเตะถัง (`scene/Mascot.tsx`, Snapshot `mascot.progress`) แล้วค่อยขึ้นการ์ด/Auto-pause; ตารางรั่ววันแรก 1×3 ชม., วันที่สอง 3×2–3 ชม. (SPEC § 4.24); tests 302/302
+- ต้นฉบับรูปอยู่ `AP_LAB_Mascot/` (ไม่ commit); Sprite ที่ใช้อยู่ `apps/web/public/mascot/`
+- รอผู้ใช้ตรวจรับ P41 และบอกกติกาด่าน 2
