@@ -164,8 +164,8 @@ export interface LevelInfo {
   waterAlertPct: number | null;
 }
 
-/** ปัจจัยสิ่งแวดล้อมที่ด่านเลือกไม่นับผลต่อผักได้ (P38 / SPEC § 4.21) */
-export type PlantFactor = 'temperature' | 'air' | 'nutrient';
+/** ปัจจัยสิ่งแวดล้อมที่ด่านเลือกไม่นับผลต่อผักได้ (P38 / SPEC § 4.21) — nutrient = EC และ pH, ph = pH อย่างเดียว (P44) */
+export type PlantFactor = 'temperature' | 'air' | 'nutrient' | 'ph';
 
 /** สถานะด่านใน Snapshot — รวมรายละเอียดด่านเพื่อให้หน้าเลือกด่านไม่ต้องเก็บค่าซ้ำ (P24) */
 export interface LevelProgress extends LevelInfo { unlocked: boolean; bestStars: number }
@@ -215,8 +215,8 @@ export interface LabSnapshot {
   doses: ActiveDose[];
   /** เหตุการณ์ที่เตือนแล้ว/กำลังเกิด/จบแล้วในรอบนี้ (SPEC § 4.8) */
   challenges: ChallengeView[];
-  /** แถบแจ้งน้ำต่ำ (P43) — null = ไม่มี */
-  waterAlert: string | null;
+  /** แถบแจ้งเตือนที่ไม่หยุดเกม: น้ำต่ำ (P43), EC นอกช่วง (P44) — [] = ไม่มี */
+  alerts: string[];
   /** Mascot วิ่งมาเตะถัง (ถังรั่วแบบ surprise, P41) — progress 0–1 ตามเวลาจำลอง, 0.5 = เตะถัง; null = ไม่มีในฉาก */
   mascot: { progress: number } | null;
   /** ผู้ช่วยหยุดเกม — reason = เหตุผลที่หยุดล่าสุด (ล้างเมื่อ Resume) */

@@ -857,3 +857,9 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `LabSession.checkWaterAlert()` แยกจาก `checkRedValues()`: `waterReached` (เคยถึงเกณฑ์ในรอบ) + `waterLow` (ต่ำอยู่) → Snapshot `waterAlert` และ Event `tank.low_water` ครั้งละหนึ่งครั้งต่อการตกลงมา; ไม่ขึ้นกับ `autoPauseEnabled`
 - `WaterAlertBanner` ใช้ class `.autopause-banner` เดิม (ตำแหน่งเดียวกัน) และซ่อนเมื่อแถบหยุดเกมแสดงอยู่ ไม่ให้ซ้อนกัน
 - รั่วด่าน 1 รวม 18 ครั้ง/5 วัน ที่ 3 L/h — ช่อง 4 ชม. ของวันที่ 2–5 พอดีกับรั่ว 3 ชม. + Mascot ออก 40 นาที (`planLeakDays` ใช้ `mascotExitS` ของรอบ)
+
+### 11.41 Implementation Notes (P44 — Level 2)
+
+- `IgnoredFactors.ph`: `stepPlant` ใช้ pH กลางช่วงเหมาะของ `phCardinal` แทน pH จริงตอนคิด Nutrient stress (`nutrient` ยังปิดทั้งก้อน); `plantCause(..., { ignorePh })` ให้สาเหตุเป็น "ปุ๋ย" ไม่ใช่ "pH"
+- `LabSession.checkAlerts()` รวมน้ำ + EC; `autoPauseActive` เป็นเท็จในด่านที่มี `waterAlertPct` (ไม่หยุดเกมทั้งเหตุการณ์และค่าแดง); Snapshot `alerts: string[]` — ฝั่ง Web join เป็น string ใน selector (ไม่คืน array ใหม่)
+- ด่าน 2 ทับ Config ผ่าน `LevelDef.cfg` เท่านั้น: ปุ๋ยไหลช้าลง 5 เท่าและโดสยาวขึ้น 5 เท่า (EC +0.15 ต่อโดสเท่าเดิม), `phDropPerDoseMin` ÷5 ให้ pH ต่อโดสเท่าเดิม

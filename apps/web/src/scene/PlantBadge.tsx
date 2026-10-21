@@ -30,7 +30,7 @@ function badgeKey(s: LabState, plantId: number): string {
   if (!snap || !p) return '';
   const dead = isPlantDead(p, snap.game.deadPlantIds);
   const mood = plantMood(p, dead);
-  const cause = dead ? '' : (plantCause(p, { ph: snap.sensors.ph, minuteOfDay: snap.sim.minuteOfDay }) ?? '');
+  const cause = dead ? '' : (plantCause(p, { ph: snap.sensors.ph, minuteOfDay: snap.sim.minuteOfDay, ignorePh: !!snap.level?.ignoredFactors.includes('ph') }) ?? '');
   const gain = !dead && showGainBadge(p, snap.sim.minuteOfDay) ? p.gainYesterdayG!.toFixed(1) : '';
   const party = !dead && isCelebrating(p, snap.simTimeS) ? p.stage : '';
   return `${mood}|${cause}|${gain}|${party}|${Math.round(p.damage * 100)}`;

@@ -14,10 +14,11 @@ import {
   deviceOfBit,
   playerDeviceOfDose,
   sensorStatus,
+  SENSOR_RANGES,
   SENSOR_REGISTERS,
 } from '@gol/shared';
 import {
-  LEVELS, SimClock, Simulation, findLevel, levelInfo, levelPct, levelRound, waterHeightCm,
+  LEVELS, SimClock, Simulation, envEc, findLevel, levelInfo, levelPct, levelRound, waterHeightCm,
   type LevelDef, type RoundStart, type SimulationOptions,
 } from '@gol/sim-core';
 import { applyFarmHelper } from './farmHelper';
@@ -140,6 +141,8 @@ export class LabSession {
   private waterReached = false;
   /** P43: น้ำต่ำกว่า waterAlertPct อยู่ → แถบแจ้งเตือน (ไม่หยุดเกม) */
   private waterLow = false;
+  /** P44: EC นอกช่วงดีอยู่ (ด่านแบบแจ้งเตือนที่ผู้เล่นคุมปุ๋ย) */
+  private ecOut: 'low' | 'high' | null = null;
   private readonly bestStars = new Map<LevelId, number>();
 
   private get recordKey(): string {
@@ -212,7 +215,7 @@ export class LabSession {
       this.log('sim.lagged', 'warning', 'Server คำนวณไม่ทัน เวลาจำลองช้ากว่าที่ตั้งไว้');
     }
     this.drainSimEvents();
-    this.checkWaterAlert();
+    this.checkAlerts();
     this.checkRedValues();
   }
 
@@ -224,14 +227,13 @@ export class LabSession {
         this.clock.pause();
       }
       this.events.add({ at: this.now(), ...e });
-      // P42/P43: ด่านที่มี waterAlertPct ไม่หยุดตอนเกิดเหตุการณ์ — แจ้งน้ำต่ำแทน (checkWaterAlert)
-      if ((e.kind === 'challenge.warning' || e.kind === 'challenge.start') && this.level?.waterAlertPct == null) this.autoPause(e.message);
+      if (e.kind === 'challenge.warning' || e.kind === 'challenge.start') this.autoPause(e.message);
     }
   }
 
-  /** Auto-pause ใช้เฉพาะโหมดด่านขณะกำลังเล่น */
+  /** Auto-pause ใช้เฉพาะโหมดด่านขณะกำลังเล่น — ด่านแบบแจ้งเตือน (waterAlertPct) ไม่หยุดเกมเลย (P43/P44) */
   private get autoPauseActive(): boolean {
-    return this.autoPauseEnabled && this.level !== null && this.sim.game.status === 'playing';
+    return this.autoPauseEnabled && this.level !== null && this.level.waterAlertPct === null && this.sim.game.status === 'playing';
   }
 
   private autoPause(reason: string): void {
@@ -242,25 +244,54 @@ export class LabSession {
     this.log('game.autopause', 'warning', 'ผู้ช่วยหยุดเกมให้: ' + reason);
   }
 
-  /** P43: น้ำต่ำกว่า waterAlertPct → แถบแจ้งเตือน + Event log ครั้งละหนึ่งครั้งต่อการตกลงมา (ไม่หยุดเกม) */
-  private checkWaterAlert(): void {
+  /**
+   * ด่านแบบแจ้งเตือน: น้ำ < waterAlertPct (P43) และ EC นอกช่วงดีเมื่อผู้เล่นคุมปุ๋ย (P44)
+   * → แถบแจ้งเตือน + Event log ครั้งละหนึ่งครั้งต่อการออกนอกช่วง (ไม่หยุดเกม)
+   */
+  private checkAlerts(): void {
     const lim = this.level?.waterAlertPct ?? null;
     if (lim === null || this.sim.game.status !== 'playing') {
       this.waterLow = false;
+      this.ecOut = null;
       return;
     }
-    const w = this.sim.readSensors(false).waterLevelPct;
-    if (w >= lim) {
+    const r = this.sim.readSensors(false);
+    if (r.waterLevelPct >= lim) {
       this.waterReached = true;
       this.waterLow = false;
     } else if (this.waterReached && !this.waterLow) {
       this.waterLow = true;
-      this.log('tank.low_water', 'warning', this.waterAlertText(w, lim));
+      this.log('tank.low_water', 'warning', this.waterAlertText(r.waterLevelPct, lim));
     }
+    const ec = this.ecOutOf(r.ecMsCm);
+    if (ec && ec !== this.ecOut) this.log('tank.ec_alert', 'warning', this.ecAlertText(r.ecMsCm, ec));
+    this.ecOut = ec;
+  }
+
+  /** EC นอกช่วงดี — เฉพาะด่านที่ผู้เล่นคุมปุ๋ย */
+  private ecOutOf(ec: number): 'low' | 'high' | null {
+    if (!this.level?.playerDevices.includes('nutrient')) return null;
+    const [lo, hi] = SENSOR_RANGES.ecMsCm!.ok;
+    return ec < lo ? 'low' : ec > hi ? 'high' : null;
   }
 
   private waterAlertText(w: number, lim: number): string {
     return `💧 น้ำเหลือ ${Math.floor(w)}% ต่ำกว่า ${lim}% — เปิด 🚰 เติมน้ำ`;
+  }
+
+  private ecAlertText(ec: number, out: 'low' | 'high'): string {
+    return out === 'low'
+      ? `🧪 EC ${ec.toFixed(2)} ต่ำ ผักหิวปุ๋ย — กด 🧪 ใส่ปุ๋ย`
+      : `🧪 EC ${ec.toFixed(2)} เข้มเกิน — เติมน้ำ 🚰 เจือจาง และหยุดใส่ปุ๋ย`;
+  }
+
+  private alerts(waterPct: number, ec: number): string[] {
+    const lim = this.level?.waterAlertPct ?? null;
+    if (lim === null) return [];
+    const out: string[] = [];
+    if (this.waterLow) out.push(this.waterAlertText(waterPct, lim));
+    if (this.ecOut) out.push(this.ecAlertText(ec, this.ecOut));
+    return out;
   }
 
   /** ค่าสีแดงครั้งแรกในรอบ → Auto-pause */
@@ -532,6 +563,7 @@ export class LabSession {
     this.redAtStart.clear();
     this.waterReached = false;
     this.waterLow = false;
+    this.ecOut = null;
     this.autoPauseReason = null;
     this.sim.reset(round);
     this.clock.reset(this.sim.startTimeS);
@@ -603,8 +635,7 @@ export class LabSession {
       disturbance: s.disturbance,
       doses: [...this.doses.values()].map((d) => ({ ...d })),
       challenges: this.sim.challengeViews(),
-      waterAlert: this.waterLow && this.level?.waterAlertPct != null
-        ? this.waterAlertText(levelPct(s.env.waterVolumeL, cfg), this.level.waterAlertPct) : null,
+      alerts: this.alerts(levelPct(s.env.waterVolumeL, cfg), envEc(s.env)),
       mascot: (() => { const p = this.sim.mascotProgress; return p === null ? null : { progress: p }; })(),
       autoPause: { enabled: this.autoPauseEnabled, reason: this.autoPauseReason },
     };

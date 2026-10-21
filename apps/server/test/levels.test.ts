@@ -98,7 +98,7 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
     expect(won.levels[1]).toMatchObject({ id: 'L2', unlocked: true });
     await t.lab.handle({ type: 'selectLevel', levelId: 'L2' });
     const l2 = t.lab.snapshot();
-    expect(l2).toMatchObject({ paused: true, level: { id: 'L2' }, game: { status: 'ready', targetG: 30, best: null } });
+    expect(l2).toMatchObject({ paused: true, level: { id: 'L2' }, game: { status: 'ready', targetG: 24, best: null } });
     expect(l2.plants.reduce((a, p) => a + p.biomassG, 0) / 6).toBeCloseTo(15, -0.5);
     expect(l2.levels[0]!.bestStars).toBe(won.game.stars);
     await t.lab.handle({ type: 'selectLevel', levelId: 'free' });

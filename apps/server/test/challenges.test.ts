@@ -91,13 +91,13 @@ describe('Events & auto-pause in LabSession — P23 / AC-39', () => {
 
   it('P43: L1 never pauses for leaks or low water; water < 65 % shows an alert that clears after refilling', async () => {
     const t = await labWith('L1', [{ kind: 'leak', afterS: 3600, durationS: 3 * 3600, surprise: true }]);
-    expect(t.lab.snapshot().waterAlert).toBeNull(); // ถังว่างตอนเริ่ม ยังไม่แจ้ง
+    expect(t.lab.snapshot().alerts).toEqual([]); // ถังว่างตอนเริ่ม ยังไม่แจ้ง
     t.lab.sim.setWaterLevelPct(70);
     await t.lab.handle({ type: 'setSpeed', speed: 720 });
-    for (let ms = 0; ms < 30_000 && t.lab.snapshot().waterAlert === null; ms += 500) await runReal(t, 500);
+    for (let ms = 0; ms < 30_000 && t.lab.snapshot().alerts.length === 0; ms += 500) await runReal(t, 500);
     let snap = t.lab.snapshot();
     expect(snap.paused).toBe(false);
-    expect(snap.waterAlert).toMatch(/น้ำเหลือ \d+% ต่ำกว่า 65%/);
+    expect(snap.alerts.join()).toMatch(/น้ำเหลือ \d+% ต่ำกว่า 65%/);
     expect(snap.tank.waterLevelPct).toBeLessThan(65);
     expect(snap.challenges).toMatchObject([{ kind: 'leak', status: 'active' }]);
     const list = t.lab.events.list();
@@ -107,14 +107,33 @@ describe('Events & auto-pause in LabSession — P23 / AC-39', () => {
     // เติมกลับถึง 65 % → แถบหาย; ตกลงใหม่ → แจ้งอีกครั้ง
     t.lab.sim.setWaterLevelPct(80);
     await runReal(t, 200);
-    expect(t.lab.snapshot().waterAlert).toBeNull();
+    expect(t.lab.snapshot().alerts).toEqual([]);
     t.lab.sim.setWaterLevelPct(60);
     await runReal(t, 200);
     snap = t.lab.snapshot();
     expect(snap.paused).toBe(false);
-    expect(snap.waterAlert).toMatch(/น้ำเหลือ (59|60)% ต่ำกว่า 65%/);
+    expect(snap.alerts.join()).toMatch(/น้ำเหลือ (59|60)% ต่ำกว่า 65%/);
     expect(t.lab.events.list().filter((e) => e.kind === 'tank.low_water')).toHaveLength(2);
   }, 60000);
+
+  it('P44: L2 shows an EC alert from the start (EC 0.6) without pausing; feeding clears it', async () => {
+    const t = await labWith('L2', []);
+    await t.lab.handle({ type: 'setSpeed', speed: 720 });
+    await runReal(t, 200);
+    let snap = t.lab.snapshot();
+    expect(snap.paused).toBe(false);
+    expect(snap.alerts).toEqual([expect.stringMatching(/EC 0\.6\d ต่ำ/)]);
+    expect(t.lab.events.list().filter((e) => e.kind === 'tank.ec_alert')).toHaveLength(1);
+    t.lab.sim.setEc(1.2);
+    await runReal(t, 200);
+    expect(t.lab.snapshot().alerts).toEqual([]);
+    t.lab.sim.setEc(2.0);
+    await runReal(t, 200);
+    snap = t.lab.snapshot();
+    expect(snap.alerts.join()).toContain('เข้มเกิน');
+    expect(snap.paused).toBe(false);
+    expect(t.lab.events.list().filter((e) => e.kind === 'game.autopause')).toHaveLength(0);
+  });
 
   it('P42: L1 plays at 720x with a slower refill pump; other levels keep 144x and the default pump', async () => {
     const t = await labWith('L1', []);

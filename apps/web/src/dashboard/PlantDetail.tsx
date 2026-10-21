@@ -69,7 +69,8 @@ export function PlantDetail() {
   const dead = !!p && (deadListed || isPlantDead(p));
   const ph = useLabStore((s) => s.snapshot?.sensors.ph);
   const minuteOfDay = useLabStore((s) => s.snapshot?.sim.minuteOfDay);
-  const cause = p && ph !== undefined && minuteOfDay !== undefined && !dead ? plantCause(p, { ph, minuteOfDay }) : null;
+  const ignorePh = useLabStore((s) => !!s.snapshot?.level?.ignoredFactors.includes('ph'));
+  const cause = p && ph !== undefined && minuteOfDay !== undefined && !dead ? plantCause(p, { ph, minuteOfDay, ignorePh }) : null;
 
   return (
     <Panel title="Plant" icon={<Sprout className="h-3.5 w-3.5" />} right={<PlantSelector />}>

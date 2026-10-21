@@ -46,6 +46,8 @@ export interface IgnoredFactors {
   temperature?: boolean;
   air?: boolean;
   nutrient?: boolean;
+  /** P44: pH ไม่มีผล (ใช้ pH ที่เหมาะ) แต่ EC ยังมีผล */
+  ph?: boolean;
 }
 
 const NO_IGNORE: Readonly<IgnoredFactors> = Object.freeze({});
@@ -139,7 +141,8 @@ export function stepPlant(
   const plantTempC = ignore.temperature ? optimalTempC(cfg) : e.airTempC;
   const lightLoadH = stepLightLoad(p.lightLoadH, req.ppfd, dtS, cfg);
   const lightStress = stepLightStress(p.lightStress, req.ppfd, plantTempC, hydration, dtS, cfg, lightLoadH);
-  const nutrientStress = ignore.nutrient ? 0 : stepNutrientStress(p.nutrientStress, e.ecMsCm, e.ph, dtS, cfg);
+  const plantPh = ignore.ph ? (cfg.nutrient.phCardinal[1] + cfg.nutrient.phCardinal[2]) / 2 : e.ph;
+  const nutrientStress = ignore.nutrient ? 0 : stepNutrientStress(p.nutrientStress, e.ecMsCm, plantPh, dtS, cfg);
   // P38: น้ำอุ่นจากอากาศที่คุมไม่ได้ไม่ทำให้รากขาดออกซิเจน
   const oxygen = ignore.temperature ? Math.max(e.estimatedOxygen, cfg.root.healthyOxygen) : e.estimatedOxygen;
   const rootHealth = stepRootHealth(p.rootHealth, oxygen, req.rootSubmerged, dtS, cfg);

@@ -114,7 +114,7 @@ describe('Dose commands — P22 / AC-38', () => {
 
   it('farm helper doses pH Down when pH > 6.6 in levels where M106 is locked', async () => {
     const clock = new FakeClock();
-    const lab = new LabSession({ labId: 'lab01', adapter: new MockPlcAdapter('manual', clock.now), now: clock.now, level: 'L2', sensorNoise: false });
+    const lab = new LabSession({ labId: 'lab01', adapter: new MockPlcAdapter('manual', clock.now), now: clock.now, level: 'L3', sensorNoise: false });
     lab.sim.setPh(7.0);
     await lab.poll();
     expect(lab.snapshot().doses).toEqual([{ device: 'phDown', remainingS: 120, totalS: 120 }]);

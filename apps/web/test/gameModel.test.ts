@@ -24,7 +24,7 @@ function snap(over: Partial<LabSnapshot> = {}, sensors: Partial<LabSnapshot['sen
     sensors: { airTempC: 23, rhPct: 65, ppfd: 320, waterTempC: 22, ph: 6.1, ecMsCm: 1.2, waterLevelPct: 85, flowLpm: 0, powerW: 100, vpdKPa: 0.9, dli: 8, ...sensors },
     tank: { waterLevelPct: 85, waterHeightCm: 17, volumeL: 34, capacityL: 40, overflowFlowLpm: 0, leakLph: 0, heightCm: 20, potBottomCm: 15, estimatedOxygen: 0.95 },
     plants: [plant(1, { biomassG: 12 }), plant(2, { biomassG: 9 }), plant(3, { biomassG: 15 })],
-    scenario: null, disturbance: { leakLph: 0 }, doses: [], challenges: [], waterAlert: null, mascot: null, autoPause: { enabled: true, reason: null },
+    scenario: null, disturbance: { leakLph: 0 }, doses: [], challenges: [], alerts: [], mascot: null, autoPause: { enabled: true, reason: null },
     ...over,
   };
 }

@@ -77,14 +77,15 @@ export function AutoPauseBanner() {
   );
 }
 
-/** แถบแจ้งน้ำต่ำ (P43) — ไม่หยุดเกม ไม่มีปุ่ม หายเองเมื่อน้ำกลับถึงเกณฑ์; ซ่อนเมื่อแถบหยุดเกมแสดงอยู่ */
+/** แถบแจ้งเตือน น้ำต่ำ/EC (P43/P44) — ไม่หยุดเกม ไม่มีปุ่ม หายเองเมื่อค่ากลับเข้าช่วง; ซ่อนเมื่อแถบหยุดเกมแสดงอยู่ */
 export function WaterAlertBanner() {
-  const alert = useLabStore((s) => s.snapshot?.waterAlert ?? null);
+  // join เป็น string เพื่อให้ selector คืนค่าเดิมเมื่อข้อความไม่เปลี่ยน (ห้ามคืน array ใหม่)
+  const text = useLabStore((s) => s.snapshot?.alerts.join(' · ') ?? '');
   const pausedBanner = useLabStore((s) => !!s.snapshot?.autoPause.reason && !!s.snapshot?.paused);
-  if (!alert || pausedBanner) return null;
+  if (!text || pausedBanner) return null;
   return (
     <div role="alert" className="autopause-banner">
-      <span className="min-w-0 flex-1 font-semibold">{alert}</span>
+      <span className="min-w-0 flex-1 font-semibold">{text}</span>
     </div>
   );
 }

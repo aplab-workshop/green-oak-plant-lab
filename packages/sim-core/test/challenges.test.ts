@@ -67,7 +67,7 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     });
   });
 
-  it('L3 has 1–2 heat waves starting around noon; L2 and Free Play have none', () => {
+  it('L3 has 1–2 heat waves starting around noon; Free Play has none', () => {
     for (const seed of [1, 2, 3, 4, 5]) {
       const plan = planChallenges(L3.challenges!, seed, roundStart, cfg);
       expect(plan.length).toBeGreaterThanOrEqual(1);
@@ -82,8 +82,6 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
       }
     }
     const sim = new Simulation();
-    sim.reset(levelRound(LEVELS.find((l) => l.id === 'L2')!));
-    expect(sim.challenges).toEqual([]);
     sim.reset({});
     expect(sim.challenges).toEqual([]);
   });
@@ -173,6 +171,21 @@ describe('Challenge lifecycle', () => {
     expect(events[0]!.message).toContain('~3 ชม.');
   });
 
+  it('P44: L2 leaks twice a day for 5 days (3 L/h), no overlaps', () => {
+    const L2 = LEVELS.find((l) => l.id === 'L2')!;
+    for (const seed of [1, 2, 3, 4, 5]) {
+      const plan = planChallenges(L2.challenges!, seed, 23 * SECONDS_PER_DAY + 6 * 3600, makeConfig(L2.cfg));
+      const day0 = 23 * SECONDS_PER_DAY;
+      expect(plan.map((p) => Math.floor((p.startS - day0) / SECONDS_PER_DAY))).toEqual([0, 0, 1, 1, 2, 2, 3, 3, 4, 4]);
+      for (const [i, p] of plan.entries()) {
+        expect(p).toMatchObject({ kind: 'leak', surprise: true });
+        const next = plan[i + 1];
+        if (next) expect(next.startS).toBeGreaterThanOrEqual(p.startS + p.durationS! + 2400);
+      }
+    }
+    expect(makeConfig(L2.cfg).challenges.leakLph).toBe(3);
+  });
+
   it('P42: a level config override applies only to its round (L1 refill 0.4 L/min, mascot 2,400 s)', () => {
     const sim = new Simulation();
     sim.reset(levelRound(LEVELS.find((l) => l.id === 'L1')!));
@@ -188,9 +201,9 @@ describe('Challenge lifecycle', () => {
     expect(sim.cfg.tank.refillFlowLpm).toBe(DEFAULT_CONFIG.tank.refillFlowLpm);
   });
 
-  it('P41: only Level 1 leaks are surprises; other levels still warn', () => {
-    expect(LEVELS.find((l) => l.id === 'L1')!.challenges!.surprise).toBe(true);
-    for (const l of LEVELS.filter((x) => x.id !== 'L1')) expect(l.challenges?.surprise).toBeFalsy();
+  it('P41/P44: only Level 1–2 leaks are surprises; other levels still warn', () => {
+    for (const id of ['L1', 'L2']) expect(LEVELS.find((l) => l.id === id)!.challenges!.surprise).toBe(true);
+    for (const l of LEVELS.filter((x) => x.id !== 'L1' && x.id !== 'L2')) expect(l.challenges?.surprise).toBeFalsy();
     const sim = simWith('leak', 8 * 3600, null);
     run(sim, 2.5 * 3600);
     expect(sim.challengeViews()).toMatchObject([{ kind: 'leak', status: 'warned' }]);

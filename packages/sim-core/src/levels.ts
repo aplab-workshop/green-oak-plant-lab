@@ -33,9 +33,22 @@ export const LEVELS: readonly LevelDef[] = [
       { day: 0, count: 2, hours: [2, 3], fromHour: 10, toHour: 20 },
       ...[1, 2, 3, 4].map((day) => ({ day, count: 4, hours: [2, 3] as const, fromHour: 6, toHour: 22 })),
     ] } },
-  { id: 'L2', title: 'อาหารของผัก', description: 'ผักโตเร็ว กินปุ๋ยมาก คอยดู EC และเติมปุ๋ย',
-    startBiomassG: 15, startDay: 23, targetG: 30, timeLimitDays: 8, energyBudgetKWh: 18, playerDevices: ['led', 'refillPump', 'nutrient'],
-    lockedMode: 'helper', ignoredFactors: [], playSpeed: 144, waterAlertPct: null },
+  // P44 (SPEC § 4.27): นำของด่าน 1 มาใช้ — คุม Refill + LED + ปุ๋ย, อื่นปิดสนิท, 720x, แจ้งเตือนไม่หยุดเกม, Mascot รั่ววันละ 2 ครั้ง
+  { id: 'L2', title: 'อาหารของผัก', description: 'เริ่มด้วยน้ำที่ปุ๋ยจาง ใส่ปุ๋ยให้ EC อยู่ในช่วงดี ระวัง Mascot ทำถังรั่ว — เติมน้ำแล้วปุ๋ยจะจางลง',
+    // วัด Seed 1–5: สูตรดูแล (ใส่ปุ๋ย EC < 1.0 → 1.2) ต้นเล็กสุดถึง 24 g ที่ ~4.05 วัน (ไฟ 4.1 kWh);
+    // ไม่ใส่ปุ๋ย (EC จางเหลือ ~0.2 จากรั่ว+เติมน้ำ) ≤ 20.2 g, ไม่เปิด LED 21.0 g ที่ 5 วัน → เป้า 24 g
+    startBiomassG: 15, startDay: 23, targetG: 24, timeLimitDays: 5, energyBudgetKWh: 35, playerDevices: ['led', 'refillPump', 'nutrient'],
+    lockedMode: 'off', playSpeed: 720, waterAlertPct: 65,
+    // P44: นับ น้ำ + แสง + EC (pH ไม่มี pH Down → ไม่มีผลต่อผัก)
+    ignoredFactors: ['temperature', 'air', 'ph'],
+    // 720x: ปั๊มเติมน้ำ/ปุ๋ยช้าลง 5 เท่า โดสยาวขึ้น 5 เท่า (ปริมาณต่อโดสเท่าเดิม); เริ่ม EC 0.6 ต่ำกว่าช่วงดี
+    cfg: { tank: { refillFlowLpm: 0.4 }, dose: { refillS: 600, nutrientS: 150 },
+      nutrient: { initialEc: 0.6, doseFlowLpm: 0.01, phDropPerDoseMin: 0.004 },
+      challenges: { leakLph: 3, mascotEnterS: 2400, mascotExitS: 2400 } },
+    challenges: { kinds: ['leak'], count: [10, 10], windowDays: [0, 4], salt: 2, surprise: true, leakDays: [
+      { day: 0, count: 2, hours: [2, 3], fromHour: 10, toHour: 20 },
+      ...[1, 2, 3, 4].map((day) => ({ day, count: 2, hours: [2, 3] as const, fromHour: 6, toHour: 22 })),
+    ] } },
   { id: 'L3', title: 'คลื่นความร้อน', description: 'ไฟ LED ทำให้ร้อน ใช้พัดลมและหมอกคุมอากาศ',
     startBiomassG: 30, startDay: 28, targetG: 60, timeLimitDays: 10, energyBudgetKWh: 23, playerDevices: ['led', 'refillPump', 'nutrient', 'fan', 'humidifier'],
     lockedMode: 'helper', ignoredFactors: [], playSpeed: 144, waterAlertPct: null, challenges: { kinds: ['heatWave'], count: [1, 2], windowDays: [1, 7], salt: 3 } },

@@ -6,7 +6,7 @@ import { CareGame, LEVELS, Simulation, createPlant, levelRound, makeConfig, type
  * สูตรดูแลตาม GAME-GUIDE: LED 06–22 น. เติมให้ PPFD ~300 (P36 มีแดด), Refill <70→90%, Fan >25.5/<24.5 °C, Humidifier <55/>70%, A+B EC <1.0→1.2
  * + รับมือเหตุการณ์ (SPEC § 4.8): คลื่นความร้อน LED 40%, pH Down >6.6→6.3, ซ่อมถังทันทีที่รั่ว
  */
-function playGuide(level: LevelDef, ledPct: number, seed = 1) {
+function playGuide(level: LevelDef, ledPct: number, seed = 1, feed = true) {
   const sim = new Simulation({ cfg: makeConfig(), seed });
   sim.reset(levelRound(level));
   sim.startGame();
@@ -22,7 +22,7 @@ function playGuide(level: LevelDef, ledPct: number, seed = 1) {
       cmd.refillPump = r.waterLevelPct < 70 ? true : r.waterLevelPct >= 90 ? false : cmd.refillPump;
       cmd.fan = r.airTempC > 25.5 ? true : r.airTempC < 24.5 ? false : cmd.fan;
       cmd.humidifier = r.rhPct < 55 ? true : r.rhPct > 70 ? false : cmd.humidifier;
-      cmd.nutrientA = cmd.nutrientB = r.ecMsCm < 1.0 ? true : r.ecMsCm >= 1.2 ? false : cmd.nutrientA;
+      cmd.nutrientA = cmd.nutrientB = feed && (r.ecMsCm < 1.0 ? true : r.ecMsCm >= 1.2 ? false : cmd.nutrientA);
       cmd.phDown = r.ph > 6.6 ? true : r.ph <= 6.3 ? false : cmd.phDown;
       // P37: ด่านที่ล็อกแบบ 'off' — อุปกรณ์ที่ไม่ได้ปลดล็อกปิดสนิท (ปั๊มลมเปิด)
       if (level.lockedMode === 'off') {
@@ -53,6 +53,33 @@ describe('Levels & missions — P21 (SPEC § 4.6)', () => {
     expect(game).toMatchObject({ status: 'lost', lostReason: 'timeout', score: 0, deadPlantIds: [] });
     expect(game.elapsedS).toBe(LEVELS[0]!.timeLimitDays * 86_400);
   }, 60_000);
+
+  it('P44: L2 without fertilizer runs out of time (EC dilutes from leaks + refills)', () => {
+    const L2 = LEVELS.find((l) => l.id === 'L2')!;
+    const game = playGuide(L2, 80, 1, false);
+    expect(game).toMatchObject({ status: 'lost', lostReason: 'timeout', deadPlantIds: [] });
+  }, 120_000);
+
+  it('P44: L2 — pH does not change growth but EC does', () => {
+    const L2 = LEVELS.find((l) => l.id === 'L2')!;
+    const run = (ph: number | null, ec: number | null) => {
+      const sim = new Simulation({ cfg: makeConfig(), seed: 2 });
+      sim.reset(levelRound(L2));
+      for (let s = 0; s < 86400; s += 10) {
+        if (ph !== null) sim.setPh(ph);
+        if (ec !== null) sim.setEc(ec);
+        sim.step(10, { fan: false, humidifier: false, ledPct: 60, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+      }
+      return sim.plants[1]!;
+    };
+    const ok = run(6.0, 1.2);
+    const badPh = run(8.5, 1.2);
+    const lowEc = run(6.0, 0.3);
+    expect(badPh.biomassG).toBeCloseTo(ok.biomassG, 3);
+    expect(badPh.nutrientStress).toBeLessThan(0.01);
+    expect(lowEc.biomassG).toBeLessThan(ok.biomassG);
+    expect(lowEc.nutrientStress).toBeGreaterThan(0.2);
+  });
 
   it('levels start from their growth chapter', () => {
     const sim = new Simulation({ cfg: makeConfig() });
@@ -132,9 +159,10 @@ describe('Ignored plant factors — P38 (SPEC § 4.21)', () => {
       return sim;
     })();
     expect(dim.plants[1]!.biomassG).toBeLessThan(base.plants[1]!.biomassG);
-    const L2 = LEVELS.find((l) => l.id === 'L2')!;
-    const l2 = grow({}, levelRound(L2));
-    const l2hot = grow({ room: { tempMeanC: 31, tempAmplitudeC: 0 } }, levelRound(L2));
-    expect(l2hot.plants[1]!.biomassG).toBeLessThan(l2.plants[1]!.biomassG);
+    // P44: ด่าน 2 ไม่นับอุณหภูมิแล้ว → ใช้ด่าน 3 (คุมพัดลม นับทุกปัจจัย)
+    const L3 = LEVELS.find((l) => l.id === 'L3')!;
+    const l3 = grow({}, levelRound(L3));
+    const l3hot = grow({ room: { tempMeanC: 31, tempAmplitudeC: 0 } }, levelRound(L3));
+    expect(l3hot.plants[1]!.biomassG).toBeLessThan(l3.plants[1]!.biomassG);
   });
 });

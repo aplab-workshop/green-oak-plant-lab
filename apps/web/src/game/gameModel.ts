@@ -83,8 +83,8 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
   const counts = (f: PlantFactor) => !(s.level?.ignoredFactors ?? []).includes(f);
   if (counts('nutrient') && r.ecMsCm < 0.8) return { text: `ผักหิวปุ๋ย (EC ${r.ecMsCm.toFixed(2)}) — ${own('nutrient') ? 'กด 🧪 ใส่ปุ๋ย แล้วรอดูค่า' : lockedOff ? 'ด่านนี้ไม่ใช้ปุ๋ย — อย่าให้น้ำล้นหรือรั่วนาน เพราะพาปุ๋ยออก' : 'ผู้ช่วยฟาร์มกำลังเติมปุ๋ยให้'}`, tone: 'warn' };
   if (counts('nutrient') && r.ecMsCm > 1.6) return { text: `ปุ๋ยเข้มเกิน (EC ${r.ecMsCm.toFixed(2)}) — เติมน้ำเพื่อเจือจาง และหยุดใส่ปุ๋ยก่อน`, tone: 'warn' };
-  if (counts('nutrient') && r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) ผักใช้ปุ๋ยได้น้อย — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส แล้วรอดู' : lockedOff ? 'ด่านนี้ไม่ใช้ pH Down' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
-  if (counts('nutrient') && r.ph < 5.5) {
+  if (counts('nutrient') && counts('ph') && r.ph > 6.6) return { text: `pH สูง (${r.ph.toFixed(2)}) ผักใช้ปุ๋ยได้น้อย — ${own('phDown') ? 'กด ⚗️ pH Down 1 โดส แล้วรอดู' : lockedOff ? 'ด่านนี้ไม่ใช้ pH Down' : 'ผู้ช่วยฟาร์มกำลังปรับให้'}`, tone: 'warn' };
+  if (counts('nutrient') && counts('ph') && r.ph < 5.5) {
     const stop = cmd.phDown && own('phDown') ? 'ปิด ⚗️ pH Down ก่อน แล้ว' : '';
     return { text: `pH ต่ำเกิน (${r.ph.toFixed(2)}) ผักเครียด — ${stop}เติมน้ำ 🚰 เล็กน้อยให้ pH ขยับขึ้น`, tone: 'warn' };
   }

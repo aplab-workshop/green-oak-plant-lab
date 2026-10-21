@@ -69,7 +69,8 @@ export function plantMood(p: Pick<PlantState, 'health' | 'damage'>, dead = false
 export function plantCause(
   p: Pick<PlantState, 'waterStress' | 'rootHealth' | 'lightStress' | 'nutrientStress' | 'ppfd' | 'damage'> &
     Partial<Pick<PlantState, 'dryAirStress' | 'humidAirStress'>>,
-  env: { ph: number; minuteOfDay: number },
+  /** ignorePh: ด่านที่ pH ไม่มีผล (P44) — Nutrient stress มาจาก EC จึงไม่บอกว่าเป็น pH */
+  env: { ph: number; minuteOfDay: number; ignorePh?: boolean },
 ): PlantCause | null {
   if (p.damage >= 1) return null;
   const candidates: [PlantCause, number][] = [
@@ -77,7 +78,7 @@ export function plantCause(
     ['root', 1 - p.rootHealth],
     ['dryAir', p.dryAirStress ?? 0],
     ['light', p.lightStress],
-    [sensorStatus('ph', env.ph) === 'ok' ? 'nutrient' : 'ph', p.nutrientStress],
+    [env.ignorePh || sensorStatus('ph', env.ph) === 'ok' ? 'nutrient' : 'ph', p.nutrientStress],
     ['humidAir', p.humidAirStress ?? 0],
   ];
   let best: [PlantCause, number] | null = null;

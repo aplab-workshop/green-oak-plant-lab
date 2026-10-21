@@ -152,7 +152,7 @@ export class Simulation {
     this._cfg = this.round.cfg ? mergeConfig(this.baseCfg, this.round.cfg) : this.baseCfg;
     const cfg = this.cfg;
     const ig = this.round.ignoredFactors ?? [];
-    this.ignore = ig.length ? { temperature: ig.includes('temperature'), air: ig.includes('air'), nutrient: ig.includes('nutrient') } : null;
+    this.ignore = ig.length ? { temperature: ig.includes('temperature'), air: ig.includes('air'), nutrient: ig.includes('nutrient'), ph: ig.includes('ph') } : null;
     this._simTimeS = this.startTimeS;
     this._env = initialEnvironment(cfg, this._simTimeS);
     if (this.round.startWaterPct !== undefined) {
@@ -272,6 +272,11 @@ export class Simulation {
     const ec = envEc(this._env);
     const volume = (clamp(pct, 0, 100) / 100) * this.cfg.tank.capacityL;
     this._env = { ...this._env, waterVolumeL: volume, saltMass: ec * volume };
+  }
+
+  /** ตั้ง EC ของสารละลาย (Initial condition ของ Scenario/Test) โดยคงระดับน้ำ */
+  setEc(ec: number): void {
+    this._env = { ...this._env, saltMass: Math.max(0, ec) * this._env.waterVolumeL };
   }
 
   /** ตั้ง pH ของสารละลาย (Initial condition ของ Scenario/Event) clamp ตาม Config */
