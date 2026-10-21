@@ -6,7 +6,7 @@
  */
 
 /** ความเร็วที่รองรับ — UI แสดงเฉพาะ UI_SPEEDS (P40); 60/360/3600 คงไว้ให้ Test/Tools */
-export const SIM_SPEEDS = [1, 60, 144, 360, 1440, 3600] as const;
+export const SIM_SPEEDS = [1, 60, 144, 360, 720, 1440, 3600] as const;
 export type SimSpeed = (typeof SIM_SPEEDS)[number];
 
 export const SECONDS_PER_DAY = 86_400;

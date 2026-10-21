@@ -57,7 +57,7 @@ describe('Garden game flow — P20 (SPEC § 4.5)', () => {
   });
 
   it('supports 1440x and 3600x speeds', () => {
-    expect(SIM_SPEEDS).toEqual([1, 60, 144, 360, 1440, 3600]);
+    expect(SIM_SPEEDS).toEqual([1, 60, 144, 360, 720, 1440, 3600]);
     const clock = new SimClock({ startS: 0, dtS: 1, maxStepsPerTick: 5000 });
     clock.setSpeed(3600);
     let steps = 0;

@@ -1,5 +1,5 @@
 import type { ActuatorCommands, PlantFactor, SensorReadings, SimInfo } from '@gol/shared';
-import { DEFAULT_CONFIG, type SimConfig } from './config/defaultConfig';
+import { DEFAULT_CONFIG, mergeConfig, type DeepPartial, type SimConfig } from './config/defaultConfig';
 import { simTimeFrom } from './clock';
 import { clamp, vpdKPa } from './math';
 import { Rng } from './rng';
@@ -78,6 +78,8 @@ export interface RoundStart {
   startWaterPct?: number;
   /** ปัจจัยที่ไม่มีผลต่อผักในรอบนี้ (P38) */
   ignoredFactors?: readonly PlantFactor[];
+  /** ค่า Config ที่ด่านทับเฉพาะรอบนี้ เช่น อัตรา Refill ด่าน 1 (P42) */
+  cfg?: DeepPartial<SimConfig>;
 }
 
 /** คำสั่งระหว่างไฟดับ: ทุกอย่าง OFF รวม Air Pump และ LED */
@@ -97,7 +99,13 @@ const OUTAGE_COMMANDS: Readonly<ActuatorCommands> = Object.freeze({
  * เวลาเดินผ่าน step(dt, commands) เท่านั้น
  */
 export class Simulation {
-  readonly cfg: SimConfig;
+  /** Config ของ Lab (ไม่รวมค่าที่ด่านทับ) */
+  private readonly baseCfg: SimConfig;
+  private _cfg: SimConfig;
+  /** Config ที่ใช้ในรอบนี้ = Config ของ Lab + ค่าที่ด่านทับ (P42) */
+  get cfg(): SimConfig {
+    return this._cfg;
+  }
   private readonly seed: number;
   private noiseRng!: Rng;
   private _simTimeS = 0;
@@ -117,7 +125,8 @@ export class Simulation {
   private _challenges: ChallengeState[] = [];
 
   constructor(opts: SimulationOptions = {}) {
-    this.cfg = opts.cfg ?? DEFAULT_CONFIG;
+    this.baseCfg = opts.cfg ?? DEFAULT_CONFIG;
+    this._cfg = this.baseCfg;
     this.seed = opts.seed ?? 1;
     this.reset();
   }
@@ -140,6 +149,7 @@ export class Simulation {
   /** กลับสู่สภาวะเริ่มต้น (Deterministic ตาม seed); round = จุดเริ่มของด่าน (คงไว้จนส่งค่าใหม่) */
   reset(round?: RoundStart): void {
     if (round) this.round = round;
+    this._cfg = this.round.cfg ? mergeConfig(this.baseCfg, this.round.cfg) : this.baseCfg;
     const cfg = this.cfg;
     const ig = this.round.ignoredFactors ?? [];
     this.ignore = ig.length ? { temperature: ig.includes('temperature'), air: ig.includes('air'), nutrient: ig.includes('nutrient') } : null;

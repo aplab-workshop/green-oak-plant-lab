@@ -136,6 +136,8 @@ export class LabSession {
   private readonly redSeen = new Set<string>();
   /** P37: ค่าที่แดงอยู่แล้วตอนเริ่มรอบ (เช่นด่าน 1 เริ่มถังว่าง) — ไม่หยุดเกมจนกว่าค่าจะกลับมาไม่แดงก่อน */
   private readonly redAtStart = new Set<string>();
+  /** P42: น้ำเคยถึง waterPausePct แล้ว → ตกต่ำกว่าจึงหยุดเกม (ติดใหม่เมื่อน้ำกลับมาถึง) */
+  private waterArmed = false;
   private readonly bestStars = new Map<LevelId, number>();
 
   private get recordKey(): string {
@@ -219,7 +221,8 @@ export class LabSession {
         this.clock.pause();
       }
       this.events.add({ at: this.now(), ...e });
-      if (e.kind === 'challenge.warning' || e.kind === 'challenge.start') this.autoPause(e.message);
+      // P42: ด่านที่มี waterPausePct ไม่หยุดตอนเกิดเหตุการณ์ — หยุดเมื่อน้ำต่ำแทน (checkRedValues)
+      if ((e.kind === 'challenge.warning' || e.kind === 'challenge.start') && this.level?.waterPausePct == null) this.autoPause(e.message);
     }
   }
 
@@ -240,8 +243,18 @@ export class LabSession {
   private checkRedValues(): void {
     if (!this.autoPauseActive) return;
     const r = this.sim.readSensors(false);
+    const lim = this.level?.waterPausePct ?? null;
+    if (lim !== null) {
+      if (r.waterLevelPct >= lim) this.waterArmed = true;
+      else if (this.waterArmed) {
+        this.waterArmed = false;
+        this.autoPause(`💧 น้ำเหลือ ${Math.floor(r.waterLevelPct)}% ต่ำกว่า ${lim}% — เปิด 🚰 เติมน้ำ`);
+        return;
+      }
+    }
     for (const key of RED_WATCH) {
       if (this.level && !this.level.playerDevices.includes(RED_WATCH_DEVICE[key])) continue;
+      if (key === 'waterLevelPct' && lim !== null) continue;
       const red = sensorStatus(key, r[key]) === 'alarm';
       if (this.redAtStart.has(key)) {
         if (!red) this.redAtStart.delete(key);
@@ -501,6 +514,7 @@ export class LabSession {
     this.doses.clear();
     this.redSeen.clear();
     this.redAtStart.clear();
+    this.waterArmed = false;
     this.autoPauseReason = null;
     this.sim.reset(round);
     this.clock.reset(this.sim.startTimeS);

@@ -844,3 +844,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `mascotProgress(states, t, cfg)` คำนวณจากเวลาจำลองล้วน → Snapshot `mascot.progress`; `tank.leakLph` = `Simulation.totalLeakLph` (Scenario + เหตุการณ์) ใช้วาดน้ำหยด — `disturbance.leakLph` ยังเป็นค่า Scenario อย่างเดียวตามเดิม
 - `scene/Mascot.tsx`: Sprite (`public/mascot/run.png`, `happy.png` ตัดจาก Pose Reference Sheet ด้วย Flood fill พื้นขาว) บน `Billboard` ล็อกแกน X/Z; ทางวิ่ง 3 จุดตามทางเดินหิน; ฝั่ง Web แค่ `damp` ค่าระหว่าง Snapshot (200 ms) และไม่ล้ำหน้า Server; การเด้งคำนวณจากระยะที่วิ่ง ไม่ใช่เวลาจริง จึงหยุดตาม Pause
 - ไฟล์ต้นฉบับ `AP_LAB_Mascot/` (~14 MB) ไม่ได้ commit — commit เฉพาะ Sprite ที่ตัดแล้ว (~140 KB)
+
+### 11.39 Implementation Notes (P42 — Level 1 at 720x)
+
+- `Simulation.cfg` เป็น getter: `baseCfg` (ของ Lab) + `RoundStart.cfg` ผ่าน `mergeConfig` ตอน `reset()` — ทุกส่วน (Environment, Plant, Challenges, `LabSession.doseDurationS`) จึงเห็นค่าของรอบโดยไม่ต้องส่ง Config ใหม่; Free Play/ด่านอื่นกลับเป็น `baseCfg`
+- ด่าน 1: `tank.refillFlowLpm` 0.4, `dose.refillS` 600, Mascot 2,400 s — `planLeakDays` ใช้ `mascotExitS` ของรอบ ช่องรั่ววันที่สอง (5 ชม.) ยังพอสำหรับรั่ว 3 ชม. + 40 นาที
+- `LabSession.waterArmed`: ติดเมื่อน้ำ ≥ `waterPausePct`, ตกต่ำกว่า → Auto-pause แล้วปลด; ไม่ใช้ `redSeen` เพราะต้องหยุดได้ทุกครั้งที่น้ำตกลงใหม่
+- `uiSpeeds(level)` ใน shared = `[1, playSpeed, 1440]`; `UI_SPEEDS` คงไว้เป็นค่าตั้งต้น

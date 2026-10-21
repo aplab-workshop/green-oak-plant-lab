@@ -10,6 +10,7 @@ interface PlanItem {
   /** เริ่มหลังเริ่มรอบกี่วินาทีจำลอง */
   afterS: number;
   durationS: number | null;
+  surprise?: boolean;
 }
 
 /** Lab ด่าน/Free Play ที่ Poll แล้วและเริ่มเล่น พร้อมตารางเหตุการณ์ที่กำหนดเอง */
@@ -20,7 +21,7 @@ async function labWith(level: LevelId | 'free', plan: PlanItem[]): Promise<TestL
   const round = level === 'free' ? {} : levelRound(LEVELS.find((l) => l.id === level)!);
   const start = lab.sim.startTimeS;
   // reset ผ่าน LabSession เพื่อให้ Clock และสถานะเกม (autoStart → playing) เริ่มรอบใหม่ด้วย
-  lab.reset(false, { ...round, challengePlan: plan.map((p, i) => ({ id: i + 1, kind: p.kind, startS: start + p.afterS, durationS: p.durationS })) });
+  lab.reset(false, { ...round, challengePlan: plan.map((p, i) => ({ id: i + 1, kind: p.kind, startS: start + p.afterS, durationS: p.durationS, ...(p.surprise ? { surprise: true } : {}) })) });
   await lab.poll();
   return { lab, mock, clock };
 }
@@ -86,6 +87,44 @@ describe('Events & auto-pause in LabSession — P23 / AC-39', () => {
     // Reset เริ่มนับใหม่
     await t.lab.handle({ type: 'reset' });
     expect(t.lab.snapshot().autoPause.reason).toBeNull();
+  });
+
+  it('P42: L1 does not pause when a leak starts; pauses when water drops below 65 % and re-arms after refilling', async () => {
+    const t = await labWith('L1', [{ kind: 'leak', afterS: 3600, durationS: 3 * 3600, surprise: true }]);
+    t.lab.sim.setWaterLevelPct(70);
+    await t.lab.handle({ type: 'setSpeed', speed: 720 });
+    await runUntilPaused(t, 30_000);
+    let snap = t.lab.snapshot();
+    expect(snap.paused).toBe(true);
+    expect(snap.autoPause.reason).toContain('ต่ำกว่า 65%');
+    expect(snap.tank.waterLevelPct).toBeLessThan(65);
+    expect(snap.challenges).toMatchObject([{ kind: 'leak', status: 'active' }]);
+    const list = t.lab.events.list();
+    expect(list.some((e) => e.kind === 'challenge.start')).toBe(true);
+    expect(list.filter((e) => e.kind === 'game.autopause')).toHaveLength(1);
+    // เล่นต่อโดยไม่เติม → ไม่หยุดซ้ำ
+    await t.lab.handle({ type: 'resume' });
+    await runReal(t, 3000);
+    expect(t.lab.clock.paused).toBe(false);
+    // เติมกลับถึง 65 % แล้วตกลงใหม่ → หยุดอีกครั้ง
+    t.lab.sim.setWaterLevelPct(80);
+    await runReal(t, 200);
+    t.lab.sim.setWaterLevelPct(60);
+    await runReal(t, 200);
+    snap = t.lab.snapshot();
+    expect(snap.paused).toBe(true);
+    expect(snap.autoPause.reason).toMatch(/น้ำเหลือ (59|60)% ต่ำกว่า 65%/);
+  }, 60000);
+
+  it('P42: L1 plays at 720x with a slower refill pump; other levels keep 144x and the default pump', async () => {
+    const t = await labWith('L1', []);
+    expect(t.lab.snapshot().level).toMatchObject({ playSpeed: 720, waterPausePct: 65 });
+    expect(t.lab.sim.cfg.tank.refillFlowLpm).toBe(0.4);
+    await t.lab.handle({ type: 'setSpeed', speed: 720 });
+    expect(t.lab.snapshot().speed).toBe(720);
+    const l4 = await labWith('L4', []);
+    expect(l4.lab.snapshot().level).toMatchObject({ playSpeed: 144, waterPausePct: null });
+    expect(l4.lab.sim.cfg.tank.refillFlowLpm).toBe(2);
   });
 
   it('repairLeak stops an active leak; otherwise 409', async () => {

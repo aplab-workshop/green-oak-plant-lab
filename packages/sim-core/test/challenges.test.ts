@@ -112,7 +112,7 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     const sim = new Simulation();
     sim.reset(levelRound(L1));
     const first = sim.challenges[0]!;
-    while (sim.simTimeS < first.startS + 660) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+    while (sim.simTimeS < first.startS + sim.cfg.challenges.mascotExitS + 60) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
     expect(sim.challengeViews().find((c) => c.id === first.id)).toMatchObject({ status: 'active', repairable: false });
     expect(sim.repairLeak()).toBe(false);
     while (sim.simTimeS < first.startS + first.durationS! + 60) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
@@ -172,6 +172,20 @@ describe('Challenge lifecycle', () => {
     expect(events.map((e) => e.kind)).toEqual(['challenge.start', 'challenge.end']);
     expect(events[0]!.simTimeS).toBeGreaterThanOrEqual(start + 600);
     expect(events[0]!.message).toContain('~3 ชม.');
+  });
+
+  it('P42: a level config override applies only to its round (L1 refill 0.4 L/min, mascot 2,400 s)', () => {
+    const sim = new Simulation();
+    sim.reset(levelRound(LEVELS.find((l) => l.id === 'L1')!));
+    expect(sim.cfg.tank.refillFlowLpm).toBe(0.4);
+    expect(sim.cfg.dose.refillS).toBe(600);
+    expect(sim.cfg.challenges.mascotEnterS).toBe(2400);
+    // ปั๊มเปิด 10 นาที = 4 L (เดิม 20 L)
+    const before = sim.env.waterVolumeL;
+    for (let i = 0; i < 10; i++) sim.step(60, { ...OFF, refillPump: true });
+    expect(sim.env.waterVolumeL - before).toBeCloseTo(4, 1);
+    sim.reset({});
+    expect(sim.cfg.tank.refillFlowLpm).toBe(DEFAULT_CONFIG.tank.refillFlowLpm);
   });
 
   it('P41: only Level 1 leaks are surprises; other levels still warn', () => {

@@ -432,12 +432,17 @@ export const DEFAULT_CONFIG: SimConfig = {
   },
 };
 
-type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? (T[K] extends unknown[] ? T[K] : DeepPartial<T[K]>) : T[K] };
+export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? (T[K] extends unknown[] ? T[K] : DeepPartial<T[K]>) : T[K] };
 
 /** สร้าง Config จากค่า Default + ค่าที่ต้องการเปลี่ยน */
 export function makeConfig(overrides: DeepPartial<SimConfig> = {}): SimConfig {
+  return mergeConfig(DEFAULT_CONFIG, overrides);
+}
+
+/** Config ใหม่จาก base + ค่าที่เปลี่ยน (ระดับ section) — ใช้ทับ Config เฉพาะรอบของด่าน (P42) */
+export function mergeConfig(base: SimConfig, overrides: DeepPartial<SimConfig>): SimConfig {
   // Config เป็น plain data ล้วน จึง clone ด้วย JSON ได้ (sim-core ไม่พึ่ง DOM/Node API)
-  const out = JSON.parse(JSON.stringify(DEFAULT_CONFIG)) as Record<string, Record<string, unknown>>;
+  const out = JSON.parse(JSON.stringify(base)) as Record<string, Record<string, unknown>>;
   for (const [section, values] of Object.entries(overrides)) {
     if (values) Object.assign(out[section] as object, values);
   }

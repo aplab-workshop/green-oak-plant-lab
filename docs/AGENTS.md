@@ -172,3 +172,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - เสร็จและ commit แล้ว: ด่าน 1 ถังรั่วแบบ surprise ไม่เตือน — Mascot AP LAB วิ่งมาเตะถัง (`scene/Mascot.tsx`, Snapshot `mascot.progress`) แล้วค่อยขึ้นการ์ด/Auto-pause; ตารางรั่ววันแรก 1×3 ชม., วันที่สอง 3×2–3 ชม. (SPEC § 4.24); tests 302/302
 - ต้นฉบับรูปอยู่ `AP_LAB_Mascot/` (ไม่ commit); Sprite ที่ใช้อยู่ `apps/web/public/mascot/`
 - รอผู้ใช้ตรวจรับ P41 และบอกกติกาด่าน 2
+
+### สถานะเพิ่มเติม 2026-10-21 — P42 ด่าน 1 ที่ 720x
+- เสร็จและ commit แล้ว: ด่าน 1 เล่นปกติ 720x (ปุ่ม Speed ตาม `LevelInfo.playSpeed`), ปั๊มเติมน้ำ/โดส/Mascot ปรับผ่าน `LevelDef.cfg`; ไม่หยุดเกมตอนรั่ว หยุดเมื่อน้ำ < 65 % (`waterPausePct`) (SPEC § 4.25); tests 305/305
+- ค่า Config เฉพาะด่านใส่ที่ `LevelDef.cfg` (อย่าแก้ `defaultConfig` เพื่อด่านเดียว); ด่าน 2–4 ยัง 144x — รอผู้ใช้ตรวจรับ P42 และบอกกติกาด่าน 2
