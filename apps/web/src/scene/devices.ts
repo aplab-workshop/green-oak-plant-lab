@@ -13,7 +13,7 @@ const DESCRIPTIONS: Record<ActuatorKey, { description: string; ratedPower: strin
   fan: { description: 'ระบายอากาศร้อนจาก LED ออก ลดอุณหภูมิได้ แต่ไม่ต่ำกว่าอุณหภูมิห้อง และลดความชื้น', ratedPower: '15 W' },
   humidifier: { description: 'เพิ่มความชื้นในอากาศ (ใช้น้ำจากถังแยก) ผลจะลดลงเมื่อเปิด Fan พร้อมกัน', ratedPower: '25 W' },
   ledPct: { description: 'ไฟปลูกหรี่ได้ 0–100% กำหนด PPFD และ DLI และสร้างความร้อนในกล่องปลูก', ratedPower: '120 W ที่ 100%' },
-  refillPump: { description: 'เติมน้ำจากถังสำรอง 2 L/min ถ้าเปิดค้างขณะถังเต็ม น้ำจะล้นและพาธาตุอาหารออก', ratedPower: '18 W' },
+  refillPump: { description: 'เติมน้ำจากถังสำรอง (อัตราไหลดู D107 Flow Sensor ตอนเปิด) ถ้าเปิดค้างขณะถังเต็ม น้ำจะล้นและพาธาตุอาหารออก', ratedPower: '18 W' },
   nutrientA: { description: 'เติมสารละลายธาตุอาหารเข้มข้น A ทำให้ EC สูงขึ้น (ไม่ได้ใช้ควบคุม pH)', ratedPower: '5 W' },
   nutrientB: { description: 'เติมสารละลายธาตุอาหารเข้มข้น B ทำให้ EC สูงขึ้น (ไม่ได้ใช้ควบคุม pH)', ratedPower: '5 W' },
   airPump: { description: 'เติมอากาศให้รากผ่าน Air stone ควรทำงานตลอดเวลา (Fail-safe จะเปิดไว้เสมอ)', ratedPower: '5 W' },

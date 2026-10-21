@@ -88,26 +88,25 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     expect(sim.challenges).toEqual([]);
   });
 
-  it('P37/P41: L1 leaks once on day 1 (3 h) and three times on day 2 (2–3 h), self-stopping and not repairable', () => {
+  it('P37/P43: L1 leaks twice on day 1 and four times a day on days 2–5 (2–3 h), self-stopping and not repairable', () => {
     const L1 = LEVELS.find((l) => l.id === 'L1')!;
     for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
-      const plan = planChallenges(L1.challenges!, seed, roundStart, cfg);
+      const plan = planChallenges(L1.challenges!, seed, roundStart, makeConfig(L1.cfg));
       const day0 = Math.floor(roundStart / SECONDS_PER_DAY) * SECONDS_PER_DAY;
       const dayOf = (p: ChallengePlan) => Math.floor((p.startS - day0) / SECONDS_PER_DAY);
-      expect(plan.map(dayOf)).toEqual([0, 1, 1, 1]);
-      expect(plan[0]!.durationS).toBe(3 * 3600);
+      expect(plan.map(dayOf)).toEqual([0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4]);
       for (const [i, p] of plan.entries()) {
         expect(p.kind).toBe('leak');
         expect(p.surprise).toBe(true);
         expect(p.durationS! / 3600).toBeGreaterThanOrEqual(2);
         expect(p.durationS! / 3600).toBeLessThanOrEqual(3);
         const hour = ((p.startS - day0) % SECONDS_PER_DAY) / 3600;
-        expect(hour).toBeGreaterThanOrEqual(i === 0 ? 10 : 7);
-        // ไม่ทับกัน: ครั้งถัดไปเริ่มหลังครั้งนี้หยุดรั่วและ Mascot ออกแล้ว
+        expect(hour).toBeGreaterThanOrEqual(i < 2 ? 10 : 6);
+        expect(hour + p.durationS! / 3600).toBeLessThanOrEqual(i < 2 ? 20 : 22);
+        // ไม่ทับกัน: ครั้งถัดไปเริ่มหลังครั้งนี้หยุดรั่วและ Mascot (2,400 s ของด่าน) ออกแล้ว
         const next = plan[i + 1];
-        if (next) expect(next.startS).toBeGreaterThanOrEqual(p.startS + p.durationS! + cfg.challenges.mascotExitS);
+        if (next) expect(next.startS).toBeGreaterThanOrEqual(p.startS + p.durationS! + 2400);
       }
-      expect(plan[3]!.startS + plan[3]!.durationS!).toBeLessThanOrEqual(day0 + SECONDS_PER_DAY + 22 * 3600);
     }
     const sim = new Simulation();
     sim.reset(levelRound(L1));
@@ -180,6 +179,7 @@ describe('Challenge lifecycle', () => {
     expect(sim.cfg.tank.refillFlowLpm).toBe(0.4);
     expect(sim.cfg.dose.refillS).toBe(600);
     expect(sim.cfg.challenges.mascotEnterS).toBe(2400);
+    expect(sim.cfg.challenges.leakLph).toBe(3);
     // ปั๊มเปิด 10 นาที = 4 L (เดิม 20 L)
     const before = sim.env.waterVolumeL;
     for (let i = 0; i < 10; i++) sim.step(60, { ...OFF, refillPump: true });

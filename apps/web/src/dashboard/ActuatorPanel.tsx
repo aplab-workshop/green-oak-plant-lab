@@ -32,13 +32,6 @@ const DOSES: Record<DoseDevice, { icon: string; label: string; effect: string; a
   phDown: { icon: '⚗️', label: 'pH Down', effect: 'pH −0.2', address: 'M106' },
 };
 
-const LED_PRESETS = [
-  { value: 0, label: 'ปิด' },
-  { value: 50, label: '50%' },
-  { value: 80, label: '80%' },
-  { value: 100, label: '100%' },
-] as const;
-
 const MODES: { mode: MockPlcMode; label: string; hint: string }[] = [
   { mode: 'auto', label: 'Auto', hint: 'Ladder ตัวอย่างใน Mock PLC ควบคุมอัตโนมัติ' },
   { mode: 'manual', label: 'Manual', hint: 'สั่ง Actuator เองเหมือนกดสวิตช์ที่ PLC' },
@@ -78,7 +71,7 @@ function LedControl({ value, manual }: { value: number; manual: boolean }) {
       type="range"
       min={0}
       max={100}
-      step={5}
+      step={1}
       value={draft}
       disabled={!manual}
       aria-label="LED brightness"
@@ -205,25 +198,8 @@ export function ActuatorPanel() {
             </div>
             <span className="font-mono text-sm font-semibold text-slate-800">{commands.ledPct}%</span>
           </div>
-          {canDose && (
-            <div className="mt-1 grid grid-cols-4 gap-1" role="group" aria-label="LED presets">
-              {LED_PRESETS.map((p) => (
-                <button
-                  key={p.value}
-                  type="button"
-                  aria-pressed={commands.ledPct === p.value}
-                  onClick={() => void sendCommand({ type: 'setManualLed', value: p.value })}
-                  className={`rounded px-1 py-0.5 text-[11px] font-medium ${
-                    commands.ledPct === p.value ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          )}
-          {/* Slider ละเอียดเฉพาะ Free Play (โหมดเกมใช้ Preset) */}
-          {canDose && !level && <LedControl value={commands.ledPct} manual={manual} />}
+          {/* P43: Slider 0–100 % ทุกโหมด (เดิมโหมดเกมใช้ปุ่ม ปิด/50/80/100) */}
+          {canDose && <LedControl value={commands.ledPct} manual={manual} />}
         </li>
       </ul>
       {error && <p className="border-t border-rose-100 px-3 py-1.5 text-xs text-rose-600">{error}</p>}

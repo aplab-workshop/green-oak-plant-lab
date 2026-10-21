@@ -89,41 +89,41 @@ describe('Events & auto-pause in LabSession — P23 / AC-39', () => {
     expect(t.lab.snapshot().autoPause.reason).toBeNull();
   });
 
-  it('P42: L1 does not pause when a leak starts; pauses when water drops below 65 % and re-arms after refilling', async () => {
+  it('P43: L1 never pauses for leaks or low water; water < 65 % shows an alert that clears after refilling', async () => {
     const t = await labWith('L1', [{ kind: 'leak', afterS: 3600, durationS: 3 * 3600, surprise: true }]);
+    expect(t.lab.snapshot().waterAlert).toBeNull(); // ถังว่างตอนเริ่ม ยังไม่แจ้ง
     t.lab.sim.setWaterLevelPct(70);
     await t.lab.handle({ type: 'setSpeed', speed: 720 });
-    await runUntilPaused(t, 30_000);
+    for (let ms = 0; ms < 30_000 && t.lab.snapshot().waterAlert === null; ms += 500) await runReal(t, 500);
     let snap = t.lab.snapshot();
-    expect(snap.paused).toBe(true);
-    expect(snap.autoPause.reason).toContain('ต่ำกว่า 65%');
+    expect(snap.paused).toBe(false);
+    expect(snap.waterAlert).toMatch(/น้ำเหลือ \d+% ต่ำกว่า 65%/);
     expect(snap.tank.waterLevelPct).toBeLessThan(65);
     expect(snap.challenges).toMatchObject([{ kind: 'leak', status: 'active' }]);
     const list = t.lab.events.list();
     expect(list.some((e) => e.kind === 'challenge.start')).toBe(true);
-    expect(list.filter((e) => e.kind === 'game.autopause')).toHaveLength(1);
-    // เล่นต่อโดยไม่เติม → ไม่หยุดซ้ำ
-    await t.lab.handle({ type: 'resume' });
-    await runReal(t, 3000);
-    expect(t.lab.clock.paused).toBe(false);
-    // เติมกลับถึง 65 % แล้วตกลงใหม่ → หยุดอีกครั้ง
+    expect(list.filter((e) => e.kind === 'game.autopause')).toHaveLength(0);
+    expect(list.filter((e) => e.kind === 'tank.low_water')).toHaveLength(1);
+    // เติมกลับถึง 65 % → แถบหาย; ตกลงใหม่ → แจ้งอีกครั้ง
     t.lab.sim.setWaterLevelPct(80);
     await runReal(t, 200);
+    expect(t.lab.snapshot().waterAlert).toBeNull();
     t.lab.sim.setWaterLevelPct(60);
     await runReal(t, 200);
     snap = t.lab.snapshot();
-    expect(snap.paused).toBe(true);
-    expect(snap.autoPause.reason).toMatch(/น้ำเหลือ (59|60)% ต่ำกว่า 65%/);
+    expect(snap.paused).toBe(false);
+    expect(snap.waterAlert).toMatch(/น้ำเหลือ (59|60)% ต่ำกว่า 65%/);
+    expect(t.lab.events.list().filter((e) => e.kind === 'tank.low_water')).toHaveLength(2);
   }, 60000);
 
   it('P42: L1 plays at 720x with a slower refill pump; other levels keep 144x and the default pump', async () => {
     const t = await labWith('L1', []);
-    expect(t.lab.snapshot().level).toMatchObject({ playSpeed: 720, waterPausePct: 65 });
+    expect(t.lab.snapshot().level).toMatchObject({ playSpeed: 720, waterAlertPct: 65, timeLimitDays: 5 });
     expect(t.lab.sim.cfg.tank.refillFlowLpm).toBe(0.4);
     await t.lab.handle({ type: 'setSpeed', speed: 720 });
     expect(t.lab.snapshot().speed).toBe(720);
     const l4 = await labWith('L4', []);
-    expect(l4.lab.snapshot().level).toMatchObject({ playSpeed: 144, waterPausePct: null });
+    expect(l4.lab.snapshot().level).toMatchObject({ playSpeed: 144, waterAlertPct: null });
     expect(l4.lab.sim.cfg.tank.refillFlowLpm).toBe(2);
   });
 

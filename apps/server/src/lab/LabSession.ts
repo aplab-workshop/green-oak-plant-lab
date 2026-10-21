@@ -136,8 +136,10 @@ export class LabSession {
   private readonly redSeen = new Set<string>();
   /** P37: ค่าที่แดงอยู่แล้วตอนเริ่มรอบ (เช่นด่าน 1 เริ่มถังว่าง) — ไม่หยุดเกมจนกว่าค่าจะกลับมาไม่แดงก่อน */
   private readonly redAtStart = new Set<string>();
-  /** P42: น้ำเคยถึง waterPausePct แล้ว → ตกต่ำกว่าจึงหยุดเกม (ติดใหม่เมื่อน้ำกลับมาถึง) */
-  private waterArmed = false;
+  /** P43: น้ำเคยถึง waterAlertPct แล้วในรอบนี้ (ตอนเริ่มถังว่างยังไม่แจ้ง) */
+  private waterReached = false;
+  /** P43: น้ำต่ำกว่า waterAlertPct อยู่ → แถบแจ้งเตือน (ไม่หยุดเกม) */
+  private waterLow = false;
   private readonly bestStars = new Map<LevelId, number>();
 
   private get recordKey(): string {
@@ -210,6 +212,7 @@ export class LabSession {
       this.log('sim.lagged', 'warning', 'Server คำนวณไม่ทัน เวลาจำลองช้ากว่าที่ตั้งไว้');
     }
     this.drainSimEvents();
+    this.checkWaterAlert();
     this.checkRedValues();
   }
 
@@ -221,8 +224,8 @@ export class LabSession {
         this.clock.pause();
       }
       this.events.add({ at: this.now(), ...e });
-      // P42: ด่านที่มี waterPausePct ไม่หยุดตอนเกิดเหตุการณ์ — หยุดเมื่อน้ำต่ำแทน (checkRedValues)
-      if ((e.kind === 'challenge.warning' || e.kind === 'challenge.start') && this.level?.waterPausePct == null) this.autoPause(e.message);
+      // P42/P43: ด่านที่มี waterAlertPct ไม่หยุดตอนเกิดเหตุการณ์ — แจ้งน้ำต่ำแทน (checkWaterAlert)
+      if ((e.kind === 'challenge.warning' || e.kind === 'challenge.start') && this.level?.waterAlertPct == null) this.autoPause(e.message);
     }
   }
 
@@ -239,19 +242,32 @@ export class LabSession {
     this.log('game.autopause', 'warning', 'ผู้ช่วยหยุดเกมให้: ' + reason);
   }
 
+  /** P43: น้ำต่ำกว่า waterAlertPct → แถบแจ้งเตือน + Event log ครั้งละหนึ่งครั้งต่อการตกลงมา (ไม่หยุดเกม) */
+  private checkWaterAlert(): void {
+    const lim = this.level?.waterAlertPct ?? null;
+    if (lim === null || this.sim.game.status !== 'playing') {
+      this.waterLow = false;
+      return;
+    }
+    const w = this.sim.readSensors(false).waterLevelPct;
+    if (w >= lim) {
+      this.waterReached = true;
+      this.waterLow = false;
+    } else if (this.waterReached && !this.waterLow) {
+      this.waterLow = true;
+      this.log('tank.low_water', 'warning', this.waterAlertText(w, lim));
+    }
+  }
+
+  private waterAlertText(w: number, lim: number): string {
+    return `💧 น้ำเหลือ ${Math.floor(w)}% ต่ำกว่า ${lim}% — เปิด 🚰 เติมน้ำ`;
+  }
+
   /** ค่าสีแดงครั้งแรกในรอบ → Auto-pause */
   private checkRedValues(): void {
     if (!this.autoPauseActive) return;
     const r = this.sim.readSensors(false);
-    const lim = this.level?.waterPausePct ?? null;
-    if (lim !== null) {
-      if (r.waterLevelPct >= lim) this.waterArmed = true;
-      else if (this.waterArmed) {
-        this.waterArmed = false;
-        this.autoPause(`💧 น้ำเหลือ ${Math.floor(r.waterLevelPct)}% ต่ำกว่า ${lim}% — เปิด 🚰 เติมน้ำ`);
-        return;
-      }
-    }
+    const lim = this.level?.waterAlertPct ?? null;
     for (const key of RED_WATCH) {
       if (this.level && !this.level.playerDevices.includes(RED_WATCH_DEVICE[key])) continue;
       if (key === 'waterLevelPct' && lim !== null) continue;
@@ -514,7 +530,8 @@ export class LabSession {
     this.doses.clear();
     this.redSeen.clear();
     this.redAtStart.clear();
-    this.waterArmed = false;
+    this.waterReached = false;
+    this.waterLow = false;
     this.autoPauseReason = null;
     this.sim.reset(round);
     this.clock.reset(this.sim.startTimeS);
@@ -586,6 +603,8 @@ export class LabSession {
       disturbance: s.disturbance,
       doses: [...this.doses.values()].map((d) => ({ ...d })),
       challenges: this.sim.challengeViews(),
+      waterAlert: this.waterLow && this.level?.waterAlertPct != null
+        ? this.waterAlertText(levelPct(s.env.waterVolumeL, cfg), this.level.waterAlertPct) : null,
       mascot: (() => { const p = this.sim.mascotProgress; return p === null ? null : { progress: p }; })(),
       autoPause: { enabled: this.autoPauseEnabled, reason: this.autoPauseReason },
     };

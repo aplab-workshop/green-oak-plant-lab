@@ -851,3 +851,9 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - ด่าน 1: `tank.refillFlowLpm` 0.4, `dose.refillS` 600, Mascot 2,400 s — `planLeakDays` ใช้ `mascotExitS` ของรอบ ช่องรั่ววันที่สอง (5 ชม.) ยังพอสำหรับรั่ว 3 ชม. + 40 นาที
 - `LabSession.waterArmed`: ติดเมื่อน้ำ ≥ `waterPausePct`, ตกต่ำกว่า → Auto-pause แล้วปลด; ไม่ใช้ `redSeen` เพราะต้องหยุดได้ทุกครั้งที่น้ำตกลงใหม่
 - `uiSpeeds(level)` ใน shared = `[1, playSpeed, 1440]`; `UI_SPEEDS` คงไว้เป็นค่าตั้งต้น
+
+### 11.40 Implementation Notes (P43 — Level 1 Feedback)
+
+- `LabSession.checkWaterAlert()` แยกจาก `checkRedValues()`: `waterReached` (เคยถึงเกณฑ์ในรอบ) + `waterLow` (ต่ำอยู่) → Snapshot `waterAlert` และ Event `tank.low_water` ครั้งละหนึ่งครั้งต่อการตกลงมา; ไม่ขึ้นกับ `autoPauseEnabled`
+- `WaterAlertBanner` ใช้ class `.autopause-banner` เดิม (ตำแหน่งเดียวกัน) และซ่อนเมื่อแถบหยุดเกมแสดงอยู่ ไม่ให้ซ้อนกัน
+- รั่วด่าน 1 รวม 18 ครั้ง/5 วัน ที่ 3 L/h — ช่อง 4 ชม. ของวันที่ 2–5 พอดีกับรั่ว 3 ชม. + Mascot ออก 40 นาที (`planLeakDays` ใช้ `mascotExitS` ของรอบ)

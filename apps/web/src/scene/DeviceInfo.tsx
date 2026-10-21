@@ -70,7 +70,8 @@ export function DeviceInfo() {
   }
 
   return (
-    <div className="absolute top-12 left-2 z-10 w-72 rounded-lg border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur">
+    // P43: มุมซ้ายล่างของฉาก — ไม่ทับ HUD/การ์ดคะแนนด้านบนซ้าย
+    <div className="absolute bottom-9 left-2 z-20 w-72 rounded-lg border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur">
       <button type="button" onClick={close} className="absolute top-1.5 right-1.5 rounded p-0.5 text-slate-400 hover:text-slate-700" aria-label="ปิด">
         <X className="h-4 w-4" />
       </button>

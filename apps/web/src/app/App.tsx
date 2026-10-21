@@ -10,7 +10,7 @@ import { TrendChart } from '../dashboard/TrendChart';
 import { EventLog } from '../dashboard/EventLog';
 import { GuidePanel, LevelBriefing } from '../dashboard/GuidePanel';
 import { LossStoryView } from '../dashboard/LossStoryView';
-import { AutoPauseBanner, AutoPauseToggle, ChallengeCard } from '../dashboard/ChallengeCard';
+import { AutoPauseBanner, AutoPauseToggle, ChallengeCard, WaterAlertBanner } from '../dashboard/ChallengeCard';
 import { PlantView } from '../scene/PlantView';
 import { LevelSelect as LevelSelectScreen, WinScreen } from '../game/LevelScreens';
 import { HelperBubble } from '../game/HelperBubble';
@@ -179,6 +179,7 @@ export function App() {
         <div className="scene-window"><PlantView /></div>
         {gameMode && <LevelWatch />}
         <AutoPauseBanner />
+        <WaterAlertBanner />
         {!wide && <div className="garden-hud">{scoreCards}{sensorCard}<GrowthMeter variant="compact" /></div>}
         <aside className="hud-card plant-card">
           <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold text-emerald-800">ผักของคุณ</span><PlantSelector /></div>

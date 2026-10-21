@@ -77,6 +77,18 @@ export function AutoPauseBanner() {
   );
 }
 
+/** แถบแจ้งน้ำต่ำ (P43) — ไม่หยุดเกม ไม่มีปุ่ม หายเองเมื่อน้ำกลับถึงเกณฑ์; ซ่อนเมื่อแถบหยุดเกมแสดงอยู่ */
+export function WaterAlertBanner() {
+  const alert = useLabStore((s) => s.snapshot?.waterAlert ?? null);
+  const pausedBanner = useLabStore((s) => !!s.snapshot?.autoPause.reason && !!s.snapshot?.paused);
+  if (!alert || pausedBanner) return null;
+  return (
+    <div role="alert" className="autopause-banner">
+      <span className="min-w-0 flex-1 font-semibold">{alert}</span>
+    </div>
+  );
+}
+
 /** สวิตช์ผู้ช่วยหยุดเกม (แสดงเฉพาะโหมดด่าน) */
 export function AutoPauseToggle() {
   const enabled = useLabStore((s) => s.snapshot?.autoPause.enabled ?? true);

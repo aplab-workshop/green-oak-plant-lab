@@ -160,8 +160,8 @@ export interface LevelInfo {
   ignoredFactors: PlantFactor[];
   /** ปุ่ม Speed เล่นปกติของด่าน (P42: ด่าน 1 = 720, อื่น = 144) */
   playSpeed: 144 | 720;
-  /** หยุดเกมเมื่อน้ำต่ำกว่า N % (แทนการหยุดตอนเกิดเหตุการณ์) — null = กติกาเดิม (P42) */
-  waterPausePct: number | null;
+  /** แจ้งเตือน (ไม่หยุดเกม) เมื่อน้ำต่ำกว่า N % และไม่หยุดเกมตอนเกิดเหตุการณ์ — null = กติกาเดิม (P42/P43) */
+  waterAlertPct: number | null;
 }
 
 /** ปัจจัยสิ่งแวดล้อมที่ด่านเลือกไม่นับผลต่อผักได้ (P38 / SPEC § 4.21) */
@@ -215,6 +215,8 @@ export interface LabSnapshot {
   doses: ActiveDose[];
   /** เหตุการณ์ที่เตือนแล้ว/กำลังเกิด/จบแล้วในรอบนี้ (SPEC § 4.8) */
   challenges: ChallengeView[];
+  /** แถบแจ้งน้ำต่ำ (P43) — null = ไม่มี */
+  waterAlert: string | null;
   /** Mascot วิ่งมาเตะถัง (ถังรั่วแบบ surprise, P41) — progress 0–1 ตามเวลาจำลอง, 0.5 = เตะถัง; null = ไม่มีในฉาก */
   mascot: { progress: number } | null;
   /** ผู้ช่วยหยุดเกม — reason = เหตุผลที่หยุดล่าสุด (ล้างเมื่อ Resume) */
