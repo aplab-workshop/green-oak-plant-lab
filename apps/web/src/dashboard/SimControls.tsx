@@ -1,8 +1,15 @@
 import { Clock, Pause, Play, RotateCcw, Sprout } from 'lucide-react';
-import { SPEED_VALUES } from '@gol/shared';
+import { UI_SPEEDS } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 import { formatClock } from '../lib/format';
+
+/** คำอธิบายปุ่ม Speed (P40) */
+const SPEED_HINT: Record<(typeof UI_SPEEDS)[number], string> = {
+  1: '1x — เริ่มเกม / หยุดปรับสภาพแวดล้อม (เวลาจริง)',
+  144: '144x — เล่นปกติ (1 วันจำลอง ≈ 10 นาทีจริง)',
+  1440: '1440x — สำหรับทดสอบ (1 วันจำลอง ≈ 1 นาทีจริง)',
+};
 
 export function SimControls() {
   const snap = useLabStore((s) => s.snapshot);
@@ -23,16 +30,17 @@ export function SimControls() {
       </div>
 
       <div className="flex rounded-md bg-slate-100 p-0.5" role="group" aria-label="Simulation speed">
-        {SPEED_VALUES.map((v) => (
+        {UI_SPEEDS.map((v) => (
           <button
             key={v}
             type="button"
+            title={SPEED_HINT[v]}
             onClick={() => void sendCommand({ type: 'setSpeed', speed: v })}
             className={`rounded px-2.5 py-1 font-mono text-xs font-semibold ${
               speed === v ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-600 hover:text-slate-800'
             }`}
           >
-            {v}x
+            {v}x{v === 1440 && <span className="ml-1 font-sans text-[10px] font-normal text-slate-500">ทดสอบ</span>}
           </button>
         ))}
       </div>

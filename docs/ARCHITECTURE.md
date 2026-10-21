@@ -832,3 +832,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `LabSession.drainSimEvents`: Event `game.won`/`game.over` → `saveRecord()` + `clock.pause()`; คำสั่ง `harvest` ยังอยู่ (409 เมื่อจบแล้ว)
 - ด่าน 1: `targetG: 6.8`, `timeLimitDays: 3`
 
+### 11.37 Implementation Notes (P40 — Speed Choices)
+
+- `SIM_SPEEDS` (sim-core) และ `SPEED_VALUES`/zod (shared) เพิ่ม 144; `UI_SPEEDS` (shared) คือปุ่มที่ `SimControls` แสดง — ความเร็วอื่นยังใช้ผ่าน API ได้
+- ที่ Tick 100 ms: 144x = 14.4 Step ต่อ Tick (ต่ำกว่า `maxStepsPerTick` มาก)
+

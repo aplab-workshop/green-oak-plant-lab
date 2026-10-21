@@ -213,13 +213,15 @@ export interface LabSnapshot {
   autoPause: { enabled: boolean; reason: string | null };
 }
 
-export const SPEED_VALUES = [1, 60, 360, 1440, 3600] as const;
+export const SPEED_VALUES = [1, 60, 144, 360, 1440, 3600] as const;
+/** ปุ่ม Speed ที่ผู้เล่นเห็น (P40 / SPEC § 4.23): เริ่ม/ปรับ · เล่นปกติ · ทดสอบ */
+export const UI_SPEEDS = [1, 144, 1440] as const;
 
 const ActuatorBitKey = z.enum(['fan', 'humidifier', 'refillPump', 'nutrientA', 'nutrientB', 'airPump', 'phDown']);
 
 /** คำสั่งที่ Client ส่งมาที่ POST /api/labs/:labId/commands */
 export const LabCommand = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('setSpeed'), speed: z.union([z.literal(1), z.literal(60), z.literal(360), z.literal(1440), z.literal(3600)]) }),
+  z.object({ type: z.literal('setSpeed'), speed: z.union([z.literal(1), z.literal(60), z.literal(144), z.literal(360), z.literal(1440), z.literal(3600)]) }),
   z.object({ type: z.literal('pause') }),
   z.object({ type: z.literal('resume') }),
   z.object({ type: z.literal('reset') }),
