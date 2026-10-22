@@ -72,4 +72,25 @@ describe('Garden game flow on LabSession — P20 (SPEC § 4.5)', () => {
     delete process.env.MOCK_PLC_MODE;
     try { expect(loadConfig().mockMode).toBe('manual'); } finally { if (saved !== undefined) process.env.MOCK_PLC_MODE = saved; }
   });
+
+  it('P47: UNLOCK_ALL_LEVELS defaults to on only under npm run dev; the env overrides it', () => {
+    const saved = { e: process.env.npm_lifecycle_event, u: process.env.UNLOCK_ALL_LEVELS };
+    try {
+      delete process.env.UNLOCK_ALL_LEVELS;
+      process.env.npm_lifecycle_event = 'dev';
+      expect(loadConfig().unlockAllLevels).toBe(true);
+      process.env.npm_lifecycle_event = 'start';
+      expect(loadConfig().unlockAllLevels).toBe(false);
+      process.env.UNLOCK_ALL_LEVELS = 'true';
+      expect(loadConfig().unlockAllLevels).toBe(true);
+      process.env.npm_lifecycle_event = 'dev';
+      process.env.UNLOCK_ALL_LEVELS = 'false';
+      expect(loadConfig().unlockAllLevels).toBe(false);
+      process.env.UNLOCK_ALL_LEVELS = 'maybe';
+      expect(() => loadConfig()).toThrow();
+    } finally {
+      if (saved.e === undefined) delete process.env.npm_lifecycle_event; else process.env.npm_lifecycle_event = saved.e;
+      if (saved.u === undefined) delete process.env.UNLOCK_ALL_LEVELS; else process.env.UNLOCK_ALL_LEVELS = saved.u;
+    }
+  });
 });

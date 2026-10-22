@@ -44,6 +44,8 @@ export interface LabSessionOptions {
   autoStart?: boolean;
   /** ด่านเริ่มต้น (SPEC § 4.6) — ค่าเริ่มต้น Free Play */
   level?: LevelId | 'free';
+  /** ปลดล็อกทุกด่านตั้งแต่เริ่ม (โหมดผู้พัฒนา, P47 / SPEC § 4.30) */
+  unlockAllLevels?: boolean;
 }
 
 export class LabCommandError extends Error {
@@ -156,6 +158,7 @@ export class LabSession {
   private readonly autoStart: boolean;
   private level: LevelDef | null = null;
   private readonly unlocked = new Set<LevelId>(['L1']);
+  private readonly devUnlockAll: boolean;
   /** โดสที่ค้าง นับเวลาจำลองราย Step (SPEC § 4.7) */
   private readonly doses = new Map<DoseDevice, ActiveDose>();
   /** ผู้ช่วยหยุดเกม (SPEC § 4.8) */
@@ -198,6 +201,8 @@ export class LabSession {
     this.now = opts.now ?? Date.now;
     this.commandTimeoutMs = opts.commandTimeoutMs ?? 3000;
     this.autoStart = opts.autoStart ?? false;
+    this.devUnlockAll = opts.unlockAllLevels ?? false;
+    if (this.devUnlockAll) for (const l of LEVELS) this.unlocked.add(l.id);
     this.sim = new Simulation(opts.sim);
     if (opts.level && opts.level !== 'free') {
       this.level = findLevel(opts.level);
@@ -626,6 +631,7 @@ export class LabSession {
       game: { ...this.sim.game, best: this.bestByScenario.has(this.recordKey)
         ? { ...this.bestByScenario.get(this.recordKey)! } : null },
       level: this.level ? levelInfo(this.level) : null,
+      devUnlockAll: this.devUnlockAll,
       levels: LEVELS.map((l) => ({ ...levelInfo(l), unlocked: this.unlocked.has(l.id), bestStars: this.bestStars.get(l.id) ?? 0 })),
       labId: this.labId,
       runId: this.events.runId,

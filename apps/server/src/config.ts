@@ -11,6 +11,15 @@ function num(name: string, fallback: number): number {
   return n;
 }
 
+/** true/false จาก Environment — เว้นว่าง = fallback */
+function bool(name: string, fallback: boolean): boolean {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return fallback;
+  if (raw === 'true' || raw === '1') return true;
+  if (raw === 'false' || raw === '0') return false;
+  throw new Error(`Invalid boolean for ${name}: ${raw}`);
+}
+
 /** โฟลเดอร์หน้าเว็บที่ build แล้ว (ค่าเริ่มต้น apps/web/dist) */
 const DEFAULT_WEB_DIST = fileURLToPath(new URL('../../web/dist', import.meta.url));
 
@@ -31,6 +40,8 @@ export interface ServerConfig {
   broadcastMs: number;
   commandTimeoutMs: number;
   mockMode: MockPlcMode;
+  /** ปลดล็อกทุกด่าน (โหมดผู้พัฒนา, P47) */
+  unlockAllLevels: boolean;
   /** โฟลเดอร์หน้าเว็บที่จะเสิร์ฟ (ถ้ามี) */
   webDist?: string;
 }
@@ -46,6 +57,8 @@ export function loadConfig(): ServerConfig {
     broadcastMs: num('WS_BROADCAST_MS', 200),
     commandTimeoutMs: num('PLC_COMMAND_TIMEOUT_MS', 3000),
     mockMode: mockMode(),
+    // P47: ค่าเริ่ม = รันด้วย npm run dev (โหมดผู้พัฒนา); ห้องเรียน (npm start/serve) ล็อกตามปกติ
+    unlockAllLevels: bool('UNLOCK_ALL_LEVELS', process.env.npm_lifecycle_event === 'dev'),
     webDist: process.env.WEB_DIST || DEFAULT_WEB_DIST,
   };
 }

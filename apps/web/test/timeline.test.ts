@@ -15,7 +15,7 @@ const event = (id: number, plantId?: number, runId = 0): EventEntry => ({
 });
 const snapshot = (runId = 0, at = 100, labId = 'lab01'): LabSnapshot => ({
   game: { score: 0, elapsedS: 0, averageHealth: 100, growthProgress: 0, harvestProgress: 0, deadPlantIds: [], totalPlants: 0, status: 'playing', endedAtS: null, canHarvest: false, harvestBonus: 0, yieldG: null, testRun: false, targetG: 100, timeLimitS: null, energyKWh: 0, energyBudgetKWh: null, stars: 0, lostReason: null, overflowL: 0, overflowKWh: 0, overflowPenalty: 0, best: null },
-  level: null, levels: [],
+  level: null, levels: [], devUnlockAll: false,
   labId, runId, at, simTimeS: 36000, sim: { day: 0, minuteOfDay: 600 }, speed: 360, paused: false,
   plc: { kind: 'mock', mode: 'auto', connection: 'connected', lastOkAt: at, latencyMs: 0, errorCount: 0, lastError: null },
   failsafe: false, commands: { fan: false, humidifier: false, ledPct: 80, refillPump: false,

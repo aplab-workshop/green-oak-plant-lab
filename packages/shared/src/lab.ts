@@ -179,6 +179,8 @@ export interface LabSnapshot {
   /** ด่านปัจจุบัน — null = Free Play */
   level: LevelInfo | null;
   levels: LevelProgress[];
+  /** โหมดผู้พัฒนา: ปลดล็อกทุกด่าน (P47) */
+  devUnlockAll: boolean;
   labId: string;
   runId: number;
   /** เวลาจริงที่สร้าง Snapshot (ms epoch) */

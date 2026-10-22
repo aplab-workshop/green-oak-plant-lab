@@ -13,12 +13,18 @@ const DEVICE_ICON: Record<PlayerDevice, string> = {
 export function LevelSelect({ onDone }: { onDone: () => void }) {
   const levels = useLabStore((s) => s.snapshot?.levels);
   const current = useLabStore((s) => s.snapshot?.level?.id ?? 'free');
+  const devUnlockAll = useLabStore((s) => s.snapshot?.devUnlockAll ?? false);
   const choose = async (levelId: LevelId | 'free') => {
     if (await sendCommand({ type: 'selectLevel', levelId })) onDone();
   };
   if (!levels) return <p className="p-6">กำลังรอข้อมูลด่าน…</p>;
   return (
     <div className="grid gap-3 p-5 sm:grid-cols-2">
+      {devUnlockAll && (
+        <p role="note" className="rounded-md bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 sm:col-span-2">
+          🔓 โหมดผู้พัฒนา: ปลดล็อกทุกด่าน (npm run dev — ห้องเรียนใช้ npm run serve จะล็อกตามปกติ)
+        </p>
+      )}
       {levels.map((l) => {
         return (
           <button

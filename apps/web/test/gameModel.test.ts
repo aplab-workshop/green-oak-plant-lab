@@ -16,7 +16,7 @@ const L2: LevelInfo = { id: 'L2', title: 'อาหารของผัก', de
 function snap(over: Partial<LabSnapshot> = {}, sensors: Partial<LabSnapshot['sensors']> = {}): LabSnapshot {
   return {
     game: { score: 500, elapsedS: 3600, averageHealth: 100, growthProgress: 0.1, harvestProgress: 0.25, deadPlantIds: [], totalPlants: 3, status: 'playing', endedAtS: null, canHarvest: false, harvestBonus: 0, yieldG: null, testRun: false, targetG: 30, timeLimitS: 8 * 86400, energyKWh: 2, energyBudgetKWh: 18, stars: 0, lostReason: null, overflowL: 0, overflowKWh: 0, overflowPenalty: 0, best: null },
-    level: L2, levels: [],
+    level: L2, levels: [], devUnlockAll: false,
     labId: 'lab01', runId: 1, at: 0, simTimeS: 36000, sim: { day: 23, minuteOfDay: 600 }, speed: 360, paused: false,
     plc: { kind: 'mock', mode: 'manual', connection: 'connected', lastOkAt: 0, latencyMs: 0, errorCount: 0, lastError: null },
     failsafe: false,

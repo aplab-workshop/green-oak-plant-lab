@@ -871,3 +871,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `LabSession` แถบเตือนเป็นตาราง `RANGE_ALERTS` (EC/อุณหภูมิ/VPD) + `rangeOut` (Map) — เพิ่มค่าใหม่ได้โดยเพิ่มแถว; แสดงเฉพาะด่านที่ผู้เล่นคุมอุปกรณ์ของค่านั้น
 - ไม่มีด่านที่ใช้ผู้ช่วยฟาร์มคุม pH Down แล้ว (ด่าน 1–3 `lockedMode: 'off'`, ด่าน 4 คุมเอง) — `farmHelper` ยังอยู่สำหรับด่าน 4 แบบ `helper` และ Free Play/อนาคต
 - เทสต์ยาวบางข้อเพิ่ม timeout 30 s (ล้มเพราะเครื่องโหลดตอนรันทั้งชุด ไม่ใช่ผิด)
+
+### 11.43 Implementation Notes (P47 — Developer Unlock-all)
+
+- `npm run dev` (root) → `concurrently` → `npm run dev -w @gol/server` ทำให้ `npm_lifecycle_event = 'dev'` ใน Process ของ Server (คงอยู่แม้ `tsx watch` รีสตาร์ท) → ปลดล็อกทุกด่านโดยไม่ต้องมี `.env`; `npm start`/`serve` ได้ `'start'` จึงล็อกตามปกติ
+- ปลดล็อกที่ Constructor ของ `LabSession` (Set `unlocked` ทุกด่าน) — การชนะด่านยังบันทึกดาว/Best เหมือนเดิม

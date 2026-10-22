@@ -9,6 +9,8 @@ export interface LabManagerConfig {
   broadcastMs: number;
   commandTimeoutMs: number;
   mockMode: MockPlcMode;
+  /** ปลดล็อกทุกด่าน (โหมดผู้พัฒนา, P47) */
+  unlockAllLevels?: boolean;
 }
 
 export const labIdOf = (n: number): string => `lab${String(n).padStart(2, '0')}`;
@@ -35,6 +37,7 @@ export class LabManager {
         sim: { seed: i },
         // เกมเริ่มที่ด่านแรก (SPEC § 4.6); Free Play/Scenario เลือกได้ภายหลัง
         level: 'L1',
+        unlockAllLevels: config.unlockAllLevels ?? false,
       });
       lab.events.onEvent((e) => this.eventListeners.forEach((l) => l(labId, e)));
       this.labs.set(labId, lab);

@@ -14,6 +14,7 @@ export const testConfig = (overrides: Partial<ServerConfig> = {}): ServerConfig 
   broadcastMs: 50,
   commandTimeoutMs: 3000,
   mockMode: 'auto',
+  unlockAllLevels: false,
   ...overrides,
 });
 

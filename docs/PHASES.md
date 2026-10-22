@@ -487,6 +487,12 @@ tags: [green-oak, roadmap]
 - **พบระหว่างทาง:** แถบ "อากาศแห้ง (RH 59%)" สับสนเพราะ RH อยู่ในช่วงดีแต่ร้อนจน VPD สูง → เปลี่ยนเป็นแสดง VPD; ช่วงท้ายด่าน 3 ผักใหญ่ดื่มน้ำมาก EC ขึ้นเกิน 1.6 ได้ (แถบเตือนให้เติมน้ำเจือจาง)
 - **หมายเหตุ:** แก้ `apps/server`/`shared` ทำให้ Dev server รีสตาร์ทและด่านที่ปลดล็อกหาย — เล่นด่าน 1–2 ด้วยสคริปต์ใหม่แล้วตั้งด่าน 3 พร้อมเล่น 1x
 
+### P47 — ปลดล็อกทุกด่านสำหรับผู้พัฒนา ✅
+- [x] ผู้ใช้ (2026-10-22): "ปลดล็อกทุกด่านสำหรับผู้พัฒนา" → SPEC § 4.30 + AC-61
+- [x] `UNLOCK_ALL_LEVELS` (`config.ts` `bool()`, ค่าเริ่ม = `npm_lifecycle_event === 'dev'`) → `LabManager` → `LabSessionOptions.unlockAllLevels`; Snapshot `devUnlockAll` + ป้าย "🔓 โหมดผู้พัฒนา" ในหน้าเลือกด่าน; `.env.example`
+- [x] เทสต์: ปลดล็อกทุกด่าน/เลือกด่าน 4 ได้/คงหลัง Reset, ค่าเริ่มล็อก 409; loadConfig dev/start/override/ค่าผิด
+- **ผลตรวจ:** AC-61 ผ่าน; tests 314/314 (39 files), typecheck และ build ผ่าน; Browser: หลัง Dev server รีสตาร์ท `devUnlockAll: true` ด่าน 1–4 ปลดล็อก, หน้าเลือกด่านมีป้ายโหมดผู้พัฒนา, ตั้ง lab01 ด่าน 3 พร้อมเล่น 1x; Console ไม่มี Error ใหม่
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

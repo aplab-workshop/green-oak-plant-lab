@@ -109,6 +109,21 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
     expect(t.lab.snapshot()).toMatchObject({ level: null, scenario: { id: 'water-shortage' } });
   });
 
+  it('P47: developer unlock-all opens every level from the start; default stays locked', async () => {
+    const clock = new FakeClock();
+    const dev = new LabSession({ labId: 'lab01', adapter: new MockPlcAdapter('manual', clock.now), now: clock.now, level: 'L1', sensorNoise: false, unlockAllLevels: true });
+    expect(dev.snapshot().devUnlockAll).toBe(true);
+    expect(dev.snapshot().levels.every((l) => l.unlocked)).toBe(true);
+    await dev.handle({ type: 'selectLevel', levelId: 'L4' });
+    expect(dev.snapshot().level?.id).toBe('L4');
+    await dev.handle({ type: 'reset' });
+    expect(dev.snapshot().levels.every((l) => l.unlocked)).toBe(true);
+    const normal = new LabSession({ labId: 'lab02', adapter: new MockPlcAdapter('manual', clock.now), now: clock.now, level: 'L1', sensorNoise: false });
+    expect(normal.snapshot().devUnlockAll).toBe(false);
+    expect(normal.snapshot().levels.map((l) => l.unlocked)).toEqual([true, false, false, false]);
+    await expect(normal.handle({ type: 'selectLevel', levelId: 'L4' })).rejects.toMatchObject({ statusCode: 409 });
+  });
+
   it('a test run (Auto) win does not unlock the next level', async () => {
     const t = levelLab('auto', true);
     await winL1(t);
