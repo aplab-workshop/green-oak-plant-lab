@@ -44,7 +44,7 @@ describe('Nutrient Stress — P10', () => {
     const sim = new Simulation({ seed: 7, cfg: makeConfig({ nutrient: initial }) });
     const healthy = new Simulation({ seed: 7 });
     for (let i = 0; i < 86400; i++) {
-      const cmd = { ...OFF, ledPct: 60, fan: true };
+      const cmd = { ...OFF, ledPct: 60, fanPct: 100 };
       sim.step(1, cmd);
       healthy.step(1, cmd);
       // ค่า Sensor ที่อ่านไม่ควรมีผลต่อการคำนวณ Plant
@@ -108,7 +108,7 @@ describe('Empirical pH equilibrium — P10 / AC-20', () => {
       const dose = envEc(sim.env) < 1;
       sim.step(1, { ...OFF, ledPct: h >= 6 && h < 22 ? 80 : 0,
         refillPump: levelPct(sim.env.waterVolumeL, sim.cfg) < 70,
-        fan: sim.env.airTempC > 25, nutrientA: dose, nutrientB: dose });
+        fanPct: sim.env.airTempC > 25 ? 100 : 0, nutrientA: dose, nutrientB: dose });
       minimum = Math.min(minimum, sim.env.ph);
       maximum = Math.max(maximum, sim.env.ph);
       if (i % 86400 === 0) sim.drainEvents();

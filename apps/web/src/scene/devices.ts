@@ -1,4 +1,4 @@
-import { COMMAND_BITS, LED_COMMAND_REGISTER, deviceName, type ActuatorKey, type SensorKey } from '@gol/shared';
+import { COMMAND_BITS, FAN_COMMAND_REGISTER, LED_COMMAND_REGISTER, deviceName, type ActuatorKey, type SensorKey } from '@gol/shared';
 
 /** ข้อมูลอุปกรณ์ที่คลิกได้ในฉาก 3D */
 export interface ActuatorInfo {
@@ -10,7 +10,7 @@ export interface ActuatorInfo {
 }
 
 const DESCRIPTIONS: Record<ActuatorKey, { description: string; ratedPower: string }> = {
-  fan: { description: 'ระบายอากาศร้อนจาก LED ออก ลดอุณหภูมิได้ แต่ไม่ต่ำกว่าอุณหภูมิห้อง และลดความชื้น', ratedPower: '15 W' },
+  fanPct: { description: 'พัดลมระบายอากาศ + Cooling pad ปรับความเร็ว 0–100 % (D201) ระบายความร้อนจาก LED/แดด และทำให้เย็นกว่าห้องได้ถึง ~8 °C ที่ 100 % เปิดแรงจะทำให้อากาศแห้งลง', ratedPower: '15 W ที่ 100%' },
   humidifier: { description: 'เพิ่มความชื้นในอากาศ (ใช้น้ำจากถังแยก) ผลจะลดลงเมื่อเปิด Fan พร้อมกัน', ratedPower: '25 W' },
   ledPct: { description: 'ไฟปลูกหรี่ได้ 0–100% กำหนด PPFD และ DLI และสร้างความร้อนในกล่องปลูก', ratedPower: '120 W ที่ 100%' },
   refillPump: { description: 'เติมน้ำจากถังสำรอง (อัตราไหลดู D107 Flow Sensor ตอนเปิด) ถ้าเปิดค้างขณะถังเต็ม น้ำจะล้นและพาธาตุอาหารออก', ratedPower: '18 W' },
@@ -23,6 +23,7 @@ const DESCRIPTIONS: Record<ActuatorKey, { description: string; ratedPower: strin
 export const ACTUATOR_INFO: Record<ActuatorKey, ActuatorInfo> = Object.fromEntries([
   ...COMMAND_BITS.map((b) => [b.key, { label: b.label, address: deviceName('M', b.address), ...DESCRIPTIONS[b.key] }]),
   ['ledPct', { label: LED_COMMAND_REGISTER.label, address: deviceName('D', LED_COMMAND_REGISTER.address), ...DESCRIPTIONS.ledPct }],
+  ['fanPct', { label: FAN_COMMAND_REGISTER.label, address: deviceName('D', FAN_COMMAND_REGISTER.address), ...DESCRIPTIONS.fanPct }],
 ]) as Record<ActuatorKey, ActuatorInfo>;
 
 export interface SensorDeviceInfo {

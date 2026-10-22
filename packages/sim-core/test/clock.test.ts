@@ -23,7 +23,7 @@ function newClock(speed: 1 | 60 | 360 = 360, maxStepsPerTick = 1_000_000) {
 function runWithTicks(ticksMs: number[]): { env: EnvironmentState; simTimeS: number } {
   const clock = newClock(360);
   let env = initialEnvironment(cfg, START);
-  const cmd = { ...OFF, ledPct: 80, refillPump: true, fan: true };
+  const cmd = { ...OFF, ledPct: 80, refillPump: true, fanPct: 100 };
   for (const ms of ticksMs) {
     clock.advance(ms, (dt, t) => {
       env = stepEnvironment(env, { cmd, simTimeS: t, plantUptakeDemandL: 0.00001 }, dt, cfg).state;

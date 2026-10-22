@@ -54,7 +54,7 @@ describe('Care score and permanent death — P17', () => {
     const cfg = makeConfig({ plant: { initialBiomassSpread: 0 } });
     const dry = new Simulation({ cfg }), healthy = new Simulation({ cfg });
     dry.setWaterLevelPct(0); dry.startGame(); healthy.startGame();
-    const cmd = { ...OFF, ledPct: 60, fan: true };
+    const cmd = { ...OFF, ledPct: 60, fanPct: 100 };
     for (let i = 0; i < 36 * 3600; i++) { dry.step(1, cmd); healthy.step(1, cmd); }
     expect(dry.game.status).toBe('lost');
     expect(healthy.game.score).toBeGreaterThan(dry.game.score);
@@ -131,7 +131,7 @@ describe('Harvest progress and growth rate — P35', () => {
 
   it('growthGPerH matches the biomass change and efficiency is ~1 under the care recipe at noon', () => {
     const sim = new Simulation({ seed: 3, cfg: noSunConfig() });
-    const fan = (s: Simulation) => ({ ...OFF, ledPct: 80, fan: s.env.airTempC > 25 });
+    const fan = (s: Simulation) => ({ ...OFF, ledPct: 80, fanPct: s.env.airTempC > 25 ? 100 : 0 });
     for (let i = 0; i < 6 * 360; i++) sim.step(10, fan(sim));
     const before = sim.plants.map((p) => p.biomassG);
     sim.step(10, fan(sim));

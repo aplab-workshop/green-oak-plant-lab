@@ -91,7 +91,7 @@ export function helperMessage(s: LabSnapshot): HelperMessage {
 
   const tired = cmd.ledPct > 0 ? Math.max(0, ...s.plants.filter((p) => !isPlantDead(p, g.deadPlantIds)).map((p) => p.lightLoadH)) : 0;
   if (tired >= LIGHT_LOAD_WARN_H) return { text: `เปิดไฟมา ${tired.toFixed(0)} ชม. ผักต้องการช่วงมืด — ปิดหรือลดไฟ 💡 ไม่งั้นจะเครียดและโตช้า`, tone: 'warn' };
-  if (counts('temperature') && r.airTempC > 25.5 && !cmd.fan) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C ผักโตช้า — ${own('fan') ? 'เปิด 🌀 พัดลม (เย็นได้ถึงอุณหภูมิห้อง) หรือลดไฟ LED' : lockedOff ? 'ด่านนี้ไม่มีพัดลม — ลดไฟ LED ตอนแดดแรง' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
+  if (counts('temperature') && r.airTempC > 25.5 && cmd.fanPct < 100) return { text: `อากาศร้อน ${r.airTempC.toFixed(1)} °C ผักโตช้า — ${own('fan') ? 'เร่ง 🌀 พัดลมให้แรงขึ้น หรือลดไฟ LED' : lockedOff ? 'ด่านนี้ไม่มีพัดลม — ลดไฟ LED ตอนแดดแรง' : 'ลดไฟ LED ลงสักหน่อย'}`, tone: 'warn' };
   // P33: ใช้ VPD — แห้งเปิดหมอก, ชื้นจัดขณะเปิดหมอกให้ปิด
   const comfort = airComfort(r.vpdKPa);
   if (counts('air') && comfort === 'dry' && !cmd.humidifier) {

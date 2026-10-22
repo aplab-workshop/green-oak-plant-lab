@@ -137,8 +137,12 @@ describe('Lab commands', () => {
 
   it('logs actuator changes with their PLC address', async () => {
     const t = makeLab('lab01', 'manual');
-    await t.lab.handle({ type: 'setManualBit', key: 'fan', value: true });
-    expect(t.lab.events.list().some((e) => e.message === 'Ventilation Fan (M100): ON')).toBe(true);
+    await t.lab.handle({ type: 'setManualBit', key: 'humidifier', value: true });
+    expect(t.lab.events.list().some((e) => e.message === 'Humidifier (M101): ON')).toBe(true);
+    // P48: พัดลมเป็นความเร็ว D201
+    await t.lab.handle({ type: 'setManualFan', value: 60 });
+    expect(t.lab.events.list().some((e) => e.message === 'Ventilation Fan Speed (D201): 60%')).toBe(true);
+    expect(t.lab.snapshot().commands.fanPct).toBe(60);
   });
 
   it('reset keeps the current scenario and clears history', async () => {

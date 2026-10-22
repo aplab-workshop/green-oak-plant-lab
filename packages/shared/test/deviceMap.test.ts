@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { COMMAND_BITS, LED_COMMAND_REGISTER, SENSOR_REGISTERS, WRITABLE_D_ADDRESSES, fromRaw, toRaw } from '../src';
+import { COMMAND_BITS, FAN_COMMAND_REGISTER, LED_COMMAND_REGISTER, SENSOR_REGISTERS, WRITABLE_D_ADDRESSES, fromRaw, toRaw } from '../src';
 
 const reg = (key: string) => {
   const r = SENSOR_REGISTERS.find((x) => x.key === key);
@@ -33,8 +33,10 @@ describe('deviceMap', () => {
     expect(WRITABLE_D_ADDRESSES.has(LED_COMMAND_REGISTER.address)).toBe(false);
   });
 
-  it('maps commands to M100–M106 (M106 = pH Down, P22)', () => {
-    expect(COMMAND_BITS.map((b) => b.address)).toEqual([100, 101, 102, 103, 104, 105, 106]);
+  it('maps commands to M101–M106 (M106 = pH Down, P22); the fan is D201 0–100 % (P48, M100 retired)', () => {
+    expect(COMMAND_BITS.map((b) => b.address)).toEqual([101, 102, 103, 104, 105, 106]);
+    expect(FAN_COMMAND_REGISTER).toMatchObject({ key: 'fanPct', address: 201, min: 0, max: 100 });
+    expect(WRITABLE_D_ADDRESSES.has(201)).toBe(false);
     expect(COMMAND_BITS.find((b) => b.address === 106)?.key).toBe('phDown');
   });
 });

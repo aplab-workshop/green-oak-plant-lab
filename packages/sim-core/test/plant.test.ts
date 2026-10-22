@@ -39,7 +39,7 @@ const goodCare =
   (sim) => {
     const h = hourOfDay(sim.simTimeS);
     const level = levelPct(sim.env.waterVolumeL, sim.cfg);
-    return { ledPct: h >= 6 && h < 22 ? led : 0, refillPump: level < 70, fan: sim.env.airTempC > 25 };
+    return { ledPct: h >= 6 && h < 22 ? led : 0, refillPump: level < 70, fanPct: sim.env.airTempC > 25 ? 100 : 0 };
   };
 
 const avg = (xs: number[]) => xs.reduce((s, x) => s + x, 0) / xs.length;

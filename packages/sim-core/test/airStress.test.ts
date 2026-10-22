@@ -14,7 +14,7 @@ const run = (sim: Simulation, hours: number, cmd: CmdFn, dtS = 10) => {
 const recipe = (s: Simulation): Partial<ActuatorCommands> => ({
   ledPct: hourOfDay(s.simTimeS) >= 6 && hourOfDay(s.simTimeS) < 22 ? 80 : 0,
   refillPump: levelPct(s.env.waterVolumeL, s.cfg) < 70,
-  fan: s.env.airTempC > 25.5,
+  fanPct: s.env.airTempC > 25.5 ? 100 : 0,
 });
 const avg = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
 const dryOf = (s: Simulation) => avg(s.plants.map((p) => p.dryAirStress));

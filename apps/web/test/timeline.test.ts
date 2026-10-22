@@ -18,7 +18,7 @@ const snapshot = (runId = 0, at = 100, labId = 'lab01'): LabSnapshot => ({
   level: null, levels: [], devUnlockAll: false,
   labId, runId, at, simTimeS: 36000, sim: { day: 0, minuteOfDay: 600 }, speed: 360, paused: false,
   plc: { kind: 'mock', mode: 'auto', connection: 'connected', lastOkAt: at, latencyMs: 0, errorCount: 0, lastError: null },
-  failsafe: false, commands: { fan: false, humidifier: false, ledPct: 80, refillPump: false,
+  failsafe: false, commands: { fanPct: 0, humidifier: false, ledPct: 80, refillPump: false,
     nutrientA: false, nutrientB: false, airPump: true, phDown: false },
   sensors: { airTempC: 25, rhPct: 65, ppfd: 200, waterTempC: 24, ph: 6, ecMsCm: 1.2,
     waterLevelPct: 80, flowLpm: 0, powerW: 100, vpdKPa: 1, dli: 5 },

@@ -876,3 +876,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 
 - `npm run dev` (root) → `concurrently` → `npm run dev -w @gol/server` ทำให้ `npm_lifecycle_event = 'dev'` ใน Process ของ Server (คงอยู่แม้ `tsx watch` รีสตาร์ท) → ปลดล็อกทุกด่านโดยไม่ต้องมี `.env`; `npm start`/`serve` ได้ `'start'` จึงล็อกตามปกติ
 - ปลดล็อกที่ Constructor ของ `LabSession` (Set `unlocked` ทุกด่าน) — การชนะด่านยังบันทึกดาว/Best เหมือนเดิม
+
+### 11.44 Implementation Notes (P48 — Fan D201, Air Balance, Power Cuts)
+
+- **M100 → D201:** `ActuatorCommands.fan` (bit) เปลี่ยนเป็น `fanPct` (0–100) — `COMMAND_BITS` เหลือ M101–M106, `FAN_COMMAND_REGISTER` D201 คู่กับ `LED_COMMAND_REGISTER` D200; `LabSession.logActuatorChanges` วน Register ทั้งสอง และ `sameCommands` ต้องรวม `fanPct` (Snapshot ไม่อัปเดตถ้าลืม)
+- **Air:** `stepAir` ใช้ `f = fanPct/100` ทุกพจน์ (ระบายความร้อน, Cooling pad `−fanCoolingC·f`, ลดผลหมอก, ความชื้นสะสม) — ไม่มี Clamp "ห้ามต่ำกว่าห้อง" แล้ว; RH ที่สูงขึ้นเมื่อเย็นกว่าห้องมาจาก `rhPerDegC` เดิม (สอดคล้องกับ Cooling pad ที่ระเหยน้ำ)
+- **ปุ๋ย A+B:** UI-only — `ActuatorPanel` ส่ง `setManualBit` A แล้ว B; Device map/Ladder ยังแยกได้
+- **ไฟดับ:** ใช้ `powerOutage` เดิม (OUTAGE_COMMANDS) + surprise; `Mascot.tsx` เลือกทางวิ่งตาม `mascot.kind`; ด่าน 4 ใช้ `extraDays` ต่อจากเหตุการณ์สุ่ม แล้วเรียง/ให้ id ใหม่

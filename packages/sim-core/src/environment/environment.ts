@@ -101,7 +101,7 @@ export function stepEnvironment(
   // --- Air ---
   const air = stepAir(
     s,
-    { simTimeS: u.simTimeS, ledPct, fan: cmd.fan, humidifier: cmd.humidifier, roomTempDeltaC: u.roomTempDeltaC, roomRhDeltaPct: u.roomRhDeltaPct,
+    { simTimeS: u.simTimeS, ledPct, fanPct: cmd.fanPct, humidifier: cmd.humidifier, roomTempDeltaC: u.roomTempDeltaC, roomRhDeltaPct: u.roomRhDeltaPct,
       sunFrac: sunFraction(u.simTimeS, cfg) },
     dtS,
     cfg,

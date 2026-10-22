@@ -9,7 +9,7 @@ import {
 } from '../src';
 
 export const OFF: ActuatorCommands = {
-  fan: false,
+  fanPct: 0,
   humidifier: false,
   ledPct: 0,
   refillPump: false,

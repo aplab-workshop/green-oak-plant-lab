@@ -19,6 +19,6 @@ describe('device rationale texts (P34)', () => {
     expect(DEVICE_RATIONALE.ledPct.caution).toContain('18 ชม.');
     expect(DEVICE_RATIONALE.humidifier.problem).toContain('แห้ง');
     expect(DEVICE_RATIONALE.humidifier.caution).toContain('ชื้นจัด');
-    expect(DEVICE_RATIONALE.fan.caution).toContain('ไม่ต่ำกว่าห้อง');
+    expect(DEVICE_RATIONALE.fanPct.benefit).toContain('เย็นกว่าห้อง');
   });
 });

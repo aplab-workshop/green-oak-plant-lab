@@ -48,14 +48,13 @@ export const SIM_INFO_REGISTERS: readonly WordRegister<SimInfoKey>[] = [
 export const HEARTBEAT_REGISTER = { address: 120, label: 'Gateway Heartbeat', min: 0, max: INT16_MAX } as const;
 
 export interface BitCommand {
-  key: Exclude<ActuatorKey, 'ledPct'>;
+  key: Exclude<ActuatorKey, 'ledPct' | 'fanPct'>;
   /** M-device number เช่น 100 = M100 */
   address: number;
   label: string;
 }
 
 export const COMMAND_BITS: readonly BitCommand[] = [
-  { key: 'fan', address: 100, label: 'Ventilation Fan' },
   { key: 'humidifier', address: 101, label: 'Humidifier' },
   { key: 'refillPump', address: 102, label: 'Water Refill Pump' },
   { key: 'nutrientA', address: 103, label: 'Nutrient Pump A' },
@@ -68,6 +67,16 @@ export const LED_COMMAND_REGISTER = {
   key: 'ledPct',
   address: 200,
   label: 'Grow Light Brightness',
+  unit: '%',
+  min: 0,
+  max: 100,
+} as const;
+
+/** D201: ความเร็วพัดลม 0–100 % (P48 / SPEC § 4.31 — แทน M100) */
+export const FAN_COMMAND_REGISTER = {
+  key: 'fanPct',
+  address: 201,
+  label: 'Ventilation Fan Speed',
   unit: '%',
   min: 0,
   max: 100,

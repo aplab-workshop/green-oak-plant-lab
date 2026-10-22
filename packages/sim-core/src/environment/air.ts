@@ -12,7 +12,8 @@ export function roomTempC(simTimeS: number, cfg: SimConfig): number {
 export interface AirInput {
   simTimeS: number;
   ledPct: number;
-  fan: boolean;
+  /** พัดลม + Cooling pad 0–100 % (P48, D201) */
+  fanPct: number;
   humidifier: boolean;
   /** เหตุการณ์ (SPEC § 4.8): อุณหภูมิห้องเพิ่ม (°C) */
   roomTempDeltaC?: number;
@@ -29,18 +30,18 @@ export interface AirState {
 
 /**
  * อุณหภูมิและความชื้นอากาศแบบ First-order (FR-06)
- *   T_eq  = T_room + (ΔT_LED·LED + ΔT_sun·sun)·(1 − η_fan·fan)   (P36: ความร้อนจากแดด)
- *   RH_eq = RH_room + G_hum·hum·(1 − L_fan·fan) + M_enc·(1 − fan) − k·(T − T_room)
- * Fan ทำให้อุณหภูมิต่ำกว่าห้องไม่ได้
+ *   T_eq  = T_room + (ΔT_LED·LED + ΔT_sun·sun)·(1 − η_fan·f) − C_fan·f   (P36 แดด, P48 Cooling pad)
+ *   RH_eq = RH_room + G_hum·hum·(1 − L_fan·f) + M_enc·(1 − f) − k·(T − T_room)
+ * f = ความเร็วพัดลม 0–1 (D201) — Cooling pad ทำให้เย็นกว่าห้องได้สูงสุด C_fan (P48 / SPEC § 4.31)
  */
 export function stepAir(s: AirState, u: AirInput, dtS: number, cfg: SimConfig): AirState {
   const a = cfg.air;
   const tRoom = roomTempC(u.simTimeS, cfg) + (u.roomTempDeltaC ?? 0);
-  const fan = u.fan ? 1 : 0;
+  const fan = clamp(Number.isFinite(u.fanPct) ? u.fanPct : 0, 0, 100) / 100;
   const hum = u.humidifier ? 1 : 0;
   const led = clamp(u.ledPct, 0, 100) / 100;
 
-  const tEq = tRoom + (a.ledHeatC * led + cfg.sun.heatC * clamp(u.sunFrac ?? 0, 0, 1)) * (1 - a.fanEfficiency * fan);
+  const tEq = tRoom + (a.ledHeatC * led + cfg.sun.heatC * clamp(u.sunFrac ?? 0, 0, 1)) * (1 - a.fanEfficiency * fan) - a.fanCoolingC * fan;
   const airTempC = approach(s.airTempC, tEq, dtS, a.tempTauMin * 60);
 
   const rhEq = clamp(

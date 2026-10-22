@@ -14,10 +14,10 @@ export interface DeviceRationale {
 }
 
 export const DEVICE_RATIONALE: Record<ActuatorKey, DeviceRationale> = {
-  fan: {
-    problem: 'อากาศร้อนเกิน 25 °C (ไฟ LED ทำให้ร้อน) ผักโตช้า',
-    benefit: 'ระบายความร้อนให้อุณหภูมิเข้าใกล้อุณหภูมิห้อง',
-    caution: 'เย็นได้ไม่ต่ำกว่าห้อง และทำให้อากาศแห้งลง อาจต้องเปิดหมอก',
+  fanPct: {
+    problem: 'อากาศร้อนเกิน 25 °C (ไฟ LED แดด หรือคลื่นความร้อน) ผักโตช้า',
+    benefit: 'ปรับความเร็ว 0–100 %: ระบายความร้อน + Cooling pad ทำให้เย็นกว่าห้องได้ถึง ~8 °C ที่ 100 %',
+    caution: 'เปิดแรงตอนกลางคืนจะเย็นเกิน (ต่ำกว่า 15 °C) และลดผลของเครื่องทำหมอก — หรี่ตามอุณหภูมิ',
   },
   humidifier: {
     problem: 'อากาศ "แห้ง" (VPD สูง) ต่อเนื่อง ผักโตช้าแม้น้ำพอ และดื่มน้ำมากขึ้น',
@@ -58,5 +58,5 @@ export const DEVICE_RATIONALE: Record<ActuatorKey, DeviceRationale> = {
 
 /** อุปกรณ์ที่ผู้เล่นคุม → Actuator key สำหรับดึงเหตุผล */
 export const PLAYER_DEVICE_KEY: Record<PlayerDevice, ActuatorKey> = {
-  led: 'ledPct', refillPump: 'refillPump', nutrient: 'nutrientA', fan: 'fan', humidifier: 'humidifier', airPump: 'airPump', phDown: 'phDown',
+  led: 'ledPct', refillPump: 'refillPump', nutrient: 'nutrientA', fan: 'fanPct', humidifier: 'humidifier', airPump: 'airPump', phDown: 'phDown',
 };

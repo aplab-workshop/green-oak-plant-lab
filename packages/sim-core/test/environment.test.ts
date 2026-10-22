@@ -67,17 +67,22 @@ describe('Air temperature & humidity', () => {
     }
   });
 
-  it('fan reduces LED heat build-up but cannot cool below room temperature', () => {
+  it('P48: fan speed removes LED heat and the cooling pad can go below room temperature', () => {
     const cfg = flatRoomConfig();
-    expect(runEnv({ cfg, cmd: { ledPct: 100, fan: true }, hours: 4 }).env.airTempC).toBeCloseTo(27.8, 1);
-    expect(runEnv({ cfg, cmd: { fan: true }, hours: 4 }).env.airTempC).toBeGreaterThanOrEqual(26 - 1e-6);
+    // ห้อง 26 °C: T = 26 + 6·LED·(1 − 0.7f) − 9f
+    expect(runEnv({ cfg, cmd: { ledPct: 100, fanPct: 50 }, hours: 4 }).env.airTempC).toBeCloseTo(25.4, 1);
+    expect(runEnv({ cfg, cmd: { ledPct: 100, fanPct: 100 }, hours: 4 }).env.airTempC).toBeCloseTo(18.8, 1);
+    expect(runEnv({ cfg, cmd: { fanPct: 100 }, hours: 4 }).env.airTempC).toBeCloseTo(17, 1);
   });
 
-  it('humidifier raises RH; fan reduces its effect', () => {
+  it('humidifier raises RH; fan reduces its effect at the same air temperature', () => {
     const cfg = flatRoomConfig();
     expect(runEnv({ cfg, cmd: {}, hours: 3 }).env.rhPct).toBeCloseTo(65, 0);
     expect(runEnv({ cfg, cmd: { humidifier: true }, hours: 3 }).env.rhPct).toBeCloseTo(90, 0);
-    expect(runEnv({ cfg, cmd: { humidifier: true, fan: true }, hours: 3 }).env.rhPct).toBeCloseTo(70, 0);
+    // LED 100 % + พัดลม ~60 % ทำให้อากาศเท่าห้องพอดี → เทียบผลหมอกล้วน ๆ (25·(1 − 0.6f))
+    const same = runEnv({ cfg, cmd: { humidifier: true, ledPct: 100, fanPct: Math.round(6 / (6 * 0.7 + 9) * 100) }, hours: 3 }).env;
+    expect(same.airTempC).toBeCloseTo(26, 0);
+    expect(same.rhPct).toBeLessThan(85);
   });
 
   it('room temperature follows a daily cycle by default', () => {
@@ -145,8 +150,8 @@ describe('Power', () => {
   it('sums rated power of active actuators', () => {
     const cfg = flatRoomConfig();
     expect(powerW({ ...OFF, airPump: false }, cfg)).toBe(0);
-    expect(powerW({ ...OFF, ledPct: 50, fan: true }, cfg)).toBe(60 + 15 + 5);
-    const all = { fan: true, humidifier: true, ledPct: 100, refillPump: true, nutrientA: true, nutrientB: true, airPump: true, phDown: true };
+    expect(powerW({ ...OFF, ledPct: 50, fanPct: 100 }, cfg)).toBe(60 + 15 + 5);
+    const all = { fanPct: 100, humidifier: true, ledPct: 100, refillPump: true, nutrientA: true, nutrientB: true, airPump: true, phDown: true };
     expect(powerW(all, cfg)).toBe(120 + 15 + 25 + 18 + 5 + 5 + 5 + 5);
   });
 });

@@ -28,7 +28,7 @@ describe('readSensors', () => {
 
   it('every reading fits its PLC register without clamping in normal operation', () => {
     const cfg = flatRoomConfig();
-    const env = runEnv({ cfg, cmd: { ledPct: 100, fan: true, humidifier: true }, hours: 10 }).env;
+    const env = runEnv({ cfg, cmd: { ledPct: 100, fanPct: 100, humidifier: true }, hours: 10 }).env;
     const r = readSensors(env, cfg, new Rng(1));
     for (const reg of SENSOR_REGISTERS) {
       expect(toRaw(reg, r[reg.key]).clamped, reg.key).toBe(false);

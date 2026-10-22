@@ -17,7 +17,7 @@ export function applyFarmHelper(
   if (lockedMode === 'off') {
     // P37 (ด่าน 1): อุปกรณ์ที่ล็อกปิดสนิท ยกเว้นปั๊มลมที่รากต้องการตลอด
     if (locked('refillPump')) out.refillPump = false;
-    if (locked('fan')) out.fan = false;
+    if (locked('fan')) out.fanPct = 0;
     if (locked('humidifier')) out.humidifier = false;
     if (locked('nutrient')) out.nutrientA = out.nutrientB = false;
     if (locked('airPump')) out.airPump = true;
@@ -26,7 +26,7 @@ export function applyFarmHelper(
   }
   const hyst = (was: boolean, on: boolean, off: boolean) => (on ? true : off ? false : was);
   if (locked('refillPump')) out.refillPump = hyst(prev.refillPump, s.waterLevelPct < 70, s.waterLevelPct >= 90);
-  if (locked('fan')) out.fan = hyst(prev.fan, s.airTempC > 25.5, s.airTempC < 24.5);
+  if (locked('fan')) out.fanPct = hyst(prev.fanPct > 0, s.airTempC > 25.5, s.airTempC < 24.5) ? 100 : 0;
   if (locked('humidifier')) out.humidifier = hyst(prev.humidifier, s.rhPct < 55, s.rhPct > 70);
   // Nutrient และ pH Down ที่ล็อก: ผู้ช่วยสั่งเป็นโดสใน LabSession (นับเวลาจำลอง) — ถ้าเปิดค้างตามรอบ Poll
   // ที่ 3600x ปั๊มจะเปิด 30 นาทีจำลองต่อรอบ ทำให้ EC พุ่งเกินจริง (พบใน P22)

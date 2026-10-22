@@ -10,7 +10,7 @@ function playGuide(level: LevelDef, ledPct: number, seed = 1, feed = true) {
   const sim = new Simulation({ cfg: makeConfig(), seed });
   sim.reset(levelRound(level));
   sim.startGame();
-  const cmd: ActuatorCommands = { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
+  const cmd: ActuatorCommands = { fanPct: 0, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
   for (let s = 0; sim.game.status === 'playing'; s++) {
     if (s % 60 === 0) {
       const r = sim.readSensors(false);
@@ -20,14 +20,14 @@ function playGuide(level: LevelDef, ledPct: number, seed = 1, feed = true) {
       const topUp = Math.min(ledPct, Math.max(0, Math.round((300 - sim.env.sunPpfd) / 4 / 5) * 5));
       cmd.ledPct = minute >= 360 && minute < 1320 ? (heat ? Math.min(topUp, 40) : topUp) : 0;
       cmd.refillPump = r.waterLevelPct < 70 ? true : r.waterLevelPct >= 90 ? false : cmd.refillPump;
-      cmd.fan = r.airTempC > 25.5 ? true : r.airTempC < 24.5 ? false : cmd.fan;
+      cmd.fanPct = r.airTempC > 25.5 ? 100 : r.airTempC < 24.5 ? 0 : cmd.fanPct;
       cmd.humidifier = r.rhPct < 55 ? true : r.rhPct > 70 ? false : cmd.humidifier;
       cmd.nutrientA = cmd.nutrientB = feed && (r.ecMsCm < 1.0 ? true : r.ecMsCm >= 1.2 ? false : cmd.nutrientA);
       cmd.phDown = r.ph > 6.6 ? true : r.ph <= 6.3 ? false : cmd.phDown;
       // P37: ด่านที่ล็อกแบบ 'off' — อุปกรณ์ที่ไม่ได้ปลดล็อกปิดสนิท (ปั๊มลมเปิด)
       if (level.lockedMode === 'off') {
         const own = (d: (typeof level.playerDevices)[number]) => level.playerDevices.includes(d);
-        if (!own('fan')) cmd.fan = false;
+        if (!own('fan')) cmd.fanPct = 0;
         if (!own('humidifier')) cmd.humidifier = false;
         if (!own('nutrient')) cmd.nutrientA = cmd.nutrientB = false;
         if (!own('phDown')) cmd.phDown = false;
@@ -68,7 +68,7 @@ describe('Levels & missions — P21 (SPEC § 4.6)', () => {
       for (let s = 0; s < 86400; s += 10) {
         if (ph !== null) sim.setPh(ph);
         if (ec !== null) sim.setEc(ec);
-        sim.step(10, { fan: false, humidifier: false, ledPct: 60, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+        sim.step(10, { fanPct: 0, humidifier: false, ledPct: 60, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
       }
       return sim.plants[1]!;
     };
@@ -126,7 +126,7 @@ describe('Ignored plant factors — P38 (SPEC § 4.21)', () => {
   const grow = (cfg: Parameters<typeof makeConfig>[0], round = levelRound(L1)) => {
     const sim = new Simulation({ cfg: makeConfig(cfg), seed: 4 });
     sim.reset(round);
-    const cmd: ActuatorCommands = { fan: false, humidifier: false, ledPct: 0, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
+    const cmd: ActuatorCommands = { fanPct: 0, humidifier: false, ledPct: 0, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
     for (let s = 0; s < 2 * 86400; s += 10) {
       const lvl = sim.readSensors(false).waterLevelPct;
       cmd.refillPump = lvl < 70 ? true : lvl >= 90 ? false : cmd.refillPump;
@@ -155,7 +155,7 @@ describe('Ignored plant factors — P38 (SPEC § 4.21)', () => {
     const dim = (() => {
       const sim = new Simulation({ cfg: makeConfig(), seed: 4 });
       sim.reset(levelRound(L1));
-      for (let s = 0; s < 2 * 86400; s += 10) sim.step(10, { fan: false, humidifier: false, ledPct: 0, refillPump: sim.readSensors(false).waterLevelPct < 80, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+      for (let s = 0; s < 2 * 86400; s += 10) sim.step(10, { fanPct: 0, humidifier: false, ledPct: 0, refillPump: sim.readSensors(false).waterLevelPct < 80, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
       return sim;
     })();
     expect(dim.plants[1]!.biomassG).toBeLessThan(base.plants[1]!.biomassG);

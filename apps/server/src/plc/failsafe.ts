@@ -5,7 +5,7 @@ import type { ActuatorCommands } from '@gol/shared';
  * ทุกอย่าง OFF ยกเว้น Air Pump เพื่อให้รากยังได้ออกซิเจน
  */
 export const FAILSAFE_COMMANDS: Readonly<ActuatorCommands> = Object.freeze({
-  fan: false,
+  fanPct: 0,
   humidifier: false,
   ledPct: 0,
   refillPump: false,

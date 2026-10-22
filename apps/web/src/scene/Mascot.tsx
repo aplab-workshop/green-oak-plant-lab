@@ -10,33 +10,39 @@ import { TANK } from './layout';
 const FLOOR_Y = -0.2;
 /** ความสูง Mascot (m) — สูงเกือบเท่าถัง */
 const HEIGHT = 0.22;
+type Path = readonly (readonly [number, number])[];
 /** ทางวิ่ง: ขอบเกาะขวา → หน้าถังตามทางเดินหิน → มุมหน้าซ้ายของถัง (x, z) */
-const PATH: [number, number][] = [[0.74, 0.5], [-0.02, 0.5], [-0.12, 0.3]];
+const TANK_PATH: Path = [[0.74, 0.5], [-0.02, 0.5], [-0.12, 0.3]];
+/** P48: ไฟดับ — วิ่งไปหน้า Power Meter (บนชั้นถังสำรอง x 0.28, z 0.34) */
+const METER_PATH: Path = [[0.74, 0.5], [0.3, 0.5], [0.28, 0.43]];
+const pathOf = (kind: ChallengeKind | undefined): Path => (kind === 'powerOutage' ? METER_PATH : TANK_PATH);
 /** ช่วง progress ที่ยืนอยู่หน้าถัง (เตะที่ 0.5) */
 const ARRIVE = 0.42;
 const LEAVE = 0.58;
 /** รูรั่วที่มุมหน้าซ้ายล่างของถัง */
 const HOLE: [number, number, number] = [-0.16, 0.02, TANK.depth / 2 + 0.012];
 
-const SEG = PATH.slice(1).map((p, i) => Math.hypot(p[0] - PATH[i]![0], p[1] - PATH[i]![1]));
-const PATH_LEN = SEG.reduce((a, b) => a + b, 0);
+const segments = (path: Path) => path.slice(1).map((p, i) => Math.hypot(p[0] - path[i]![0], p[1] - path[i]![1]));
+const lengthOf = (path: Path) => segments(path).reduce((a, b) => a + b, 0);
 
-/** ตำแหน่งบนทางวิ่งตามระยะ d (0 = ขอบเกาะ, PATH_LEN = หน้าถัง) */
-function pointAt(d: number): [number, number] {
-  let rest = MathUtils.clamp(d, 0, PATH_LEN);
-  for (let i = 0; i < SEG.length; i++) {
-    const len = SEG[i]!;
-    if (rest <= len || i === SEG.length - 1) {
+/** ตำแหน่งบนทางวิ่งตามระยะ d (0 = ขอบเกาะ, ความยาวทาง = ปลายทาง) */
+function pointAt(path: Path, d: number): [number, number] {
+  const seg = segments(path);
+  let rest = MathUtils.clamp(d, 0, lengthOf(path));
+  for (let i = 0; i < seg.length; i++) {
+    const len = seg[i]!;
+    if (rest <= len || i === seg.length - 1) {
       const t = len > 0 ? rest / len : 0;
-      const a = PATH[i]!, b = PATH[i + 1]!;
+      const a = path[i]!, b = path[i + 1]!;
       return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
     }
     rest -= len;
   }
-  return PATH[PATH.length - 1]!;
+  const last = path[path.length - 1]!;
+  return [last[0], last[1]];
 }
 
-/** ของที่ Mascot ถือมา (P46 / SPEC § 4.29) — ถังรั่วไม่ถือ (เตะถัง) */
+/** ของที่ Mascot ถือมา (P46 / SPEC § 4.29) — ถังรั่ว (เตะถัง) และไฟดับ (กดปิด Power Meter, P48) ไม่ถือ */
 const PROP_EMOJI: Partial<Record<ChallengeKind, string>> = { heatWave: '🔥', dryAir: '🌵' };
 const PROP_SIZE = 0.09;
 
@@ -87,8 +93,10 @@ function MascotSprite() {
     const p = shown.current;
     const entering = p < ARRIVE;
     const atTank = p >= ARRIVE && p < LEAVE;
-    const d = entering ? (p / ARRIVE) * PATH_LEN : atTank ? PATH_LEN : (1 - (p - LEAVE) / (1 - LEAVE)) * PATH_LEN;
-    const [x, z] = pointAt(d);
+    const path = pathOf(mascot?.kind);
+    const len = lengthOf(path);
+    const d = entering ? (p / ARRIVE) * len : atTank ? len : (1 - (p - LEAVE) / (1 - LEAVE)) * len;
+    const [x, z] = pointAt(path, d);
     // เด้งตามระยะที่วิ่ง (ไม่ใช่เวลาจริง) · หน้าถังกระโดดดีใจตอนเตะ
     const hop = atTank
       ? 0.035 * Math.max(0, Math.sin(((p - ARRIVE) / (LEAVE - ARRIVE)) * Math.PI * 2))

@@ -109,7 +109,7 @@ export type LevelId = (typeof LEVEL_IDS)[number];
 export type PlayerDevice = 'led' | 'refillPump' | 'nutrient' | 'fan' | 'humidifier' | 'airPump' | 'phDown';
 
 /** Bit ของ Actuator → อุปกรณ์ผู้เล่น (Nutrient A/B รวมเป็นปุ่มเดียว) */
-export const deviceOfBit = (key: 'fan' | 'humidifier' | 'refillPump' | 'nutrientA' | 'nutrientB' | 'airPump' | 'phDown'): PlayerDevice =>
+export const deviceOfBit = (key: 'humidifier' | 'refillPump' | 'nutrientA' | 'nutrientB' | 'airPump' | 'phDown'): PlayerDevice =>
   key === 'nutrientA' || key === 'nutrientB' ? 'nutrient' : key;
 
 /** อุปกรณ์ที่สั่งเป็นโดสได้ (SPEC § 4.7) */
@@ -230,7 +230,7 @@ export const SPEED_VALUES = [1, 60, 144, 360, 720, 1440, 3600] as const;
 export const UI_SPEEDS = [1, 144, 1440] as const;
 export const uiSpeeds = (level: Pick<LevelInfo, 'playSpeed'> | null): readonly number[] => [1, level?.playSpeed ?? 144, 1440];
 
-const ActuatorBitKey = z.enum(['fan', 'humidifier', 'refillPump', 'nutrientA', 'nutrientB', 'airPump', 'phDown']);
+const ActuatorBitKey = z.enum(['humidifier', 'refillPump', 'nutrientA', 'nutrientB', 'airPump', 'phDown']);
 
 /** คำสั่งที่ Client ส่งมาที่ POST /api/labs/:labId/commands */
 export const LabCommand = z.discriminatedUnion('type', [
@@ -244,6 +244,7 @@ export const LabCommand = z.discriminatedUnion('type', [
   z.object({ type: z.literal('setPlcMode'), mode: z.enum(['manual', 'auto', 'offline']) }),
   z.object({ type: z.literal('setManualBit'), key: ActuatorBitKey, value: z.boolean() }),
   z.object({ type: z.literal('setManualLed'), value: z.number().int().min(0).max(100) }),
+  z.object({ type: z.literal('setManualFan'), value: z.number().int().min(0).max(100) }),
   z.object({ type: z.literal('dose'), device: z.enum(DOSE_DEVICES) }),
   z.object({ type: z.literal('repairLeak') }),
   z.object({ type: z.literal('setAutoPause'), enabled: z.boolean() }),

@@ -1,5 +1,6 @@
 import {
   COMMAND_BITS,
+  FAN_COMMAND_REGISTER,
   LED_COMMAND_REGISTER,
   type ActuatorCommands,
   type MockPlcMode,
@@ -13,7 +14,7 @@ type BitKey = (typeof COMMAND_BITS)[number]['key'];
 
 /**
  * Mock PLC (FR-30) — จำลอง Device memory ของ FX5U ทำให้ Data path เหมือน SLMP จริง
- * - Gateway เขียน D100–D112, D120 และอ่าน M100–M105, D200 ผ่าน API เดียวกับ SLMP
+ * - Gateway เขียน D100–D112, D120 และอ่าน M101–M106, D200–D201 ผ่าน API เดียวกับ SLMP (P48: พัดลม D201)
  * - manual: UI สั่ง M/D ภายใน "PLC" (แทนนักเรียนกดสวิตช์) ไม่ใช่ผ่าน Gateway
  * - auto: รัน autoProgramScan เหมือน Ladder ทุกครั้งที่ PLC scan
  * - offline: จำลองสายหลุด ทุกการสื่อสาร throw PlcCommError
@@ -54,6 +55,12 @@ export class MockPlcAdapter implements PlcAdapter {
     this.memory.setM(bit.address, value);
   }
 
+  /** Manual mode: ตั้งความเร็วพัดลม (D201) ภายใน PLC — P48 */
+  setManualFan(pct: number): void {
+    this.requireManual();
+    this.memory.setD(FAN_COMMAND_REGISTER.address, pct);
+  }
+
   /** Manual mode: ตั้งความสว่าง LED (D200) ภายใน PLC */
   setManualLed(pct: number): void {
     this.requireManual();
@@ -82,13 +89,19 @@ export class MockPlcAdapter implements PlcAdapter {
 
     const commands = Object.fromEntries(COMMAND_BITS.map((b) => [b.key, this.memory.getM(b.address)])) as Omit<
       ActuatorCommands,
-      'ledPct'
+      'ledPct' | 'fanPct'
     >;
-    const rawLed = this.memory.getD(LED_COMMAND_REGISTER.address);
-    const ledPct = Math.min(LED_COMMAND_REGISTER.max, Math.max(LED_COMMAND_REGISTER.min, rawLed));
-    const outOfRange = rawLed === ledPct ? [] : [`D200 = ${rawLed}`];
+    const outOfRange: string[] = [];
+    const word = (reg: { address: number; min: number; max: number }) => {
+      const raw = this.memory.getD(reg.address);
+      const v = Math.min(reg.max, Math.max(reg.min, raw));
+      if (v !== raw) outOfRange.push(`D${reg.address} = ${raw}`);
+      return v;
+    };
+    const ledPct = word(LED_COMMAND_REGISTER);
+    const fanPct = word(FAN_COMMAND_REGISTER);
     this.ok();
-    return { commands: { ...commands, ledPct }, at: this.now(), outOfRange };
+    return { commands: { ...commands, ledPct, fanPct }, at: this.now(), outOfRange };
   }
 
   status(): PlcStatus {

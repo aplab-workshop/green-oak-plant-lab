@@ -26,6 +26,8 @@ export interface ChallengeSpec {
    * แต่ละรายการแบ่ง [fromHour, toHour) เป็น count ช่วงเท่ากัน สุ่มเวลาเริ่มในแต่ละช่วง — รายการในวันเดียวกันต้องวางช่วงไม่ให้ทับกันเอง
    */
   days?: readonly ScheduledDay[];
+  /** เหตุการณ์ตามตารางเพิ่มเติม รวมกับเหตุการณ์สุ่ม (count/windowDays) — เช่น ไฟดับของด่าน 4 (P48) */
+  extraDays?: readonly ScheduledDay[];
   /** ไม่เตือนล่วงหน้า — Mascot วิ่งมาก่อเหตุ แล้วประกาศหลัง Mascot ออก (P41/P46) */
   surprise?: boolean;
 }
@@ -34,6 +36,8 @@ export interface ChallengeSpec {
 export interface ScheduledDay {
   /** ชนิดเหตุการณ์ (ค่าเริ่ม 'leak') — P46 */
   kind?: ChallengeKind;
+  /** ไม่เตือนล่วงหน้า + Mascot เฉพาะรายการนี้ (ค่าเริ่ม = ChallengeSpec.surprise) — P48 */
+  surprise?: boolean;
   /** วันของรอบ (0 = วันเริ่มรอบ) */
   day: number;
   count: number;
@@ -122,6 +126,16 @@ const startHourOf = (kind: ChallengeKind, rng: Rng): number =>
 export function planChallenges(spec: ChallengeSpec, seed: number, roundStartS: number, cfg: SimConfig): ChallengePlan[] {
   const rng = new Rng((Math.imul(seed, 2654435761) ^ Math.imul(spec.salt + 1, 40503)) >>> 0);
   if (spec.days) return planDays(spec.days, rng, roundStartS, cfg, spec.surprise === true);
+  const random = planRandom(spec, rng, roundStartS, cfg);
+  if (!spec.extraDays) return random;
+  // P48: รวมเหตุการณ์สุ่มกับตารางเพิ่มเติม แล้วเรียงเวลาใหม่
+  return [...random, ...planDays(spec.extraDays, rng, roundStartS, cfg, spec.surprise === true)]
+    .sort((a, b) => a.startS - b.startS)
+    .map((p, i) => ({ ...p, id: i + 1 }));
+}
+
+/** เหตุการณ์สุ่มตาม count/windowDays (P23) */
+function planRandom(spec: ChallengeSpec, rng: Rng, roundStartS: number, cfg: SimConfig): ChallengePlan[] {
   const n = randInt(rng, spec.count[0], spec.count[1]);
   if (n <= 0 || spec.kinds.length === 0) return [];
 
@@ -168,7 +182,7 @@ function planDays(days: readonly ScheduledDay[], rng: Rng, roundStartS: number, 
       const slot0 = day0 + d.day * SECONDS_PER_DAY + d.fromHour * 3600 + i * slotS;
       const room = Math.max(0, slotS - durationS - cfg.challenges.mascotExitS);
       const startS = slot0 + randInt(rng, 0, Math.floor(room / 60)) * 60;
-      plans.push({ kind: d.kind ?? 'leak', startS, durationS, ...(surprise ? { surprise: true } : {}) });
+      plans.push({ kind: d.kind ?? 'leak', startS, durationS, ...((d.surprise ?? surprise) ? { surprise: true } : {}) });
     }
   }
   return plans.sort((a, b) => a.startS - b.startS).map((p, i) => ({ id: i + 1, ...p }));

@@ -2,7 +2,7 @@
 title: PLC Device Mapping — FX5U
 version: 1.0
 status: draft — ต้องทดสอบกับ FX5U จริงใน M3 ก่อนใช้ในห้องเรียน
-updated: 2026-10-16
+updated: 2026-10-23
 tags: [green-oak, plc, fx5u, slmp]
 ---
 
@@ -41,7 +41,7 @@ tags: [green-oak, plc, fx5u, slmp]
 
 | Address | Actuator | Type | ค่า |
 |---|---|---|---|
-| M100 | Ventilation Fan | bit | 0 = OFF, 1 = ON |
+| ~~M100~~ | ~~Ventilation Fan~~ | — | **เลิกใช้ (P48)** — พัดลมย้ายไป D201 |
 | M101 | Humidifier | bit | 0/1 |
 | M102 | Water Refill Pump | bit | 0/1 |
 | M103 | Nutrient Pump A | bit | 0/1 |
@@ -49,10 +49,11 @@ tags: [green-oak, plc, fx5u, slmp]
 | M105 | Air Pump | bit | 0/1 |
 | M106 | pH Down Pump | bit | 0/1 (เพิ่มใน P22) |
 | D200 | Grow Light Brightness | INT16 | 0 … 100 (%) |
+| D201 | Ventilation Fan Speed (+ Cooling pad) | INT16 | 0 … 100 (%) — 0 = ปิด (P48 / SPEC § 4.31) |
 
 **กฎการอ่าน (Gateway):**
-- Batch read M100–M106 (7 bits) และ D200 (1 word)
-- D200 นอกช่วง 0–100 → Clamp และบันทึก Event `command.out_of_range`
+- Batch read M101–M106 (6 bits) และ D200–D201 (2 words)
+- D200/D201 นอกช่วง 0–100 → Clamp และบันทึก Event `command.out_of_range`
 - ทุก Command ติด Timestamp ถ้าอ่านไม่ได้นานกว่า `PLC_COMMAND_TIMEOUT_MS` (3000 ms) ให้เข้า **Fail-safe**
 
 ## 3. Access Rules (FR-31)
@@ -60,8 +61,8 @@ tags: [green-oak, plc, fx5u, slmp]
 | Operation | Allowed devices |
 |---|---|
 | **Write** | D100–D110, D111–D112, D120 |
-| **Read** | M100–M106, D200 |
-| **ห้ามเด็ดขาด** | เขียน M Device ใด ๆ, เขียน D200, เขียนนอกช่วงที่ระบุ |
+| **Read** | M101–M106, D200–D201 |
+| **ห้ามเด็ดขาด** | เขียน M Device ใด ๆ, เขียน D200–D201, เขียนนอกช่วงที่ระบุ |
 
 Software บังคับใช้ 2 ชั้น
 1. **Type-level:** ฟังก์ชันเขียนรับเฉพาะ `SensorReadings` ไม่มี API รับ Address อิสระ
@@ -83,8 +84,8 @@ Gateway เขียน Register เหล่านี้พร้อม Sensor 
 
 | Actuator | State |
 |---|---|
-| Fan, Humidifier, Refill, Nutrient A/B, pH Down | OFF |
-| LED | 0 % |
+| Humidifier, Refill, Nutrient A/B, pH Down | OFF |
+| LED (D200), Fan (D201) | 0 % |
 | **Air Pump** | **ON** (เพื่อให้รากยังได้ออกซิเจน) |
 
 เมื่อสื่อสารกลับมา ให้ใช้ Command ใหม่ที่อ่านได้ทันที และบันทึก Event `plc.recovered`
@@ -94,7 +95,7 @@ Gateway เขียน Register เหล่านี้พร้อม Sensor 
 - [ ] GX Works3 → Parameter → Module Parameter → Ethernet Port → ตั้ง IP ของ PLC แต่ละเครื่อง
 - [ ] External Device Configuration → เพิ่ม **SLMP Connection Module** (TCP, Binary) และกำหนดพอร์ต (เช่น 5000)
 - [ ] เปิดการเขียนข้อมูลขณะ RUN (Enable online change via SLMP)
-- [ ] ทดสอบอ่าน/เขียน D100 และอ่าน M100 จาก Gateway ด้วยเครื่องมือทดสอบ
+- [ ] ทดสอบอ่าน/เขียน D100 และอ่าน M101/D201 จาก Gateway ด้วยเครื่องมือทดสอบ
 - [ ] บันทึก IP/Port ของแต่ละเครื่องลง Config ของ Lab
 - [ ] ยืนยันว่า Network ของ PLC อยู่ใน LAN ห้องเรียนเท่านั้น
 

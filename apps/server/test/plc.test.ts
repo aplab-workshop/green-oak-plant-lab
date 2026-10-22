@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { WRITABLE_D_ADDRESSES } from '@gol/shared';
 import { Simulation } from '@gol/sim-core';
+import { FAILSAFE_COMMANDS } from '../src/plc/failsafe';
 import { MockPlcAdapter } from '../src/plc/MockPlcAdapter';
 import { PlcCommError, assertWritable, encodeSensorWrite, nextHeartbeat } from '../src/plc/PlcAdapter';
 import { makeLab } from './helpers';
@@ -39,13 +40,13 @@ describe('Gateway write guard — AC-11', () => {
   it("gateway polling never overwrites the student's M commands", async () => {
     const t = makeLab('lab01', 'manual');
     t.mock.setManualBit('refillPump', true);
-    t.mock.setManualBit('fan', true);
+    t.mock.setManualFan(70);
     t.mock.setManualLed(42);
     for (let i = 0; i < 5; i++) await t.lab.poll();
     expect(t.mock.memory.getM(102)).toBe(true);
-    expect(t.mock.memory.getM(100)).toBe(true);
+    expect(t.mock.memory.getD(201)).toBe(70);
     expect(t.mock.memory.getD(200)).toBe(42);
-    expect(t.lab.commands).toMatchObject({ refillPump: true, fan: true, ledPct: 42 });
+    expect(t.lab.commands).toMatchObject({ refillPump: true, fanPct: 70, ledPct: 42 });
   });
 
   it('heartbeat wraps at 32767', () => {
@@ -114,7 +115,24 @@ describe('MockPlcAdapter', () => {
     expect(mock.status()).toMatchObject({ connection: 'offline', errorCount: 1 });
   });
 
+  it('P48: fan speed D201 is clamped to 0–100 and reported out of range; Fail-safe and auto program drive D201', async () => {
+    const mock = new MockPlcAdapter('manual');
+    await mock.connect();
+    mock.memory.setD(201, 150);
+    const read = await mock.readCommands();
+    expect(read.commands.fanPct).toBe(100);
+    expect(read.outOfRange).toContain('D201 = 150');
+    expect(FAILSAFE_COMMANDS.fanPct).toBe(0);
+    const auto = new MockPlcAdapter('auto');
+    await auto.connect();
+    auto.memory.setD(100, 280); // 28.0 °C
+    expect((await auto.readCommands()).commands.fanPct).toBe(100);
+    auto.memory.setD(100, 230);
+    expect((await auto.readCommands()).commands.fanPct).toBe(0);
+  });
+
   it('manual control is rejected outside manual mode', () => {
-    expect(() => new MockPlcAdapter('auto').setManualBit('fan', true)).toThrow();
+    expect(() => new MockPlcAdapter('auto').setManualBit('humidifier', true)).toThrow();
+    expect(() => new MockPlcAdapter('auto').setManualFan(50)).toThrow();
   });
 });

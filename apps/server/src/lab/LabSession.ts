@@ -1,5 +1,6 @@
 import {
   COMMAND_BITS,
+  FAN_COMMAND_REGISTER,
   LED_COMMAND_REGISTER,
   deviceName,
   type ActuatorCommands,
@@ -58,7 +59,7 @@ export class LabCommandError extends Error {
 }
 
 const sameCommands = (a: ActuatorCommands, b: ActuatorCommands) =>
-  COMMAND_BITS.every((bit) => a[bit.key] === b[bit.key]) && a.ledPct === b.ledPct;
+  COMMAND_BITS.every((bit) => a[bit.key] === b[bit.key]) && a.ledPct === b.ledPct && a.fanPct === b.fanPct;
 
 type BitKey = (typeof COMMAND_BITS)[number]['key'];
 
@@ -99,8 +100,8 @@ const RANGE_ALERTS: { event: string; device: PlayerDevice; out: (r: SensorReadin
     event: 'air.temp_alert', device: 'fan',
     out: (r) => outOf(r.airTempC, SENSOR_RANGES.airTempC!.ok),
     text: (r, o) => o === 'high'
-      ? `🌡️ ร้อน ${r.airTempC.toFixed(1)} °C — เปิด 🌀 พัดลม หรือลดไฟ LED`
-      : `🌡️ เย็น ${r.airTempC.toFixed(1)} °C — ปิด 🌀 พัดลม`,
+      ? `🌡️ ร้อน ${r.airTempC.toFixed(1)} °C — เร่ง 🌀 พัดลม หรือลดไฟ LED`
+      : `🌡️ เย็น ${r.airTempC.toFixed(1)} °C — หรี่ 🌀 พัดลม`,
   },
   {
     event: 'air.vpd_alert', device: 'humidifier',
@@ -120,7 +121,7 @@ const RED_WATCH_DEVICE: Record<(typeof RED_WATCH)[number], PlayerDevice> = {
 
 /** คำสั่งที่มีผลระหว่างไฟดับ (แสดงใน Snapshot) */
 const OUTAGE_COMMANDS: Readonly<ActuatorCommands> = Object.freeze({
-  fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false,
+  fanPct: 0, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false,
 });
 
 /**
@@ -467,8 +468,10 @@ export class LabSession {
         this.log('actuator.change', 'info', `${bit.label} (${deviceName('M', bit.address)}): ${next[bit.key] ? 'ON' : 'OFF'}`);
       }
     }
-    if (prev.ledPct !== next.ledPct) {
-      this.log('actuator.change', 'info', `${LED_COMMAND_REGISTER.label} (${deviceName('D', LED_COMMAND_REGISTER.address)}): ${next.ledPct}%`);
+    for (const reg of [LED_COMMAND_REGISTER, FAN_COMMAND_REGISTER]) {
+      if (prev[reg.key] !== next[reg.key]) {
+        this.log('actuator.change', 'info', `${reg.label} (${deviceName('D', reg.address)}): ${next[reg.key]}%`);
+      }
     }
   }
 
@@ -552,6 +555,13 @@ export class LabSession {
           const dosed = doseOfBit(cmd.key);
           if (dosed && this.doses.delete(dosed)) this.log('dose.cancel', 'info', 'ยกเลิก' + DOSE_LABEL[dosed] + ' — สั่งเองด้วย Manual');
         }
+        await this.poll();
+        return;
+      case 'setManualFan':
+        if (this.level && !this.level.playerDevices.includes('fan')) {
+          throw new LabCommandError('ด่านนี้ยังไม่ปลดล็อกพัดลม', 409);
+        }
+        this.manual().setManualFan(cmd.value);
         await this.poll();
         return;
       case 'setManualLed':

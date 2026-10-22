@@ -3,6 +3,7 @@ import { AlertTriangle, Droplets, Fan, FlaskConical, Lightbulb, Power, TestTube,
 import {
   COMMAND_BITS,
   DOSE_DEVICES,
+  FAN_COMMAND_REGISTER,
   LED_COMMAND_REGISTER,
   deviceName,
   deviceOfBit,
@@ -16,7 +17,6 @@ import { sendCommand } from '../store/api';
 import { Panel } from './Panel';
 
 const ICONS = {
-  fan: Fan,
   humidifier: Waves,
   refillPump: Droplets,
   nutrientA: FlaskConical,
@@ -56,7 +56,8 @@ function Switch({ on, disabled, onChange, label }: { on: boolean; disabled: bool
   );
 }
 
-function LedControl({ value, manual }: { value: number; manual: boolean }) {
+/** Slider 0–100 % ของ Register D (LED D200, พัดลม D201) — ปล่อยเมาส์/คีย์แล้วจึงส่งคำสั่ง */
+function PercentSlider({ value, manual, label, command }: { value: number; manual: boolean; label: string; command: 'setManualLed' | 'setManualFan' }) {
   const [draft, setDraft] = useState(value);
   const [dragging, setDragging] = useState(false);
   useEffect(() => {
@@ -64,7 +65,7 @@ function LedControl({ value, manual }: { value: number; manual: boolean }) {
   }, [value, dragging]);
   const commit = () => {
     setDragging(false);
-    if (draft !== value) void sendCommand({ type: 'setManualLed', value: draft });
+    if (draft !== value) void sendCommand({ type: command, value: draft });
   };
   return (
     <input
@@ -74,7 +75,7 @@ function LedControl({ value, manual }: { value: number; manual: boolean }) {
       step={1}
       value={draft}
       disabled={!manual}
-      aria-label="LED brightness"
+      aria-label={label}
       onChange={(e) => {
         setDragging(true);
         setDraft(Number(e.target.value));
@@ -96,6 +97,9 @@ export function ActuatorPanel() {
   const manual = plc.mode === 'manual';
   const doseLocked = (d: DoseDevice) => !!level && !level.playerDevices.includes(playerDeviceOfDose(d));
   const canDose = manual && !failsafe;
+  // P48: ปุ๋ย A และ B แสดงเป็นสวิตช์เดียว (Ladder ยังสั่งแยก M103/M104 ได้)
+  const rows = COMMAND_BITS.filter((b) => b.key !== 'nutrientB');
+  const fanLocked = !!level && !level.playerDevices.includes('fan');
 
   return (
     <Panel title="Actuators ← PLC" icon={<Power className="h-3.5 w-3.5" />}>
@@ -160,15 +164,29 @@ export function ActuatorPanel() {
       )}
 
       <ul className="divide-y divide-slate-100">
-        {COMMAND_BITS.map((bit) => {
+        <li className="px-3 py-1.5">
+          <div className="flex items-center gap-2">
+            <Fan className={`h-4 w-4 shrink-0 ${commands.fanPct > 0 ? 'text-emerald-600' : 'text-slate-400'}`} />
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm text-slate-700">{FAN_COMMAND_REGISTER.label}</div>
+              <div className="font-mono text-[10px] text-slate-400">{deviceName('D', FAN_COMMAND_REGISTER.address)}</div>
+            </div>
+            <span className="font-mono text-sm font-semibold text-slate-800">{commands.fanPct}%</span>
+            {manual && fanLocked && <span className="text-[10px] text-slate-400" title="ด่านนี้ไม่ใช้พัดลม">🔒</span>}
+          </div>
+          {canDose && !fanLocked && <PercentSlider value={commands.fanPct} manual={manual} label="Fan speed" command="setManualFan" />}
+        </li>
+        {rows.map((bit) => {
           const Icon = ICONS[bit.key];
-          const on = commands[bit.key];
+          const pair = bit.key === 'nutrientA';
+          const on = pair ? commands.nutrientA || commands.nutrientB : commands[bit.key];
+          const label = pair ? 'Nutrient Pump A+B' : bit.label;
           return (
             <li key={bit.key} className="flex items-center gap-2 px-3 py-1.5">
               <Icon className={`h-4 w-4 shrink-0 ${on ? 'text-emerald-600' : 'text-slate-400'}`} />
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm text-slate-700">{bit.label}</div>
-                <div className="font-mono text-[10px] text-slate-400">{deviceName('M', bit.address)}</div>
+                <div className="truncate text-sm text-slate-700">{label}</div>
+                <div className="font-mono text-[10px] text-slate-400">{pair ? 'M103+M104' : deviceName('M', bit.address)}</div>
               </div>
               <span
                 className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${
@@ -182,8 +200,12 @@ export function ActuatorPanel() {
                 <Switch
                   on={on}
                   disabled={failsafe}
-                  label={bit.label}
-                  onChange={(v) => void sendCommand({ type: 'setManualBit', key: bit.key, value: v })}
+                  label={label}
+                  onChange={(v) => {
+                    if (!pair) return void sendCommand({ type: 'setManualBit', key: bit.key, value: v });
+                    void sendCommand({ type: 'setManualBit', key: 'nutrientA', value: v }).then(() =>
+                      sendCommand({ type: 'setManualBit', key: 'nutrientB', value: v }));
+                  }}
                 />
               )}
             </li>
@@ -199,7 +221,7 @@ export function ActuatorPanel() {
             <span className="font-mono text-sm font-semibold text-slate-800">{commands.ledPct}%</span>
           </div>
           {/* P43: Slider 0–100 % ทุกโหมด (เดิมโหมดเกมใช้ปุ่ม ปิด/50/80/100) */}
-          {canDose && <LedControl value={commands.ledPct} manual={manual} />}
+          {canDose && <PercentSlider value={commands.ledPct} manual={manual} label="LED brightness" command="setManualLed" />}
         </li>
       </ul>
       {error && <p className="border-t border-rose-100 px-3 py-1.5 text-xs text-rose-600">{error}</p>}

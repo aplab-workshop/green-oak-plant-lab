@@ -30,26 +30,24 @@ const sim = (cfg?: SimConfig) => new Simulation({ seed: 5, cfg: cfg ?? noSunConf
 describe('Ventilation Fan (M100)', () => {
   const cfg = noSunConfig({ room: { tempMeanC: 23, tempAmplitudeC: 0 } });
 
-  it('cools LED heat toward room temperature (never below) and so restores growth', () => {
+  it('P48: fan at half speed cools LED heat to a good temperature and so restores growth', () => {
     const hot = sim(cfg), fan = sim(cfg);
     run(hot, 48, (s) => basic(s, 100));
-    run(fan, 48, (s) => ({ ...basic(s, 100), fan: true }));
+    run(fan, 48, (s) => ({ ...basic(s, 100), fanPct: 50 }));
     // วัดตอนไฟเปิด (หลังเที่ยงวันของวันที่ 2)
     run(hot, 6, (s) => basic(s, 100));
-    run(fan, 6, (s) => ({ ...basic(s, 100), fan: true }));
+    run(fan, 6, (s) => ({ ...basic(s, 100), fanPct: 50 }));
     expect(hot.env.airTempC).toBeGreaterThan(27);
     expect(fan.env.airTempC).toBeLessThan(hot.env.airTempC - 3);
-    expect(fan.env.airTempC).toBeGreaterThanOrEqual(23 - 1e-6);
     expect(biomass(fan)).toBeGreaterThan(biomass(hot));
   });
 
-  it('cannot cool below the room and lowers humidity at the same temperature', () => {
+  it('P48: full speed with no heat source cools below the room (too cold at night — slow it down)', () => {
     const still = sim(cfg), fan = sim(cfg);
     run(still, 6, () => ({ ledPct: 0 }));
-    run(fan, 6, () => ({ ledPct: 0, fan: true }));
-    expect(fan.env.airTempC).toBeCloseTo(23, 3);
+    run(fan, 6, () => ({ ledPct: 0, fanPct: 100 }));
     expect(still.env.airTempC).toBeCloseTo(23, 3);
-    expect(fan.env.rhPct).toBeLessThan(still.env.rhPct - 2);
+    expect(fan.env.airTempC).toBeCloseTo(14, 1);
   });
 });
 
@@ -154,8 +152,8 @@ describe('Grow Light (D200)', () => {
     const start = biomass(dark);
     run(dark, 24, (s) => ({ ...basic(s), ledPct: 0 }));
     // เปิดพัดลมเหมือนผู้ช่วยฟาร์ม เพื่อแยกผลของแสงออกจากความร้อนของ LED
-    run(dim, 48, (s) => ({ ...basic(s, 20), fan: true }));
-    run(lit, 48, (s) => ({ ...basic(s, 80), fan: true }));
+    run(dim, 48, (s) => ({ ...basic(s, 20), fanPct: 100 }));
+    run(lit, 48, (s) => ({ ...basic(s, 80), fanPct: 100 }));
     expect(biomass(dark)).toBe(start);
     expect(biomass(dim) - start).toBeLessThan((biomass(lit) - start) * 0.75);
   });

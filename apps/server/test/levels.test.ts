@@ -41,9 +41,10 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
     expect(snap.game).toMatchObject({ status: 'ready', targetG: 8.8, timeLimitS: 5 * 86_400 });
     expect(snap.tank.waterLevelPct).toBe(0); // P37: เริ่มถังว่าง
     await expect(t.lab.handle({ type: 'selectLevel', levelId: 'L2' })).rejects.toMatchObject({ statusCode: 409 });
-    for (const key of ['fan', 'humidifier', 'nutrientA', 'nutrientB', 'airPump'] as const) {
+    for (const key of ['humidifier', 'nutrientA', 'nutrientB', 'airPump'] as const) {
       await expect(t.lab.handle({ type: 'setManualBit', key, value: true })).rejects.toMatchObject({ statusCode: 409 });
     }
+    await expect(t.lab.handle({ type: 'setManualFan', value: 50 })).rejects.toMatchObject({ statusCode: 409 });
     await t.lab.handle({ type: 'setManualBit', key: 'refillPump', value: true });
     expect(t.lab.snapshot().commands.refillPump).toBe(true);
   });
@@ -56,15 +57,15 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
     t.mock.setMode('offline');
     await t.lab.poll();
     t.clock.t += 4000; t.lab.tick(0);
-    expect(t.lab.snapshot()).toMatchObject({ failsafe: true, commands: { fan: false, refillPump: false } });
+    expect(t.lab.snapshot()).toMatchObject({ failsafe: true, commands: { fanPct: 0, refillPump: false } });
   });
 
   it('farm helper rules use Ladder-sample thresholds with hysteresis only for locked devices', () => {
-    const off: ActuatorCommands = { fan: false, humidifier: false, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false, ledPct: 40 };
+    const off: ActuatorCommands = { fanPct: 0, humidifier: false, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false, ledPct: 40 };
     const s = (over: Partial<SensorReadings>) => ({ airTempC: 25, rhPct: 60, ecMsCm: 1.1, waterLevelPct: 80, ...over }) as SensorReadings;
     const hot = applyFarmHelper(off, off, s({ airTempC: 26, rhPct: 50, ecMsCm: 0.9, waterLevelPct: 60 }), ['led']);
     // Nutrient / pH Down ที่ล็อก ผู้ช่วยสั่งเป็นโดสใน LabSession (P22) จึงปิดไว้ที่นี่
-    expect(hot).toEqual({ fan: true, humidifier: true, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false, ledPct: 40 });
+    expect(hot).toEqual({ fanPct: 100, humidifier: true, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false, ledPct: 40 });
     // อยู่ในช่วง Hysteresis → คงค่าเดิม
     expect(applyFarmHelper(off, hot, s({}), ['led'])).toEqual(hot);
     // อุปกรณ์ที่ผู้เล่นคุม → ใช้ค่าจาก PLC
@@ -73,9 +74,9 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
   });
 
   it('P37: L1 locked devices stay OFF (no helper fan/mist/doses) while the Air Pump stays ON', async () => {
-    const off: ActuatorCommands = { fan: false, humidifier: false, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false, ledPct: 40 };
+    const off: ActuatorCommands = { fanPct: 0, humidifier: false, refillPump: false, nutrientA: false, nutrientB: false, airPump: false, phDown: false, ledPct: 40 };
     const s = (over: Partial<SensorReadings>) => ({ airTempC: 25, rhPct: 60, ecMsCm: 1.1, waterLevelPct: 80, ph: 6, ...over }) as SensorReadings;
-    const plcOn = { ...off, fan: true, humidifier: true, nutrientA: true, nutrientB: true, phDown: true };
+    const plcOn = { ...off, fanPct: 100, humidifier: true, nutrientA: true, nutrientB: true, phDown: true };
     expect(applyFarmHelper(plcOn, off, s({ airTempC: 30, rhPct: 30, ecMsCm: 0.3 }), ['led', 'refillPump'], 'off'))
       .toEqual({ ...off, airPump: true });
     const t = levelLab();
@@ -84,7 +85,7 @@ describe('Levels on LabSession — P21 (SPEC § 4.6)', () => {
     await t.lab.handle({ type: 'setSpeed', speed: 3600 });
     await runReal(t, 3000);
     const snap = t.lab.snapshot();
-    expect(snap.commands).toMatchObject({ fan: false, humidifier: false, nutrientA: false, nutrientB: false, phDown: false, airPump: true });
+    expect(snap.commands).toMatchObject({ fanPct: 0, humidifier: false, nutrientA: false, nutrientB: false, phDown: false, airPump: true });
     expect(snap.doses).toEqual([]); // EC ต่ำตอนถังว่างก็ไม่มีโดสผู้ช่วย
   });
 

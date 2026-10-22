@@ -49,9 +49,10 @@ describe('Sunlight — P36', () => {
   it('sun heats the air in the afternoon; the fan removes part of it', () => {
     const cfg = makeConfig({ room: { tempMeanC: 24, tempAmplitudeC: 0 } });
     const still = new Simulation({ seed: 2, cfg }), fan = new Simulation({ seed: 2, cfg });
-    for (let i = 0; i < 7 * 360; i++) { still.step(10, OFF); fan.step(10, { ...OFF, fan: true }); } // ถึง 13:00
+    for (let i = 0; i < 7 * 360; i++) { still.step(10, OFF); fan.step(10, { ...OFF, fanPct: 100 }); } // ถึง 13:00
     expect(still.env.airTempC).toBeGreaterThan(25.5);
     expect(fan.env.airTempC).toBeLessThan(still.env.airTempC - 1);
-    expect(fan.env.airTempC).toBeGreaterThanOrEqual(24 - 1e-6);
+    // P48: Cooling pad ทำให้เย็นกว่าห้องได้
+    expect(fan.env.airTempC).toBeLessThan(24);
   });
 });

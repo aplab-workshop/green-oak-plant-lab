@@ -37,7 +37,7 @@ export interface PlcAdapter {
   close(): Promise<void>;
   /** เขียน D100–D112, D120 — คืนรายชื่อค่าที่ถูก Clamp */
   writeSensors(data: SensorWrite): Promise<{ clamped: string[] }>;
-  /** อ่าน M100–M105, D200 */
+  /** อ่าน M101–M106, D200–D201 (P48: พัดลม D201 แทน M100) */
   readCommands(): Promise<CommandRead>;
   status(): PlcStatus;
 }

@@ -25,7 +25,8 @@ export interface SimInfo {
 
 /** คำสั่ง Actuator ที่อ่านจาก PLC */
 export interface ActuatorCommands {
-  fan: boolean;
+  /** Ventilation Fan + Cooling pad 0–100 % — D201 (P48; เดิม M100) */
+  fanPct: number;
   humidifier: boolean;
   /** Grow light brightness 0–100 % */
   ledPct: number;

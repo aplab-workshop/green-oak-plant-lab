@@ -84,7 +84,7 @@ export interface RoundStart {
 
 /** คำสั่งระหว่างไฟดับ: ทุกอย่าง OFF รวม Air Pump และ LED */
 const OUTAGE_COMMANDS: Readonly<ActuatorCommands> = Object.freeze({
-  fan: false,
+  fanPct: 0,
   humidifier: false,
   ledPct: 0,
   refillPump: false,

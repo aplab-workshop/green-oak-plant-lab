@@ -31,7 +31,7 @@
 | **Simulation (Server)** | Fixed time-step, Speed 1x / 60x / 360x, Pause/Resume/Reset, Water mass balance, Refill, LED → PPFD/DLI, Air temp/RH/VPD, Water temp, EC (Salt mass balance), pH (Empirical), Power |
 | **Plant model** | ผัก 6 ต้นแยกสถานะ: Water/Light/Nutrient Stress, Root Health, Hydration, Damage ถาวร, Recovery, Growth, Leaf count/area, Root length, Health score รวม Stress |
 | **Mock PLC** | จำลอง Device memory ของ FX5U: `auto` (Ladder ตัวอย่าง), `manual` (กดสั่งเอง), `offline` (จำลองสายหลุด) และ Fail-safe เมื่อไม่ได้รับคำสั่ง |
-| **Student Dashboard** | Sensor → PLC (D100–D110), Actuator ← PLC (M100–M105, D200), Plant diagnostics + Estimated Oxygen, Growth/Stress chart รายต้น, Timeline 6 h/24 h/14 วัน, Scenario |
+| **Student Dashboard** | Sensor → PLC (D100–D110), Actuator ← PLC (M101–M106, D200–D201), Plant diagnostics + Estimated Oxygen, Growth/Stress chart รายต้น, Timeline 6 h/24 h/14 วัน, Scenario |
 | **3D DWC Scene** | โรงเรือน Diorama พร้อมฐานสวน ถังใสฝาขาว พุ่ม Green Oak แบบ Procedural และรากฝอย; ใบตก/เหี่ยว/ฟื้น/ม้วนตาม Simulation, น้ำขึ้นลงจริง, LED, Fan, Humidifier, Pumps, ฟองอากาศ และ Sensor probes ที่คลิกดูข้อมูลได้ |
 | **Scenario** | `Water Shortage Simulation` (ระดับน้ำ 65% + รั่ว 1.5 L/h) |
 
@@ -135,7 +135,7 @@ npm run dev
 | บน | ชื่อ Lab, สถานะ Mock PLC (connected / FAIL-SAFE), สถานะการเชื่อมต่อ Server |
 | ซ้าย | **Sensors → PLC** ค่าที่ส่งเข้า D100–D110 (จุดเขียว/เหลือง/แดงเทียบช่วงแนะนำ) และ **Scenario** |
 | กลาง | **Plant View** (3D หรือ 2D), เวลาจำลอง, Speed, Pause, Reset, **Trends** และ **Timeline** |
-| ขวา | **Actuators ← PLC** (M100–M105, D200 และโหมด Mock PLC) และ **Plant** รายละเอียดต้นที่เลือก |
+| ขวา | **Actuators ← PLC** (M101–M106, D200 LED, D201 พัดลม และโหมด Mock PLC) และ **Plant** รายละเอียดต้นที่เลือก |
 
 ### 7.2 มุมมอง 3D
 

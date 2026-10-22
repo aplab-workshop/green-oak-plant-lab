@@ -1,4 +1,4 @@
-import { COMMAND_BITS, LED_COMMAND_REGISTER } from '@gol/shared';
+import { COMMAND_BITS, FAN_COMMAND_REGISTER, LED_COMMAND_REGISTER } from '@gol/shared';
 import type { DeviceMemory } from './DeviceMemory';
 
 /**
@@ -6,7 +6,7 @@ import type { DeviceMemory } from './DeviceMemory';
  * อ่าน D-register ที่ Scaled แล้ว และเขียน M/D ภายใน PLC — เหมือนโปรแกรมที่นักเรียนเขียน
  *
  *   Refill  : SET M102 ถ้า D106 < 70   | RST ถ้า D106 ≥ 90
- *   Fan     : SET M100 ถ้า D100 > 255  | RST ถ้า D100 < 245
+ *   Fan     : D201 = 100 ถ้า D100 > 255 | D201 = 0 ถ้า D100 < 245 (P48: ความเร็ว 0–100 % แทน M100)
  *   Humid.  : SET M101 ถ้า D101 < 550  | RST ถ้า D101 > 700
  *   LED     : 06:00–22:00 (D111 360–1319) เติมแสงให้ PPFD (D102) อยู่ ~270–330:
  *             D102 < 270 → D200 += 5 · D102 > 330 → D200 −= 5 (0–100) · นอกเวลา D200 = 0 (P36: มีแดดร่วม)
@@ -22,7 +22,8 @@ export function autoProgramScan(mem: DeviceMemory): void {
   };
 
   setReset(102, d(106) < 70, d(106) >= 90);
-  setReset(100, d(100) > 255, d(100) < 245);
+  if (d(100) > 255) mem.setD(FAN_COMMAND_REGISTER.address, 100);
+  else if (d(100) < 245) mem.setD(FAN_COMMAND_REGISTER.address, 0);
   setReset(101, d(101) < 550, d(101) > 700);
   const minute = d(111);
   // P36: แดดให้แสงด้วย จึงเติม LED เท่าที่ขาด (ปรับทีละ 5 % ต่อ Scan)
@@ -43,4 +44,5 @@ export function autoProgramScan(mem: DeviceMemory): void {
 export function clearCommands(mem: DeviceMemory): void {
   for (const b of COMMAND_BITS) mem.setM(b.address, b.key === 'airPump');
   mem.setD(LED_COMMAND_REGISTER.address, 0);
+  mem.setD(FAN_COMMAND_REGISTER.address, 0);
 }

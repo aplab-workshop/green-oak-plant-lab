@@ -53,7 +53,8 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
   });
 
   it.each([1, 2, 3, 4, 5, 6, 7, 8])('L4 seed %i: 3–4 distinct kinds inside the window, at least 2 days apart', (seed) => {
-    const plan = planChallenges(spec, seed, roundStart, cfg);
+    // P48: ไฟดับแบบ surprise (extraDays) แยกตรวจในเทสต์ของตัวเอง
+    const plan = planChallenges(spec, seed, roundStart, cfg).filter((p) => !p.surprise);
     expect(plan.length).toBeGreaterThanOrEqual(3);
     expect(plan.length).toBeLessThanOrEqual(4);
     expect(new Set(plan.map((p) => p.kind)).size).toBe(plan.length);
@@ -67,14 +68,15 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     });
   });
 
-  it('P46: L3 brings heat waves (days 2, 4) and dry air (days 3, 5) plus one leak a day, no mascot overlaps; Free Play has none', () => {
+  it('P46/P48: L3 brings heat waves (days 2, 4), dry air (days 3, 5), power cuts (days 1, 2, 4, 5) and one leak a day, no mascot overlaps; Free Play has none', () => {
     const c3 = makeConfig(L3.cfg);
     const start = 28 * SECONDS_PER_DAY + 6 * 3600;
     const day0 = 28 * SECONDS_PER_DAY;
     for (const seed of [1, 2, 3, 4, 5]) {
       const plan = planChallenges(L3.challenges!, seed, start, c3);
       const dayOf = (p: ChallengePlan) => Math.floor((p.startS - day0) / SECONDS_PER_DAY);
-      expect(plan.map((p) => `${dayOf(p)}${p.kind[0]}`)).toEqual(['0l', '1h', '1l', '2d', '2l', '3h', '3l', '4d', '4l']);
+      expect(plan.map((p) => `${dayOf(p)}${p.kind[0]}`)).toEqual(['0l', '0p', '1p', '1h', '1l', '2d', '2l', '3p', '3h', '3l', '4d', '4l', '4p']);
+      for (const p of plan.filter((x) => x.kind === 'powerOutage')) expect(p.durationS! / 3600).toBeLessThanOrEqual(2);
       for (const [i, p] of plan.entries()) {
         expect(p.surprise).toBe(true);
         const hour = ((p.startS - day0) % SECONDS_PER_DAY) / 3600;
@@ -119,10 +121,10 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     const sim = new Simulation();
     sim.reset(levelRound(L1));
     const first = sim.challenges[0]!;
-    while (sim.simTimeS < first.startS + sim.cfg.challenges.mascotExitS + 60) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+    while (sim.simTimeS < first.startS + sim.cfg.challenges.mascotExitS + 60) sim.step(60, { fanPct: 0, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
     expect(sim.challengeViews().find((c) => c.id === first.id)).toMatchObject({ status: 'active', repairable: false });
     expect(sim.repairLeak()).toBe(false);
-    while (sim.simTimeS < first.startS + first.durationS! + 60) sim.step(60, { fan: false, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
+    while (sim.simTimeS < first.startS + first.durationS! + 60) sim.step(60, { fanPct: 0, humidifier: false, ledPct: 0, refillPump: false, nutrientA: false, nutrientB: false, airPump: true, phDown: false });
     expect(sim.challenges.find((c) => c.id === first.id)!.status).toBe('done');
   });
 
@@ -130,7 +132,7 @@ describe('Challenge schedule — P23 / SPEC § 4.8', () => {
     const sim = new Simulation({ seed: 1 });
     sim.reset(levelRound(LEVELS.find((l) => l.id === 'L1')!));
     expect(sim.env.waterVolumeL).toBe(0);
-    const off = { fan: false, humidifier: false, ledPct: 0, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
+    const off = { fanPct: 0, humidifier: false, ledPct: 0, refillPump: true, nutrientA: false, nutrientB: false, airPump: true, phDown: false };
     while (sim.readSensors(false).waterLevelPct < 85) sim.step(10, off);
     expect(sim.readSensors(false).ecMsCm).toBeGreaterThan(1.0);
     expect(sim.readSensors(false).ecMsCm).toBeLessThan(1.4);
@@ -181,14 +183,16 @@ describe('Challenge lifecycle', () => {
     expect(events[0]!.message).toContain('~3 ชม.');
   });
 
-  it('P44: L2 leaks twice a day for 5 days (3 L/h), no overlaps', () => {
+  it('P44/P48: L2 leaks twice a day for 5 days (3 L/h) and the mascot cuts power on days 2 and 4, no overlaps', () => {
     const L2 = LEVELS.find((l) => l.id === 'L2')!;
     for (const seed of [1, 2, 3, 4, 5]) {
       const plan = planChallenges(L2.challenges!, seed, 23 * SECONDS_PER_DAY + 6 * 3600, makeConfig(L2.cfg));
       const day0 = 23 * SECONDS_PER_DAY;
-      expect(plan.map((p) => Math.floor((p.startS - day0) / SECONDS_PER_DAY))).toEqual([0, 0, 1, 1, 2, 2, 3, 3, 4, 4]);
+      expect(plan.map((p) => `${Math.floor((p.startS - day0) / SECONDS_PER_DAY)}${p.kind[0]}`))
+        .toEqual(['0l', '0l', '1l', '1p', '1l', '2l', '2l', '3l', '3p', '3l', '4l', '4l']);
       for (const [i, p] of plan.entries()) {
-        expect(p).toMatchObject({ kind: 'leak', surprise: true });
+        expect(p.surprise).toBe(true);
+        if (p.kind === 'powerOutage') expect([3600, 7200]).toContain(p.durationS);
         const next = plan[i + 1];
         if (next) expect(next.startS).toBeGreaterThanOrEqual(p.startS + p.durationS! + 2400);
       }
@@ -211,6 +215,36 @@ describe('Challenge lifecycle', () => {
     while (sim.simTimeS < start + 3 * 3600) sim.step(60, OFF);
     expect(sim.env.airTempC).toBeGreaterThan(before + 3);
     expect(sim.drainEvents().filter((e) => e.kind.startsWith('challenge.')).map((e) => e.kind)).toEqual(['challenge.start']);
+  });
+
+  it('P48: L4 adds 8 surprise power cuts (1–2 h) to its usual warned random events', () => {
+    const plan = planChallenges(L4.challenges!, 1, 14 * SECONDS_PER_DAY + 6 * 3600, makeConfig(L4.cfg));
+    const cuts = plan.filter((p) => p.surprise);
+    expect(cuts).toHaveLength(8);
+    for (const p of cuts) {
+      expect(p.kind).toBe('powerOutage');
+      expect(p.durationS! / 3600).toBeGreaterThanOrEqual(1);
+      expect(p.durationS! / 3600).toBeLessThanOrEqual(2);
+    }
+    expect(plan.filter((p) => !p.surprise).length).toBeGreaterThanOrEqual(3);
+    expect(plan.map((p) => p.id)).toEqual(plan.map((_, i) => i + 1));
+  });
+
+  it('P48: a surprise power cut has a mascot (kind powerOutage), stops every actuator at startS and is announced after the mascot leaves', () => {
+    const sim = new Simulation({ cfg: flat });
+    sim.reset({});
+    const start = sim.startTimeS + 8 * 3600;
+    sim.reset({ challengePlan: [{ id: 1, kind: 'powerOutage', startS: start, durationS: 3600, surprise: true }] });
+    while (sim.simTimeS < start - 300) sim.step(60, { ...OFF, ledPct: 80, fanPct: 50 });
+    expect(sim.mascot).toMatchObject({ kind: 'powerOutage' });
+    expect(sim.powerOutage).toBe(false);
+    while (sim.simTimeS < start + 120) sim.step(60, { ...OFF, ledPct: 80, fanPct: 50 });
+    expect(sim.powerOutage).toBe(true);
+    expect(sim.challengeViews()).toEqual([]);
+    while (sim.simTimeS < start + 660) sim.step(60, OFF);
+    expect(sim.challengeViews()).toMatchObject([{ kind: 'powerOutage', status: 'active' }]);
+    while (sim.simTimeS < start + 3600 + 120) sim.step(60, OFF);
+    expect(sim.powerOutage).toBe(false);
   });
 
   it('P42: a level config override applies only to its round (L1 refill 0.4 L/min, mascot 2,400 s)', () => {
@@ -274,7 +308,7 @@ describe('Challenge effects on the model', () => {
 
   it('power outage switches every actuator off, including LED and air pump', () => {
     const out = simWith('powerOutage', 0, 3 * 3600);
-    const all = { fan: true, humidifier: true, ledPct: 100, refillPump: true, nutrientA: true, nutrientB: true, airPump: true, phDown: true };
+    const all = { fanPct: 100, humidifier: true, ledPct: 100, refillPump: true, nutrientA: true, nutrientB: true, airPump: true, phDown: true };
     const before = out.env.waterVolumeL;
     run(out, 3600, all);
     expect(out.powerOutage).toBe(true);

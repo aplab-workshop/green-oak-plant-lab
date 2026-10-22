@@ -50,13 +50,15 @@ export function VentFan({ x }: { x: number }) {
   }, [low]);
   useEffect(() => () => { geometry.frame.dispose(); geometry.blade.dispose(); }, [geometry]);
   useFrame((_, dt) => {
-    const on = useLabStore.getState().snapshot?.commands.fan ?? false;
+    // P48: ความเร็วใบพัดตาม D201 (0–100 %)
+    const pct = useLabStore.getState().snapshot?.commands.fanPct ?? 0;
+    const on = pct > 0;
     const k = Math.min(dt, 0.1);
-    speed.current = MathUtils.damp(speed.current, on ? 22 : 0, 1.5, k);
+    speed.current = MathUtils.damp(speed.current, 22 * (pct / 100), 1.5, k);
     if (blades.current) blades.current.rotation.z += speed.current * k;
     if (airflow.current) airflow.current.visible = on;
   });
-  return <Clickable device={{ kind: 'actuator', key: 'fan' }} position={[x, 0.44, -0.21]} labelOffset={[0, 0.105, 0]}>
+  return <Clickable device={{ kind: 'actuator', key: 'fanPct' }} position={[x, 0.44, -0.21]} labelOffset={[0, 0.105, 0]}>
     {/* หน้าพัดลมหันออกนอกโรงเรือนทั้งสองฝั่ง */}
     <group rotation={[0, x < 0 ? -Math.PI / 2 : Math.PI / 2, 0]}>
       <mesh geometry={geometry.frame} castShadow receiveShadow>
