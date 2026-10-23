@@ -23,19 +23,31 @@ const SCENARIOS = [
   ['กลางคืน + แห้ง', 3, 0, 0, -20, 0],
 ] as const;
 
-describe('Fan speed + humidifier control every situation — P48 (SPEC § 4.31)', () => {
+describe('Fan speed + humidifier control every situation — P48/P49 (SPEC § 4.31, § 4.32)', () => {
   it.each(SCENARIOS)('%s: some fan % + humidifier ON/OFF keeps 18–25 °C and air "ok"', (_name, hour, led, dT, dRh, sun) => {
     const options = [false, true].flatMap((hum) => Array.from({ length: 11 }, (_, i) => steady(hour, led, i * 10, hum, dT, dRh, sun)));
     expect(options.some(good)).toBe(true);
   });
 
-  it('fan speed cools stepwise and can go below room temperature (cooling pad)', () => {
+  it('fan speed cools stepwise and can go below room temperature', () => {
     const t = [0, 50, 100].map((f) => steady(13, 40, f, false, 5, 0, 1).airTempC);
     expect(t[0]).toBeGreaterThan(30);
     expect(t[1]).toBeLessThan(t[0]! - 4);
     expect(t[2]).toBeLessThanOrEqual(25);
     // กลางคืนเปิดเต็มที่จะเย็นเกิน → ต้องหรี่
     expect(steady(2, 0, 100, false).airTempC).toBeLessThan(15);
+  });
+
+  it.each(SCENARIOS)('P49: %s — full fan lowers RH by at least 6 points (the fan dries the air)', (_name, hour, led, dT, dRh, sun) => {
+    const still = steady(hour, led, 0, false, dT, dRh, sun);
+    const fan = steady(hour, led, 100, false, dT, dRh, sun);
+    expect(fan.rhPct).toBeLessThanOrEqual(still.rhPct - 6);
+  });
+
+  it('P49: hot + dry needs the fan together with the humidifier', () => {
+    const fanOnly = [0, 50, 100].map((f) => steady(13, 40, f, false, 5, -20, 1));
+    expect(fanOnly.some(good)).toBe(false);
+    expect(good(steady(13, 40, 100, true, 5, -20, 1))).toBe(true);
   });
 
   it('humidifier ON fixes dry air, OFF fixes humid air', () => {

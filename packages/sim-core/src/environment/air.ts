@@ -30,9 +30,9 @@ export interface AirState {
 
 /**
  * อุณหภูมิและความชื้นอากาศแบบ First-order (FR-06)
- *   T_eq  = T_room + (ΔT_LED·LED + ΔT_sun·sun)·(1 − η_fan·f) − C_fan·f   (P36 แดด, P48 Cooling pad)
- *   RH_eq = RH_room + G_hum·hum·(1 − L_fan·f) + M_enc·(1 − f) − k·(T − T_room)
- * f = ความเร็วพัดลม 0–1 (D201) — Cooling pad ทำให้เย็นกว่าห้องได้สูงสุด C_fan (P48 / SPEC § 4.31)
+ *   T_eq  = T_room + (ΔT_LED·LED + ΔT_sun·sun)·(1 − η_fan·f) − C_fan·f   (P36 แดด, P48 พัดลมเย็นกว่าห้องได้)
+ *   RH_eq = RH_room + G_hum·hum·(1 − L_fan·f) + M_enc·(1 − f) − D_fan·f − k·max(0, T − T_room)
+ * f = ความเร็วพัดลม 0–1 (D201); P49 / SPEC § 4.32: พัดลมดึงความชื้นออก (D_fan) และอากาศที่เย็นกว่าห้องไม่ทำให้ RH สูงขึ้น
  */
 export function stepAir(s: AirState, u: AirInput, dtS: number, cfg: SimConfig): AirState {
   const a = cfg.air;
@@ -48,7 +48,8 @@ export function stepAir(s: AirState, u: AirInput, dtS: number, cfg: SimConfig): 
     cfg.room.rhPct + (u.roomRhDeltaPct ?? 0) +
       a.humidifierGainPct * hum * (1 - a.fanHumidityLoss * fan) +
       a.enclosureMoisturePct * (1 - fan) -
-      a.rhPerDegC * (airTempC - tRoom),
+      a.fanDryingPct * fan -
+      a.rhPerDegC * Math.max(0, airTempC - tRoom),
     a.rhMinPct,
     a.rhMaxPct,
   );

@@ -883,3 +883,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - **Air:** `stepAir` ใช้ `f = fanPct/100` ทุกพจน์ (ระบายความร้อน, Cooling pad `−fanCoolingC·f`, ลดผลหมอก, ความชื้นสะสม) — ไม่มี Clamp "ห้ามต่ำกว่าห้อง" แล้ว; RH ที่สูงขึ้นเมื่อเย็นกว่าห้องมาจาก `rhPerDegC` เดิม (สอดคล้องกับ Cooling pad ที่ระเหยน้ำ)
 - **ปุ๋ย A+B:** UI-only — `ActuatorPanel` ส่ง `setManualBit` A แล้ว B; Device map/Ladder ยังแยกได้
 - **ไฟดับ:** ใช้ `powerOutage` เดิม (OUTAGE_COMMANDS) + surprise; `Mascot.tsx` เลือกทางวิ่งตาม `mascot.kind`; ด่าน 4 ใช้ `extraDays` ต่อจากเหตุการณ์สุ่ม แล้วเรียง/ให้ id ใหม่
+
+### 11.45 Implementation Notes (P49 — Fan Dries the Air)
+
+- `stepAir` RH: เพิ่ม `− cfg.air.fanDryingPct·f` และเปลี่ยนพจน์อุณหภูมิเป็น `− rhPerDegC·max(0, T − T_room)` — อากาศที่เย็นกว่าห้องจากพัดลมไม่เพิ่ม RH (เลิกพฤติกรรมแบบ Cooling pad ของ P48) อุณหภูมิยังเหมือน P48
+- หมอกแรงขึ้น (30 %) และถูกพัดลมลดผลน้อยลง (0.3) เพื่อให้ "ร้อน + แห้ง" ยังคุมได้ด้วยพัดลม + หมอก — ค่าเลือกจากการวัดหลายชุดใน PHASES P49

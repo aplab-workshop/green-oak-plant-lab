@@ -62,8 +62,10 @@ export interface SimConfig {
     ledHeatC: number;
     /** ประสิทธิภาพการระบายความร้อนของ Fan (0–1) */
     fanEfficiency: number;
-    /** Cooling pad: พัดลม 100 % ทำให้อากาศเย็นกว่าห้องได้ (°C) — P48 */
+    /** พัดลม 100 % ทำให้อากาศเย็นกว่าห้องได้ (°C, ดึงอากาศเย็นภายนอก) — P48 */
     fanCoolingC: number;
+    /** พัดลม 100 % ดึงความชื้นออก (%RH) — P49 */
+    fanDryingPct: number;
     /** Time constant อุณหภูมิอากาศ (min) */
     tempTauMin: number;
     /** RH ที่ Humidifier เพิ่มได้ (%) */
@@ -323,9 +325,10 @@ export const DEFAULT_CONFIG: SimConfig = {
     ledHeatC: 6,
     fanEfficiency: 0.7,
     fanCoolingC: 9,
+    fanDryingPct: 15,
     tempTauMin: 20,
-    humidifierGainPct: 25,
-    fanHumidityLoss: 0.6,
+    humidifierGainPct: 30,
+    fanHumidityLoss: 0.3,
     enclosureMoisturePct: 5,
     rhPerDegC: 2.5,
     rhTauMin: 15,

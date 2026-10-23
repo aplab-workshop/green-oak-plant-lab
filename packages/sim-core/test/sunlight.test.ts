@@ -52,7 +52,7 @@ describe('Sunlight — P36', () => {
     for (let i = 0; i < 7 * 360; i++) { still.step(10, OFF); fan.step(10, { ...OFF, fanPct: 100 }); } // ถึง 13:00
     expect(still.env.airTempC).toBeGreaterThan(25.5);
     expect(fan.env.airTempC).toBeLessThan(still.env.airTempC - 1);
-    // P48: Cooling pad ทำให้เย็นกว่าห้องได้
+    // P48: พัดลมทำให้เย็นกว่าห้องได้
     expect(fan.env.airTempC).toBeLessThan(24);
   });
 });

@@ -10,7 +10,7 @@ export interface ActuatorInfo {
 }
 
 const DESCRIPTIONS: Record<ActuatorKey, { description: string; ratedPower: string }> = {
-  fanPct: { description: 'พัดลมระบายอากาศ + Cooling pad ปรับความเร็ว 0–100 % (D201) ระบายความร้อนจาก LED/แดด และทำให้เย็นกว่าห้องได้ถึง ~8 °C ที่ 100 % เปิดแรงจะทำให้อากาศแห้งลง', ratedPower: '15 W ที่ 100%' },
+  fanPct: { description: 'พัดลมระบายอากาศ ปรับความเร็ว 0–100 % (D201) ระบายความร้อนจาก LED/แดด ดึงอากาศเย็นภายนอกจนเย็นกว่าห้องได้ ~9 °C ที่ 100 % และทำให้อากาศแห้งลง (RH ลด)', ratedPower: '15 W ที่ 100%' },
   humidifier: { description: 'เพิ่มความชื้นในอากาศ (ใช้น้ำจากถังแยก) ผลจะลดลงเมื่อเปิด Fan พร้อมกัน', ratedPower: '25 W' },
   ledPct: { description: 'ไฟปลูกหรี่ได้ 0–100% กำหนด PPFD และ DLI และสร้างความร้อนในกล่องปลูก', ratedPower: '120 W ที่ 100%' },
   refillPump: { description: 'เติมน้ำจากถังสำรอง (อัตราไหลดู D107 Flow Sensor ตอนเปิด) ถ้าเปิดค้างขณะถังเต็ม น้ำจะล้นและพาธาตุอาหารออก', ratedPower: '18 W' },

@@ -78,7 +78,7 @@ describe('Air temperature & humidity', () => {
   it('humidifier raises RH; fan reduces its effect at the same air temperature', () => {
     const cfg = flatRoomConfig();
     expect(runEnv({ cfg, cmd: {}, hours: 3 }).env.rhPct).toBeCloseTo(65, 0);
-    expect(runEnv({ cfg, cmd: { humidifier: true }, hours: 3 }).env.rhPct).toBeCloseTo(90, 0);
+    expect(runEnv({ cfg, cmd: { humidifier: true }, hours: 3 }).env.rhPct).toBeCloseTo(95, 0); // P49: หมอก +30 %
     // LED 100 % + พัดลม ~60 % ทำให้อากาศเท่าห้องพอดี → เทียบผลหมอกล้วน ๆ (25·(1 − 0.6f))
     const same = runEnv({ cfg, cmd: { humidifier: true, ledPct: 100, fanPct: Math.round(6 / (6 * 0.7 + 9) * 100) }, hours: 3 }).env;
     expect(same.airTempC).toBeCloseTo(26, 0);
