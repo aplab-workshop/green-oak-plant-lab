@@ -8,6 +8,9 @@
 
 ---
 
+> 🧪 **ลองเล่น Demo ในเบราว์เซอร์ (ไม่ต้องติดตั้ง):** https://aplab-workshop.github.io/green-oak-plant-lab/
+> Simulation + Mock PLC รันในเบราว์เซอร์ของแต่ละคน ปลดล็อกทุกด่าน รีเฟรชหน้า = เริ่มใหม่ (สร้างอัตโนมัติจาก `npm run build:demo` ทุกครั้งที่ push `main`)
+
 ## สารบัญ
 
 1. [ความสามารถใน Milestone 1–2](#1-ความสามารถใน-milestone-12)

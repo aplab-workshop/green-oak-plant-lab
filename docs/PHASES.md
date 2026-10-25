@@ -519,6 +519,12 @@ tags: [green-oak, roadmap]
 - **Publish:** Artifact ส่วนตัว https://claude.ai/artifact/WwJCyB1uYqEYwfYkGgWqei (index.html + assets + mascot) — ตรวจบนลิงก์ไม่ได้เพราะ Browser ของ Agent ไม่ได้ Sign in claude.ai; ผู้ใช้ต้องกด Share เองให้คนอื่นเปิดได้
 - **หมายเหตุ:** Build ปกติยังมี chunk `localServer` ติดไปด้วย (ไม่ถูกโหลดถ้าไม่ใช่ Demo); อัปเดต Demo = `npm run build:demo` แล้ว Publish ไฟล์ใน dist-demo ซ้ำที่ลิงก์เดิม (ชื่อไฟล์ assets เปลี่ยนตาม hash)
 
+### P51 — ขึ้น GitHub + GitHub Pages Demo
+- [x] ผู้ใช้ (2026-10-25): เอาลง GitHub แทน Artifact; เลือก Public `green-oak-plant-lab` + Pages, ลบ Artifact → SPEC § 4.34 + AC-65
+- [x] ตรวจความลับก่อน push (ไม่มี .env/คีย์/โทเคนใน repo)
+- [ ] Workflow `pages.yml`, README ลิงก์ Demo
+- [ ] สร้าง Repo + push + เปิด Pages + ตรวจลิงก์; ลบ Artifact
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |
