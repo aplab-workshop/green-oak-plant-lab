@@ -1,5 +1,6 @@
 import type { HistorySample, LabSnapshot, LevelId, PlayerDevice } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
+import { DEMO } from '../demo/mode';
 import { sendCommand } from '../store/api';
 
 /** ไอคอนการ์ดด่าน (ข้อมูลเป้า/เวลา/งบ/อุปกรณ์มาจาก Server ใน snapshot.levels) */
@@ -22,7 +23,7 @@ export function LevelSelect({ onDone }: { onDone: () => void }) {
     <div className="grid gap-3 p-5 sm:grid-cols-2">
       {devUnlockAll && (
         <p role="note" className="rounded-md bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 sm:col-span-2">
-          🔓 โหมดผู้พัฒนา: ปลดล็อกทุกด่าน (npm run dev — ห้องเรียนใช้ npm run serve จะล็อกตามปกติ)
+          {DEMO ? '🧪 Demo: ปลดล็อกทุกด่าน — Simulation รันในเบราว์เซอร์นี้ รีเฟรชหน้าแล้วเริ่มใหม่' : '🔓 โหมดผู้พัฒนา: ปลดล็อกทุกด่าน (npm run dev — ห้องเรียนใช้ npm run serve จะล็อกตามปกติ)'}
         </p>
       )}
       {levels.map((l) => {

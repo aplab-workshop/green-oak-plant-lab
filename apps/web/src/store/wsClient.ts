@@ -2,6 +2,7 @@ import { WS_PATH, type ClientMessage, type ServerMessage } from '@gol/shared';
 import { useConnectionStore } from './connectionStore';
 import { acceptEvent, acceptSnapshot, useLabStore } from './labStore';
 import { loadScenarios, refreshEvents, refreshHistory } from './api';
+import { DEMO } from '../demo/mode';
 
 /** สร้าง URL ของ WebSocket จาก location ของหน้าเว็บ (ผ่าน proxy / server เดียวกัน) */
 export function wsUrl(loc: Pick<Location, 'protocol' | 'host'>): string {
@@ -77,9 +78,23 @@ function handle(msg: ServerMessage): void {
 }
 
 export function startConnection(): void {
-  if (socket) return;
+  if (socket || connecting) return;
   useConnectionStore.setState({ status: 'connecting' });
-  const ws = new WebSocket(wsUrl(window.location));
+  // P50: Demo ใช้ Server จำลองในเบราว์เซอร์ (หน้าตาเดียวกับ WebSocket)
+  if (DEMO) {
+    connecting = true;
+    void import('../demo/localServer').then((m) => {
+      connecting = false;
+      attach(new m.LocalSocket() as unknown as WebSocket);
+    });
+    return;
+  }
+  attach(new WebSocket(wsUrl(window.location)));
+}
+
+let connecting = false;
+
+function attach(ws: WebSocket): void {
   socket = ws;
 
   ws.onopen = () => {

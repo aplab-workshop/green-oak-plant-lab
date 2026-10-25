@@ -206,3 +206,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ### สถานะเพิ่มเติม 2026-10-23 — P49 พัดลมทำให้แห้ง
 - เสร็จและ commit แล้ว: พัดลมดึงความชื้นออก (`fanDryingPct` 15 %) RH ลดตามความเร็ว, หมอก 30 % / พัดลมลดผลหมอก 0.3, ร้อน + แห้งต้องใช้พัดลมคู่หมอก (SPEC § 4.32); ด่าน 3 คงเป้า 44 g; tests 334/334
 - lab01 ด่าน 3 พร้อมเล่น — รอผู้ใช้ทดสอบ
+
+### สถานะเพิ่มเติม 2026-10-25 — P50 Demo ในเบราว์เซอร์
+- เสร็จและ commit แล้ว: `npm run build:demo` → `apps/web/dist-demo` เล่นได้โดยไม่มี Server (LabManager เดิมรันในเบราว์เซอร์, `demo/localServer.ts`), ปลดล็อกทุกด่าน (SPEC § 4.33); tests 337/337
+- Publish เป็น Artifact ส่วนตัว https://claude.ai/artifact/WwJCyB1uYqEYwfYkGgWqei — อัปเดตด้วยการ build:demo แล้ว publish ไฟล์ dist-demo ที่ path เดิม (ชื่อ assets เปลี่ยนตาม hash ต้องส่ง files ใหม่)

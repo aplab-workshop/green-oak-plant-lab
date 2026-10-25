@@ -521,6 +521,20 @@ Briefing, Loss story และคู่มือ 📖 ใช้ของเด�
 - อุณหภูมิเหมือน P48 (พัดลมเย็นกว่าห้องได้ 9 °C) — คำอธิบายพัดลมเปลี่ยนจาก "Cooling pad" เป็น "พัดลมระบายอากาศแรง (ดึงอากาศเย็นภายนอก)" และ**ทำให้อากาศแห้งลง**
 - ผลที่ต้องได้ (ตารางใน PHASES P49): เปิดพัดลม 100 % RH ลดลง 6–20 จุดในทุกสถานการณ์ (น้อยสุดตอนเช้าที่ไฟ LED 80 %); ยังคุมได้ทุกสถานการณ์ (18–25 °C และอากาศเหมาะสม) — "ร้อน + แห้ง" ต้อง**เร่งพัดลมคู่กับเปิดหมอก**
 
+### 4.33 P50 — Browser Demo Build (2026-10-25)
+
+ผู้ใช้: "Deploy Publish ระบบ Simulation เล่น Mock PLC ให้คนอื่นทดสอบกลไกเกม" — เลือกแบบ**เล่นในเบราว์เซอร์** (ไม่ต้องมี Server), ปลดล็อก 4 ด่าน
+
+- Build ใหม่ **`npm run build:demo`** → `apps/web/dist-demo/` (Vite `--mode demo`, `base: './'` ใช้ได้ทุก Path) — โหมดปกติ (`npm run dev`/`serve`) ไม่เปลี่ยน
+- ในโหมด demo: `LabManager`/`LabSession`/`MockPlcAdapter` ตัวเดียวกับ Server (โค้ดเดิม ไม่ fork) รันในเบราว์เซอร์ผ่าน `apps/web/src/demo/localServer.ts`
+  - แทน REST (`/api/...`) ด้วย `localFetch` (เส้นทางและผลลัพธ์เหมือน `api/routes.ts`: commands + zod, history/events + `X-Lab-Run-Id`, scenarios, lab snapshot)
+  - แทน WebSocket ด้วย `LocalSocket` (ข้อความ hello / heartbeat / subscribe → snapshot ~5 Hz / event / ping-pong เหมือน `api/ws.ts`)
+  - 1 Lab ต่อเบราว์เซอร์ (ผู้ทดสอบแต่ละคนมี Simulation ของตัวเอง ไม่ชนกัน), Mock PLC โหมด Manual, **ปลดล็อกทุกด่าน** (`unlockAllLevels`)
+  - ไม่มี PLC จริง/SLMP; รีเฟรชหน้า = เริ่มใหม่ (State อยู่ใน Memory ของแท็บ); แท็บที่ซ่อนอยู่เบราว์เซอร์อาจชะลอ Timer
+- ป้าย "🧪 Demo — Simulation ในเบราว์เซอร์ (Mock PLC)" ที่หัวหน้าจอ
+- Asset อ้างผ่าน `import.meta.env.BASE_URL` (Mascot sprite, favicon) ให้ทำงานใต้ Path ย่อย
+- เผยแพร่ `dist-demo` เป็น Artifact ส่วนตัวบน claude.ai (ผู้ใช้แชร์ลิงก์เอง)
+
 ## 5. Functional Requirements
 
 รหัส `FR-xx` ใช้อ้างอิงใน Test และ Commit, คอลัมน์ **M** = Milestone ที่ต้องทำเสร็จ
@@ -691,6 +705,7 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 ### 8.10 P36–P37 — วางระบบด่านใหม่
 
 - [x] AC-50 🧪 **P36 / SPEC § 4.19:** แดดตามเวลา (0 ก่อน 06:00/หลัง 19:00, สูงสุด 300 ตอน 13:00) รวมกับ LED ใน PPFD ต้น/Sensor/DLI; แดดเพิ่มความร้อนและพัดลมลดได้; ไฟดับเหลือแดด; สูตรเติม LED ให้ PPFD ~300 ผ่านด่าน 1–4 ⭐⭐⭐ และ Ladder Auto ปรับ LED ตาม D102; tests/typecheck/build ผ่าน
+- [x] AC-64 **P50 / SPEC § 4.33:** `npm run build:demo` ได้เว็บที่เล่นได้ครบโดยไม่มี Server (เลือก 4 ด่าน, สั่งอุปกรณ์, เวลาเดิน, เหตุการณ์/Mascot, กราฟ/Event log); โหมดปกติไม่เปลี่ยน; tests/typecheck/build ผ่าน; เปิดจาก dist-demo ใน Browser ไม่มี Console error
 - [x] AC-63 **P49 / SPEC § 4.32:** พัดลม 100 % ทำให้ RH ลดลงทุกสถานการณ์ (≥ 6 จุด); ยังคุมได้ทุกสถานการณ์ (เทสต์ตาราง); คู่มือ/คำอธิบายอุปกรณ์บอกว่าพัดลมทำให้แห้ง; สูตรดูแลผ่านทุกด่าน ⭐⭐⭐ และด่าน 3 ไม่ใช้พัดลม/หมอกแพ้; tests + Browser ไม่มี Console error
 - [x] AC-62 **P48 / SPEC § 4.31:** สวิตช์ปุ๋ย A+B เดียว; พัดลม D201 0–100 % (Slider, M100 เลิกใช้, Fail-safe 0, Clamp) ทุกชั้น; Model พัดลม/หมอกคุมได้ทุกสถานการณ์ (เทสต์ตาราง); Mascot ปิด Power Meter ไฟดับ 1–2 ชม. ด่าน 2/3/4 = 2/4/8 ครั้ง; สูตรดูแลผ่านทุกด่าน ⭐⭐⭐; DEVICE-MAP ตรงกับโค้ด; tests + Browser ไม่มี Console error
 - [x] AC-61 **P47 / SPEC § 4.30:** `npm run dev` ปลดล็อกทุกด่านตั้งแต่เริ่มและหลังรีสตาร์ท; `UNLOCK_ALL_LEVELS=false` หรือโหมด start ล็อกตามเดิม; หน้าเลือกด่านมีป้ายโหมดผู้พัฒนา; tests + Browser ไม่มี Console error

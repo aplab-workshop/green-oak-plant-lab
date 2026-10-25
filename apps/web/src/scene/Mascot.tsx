@@ -65,8 +65,9 @@ function emojiTexture(emoji: string): CanvasTexture {
  * ขับด้วย snapshot.mascot.progress จาก Server (เวลาจำลอง) — หยุดเมื่อ Pause; ฝั่ง Web แค่ทำให้ลื่นระหว่าง Snapshot
  */
 function MascotSprite() {
-  const run = useTexture('/mascot/run.png');
-  const happy = useTexture('/mascot/happy.png');
+  // BASE_URL: Demo build (P50) อยู่ใต้ Path ย่อยได้
+  const run = useTexture(`${import.meta.env.BASE_URL}mascot/run.png`);
+  const happy = useTexture(`${import.meta.env.BASE_URL}mascot/happy.png`);
   run.colorSpace = SRGBColorSpace;
   happy.colorSpace = SRGBColorSpace;
   const root = useRef<Group>(null);

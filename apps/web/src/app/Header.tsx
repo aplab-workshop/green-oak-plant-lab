@@ -2,6 +2,7 @@ import { Cpu, Leaf } from 'lucide-react';
 import { useLabStore } from '../store/labStore';
 import { selectLab } from '../store/wsClient';
 import { ConnectionBadge } from './ConnectionBadge';
+import { DEMO } from '../demo/mode';
 
 const labLabel = (id: string) => id.replace(/^lab/, 'Lab ');
 
@@ -35,6 +36,11 @@ export function Header() {
       <div className="flex items-center gap-3">
         <Leaf className="h-5 w-5 text-emerald-600" />
         <h1 className="font-semibold text-slate-800">Green Oak Virtual Plant Lab</h1>
+        {DEMO && (
+          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800" title="รีเฟรชหน้า = เริ่มใหม่ · ไม่มี PLC จริง">
+            🧪 Demo — Simulation ในเบราว์เซอร์ (Mock PLC)
+          </span>
+        )}
         {labIds.length > 1 ? (
           <select
             className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 text-sm"

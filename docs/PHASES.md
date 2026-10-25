@@ -510,6 +510,15 @@ tags: [green-oak, roadmap]
 - [x] วัดด่าน 3 ซ้ำ (Seed 1–5): สูตรดูแล 44.9 g ที่ 4.25 วัน, ไม่ใช้พัดลม/หมอก ≤ 39.3, ไม่เปิด LED 39.3 — เท่าเดิม คงเป้า 44 g; คำอธิบายพัดลมในเกม/คู่มือ/GAME-GUIDE เปลี่ยนจาก Cooling pad เป็น "ระบายอากาศ ทำให้แห้งลง"
 - **ผลตรวจ:** AC-63 ผ่าน; tests 334/334 (40 files), typecheck และ build ผ่าน; Browser (ด่าน 3, 720x): พัดลม 0 % → 26.0 °C RH 58 %, 100 % → 16.1 °C RH 45 %, เปิดหมอกเพิ่ม → RH 65 %; Console ไม่มี Error ใหม่; lab01 ด่าน 3 พร้อมเล่น 1x
 
+### P50 — เวอร์ชันเล่นในเบราว์เซอร์ (Demo) สำหรับให้คนอื่นทดสอบ ✅
+- [x] ผู้ใช้ (2026-10-25): Deploy ให้คนอื่นทดสอบกลไกเกมกับ Mock PLC; เลือก "เล่นในเบราว์เซอร์" ปลดล็อก 4 ด่าน → SPEC § 4.33 + AC-64
+- [x] `apps/web/src/demo/localServer.ts`: `LabManager` เดิม (1 Lab, Mock Manual, `unlockAllLevels`) + `localFetch` (เส้นทางเดียวกับ `api/routes.ts`) + `LocalSocket` (ข้อความเดียวกับ `api/ws.ts`); `demo/mode.ts` (`DEMO`, `apiFetch`) — `api.ts` ใช้ `apiFetch`, `wsClient.ts` ใช้ `LocalSocket` เมื่อ Demo (โหลดแบบ dynamic import)
+- [x] `npm run build:demo` → `apps/web/dist-demo/` (`vite --mode demo`: `base './'`, `VITE_DEMO=1`); Mascot/favicon ผ่าน `BASE_URL`; ป้าย "🧪 Demo" ที่หัวจอและหน้าเลือกด่าน; `.gitignore` dist-demo; launch config `green-oak-demo` (vite preview 4174)
+- [x] เทสต์ `apps/web/test/localServer.test.ts`: scenarios/snapshot (ปลดล็อกทุกด่าน)/history header, คำสั่ง 200/400/409 ตามกฎ LabSession, LocalSocket hello/snapshot/pong
+- **ผลตรวจ:** AC-64 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser (dist-demo ผ่าน vite preview): ไม่มีคำขอ `/api` เลย ไม่มี Console error, ด่าน 1 เริ่มปลูก/1440x เวลาเดิน, เลือกด่าน 3 ได้, โดสเติมน้ำ/Slider พัดลม, ถังรั่วและไฟดับ (Mascot) เกิดและจบตามตาราง; Bundle ไม่เรียกไฟล์ภายนอก
+- **Publish:** Artifact ส่วนตัว https://claude.ai/artifact/WwJCyB1uYqEYwfYkGgWqei (index.html + assets + mascot) — ตรวจบนลิงก์ไม่ได้เพราะ Browser ของ Agent ไม่ได้ Sign in claude.ai; ผู้ใช้ต้องกด Share เองให้คนอื่นเปิดได้
+- **หมายเหตุ:** Build ปกติยังมี chunk `localServer` ติดไปด้วย (ไม่ถูกโหลดถ้าไม่ใช่ Demo); อัปเดต Demo = `npm run build:demo` แล้ว Publish ไฟล์ใน dist-demo ซ้ำที่ลิงก์เดิม (ชื่อไฟล์ assets เปลี่ยนตาม hash)
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

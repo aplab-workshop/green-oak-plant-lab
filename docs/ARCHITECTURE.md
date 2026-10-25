@@ -888,3 +888,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 
 - `stepAir` RH: เพิ่ม `− cfg.air.fanDryingPct·f` และเปลี่ยนพจน์อุณหภูมิเป็น `− rhPerDegC·max(0, T − T_room)` — อากาศที่เย็นกว่าห้องจากพัดลมไม่เพิ่ม RH (เลิกพฤติกรรมแบบ Cooling pad ของ P48) อุณหภูมิยังเหมือน P48
 - หมอกแรงขึ้น (30 %) และถูกพัดลมลดผลน้อยลง (0.3) เพื่อให้ "ร้อน + แห้ง" ยังคุมได้ด้วยพัดลม + หมอก — ค่าเลือกจากการวัดหลายชุดใน PHASES P49
+
+### 11.46 Implementation Notes (P50 — Browser Demo Build)
+
+- **ไม่ fork โค้ด Server:** `apps/web/src/demo/localServer.ts` import `LabManager`/`LabSession`/`SCENARIOS`/`SERVER_VERSION` จาก `apps/server/src` โดยตรง (Pure TS ไม่มี Node I/O) — แก้กฎเกมที่ Server ที่เดียว Demo ได้ตามอัตโนมัติ
+- **Transport swap:** `demo/mode.ts` `DEMO = import.meta.env.VITE_DEMO === '1'` (Vite `define` ใน `--mode demo`); `apiFetch` คืน `Response` จาก `localFetch` ทำให้ `api.ts` ใช้ Logic เดิม (header `X-Lab-Run-Id`, error body); `LocalSocket` เลียนแบบ WebSocket เท่าที่ `wsClient.ts` ใช้ (readyState/onopen/onmessage/onclose/send) และส่งข้อความผ่าน JSON + microtask เหมือนเครือข่าย
+- **Base path:** `base: './'` + `import.meta.env.BASE_URL` สำหรับ Asset ใน `public/` เพื่อวางใต้ Path ใดก็ได้ (Artifact/Static host)
+- โหมด Demo คือ 1 Lab ต่อแท็บ, ไม่มี Persistence, Timer ของแท็บที่ซ่อนถูกเบราว์เซอร์ชะลอ (เวลาจำลองเดินตาม elapsed จริงของ `LabManager` จึงตามทันเมื่อกลับมา แต่ `maxStepsPerTick` จำกัดการไล่)

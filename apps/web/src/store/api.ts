@@ -1,8 +1,9 @@
 import type { EventEntry, HistorySample, LabCommand, LabSnapshot, ScenarioInfo } from '@gol/shared';
 import { acceptSnapshot, mergeEvents, useLabStore } from './labStore';
+import { apiFetch } from '../demo/mode';
 
 async function getJson<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+  const res = await apiFetch(url);
   if (!res.ok) throw new Error(`${res.status} ${url}`);
   return (await res.json()) as T;
 }
@@ -12,7 +13,7 @@ export async function sendCommand(cmd: LabCommand): Promise<boolean> {
   const { labId, viewRevision } = useLabStore.getState();
   if (!labId) return false;
   try {
-    const res = await fetch(`/api/labs/${labId}/commands`, {
+    const res = await apiFetch(`/api/labs/${labId}/commands`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(cmd),
@@ -48,7 +49,7 @@ export async function refreshHistory(): Promise<void> {
   if (!labId || !snapshot) return;
   const request = ++historyRequest;
   try {
-    const res = await fetch(`/api/labs/${labId}/history`);
+    const res = await apiFetch(`/api/labs/${labId}/history`);
     if (!res.ok) return;
     const runId = res.headers.get('X-Lab-Run-Id');
     const history = await res.json() as HistorySample[];
@@ -67,7 +68,7 @@ export async function refreshEvents(): Promise<void> {
   if (!labId || !snapshot) return;
   const request = ++eventsRequest;
   try {
-    const res = await fetch(`/api/labs/${labId}/events?limit=1000`);
+    const res = await apiFetch(`/api/labs/${labId}/events?limit=1000`);
     if (!res.ok) return;
     const runId = res.headers.get('X-Lab-Run-Id');
     const events = await res.json() as EventEntry[];
