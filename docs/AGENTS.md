@@ -209,4 +209,8 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 
 ### สถานะเพิ่มเติม 2026-10-25 — P50 Demo ในเบราว์เซอร์
 - เสร็จและ commit แล้ว: `npm run build:demo` → `apps/web/dist-demo` เล่นได้โดยไม่มี Server (LabManager เดิมรันในเบราว์เซอร์, `demo/localServer.ts`), ปลดล็อกทุกด่าน (SPEC § 4.33); tests 337/337
-- Publish เป็น Artifact ส่วนตัว https://claude.ai/artifact/WwJCyB1uYqEYwfYkGgWqei — อัปเดตด้วยการ build:demo แล้ว publish ไฟล์ dist-demo ที่ path เดิม (ชื่อ assets เปลี่ยนตาม hash ต้องส่ง files ใหม่)
+- (P51) ย้ายไป GitHub Pages แล้ว — Artifact claude.ai ถูกลบ
+
+### สถานะเพิ่มเติม 2026-10-25 — P51 GitHub + Pages
+- Repo public: https://github.com/aplab-workshop/green-oak-plant-lab (remote `origin`, branch `main`) — **push main = Demo อัปเดตอัตโนมัติ** ที่ https://aplab-workshop.github.io/green-oak-plant-lab/ ผ่าน `.github/workflows/pages.yml`
+- push ต้องได้รับอนุญาตจากผู้ใช้ทุกครั้ง (สาธารณะ); อย่า commit `AP_LAB_Mascot/` และ `.obsidian/graph.json`

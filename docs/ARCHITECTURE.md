@@ -895,3 +895,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - **Transport swap:** `demo/mode.ts` `DEMO = import.meta.env.VITE_DEMO === '1'` (Vite `define` ใน `--mode demo`); `apiFetch` คืน `Response` จาก `localFetch` ทำให้ `api.ts` ใช้ Logic เดิม (header `X-Lab-Run-Id`, error body); `LocalSocket` เลียนแบบ WebSocket เท่าที่ `wsClient.ts` ใช้ (readyState/onopen/onmessage/onclose/send) และส่งข้อความผ่าน JSON + microtask เหมือนเครือข่าย
 - **Base path:** `base: './'` + `import.meta.env.BASE_URL` สำหรับ Asset ใน `public/` เพื่อวางใต้ Path ใดก็ได้ (Artifact/Static host)
 - โหมด Demo คือ 1 Lab ต่อแท็บ, ไม่มี Persistence, Timer ของแท็บที่ซ่อนถูกเบราว์เซอร์ชะลอ (เวลาจำลองเดินตาม elapsed จริงของ `LabManager` จึงตามทันเมื่อกลับมา แต่ `maxStepsPerTick` จำกัดการไล่)
+
+### 11.47 Implementation Notes (P51 — GitHub + Pages)
+
+- Repo: https://github.com/aplab-workshop/green-oak-plant-lab (public, remote `origin`) · Demo: https://aplab-workshop.github.io/green-oak-plant-lab/
+- `pages.yml` สร้างจาก `npm run build:demo` เท่านั้น (ไม่รัน `npm test` ใน CI เพราะเทสต์ยาวบางข้อไวต่อเครื่องช้า — รันบนเครื่องตามกติกาเดิม); deploy ใช้ `actions/upload-pages-artifact` + `actions/deploy-pages`

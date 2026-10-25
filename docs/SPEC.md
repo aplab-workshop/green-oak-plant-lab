@@ -713,7 +713,7 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 ### 8.10 P36–P37 — วางระบบด่านใหม่
 
 - [x] AC-50 🧪 **P36 / SPEC § 4.19:** แดดตามเวลา (0 ก่อน 06:00/หลัง 19:00, สูงสุด 300 ตอน 13:00) รวมกับ LED ใน PPFD ต้น/Sensor/DLI; แดดเพิ่มความร้อนและพัดลมลดได้; ไฟดับเหลือแดด; สูตรเติม LED ให้ PPFD ~300 ผ่านด่าน 1–4 ⭐⭐⭐ และ Ladder Auto ปรับ LED ตาม D102; tests/typecheck/build ผ่าน
-- [ ] AC-65 **P51 / SPEC § 4.34:** Repo public บน GitHub มี history ครบ; Workflow Pages ผ่าน; ลิงก์ Pages เปิดเกมเล่นได้ (เลือกด่าน, เวลาเดิน) ไม่มี Console error; Artifact เดิมถูกลบ
+- [x] AC-65 **P51 / SPEC § 4.34:** Repo public บน GitHub มี history ครบ; Workflow Pages ผ่าน; ลิงก์ Pages เปิดเกมเล่นได้ (เลือกด่าน, เวลาเดิน) ไม่มี Console error; Artifact เดิมถูกลบ
 - [x] AC-64 **P50 / SPEC § 4.33:** `npm run build:demo` ได้เว็บที่เล่นได้ครบโดยไม่มี Server (เลือก 4 ด่าน, สั่งอุปกรณ์, เวลาเดิน, เหตุการณ์/Mascot, กราฟ/Event log); โหมดปกติไม่เปลี่ยน; tests/typecheck/build ผ่าน; เปิดจาก dist-demo ใน Browser ไม่มี Console error
 - [x] AC-63 **P49 / SPEC § 4.32:** พัดลม 100 % ทำให้ RH ลดลงทุกสถานการณ์ (≥ 6 จุด); ยังคุมได้ทุกสถานการณ์ (เทสต์ตาราง); คู่มือ/คำอธิบายอุปกรณ์บอกว่าพัดลมทำให้แห้ง; สูตรดูแลผ่านทุกด่าน ⭐⭐⭐ และด่าน 3 ไม่ใช้พัดลม/หมอกแพ้; tests + Browser ไม่มี Console error
 - [x] AC-62 **P48 / SPEC § 4.31:** สวิตช์ปุ๋ย A+B เดียว; พัดลม D201 0–100 % (Slider, M100 เลิกใช้, Fail-safe 0, Clamp) ทุกชั้น; Model พัดลม/หมอกคุมได้ทุกสถานการณ์ (เทสต์ตาราง); Mascot ปิด Power Meter ไฟดับ 1–2 ชม. ด่าน 2/3/4 = 2/4/8 ครั้ง; สูตรดูแลผ่านทุกด่าน ⭐⭐⭐; DEVICE-MAP ตรงกับโค้ด; tests + Browser ไม่มี Console error

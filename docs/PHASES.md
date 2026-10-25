@@ -516,14 +516,16 @@ tags: [green-oak, roadmap]
 - [x] `npm run build:demo` → `apps/web/dist-demo/` (`vite --mode demo`: `base './'`, `VITE_DEMO=1`); Mascot/favicon ผ่าน `BASE_URL`; ป้าย "🧪 Demo" ที่หัวจอและหน้าเลือกด่าน; `.gitignore` dist-demo; launch config `green-oak-demo` (vite preview 4174)
 - [x] เทสต์ `apps/web/test/localServer.test.ts`: scenarios/snapshot (ปลดล็อกทุกด่าน)/history header, คำสั่ง 200/400/409 ตามกฎ LabSession, LocalSocket hello/snapshot/pong
 - **ผลตรวจ:** AC-64 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser (dist-demo ผ่าน vite preview): ไม่มีคำขอ `/api` เลย ไม่มี Console error, ด่าน 1 เริ่มปลูก/1440x เวลาเดิน, เลือกด่าน 3 ได้, โดสเติมน้ำ/Slider พัดลม, ถังรั่วและไฟดับ (Mascot) เกิดและจบตามตาราง; Bundle ไม่เรียกไฟล์ภายนอก
-- **Publish:** Artifact ส่วนตัว https://claude.ai/artifact/WwJCyB1uYqEYwfYkGgWqei (index.html + assets + mascot) — ตรวจบนลิงก์ไม่ได้เพราะ Browser ของ Agent ไม่ได้ Sign in claude.ai; ผู้ใช้ต้องกด Share เองให้คนอื่นเปิดได้
+- **Publish:** เดิม Publish เป็น Artifact บน claude.ai — **ลบแล้วใน P51** เปลี่ยนเป็น GitHub Pages
 - **หมายเหตุ:** Build ปกติยังมี chunk `localServer` ติดไปด้วย (ไม่ถูกโหลดถ้าไม่ใช่ Demo); อัปเดต Demo = `npm run build:demo` แล้ว Publish ไฟล์ใน dist-demo ซ้ำที่ลิงก์เดิม (ชื่อไฟล์ assets เปลี่ยนตาม hash)
 
-### P51 — ขึ้น GitHub + GitHub Pages Demo
+### P51 — ขึ้น GitHub + GitHub Pages Demo ✅
 - [x] ผู้ใช้ (2026-10-25): เอาลง GitHub แทน Artifact; เลือก Public `green-oak-plant-lab` + Pages, ลบ Artifact → SPEC § 4.34 + AC-65
 - [x] ตรวจความลับก่อน push (ไม่มี .env/คีย์/โทเคนใน repo)
-- [ ] Workflow `pages.yml`, README ลิงก์ Demo
-- [ ] สร้าง Repo + push + เปิด Pages + ตรวจลิงก์; ลบ Artifact
+- [x] Workflow `.github/workflows/pages.yml` (npm ci → typecheck → build:demo → deploy-pages), README ลิงก์ Demo
+- [x] `gh repo create aplab-workshop/green-oak-plant-lab --public` + push main และ tag `m1`; เปิด Pages (`build_type=workflow`)
+- **ผลตรวจ:** AC-65 ผ่าน; Workflow run 40177388788 สำเร็จ (build + deploy); https://aplab-workshop.github.io/green-oak-plant-lab/ เปิดเกมได้ ป้าย Demo, Mascot sprite 200, เริ่มปลูก + 1440x เวลาเดิน ไม่มี Console error; ลบ Artifact claude.ai แล้ว
+- **หมายเหตุ:** Actions เตือน Node 20 deprecated ใน action v4 (ยังทำงาน) และ ubuntu-latest จะย้ายเป็น Ubuntu 26 — ไม่กระทบตอนนี้; อีเมลผู้ commit อยู่ใน history สาธารณะ
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
