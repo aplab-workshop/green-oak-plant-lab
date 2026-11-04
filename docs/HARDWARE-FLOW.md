@@ -38,29 +38,31 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    PAR["PAR sensor<br/>PPFD → D102"] --> ADC1["ADS1115 #1"]
-    LVL["Level sensor<br/>→ D106"] --> ADC1
-    PH["pH probe"] --> ISO1["Isolator"] --> ADC2["ADS1115 #2"]
-    EC["EC probe"] --> ISO2["Isolator"] --> ADC2
+    subgraph BUSA["RS-485 บัส A (A / B, 120 Ω ที่ปลายบัส)"]
+        WQ["5-in-1 Water Quality (addr 1)<br/>pH → D104 · EC → D105<br/>Water Temp → D103"]
+        PAR["PAR sensor RS-485 (addr 2)<br/>PPFD → D102"]
+    end
+    BUSA --> RS485["TTL to RS485 module"]
 
     subgraph I2C["I²C bus (SDA / SCL)"]
         SHT["SHT40<br/>Air Temp / RH → D100, D101"]
         RTC["DS3231 RTC<br/>→ D111, D112"]
-        ADC1
-        ADC2
+        ADC["ADS1115"]
     end
+    LVL["Level 4–20 mA + R 150 Ω<br/>→ D106"] --> ADC
 
-    PZEM["PZEM Power meter<br/>→ D108"] --> RS485["MAX3485 RS-485"]
-
-    I2C --> MCU["ESP32-S3<br/>คำนวณ VPD → D109, DLI → D110<br/>เขียนทั้งหมดลง PLC"]
-    DS["DS18B20<br/>Water Temp → D103"] -- "1-Wire" --> MCU
-    FLOW["YF-S401<br/>Flow → D107"] -- "Pulse (Interrupt)" --> MCU
-    RS485 -- "UART" --> MCU
+    MCU["ESP32-S3<br/>คำนวณ VPD → D109, DLI → D110<br/>เขียนทั้งหมดลง PLC"]
+    RS485 -- "UART 1" --> MCU
+    PZEM["PZEM-004T-100A + CT<br/>Power → D108"] -- "UART 2 (TTL)" --> MCU
+    I2C --> MCU
+    FLOW["YF-S401<br/>Flow → D107"] -- "Pulse (Divider 5V→3.3V)" --> MCU
     FLH["Float สูง"] -- "GPIO → D121" --> MCU
     FLL["Float ต่ำ"] -- "GPIO → D121" --> MCU
 ```
 
-- pH และ EC ต้องผ่าน Isolator ก่อนเข้า ADC เสมอ (Probe สองตัวในถังเดียวรบกวนกัน)
+- 5-in-1 แยกสัญญาณ pH/EC และชดเชยอุณหภูมิในตัว — ไม่ต้องใช้ Isolator และ DS18B20
+- EC เต็มสเกล 2000 µS/cm: ค่า ≥ 1990 ตั้ง D121 bit 13 (เกินช่วงวัด)
+- PZEM-004T เป็น TTL ไม่ใช่ RS-485 — ต่อ UART ตรง (สัญญาณ 5V ต้องลดเป็น 3.3V ก่อนเข้า RX)
 
 ## 3. Output — ESP32-S3 → Actuator
 
@@ -97,9 +99,9 @@ flowchart TB
     S1["1. ตั้ง FX5U<br/>IP + Modbus/TCP Slave + Device assignment"] --> S2["2. ทดสอบ FX5U ด้วย Modbus tool บน PC"]
     S2 --> S3["3. ต่อ ESP32-S3 + W5500 เข้า Switch<br/>เขียน D100 / อ่าน M101, D200"]
     S3 --> S4["4. ทดสอบ Fail-safe<br/>ถอดสาย LAN, PLC STOP, D202 หยุด"]
-    S4 -->|H1 ผ่าน| S5["5. Sensor I²C / 1-Wire<br/>SHT40, DS18B20, PAR, RTC"]
-    S5 -->|H2 ผ่าน| S6["6. Sensor น้ำ<br/>pH, EC (+Isolator), Level, Flow, Float"]
-    S6 -->|H3 ผ่าน| S7["7. RS-485 Power meter"]
+    S4 -->|H1 ผ่าน| S5["5. Sensor อากาศ/แสง/เวลา<br/>SHT40, RTC (I²C), PAR (RS-485)"]
+    S5 -->|H2 ผ่าน| S6["6. Sensor น้ำ<br/>5-in-1 RS-485, Level, Flow, Float"]
+    S6 -->|H3 ผ่าน| S7["7. PZEM-004T Power meter (UART)"]
     S7 -->|H4 ผ่าน| S8["8. Output: MOSFET / Relay / PWM<br/>+ Interlock, E-Stop, Safety limit"]
     S8 -->|H5 ผ่าน| S9["9. ย้ายวงจรลง PCB (KiCad)<br/>ทดสอบ H1–H5 ซ้ำ"]
     S9 -->|H6 ผ่าน| S10["10. ประกอบตู้ปลูกจริง<br/>รัน Ladder 24 ชม."]

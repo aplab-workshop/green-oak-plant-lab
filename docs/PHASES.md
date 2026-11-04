@@ -549,15 +549,16 @@ tags: [green-oak, roadmap]
 - **เกณฑ์ผ่าน:** ถอดสาย LAN / สั่ง PLC STOP แล้วเข้า Fail-safe ≤ 3 s, ต่อกลับแล้วใช้คำสั่ง PLC ทันที
 
 ### H2 — Sensor อากาศ/แสง/เวลา
-- [ ] Temp/RH, Water Temp, PPFD, RTC → D100–D103, D109 (VPD), D110 (DLI), D111–D112
+- [ ] Temp/RH (SHT40, I²C), PPFD (PAR รุ่น RS-485, บัส A addr 2), RTC → D100–D102, D109 (VPD), D110 (DLI), D111–D112
 - **เกณฑ์ผ่าน:** ค่าใน GX Works3 Monitor ตรงเครื่องวัดอ้างอิงในช่วงที่ยอมรับได้; DLI รีเซ็ตเที่ยงคืน
 
 ### H3 — Sensor น้ำ
-- [ ] pH, EC (Isolation + Calibration 2 จุด + ชดเชยอุณหภูมิ), Water Level, Flow → D104–D107
-- **เกณฑ์ผ่าน:** pH/EC ตรงน้ำยามาตรฐาน; จุ่มพร้อมกันในถังเดียวค่าไม่รบกวนกัน
+- [ ] 5-in-1 RS485 (K=1.0, OLED) บนบัส A addr 1 → pH D104, EC D105, Water Temp D103; EC ≥ 1990 µS/cm → D121 bit 13 (ต้องได้ Register map จากผู้ขายก่อน)
+- [ ] Water Level (4–20 mA → ADS1115) → D106, YF-S401 → D107
+- **เกณฑ์ผ่าน:** pH/EC ตรงน้ำยามาตรฐานและตรงจอ OLED; บัส A อ่านได้ครบทั้ง 2 Slave
 
 ### H4 — Power Meter
-- [ ] RS-485 Modbus RTU → D108
+- [ ] PZEM-004T-100A (TTL UART, Modbus RTU) → D108
 - **เกณฑ์ผ่าน:** ค่าตรงมิเตอร์อ้างอิง
 
 ### H5 — Output + Safety
