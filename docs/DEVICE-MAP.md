@@ -2,7 +2,7 @@
 title: PLC Device Mapping — FX5U
 version: 1.0
 status: draft — ต้องทดสอบกับ FX5U จริงใน M3 ก่อนใช้ในห้องเรียน
-updated: 2026-10-23
+updated: 2026-11-04
 tags: [green-oak, plc, fx5u, slmp]
 ---
 
@@ -119,3 +119,16 @@ Gateway เขียน Register เหล่านี้พร้อม Sensor 
 > pH Down เปิดค้างทำให้ pH ลดเร็ว (≈0.1 pH/นาที ที่ระดับน้ำ 85%) ถ้าเร่งเวลา Poll แต่ละรอบกินเวลาจำลองนาน ค่าอาจเลยเป้า ควรทดสอบที่ 1x–60x หรือใช้ Timer สั่งเป็นช่วงสั้น ๆ
 
 ตัวอย่างครบทุกบทเรียนจะอยู่ใน `docs/ladder-examples.md` (M3/M5)
+
+---
+
+## 8. Register ของต้นแบบจริง (MCU) — อนุมัติ 2026-11-04
+
+ใช้เฉพาะต้นแบบจริงที่ ESP32-S3 เป็น Modbus TCP Master ([HARDWARE.md](HARDWARE.md)) — **ยังไม่มีใน Sim และ `deviceMap.ts`**
+
+| Address | ทิศทาง | Parameter | ค่า |
+|---|---|---|---|
+| D121 | MCU เขียน → PLC อ่าน | MCU Status bits | Bit 0–7 Sensor fault, 8 Refill ถูกตัด, 9 ปั๊มโดสถูกตัด, 10/11 Float สูง/ต่ำ, 12 RTC ยังไม่ตั้ง, 15 เพิ่งออกจาก Fail-safe (HARDWARE § 5.4) |
+| D202 | Ladder เขียน → MCU อ่าน | PLC Heartbeat | +1 ทุก 1 s; ไม่เปลี่ยน > 3 s → MCU เข้า Fail-safe (จับกรณี PLC STOP) |
+
+- Allowlist การเขียนของ MCU: D100–D112, D120–D121 เท่านั้น (ห้ามเขียน M และ D200 ขึ้นไป เหมือน FR-31)

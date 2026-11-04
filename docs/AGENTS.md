@@ -214,3 +214,8 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ### สถานะเพิ่มเติม 2026-10-25 — P51 GitHub + Pages
 - Repo public: https://github.com/aplab-workshop/green-oak-plant-lab (remote `origin`, branch `main`) — **push main = Demo อัปเดตอัตโนมัติ** ที่ https://aplab-workshop.github.io/green-oak-plant-lab/ ผ่าน `.github/workflows/pages.yml`
 - push ต้องได้รับอนุญาตจากผู้ใช้ทุกครั้ง (สาธารณะ); อย่า commit `AP_LAB_Mascot/` และ `.obsidian/graph.json`
+
+### สถานะเพิ่มเติม 2026-11-04 — แผนต้นแบบจริง (Hardware)
+- ผู้ใช้อนุมัติแผนต้นแบบจริง H1–H7 (PHASES) และรายละเอียดใน `docs/HARDWARE.md`: ESP32-S3 + W5500 เป็น Modbus TCP Master, FX5U เป็น Slave, Address เดิมของ DEVICE-MAP + D121 (MCU Status) / D202 (PLC Heartbeat) (DEVICE-MAP § 8 — ยังไม่มีใน Sim/`deviceMap.ts`)
+- ต้นแบบจริงใช้พัดลมอย่างเดียว ไม่มี Cooling pad; Sim ยังเย็นกว่าห้อง 9 °C ไว้ตามที่ผู้ใช้สั่งคงไว้; Dashboard ต่อต้นแบบตัดสินใจทีหลังสุด
+- ก่อนเริ่ม H1 ต้องถามผู้ใช้: เก็บ firmware/KiCad ใน repo นี้ (Public) หรือแยก, M3 เดิม (SLMP) ยังทำหรือไม่

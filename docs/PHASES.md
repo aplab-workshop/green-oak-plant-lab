@@ -535,6 +535,43 @@ tags: [green-oak, roadmap]
 | M4 Multi-Lab Classroom | 10 LabSession + Config IP · Auth/สิทธิ์ · Teacher Dashboard · SQLite · Concurrent connection test |
 | M5 Advanced | Scenario library 10 บท + metrics · Experiment logging/export · Performance evaluation · Real sensor provider architecture |
 
+## Real Prototype — Hardware (H1–H7, อนุมัติ 2026-11-04)
+
+รายละเอียด, Fail-safe และ Checklist KiCad/Firmware: [HARDWARE.md](HARDWARE.md) — ESP32-S3 + W5500 เป็น Modbus TCP Master, FX5U เป็น Slave ใช้ Address ตาม DEVICE-MAP; Dashboard ตัดสินใจทีหลังสุด
+- ทำทีละ Phase และหยุดให้ผู้ใช้ตรวจเหมือนเดิม; Firmware ต้องมี Unit test (PlatformIO `native`) ส่วน Hardware ใช้ผลวัดเป็นหลักฐาน
+- **ก่อนเริ่ม H1 ต้องตอบ:** เก็บ `firmware/` และ `hardware/` ใน repo นี้ (Public) หรือแยก repo, และ M3 เดิม (SLMP Gateway) ยังทำต่อหรือไม่ (HARDWARE § 10)
+
+### H1 — Modbus Link + Fail-safe
+- [ ] ESP32-S3-DevKitC-1 + W5500 บน Breadboard ↔ FX5U Modbus/TCP Slave (ตั้ง Device assignment ให้ D/M ตรง Address)
+- [ ] เขียน D100–D112, D120–D121 (Allowlist) อ่าน M101–M106, D200–D202 รอบ 200 ms
+- [ ] Fail-safe เมื่อสื่อสารขาด > 3 s และเมื่อ D202 ไม่เดิน > 3 s (PLC STOP) แสดงด้วย LED
+- [ ] Unit test: Scaling/Clamp, Allowlist, Fail-safe state machine
+- **เกณฑ์ผ่าน:** ถอดสาย LAN / สั่ง PLC STOP แล้วเข้า Fail-safe ≤ 3 s, ต่อกลับแล้วใช้คำสั่ง PLC ทันที
+
+### H2 — Sensor อากาศ/แสง/เวลา
+- [ ] Temp/RH, Water Temp, PPFD, RTC → D100–D103, D109 (VPD), D110 (DLI), D111–D112
+- **เกณฑ์ผ่าน:** ค่าใน GX Works3 Monitor ตรงเครื่องวัดอ้างอิงในช่วงที่ยอมรับได้; DLI รีเซ็ตเที่ยงคืน
+
+### H3 — Sensor น้ำ
+- [ ] pH, EC (Isolation + Calibration 2 จุด + ชดเชยอุณหภูมิ), Water Level, Flow → D104–D107
+- **เกณฑ์ผ่าน:** pH/EC ตรงน้ำยามาตรฐาน; จุ่มพร้อมกันในถังเดียวค่าไม่รบกวนกัน
+
+### H4 — Power Meter
+- [ ] RS-485 Modbus RTU → D108
+- **เกณฑ์ผ่าน:** ค่าตรงมิเตอร์อ้างอิง
+
+### H5 — Output + Safety
+- [ ] Driver ทุกช่อง (Relay/MOSFET/PWM), Air Pump ขา NC, Float สูงตัดปั๊มเติม, E-Stop, Safety limit, D121
+- **เกณฑ์ผ่าน:** ทดสอบตาราง Fail-safe (HARDWARE § 5) ทุกแถวผ่าน
+
+### H6 — PCB (KiCad)
+- [ ] Schematic → Layout → สั่งผลิต จากวงจรที่ผ่าน H1–H5 ตาม Checklist HARDWARE § 6
+- **เกณฑ์ผ่าน:** ERC/DRC ผ่าน; ประกอบแล้วผ่านเทสต์ H1–H5 ซ้ำ
+
+### H7 — Integration
+- [ ] ตู้ปลูกจริง + Ladder แบบเดียวกับที่นักเรียนเขียนกับ Sim (มี Rung D202)
+- **เกณฑ์ผ่าน:** รัน 24 ชม. ไม่มี Fail-safe ที่ไม่คาดคิด
+
 ## P26 — Green Oak Visual Refinement (ตามภาพผู้ใช้ 2026-10-18)
 - ปรับภาพก่อน P22–P25 ตามคำขอล่าสุด; ไม่เปลี่ยนสมการหรือ PLC mapping
 - [x] ใบ Rosette กว้างเตี้ย หยักมน และปรับวัสดุปลูก/แสง
