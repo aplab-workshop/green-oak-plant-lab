@@ -29,6 +29,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | 2026-11-04 | PAR | Quantum PAR sensor **รุ่น RS-485** อยู่บัสเดียวกับ 5-in-1 (คนละ Slave address) |
 | 2026-11-04 | Power | **PZEM-004T-100A (TTL UART)** ต่อ UART ของ ESP32 ตรง (ไม่ผ่าน RS-485) คล้อง CT ที่สาย 220V หลักของตู้ |
 | 2026-11-04 | RS-485 | โมดูล **TTL to RS485** แบบสลับทิศทางเอง (ไม่มีขา DE) ต่อ UART อีกช่อง |
+| 2026-11-04 | Water Level | **Hydrostatic level transmitter แบบจุ่ม IP68, 1m Range / 2m Cable, RS485 dc24v** อยู่บัส A (addr 3) — ไม่ต้องใช้ ADS1115 |
 
 ## 2. โครงสร้าง
 
@@ -55,7 +56,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | D103 | Water Temp | **5-in-1** (Sensor อุณหภูมิในหัว EC: T+/T−) | RS-485 บัส A (Slave addr 1) |
 | D104 | pH | **5-in-1** หัว pH แบบ BNC (เปลี่ยนหัวได้) | RS-485 บัส A (Slave addr 1) |
 | D105 | EC | **5-in-1** หัว EC K=1.0, 0–2000 µS/cm (เต็มสเกล 2.00 mS/cm) | RS-485 บัส A (Slave addr 1) |
-| D106 | Water Level % | Pressure transmitter แบบจุ่ม 4–20 mA + R 150 Ω (0.6–3.0 V) — รุ่นยังไม่ยืนยัน | Analog → ADS1115 |
+| D106 | Water Level % | Hydrostatic level transmitter 1m Range, สาย 2 m (มี Vent tube) — แปลงเป็น % ด้วย Calibrate ถังว่าง/เต็ม | RS-485 บัส A (Slave addr 3) |
 | D107 | Refill Flow | YF-S401 (0.3–6 L/min, F ≈ 98·Q Hz) | GPIO Interrupt (ผ่าน Divider 5V → 3.3V) |
 | D108 | Power | PZEM-004T-100A + CT | UART (TTL, Modbus RTU) |
 | D109 | VPD | **คำนวณ** จาก D100/D101 | — |
@@ -65,7 +66,9 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | D121 | MCU Status bits | § 5.4 | — |
 | — | Float switch สูง/ต่ำ | Interlock + สถานะ | GPIO (และต่อ Hardware ตรง § 5.1) |
 
-- **บัส RS-485 A** (5-in-1 + PAR) ใช้ Baud rate เดียวกัน ตั้ง Slave address ไม่ชนกัน; Termination 120 Ω ที่ปลายบัส
+- **บัส RS-485 A** (5-in-1 addr 1, PAR addr 2, Level addr 3) ใช้ Baud rate เดียวกัน ตั้ง Slave address ไม่ชนกัน; Termination 120 Ω ที่ปลายบัส
+- Sensor ทุกตัวเป็น Digital (RS-485, I²C, UART, Pulse) — **ไม่มี Analog sensor และไม่ใช้ ADS1115**
+- Level transmitter: วางก้นถังห่างหัวทราย Air Pump; **ห้ามตัด/พับ/ปิดปลายสาย** (Vent tube) และปลายสายอยู่ที่แห้ง; ไฟเลี้ยงระบุ dc24v — ถามผู้ขายว่าใช้ 12V ได้หรือไม่ ถ้าไม่ได้ใช้ Boost 12→24V
 - 5-in-1 ไฟเลี้ยง **DC 9–24V** ใช้ 12V ร่วมกับปั๊ม; ต้องขอ **Modbus Register map + วิธี Calibrate** จากผู้ขายก่อน H3
 - 5-in-1 ทำ Isolation และชดเชยอุณหภูมิในตัว — Firmware ไม่ต้องทำเอง
 
@@ -141,13 +144,13 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 
 ### ไฟเลี้ยง
 - [ ] แหล่งจ่าย 12V (ปั๊ม/พัดลม) → Buck 5V → LDO 3.3V; คำนวณกระแสรวมของปั๊มที่เปิดพร้อมกัน
-- [ ] แยก Analog ground (ADS1115, Level) กับ Power ground ต่อกันจุดเดียว (Star ground)
+- [ ] Ground ของบัส RS-485 ต่อร่วมกับ GND ของ MCU จุดเดียว; ไม่มีวงจร Analog แล้ว (ไม่ต้องแยก Analog ground)
+- [ ] ถ้า Level ต้องใช้ 24V จริง: Boost 12→24V แยก Fuse
 - [ ] Bulk capacitor ใกล้ขั้วต่อปั๊ม, Decoupling 100 nF ทุก IC
 
 ### Sensor
 - [ ] pH/EC ไม่ต้องมี Isolator บนบอร์ด (5-in-1 แยกในตัว) — บนบอร์ดมีแค่ขั้วต่อ RS-485 A/B/GND + ไฟ 12V ไปตัวส่งสัญญาณ
-- [ ] ระดับแรงดัน: ESP32-S3 เป็น 3.3V — สัญญาณ 5V ต้องมี Level shifter/Divider: **PZEM-004T TX → RX** (ถ้าเลี้ยงฝั่ง TTL ด้วย 5V) และ **YF-S401 Pulse**; ADS1115 จ่าย 3.3V
-- [ ] Level 4–20 mA: R 150 Ω 0.1 % + ไฟ Loop 12–24V; ใส่ Fuse/ตัวต้านทานจำกัดกระแสกันขั้วต่อผิด
+- [ ] ระดับแรงดัน: ESP32-S3 เป็น 3.3V — สัญญาณ 5V ต้องมี Level shifter/Divider: **PZEM-004T TX → RX** (ถ้าเลี้ยงฝั่ง TTL ด้วย 5V) และ **YF-S401 Pulse**
 - [ ] TVS/ESD และตัวต้านทานอนุกรมที่ขั้วต่อ Sensor ที่สายยาว
 - [ ] I²C: Pull-up 4.7 kΩ (เช็กว่าโมดูลมีอยู่แล้วหรือไม่ อย่าซ้อนจนต่ำเกิน)
 - [ ] RS-485: ใช้โมดูล TTL to RS485 (สลับทิศทางเอง) บน Header **หรือ** Transceiver 3.3V บนบอร์ด (MAX3485 + ขา DE/RE); Termination 120 Ω แบบ Jumper, Bias resistor
@@ -199,7 +202,7 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 |---|---|---|
 | H1 Modbus Link | ESP32-S3 + W5500 บน Breadboard ↔ FX5U Slave; เขียน D100 อ่าน M101/D200; Heartbeat D120/D202; Fail-safe เมื่อถอดสาย LAN / PLC STOP (แสดงด้วย LED) | ถอดสาย/STOP แล้วเข้า Fail-safe ≤ 3 s, ต่อกลับแล้วทำงานต่อ; Unit test Scaling/Allowlist ผ่าน |
 | H2 Sensor อากาศ/แสง/เวลา | Temp/RH (I²C), PPFD (RS-485), RTC → D100–D102, D109–D112 | ค่าใน GX Works3 Monitor ตรงกับเครื่องวัดอ้างอิงในช่วงที่ยอมรับได้ |
-| H3 Sensor น้ำ | 5-in-1 (pH, EC, Water Temp) บนบัส RS-485 เดียวกับ PAR, Level, Flow → D103–D107 | pH/EC ตรงน้ำยามาตรฐาน และตรงกับจอ OLED; บัสมี 2 Slave อ่านได้ครบ |
+| H3 Sensor น้ำ | 5-in-1 (pH, EC, Water Temp) และ Level บนบัส RS-485 เดียวกับ PAR, Flow → D103–D107 | pH/EC ตรงน้ำยามาตรฐาน และตรงกับจอ OLED; Level ตรงไม้บรรทัด ±1 cm; บัสมี 3 Slave อ่านได้ครบ |
 | H4 Power Meter | PZEM-004T (UART) → D108 | ค่าตรงกับมิเตอร์อ้างอิง |
 | H5 Output + Safety | Driver ทุกช่อง, Interlock Hardware, Safety limit, D121 | ทดสอบตาราง Fail-safe ทุกแถวผ่าน |
 | H6 PCB (KiCad) | Schematic → Layout → สั่งผลิต จากวงจรที่พิสูจน์แล้วใน H1–H5 | ERC/DRC ผ่าน, ประกอบแล้วผ่านเทสต์ H1–H5 ซ้ำ |
@@ -208,7 +211,8 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 
 ## 10. คำถามที่ยังเปิดอยู่
 
-- งบประมาณ; รุ่น PAR sensor (RS-485) และ Level sensor ยังไม่เลือก
+- งบประมาณ; รุ่น PAR sensor (RS-485) ยังไม่เลือก
+- Level transmitter: ไฟเลี้ยง 12V ได้หรือไม่, Register map, วิธีเปลี่ยน Slave address
 - ขอ Modbus Register map + วิธี Calibrate + ความแม่นของ 5-in-1 จากผู้ขาย
 - เก็บ Firmware (`firmware/`, PlatformIO) และไฟล์ KiCad (`hardware/`) ใน repo นี้หรือแยก repo (repo นี้เป็น Public)
 - ต้นแบบ M3 เดิม (SLMP Gateway กับ FX5U จริง) ยังทำต่อหรือแทนด้วยแผนนี้

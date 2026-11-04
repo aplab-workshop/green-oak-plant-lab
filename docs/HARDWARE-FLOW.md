@@ -41,15 +41,14 @@ flowchart LR
     subgraph BUSA["RS-485 บัส A (A / B, 120 Ω ที่ปลายบัส)"]
         WQ["5-in-1 Water Quality (addr 1)<br/>pH → D104 · EC → D105<br/>Water Temp → D103"]
         PAR["PAR sensor RS-485 (addr 2)<br/>PPFD → D102"]
+        LVL["Level transmitter RS-485 (addr 3)<br/>1m Range → D106"]
     end
     BUSA --> RS485["TTL to RS485 module"]
 
     subgraph I2C["I²C bus (SDA / SCL)"]
         SHT["SHT40<br/>Air Temp / RH → D100, D101"]
         RTC["DS3231 RTC<br/>→ D111, D112"]
-        ADC["ADS1115"]
     end
-    LVL["Level 4–20 mA + R 150 Ω<br/>→ D106"] --> ADC
 
     MCU["ESP32-S3<br/>คำนวณ VPD → D109, DLI → D110<br/>เขียนทั้งหมดลง PLC"]
     RS485 -- "UART 1" --> MCU
@@ -61,6 +60,7 @@ flowchart LR
 ```
 
 - 5-in-1 แยกสัญญาณ pH/EC และชดเชยอุณหภูมิในตัว — ไม่ต้องใช้ Isolator และ DS18B20
+- Sensor ทุกตัวเป็น Digital — ไม่ใช้ ADS1115; Level ห้ามตัด/ปิดปลายสาย (Vent tube)
 - EC เต็มสเกล 2000 µS/cm: ค่า ≥ 1990 ตั้ง D121 bit 13 (เกินช่วงวัด)
 - PZEM-004T เป็น TTL ไม่ใช่ RS-485 — ต่อ UART ตรง (สัญญาณ 5V ต้องลดเป็น 3.3V ก่อนเข้า RX)
 
