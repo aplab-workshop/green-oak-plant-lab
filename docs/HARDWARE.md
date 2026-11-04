@@ -31,7 +31,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | 2026-11-04 | RS-485 | โมดูล **TTL to RS485** แบบสลับทิศทางเอง (ไม่มีขา DE) ต่อ UART อีกช่อง |
 | 2026-11-04 | Water Level | **XKC-Y25 (Non-contact, รุ่น NPN) 3 ตัว ติดนอกถังที่ 65 / 70 / 90 %** — D106 เป็นค่าขั้นบันได (เปลี่ยนจาก Hydrostatic RS485 ตามที่ผู้ใช้ยืนยัน) |
 | 2026-11-04 | I²C | **Aideepen SHT40** (Air Temp/RH) + **DS3231 ZS-042** (RTC) ไฟ 3.3V ทั้งคู่ |
-| 2026-11-05 | Grow Light | **Samsung LM301B ไฟ 220 VAC** + LED Driver แบบ Dimmable 0–10V + โมดูล **PWM to 0–10V Converter** (หาแบบ 12V ไม่ได้) — Relay ตัดไฟ AC ของ Driver เมื่อ D200 = 0 |
+| 2026-11-05 | Grow Light | **COB 50W LED Light Grow 12VDC** + MOSFET module (PWM) — เปลี่ยนกลับจากแผน LM301B 220V/0–10V ในวันเดียวกัน (ผู้ใช้หา 12V ได้) |
 
 ## 2. โครงสร้าง
 
@@ -92,17 +92,17 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | M103, M104 | Nutrient Pump A, B (Peristaltic) | MOSFET (12V) |
 | M105 | Air Pump | **Relay หน้าสัมผัส NC** (ไม่มีไฟเลี้ยง = ทำงาน) |
 | M106 | pH Down Pump (Peristaltic ทนกรด) | MOSFET (12V) |
-| D200 | Grow Light Brightness 0–100 % (Samsung LM301B, 220 VAC) | PWM → **PWM to 0–10V Converter** → ขา DIM+/DIM− ของ LED Driver; **Relay** ตัดไฟ 220V ของ Driver เมื่อ D200 = 0 |
+| D200 | Grow Light Brightness 0–100 % (COB 50W 12VDC) | **MOSFET module (12V) + PWM** — D200 = 0 ดับสนิท ไม่ต้องมี Relay |
 | D201 | Fan Speed 0–100 % | PWM หรือ 0–10V ตามชนิดพัดลม |
 | D202 | PLC Heartbeat (อนุมัติแล้ว) | Ladder นับ +1 ทุก 1 s (§ 5.2) |
 
-- **Grow Light 220 VAC (Samsung LM301B):**
-  - ลำดับ: ESP32 PWM (3.3V) → PWM to 0–10V Converter → DIM+ / DIM− ของ LED Driver; ไฟ 220V เข้า Driver ผ่าน E-Stop + Fuse + Relay
-  - **Dimmer ปุ่มหมุน (ต่อขั้ว Wago) ที่มากับชุด ต้องถอดออกจากสาย DIM** ก่อนต่อ Converter — ต่อทั้งสองพร้อมกันค่าจะตีกัน (ถ้าอยากเก็บไว้ใช้มือ ให้มีสวิตช์เลือก Manual/Auto)
-  - Driver แบบ 0–10V ส่วนใหญ่**หรี่ได้ต่ำสุด ~10 % ไม่ดับสนิทที่ 0V** → D200 = 0 ให้ Relay ตัดไฟ AC; D200 = 1–100 ให้ Relay ON + จ่าย 0–10V
-  - Converter (บอร์ดฟ้า PC817 + LM358): ไฟเลี้ยง 12–30V ใช้ 12V ชุดเดิม; **Jumper เลือก 10V**; ด้านเข้า PWM เป็น Opto PC817 ซึ่งมักต้อง ≥ 4.5V — PWM 3.3V จาก ESP32 อาจไม่พอ ให้ขับผ่าน Transistor/MOSFET จาก 5V หรือ 12V; ความถี่ PWM ~1 kHz; ปรับ Trimpot ให้ Duty 100 % = 10.0V
-  - ความสว่างไม่เป็นเส้นตรงกับแรงดัน — ใช้ PAR Sensor (D102) ทำตาราง D200 → PPFD ตอน H5 แล้ว Map ใน Firmware ถ้าต้องการให้ใกล้ Sim
-  - ไฟ 220V ของ LED ผ่าน PZEM-004T อยู่แล้ว → D108 รวมกำลังไฟของ LED
+- **Grow Light COB 50W 12VDC:**
+  - กระแส ≈ 50 W / 12 V ≈ **4.2 A** ต่อดวง — MOSFET module ต้องเป็นแบบ **Logic-level** (เปิดเต็มที่ 3.3V เช่น AOD4184/D4184, IRLZ44N) ไม่ใช่ IRF520 module (Gate 3.3V เปิดไม่สุด ร้อน); สายและขั้วต่อรับ ≥ 5 A; Fuse แยกช่อง
+  - **ต้องมี Heatsink + พัดลมระบาย + Thermal paste** — COB 50W ไม่มีฮีตซิงก์จะร้อนจนเสียในไม่กี่นาที; ไม่มีตัวจำกัดกระแสในตัว ใช้ Power Supply 12V ที่แรงดันนิ่ง (ไม่เกิน 12V) หรือ Constant-current driver
+  - PWM ~1–20 kHz ผ่าน MOSFET (Low-side) หรี่ได้ 0–100 % และ 0 % ดับสนิท — ไม่ต้องใช้ Converter/Relay
+  - COB เป็นจุดเดียว แสงตรงกลางแรงกว่าขอบ — วัด PPFD ด้วย PAR Sensor หลายจุดตอน H5 (อาจต้อง 2 ดวงหรือแขวนสูงขึ้นให้ทั่วถาด); สเปกตรัมแดง/ชมพูทำให้ PAR Sensor ราคาประหยัดอ่านคลาดได้มากขึ้น
+  - ทำตาราง D200 → PPFD ตอน H5 แล้ว Map ใน Firmware ถ้าต้องการให้ใกล้ Sim
+  - **Power Supply 12V ต้องพอกับโหลดรวม** (LED 4.2 A + ปั๊ม + พัดลม + Sensor) — เผื่อ ≥ 30 % เช่น 12V 10A ขึ้นไป; PZEM-004T วัดไฟ 220V ขาเข้า Power Supply จึงรวม LED ใน D108 อยู่แล้ว
 
 ## 4. การเลือก MCU
 
@@ -116,7 +116,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 - **ESP32-S3 ไม่ได้เสถียรกว่า ESP32 เดิมโดยตัวชิป** ความเสถียรมาจาก W5500 (Hardware TCP/IP), แหล่งจ่ายไฟที่ดี, Watchdog และ Firmware แบบ Non-blocking — S3 ได้เปรียบที่ GPIO และ USB
 - ต้นแบบแรก: **ESP32-S3-DevKitC-1 + โมดูล W5500** ต่อผ่าน Pin header บน PCB เพื่อเปลี่ยนได้ง่ายถ้าเสีย (ทางเลือก: บอร์ดสำเร็จรูป S3 + W5500 บนบอร์ดเดียว ถ้าขาพอ)
 - Software ที่จะทดลองใน Phase แรก: Arduino-ESP32 core 3.x (`ETH` รองรับ W5500 ผ่าน SPI) + Library Modbus TCP Client เช่น eModbus — ต้องยืนยันว่าใช้กับ W5500 ได้จริง
-- **งบขา (ประมาณ):** W5500 SPI 6 · I²C 2 · UART RS-485 บัส A 2 · UART PZEM 2 · Flow 1 · XKC-Y25 3 · Output on/off 7 (+Relay LED) · PWM 2 · LED สถานะ/Buzzer 2 = **~27 ขา** — DevKitC-1 พอ; ใช้ UART 2 ช่อง (S3 มี 3 ช่อง, Log ผ่าน Native USB)
+- **งบขา (ประมาณ):** W5500 SPI 6 · I²C 2 · UART RS-485 บัส A 2 · UART PZEM 2 · Flow 1 · XKC-Y25 3 · Output on/off 6 · PWM 2 · LED สถานะ/Buzzer 2 = **~26 ขา** — DevKitC-1 พอ; ใช้ UART 2 ช่อง (S3 มี 3 ช่อง, Log ผ่าน Native USB)
 
 ## 5. Fail-safe (3 ชั้น)
 
@@ -182,7 +182,7 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 - [ ] MOSFET แบบ Logic-level (Vgs(th) ต่ำพอที่ 3.3V), Gate resistor + Pull-down
 - [ ] Flyback diode ที่ปั๊ม/คอยล์ Relay ทุกตัว
 - [ ] Air Pump ต่อขา NC
-- [ ] Grow Light: Header ต่อโมดูล PWM to 0–10V (PWM + 12V + GND) และช่อง Relay ตัดไฟ AC ของ LED Driver (Relay/ไฟ 220V อยู่ในตู้ DIN แยก ไม่อยู่บน PCB)
+- [ ] Grow Light 12V: ช่อง MOSFET กระแส ≥ 5 A (ทองแดงกว้าง/ขั้วต่อ Screw terminal), Fuse แยก, ขั้วต่อพัดลม Heatsink ของ LED
 - [ ] LED แสดงสถานะทุก Output (ช่วยสอนและ Debug)
 
 ### ทั่วไป
