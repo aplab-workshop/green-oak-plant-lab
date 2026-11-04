@@ -26,7 +26,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | 2026-11-04 | Dashboard | ตัดสินใจทีหลังสุด — ตอนนี้ต้นแบบทำงานกับ PLC อย่างเดียว ไม่ต่อกับ Server |
 | 2026-11-04 | แผน + Register | ผู้ใช้อนุมัติแผน H1–H7 และ Register ใหม่ D121 (MCU Status), D202 (PLC Heartbeat) |
 | 2026-11-04 | pH / EC / Water Temp | **5-in-1 Water Quality Sensor รุ่น RS485 (EC K=1.0, 0–2000 µS/cm, มี OLED)** ตัวเดียวได้ pH, EC, อุณหภูมิน้ำ — ไม่ต้องใช้ Isolator และ DS18B20; EC ≥ 1990 µS/cm ถือว่าเกินช่วงวัด (D121 bit 13) |
-| 2026-11-04 | PAR | Quantum PAR sensor **รุ่น RS-485** อยู่บัสเดียวกับ 5-in-1 (คนละ Slave address) |
+| 2026-11-04 | PAR | **PAR Sensor (Photosynthetically Active Radiation) ตัวเลือก RS485** — 7–30V DC, 400–700 nm, 0–2500 µmol/m²/s, ละเอียด 1, ±2 % (ผู้ผลิต) อยู่บัส A (addr 2) |
 | 2026-11-04 | Power | **PZEM-004T-100A (TTL UART)** ต่อ UART ของ ESP32 ตรง (ไม่ผ่าน RS-485) คล้อง CT ที่สาย 220V หลักของตู้ |
 | 2026-11-04 | RS-485 | โมดูล **TTL to RS485** แบบสลับทิศทางเอง (ไม่มีขา DE) ต่อ UART อีกช่อง |
 | 2026-11-04 | Water Level | **Hydrostatic level transmitter แบบจุ่ม IP68, 1m Range / 2m Cable, RS485 dc24v** อยู่บัส A (addr 3) — ไม่ต้องใช้ ADS1115 |
@@ -52,7 +52,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | Address | ค่า | อุปกรณ์ | Interface |
 |---|---|---|---|
 | D100, D101 | Air Temp, RH | SHT40/SHT31 (มีกระบอกกันฝุ่น) | I²C |
-| D102 | PPFD | Quantum PAR sensor รุ่น RS-485 (0–2500 µmol/m²/s) | RS-485 บัส A (Slave addr 2) |
+| D102 | PPFD | PAR Sensor ตัวเลือก RS485 (0–2500 µmol/m²/s) | RS-485 บัส A (Slave addr 2) |
 | D103 | Water Temp | **5-in-1** (Sensor อุณหภูมิในหัว EC: T+/T−) | RS-485 บัส A (Slave addr 1) |
 | D104 | pH | **5-in-1** หัว pH แบบ BNC (เปลี่ยนหัวได้) | RS-485 บัส A (Slave addr 1) |
 | D105 | EC | **5-in-1** หัว EC K=1.0, 0–2000 µS/cm (เต็มสเกล 2.00 mS/cm) | RS-485 บัส A (Slave addr 1) |
@@ -69,6 +69,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 - **บัส RS-485 A** (5-in-1 addr 1, PAR addr 2, Level addr 3) ใช้ Baud rate เดียวกัน ตั้ง Slave address ไม่ชนกัน; Termination 120 Ω ที่ปลายบัส
 - Sensor ทุกตัวเป็น Digital (RS-485, I²C, UART, Pulse) — **ไม่มี Analog sensor และไม่ใช้ ADS1115**
 - Level transmitter: วางก้นถังห่างหัวทราย Air Pump; **ห้ามตัด/พับ/ปิดปลายสาย** (Vent tube) และปลายสายอยู่ที่แห้ง; ไฟเลี้ยง DC 12–30V (ผู้ขายยืนยัน, ค่าเริ่ม 24V) — ใช้ 12V ร่วมกับปั๊มได้ ไม่ต้องมี Boost; สาย 4 เส้นตาม Datasheet: **แดง V+ → +12V, เขียว V− → GND, น้ำเงิน A → A+, เหลือง B → B−**; Shield ต่อ GND ฝั่งกล่องควบคุมด้านเดียว
+- PAR Sensor: ไฟเลี้ยง 7–30V DC ใช้ 12V ร่วมกับปั๊มได้; วางหน้าเซ็นเซอร์แนวนอน (ใช้ลูกน้ำบนฐาน) ที่ระดับยอดผัก; **±2 % ของผู้ผลิตไม่ได้บอกแหล่งแสงที่ปรับเทียบ** — ใต้ LED อาจคลาดมากกว่านี้ ใช้สอน/คุมด้วย Ladder และเปรียบเทียบแบบสัมพัทธ์ได้ แต่ถ้าจะรายงาน PPFD/DLI เป็นค่าจริงในงานวิจัย ต้องวัดคู่กับเครื่องอ้างอิงที่วัดใต้ LED ได้ (เช่น Apogee SQ-500, LI-COR LI-190R) 3–5 ระดับ แล้วใส่ Correction factor ใน Firmware ก่อนเขียน D102
 - 5-in-1 ไฟเลี้ยง **DC 9–24V** ใช้ 12V ร่วมกับปั๊ม; ต้องขอ **Modbus Register map + วิธี Calibrate** จากผู้ขายก่อน H3
 - 5-in-1 ทำ Isolation และชดเชยอุณหภูมิในตัว — Firmware ไม่ต้องทำเอง
 
@@ -210,7 +211,8 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 
 ## 10. คำถามที่ยังเปิดอยู่
 
-- งบประมาณ; รุ่น PAR sensor (RS-485) ยังไม่เลือก
+- งบประมาณ
+- PAR Sensor: Register map, Baud rate, วิธีเปลี่ยน Slave address, สีสาย 4 เส้น, แหล่งแสงที่ใช้ปรับเทียบ/มี Calibration certificate ไหม
 - Level transmitter: Register map, วิธีเปลี่ยน Slave address (ไฟ 12V ใช้ได้แล้ว)
 - ขอ Modbus Register map + วิธี Calibrate + ความแม่นของ 5-in-1 จากผู้ขาย
 - เก็บ Firmware (`firmware/`, PlatformIO) และไฟล์ KiCad (`hardware/`) ใน repo นี้หรือแยก repo (repo นี้เป็น Public)
