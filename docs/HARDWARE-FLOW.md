@@ -81,12 +81,16 @@ flowchart LR
     MOS --> NUTA["ปั๊มปุ๋ย A — M103"]
     MOS --> NUTB["ปั๊มปุ๋ย B — M104"]
     MOS --> PHD["ปั๊ม pH Down — M106"]
-    MOS -- "PWM" --> LED["Grow Light — D200"]
+    MCU -- "PWM" --> CONV["PWM to 0–10V Converter"]
+    CONV -- "DIM+ / DIM−" --> DRV["LED Driver ในโคม (Dimmable 0–10V, 220 VAC)"]
+    REL -- "NO (D200 = 0 → ตัด AC)" --> DRV
+    DRV --> LED["Grow Light Samsung LM301B — D200"]
     REL -- "NC" --> AIR["Air Pump 220V — M105"]
     REL -- "NO" --> HUM["Humidifier — M101"]
 
 ```
 
+- Grow Light 220 VAC: หรี่ด้วย 0–10V; D200 = 0 Relay ตัดไฟ AC เพราะ Driver ดับสนิทที่ 0V ไม่ได้ — ถอด Dimmer ปุ่มหมุนออกจากสาย DIM
 - Air Pump ต่อขา **NC** — MCU ค้าง/ไม่มีไฟ ปั๊มลมยังทำงาน
 - ไม่มี Float switch: Firmware ตัดปั๊มเติมเมื่อ XKC-Y25 ตัว 90 % เจอน้ำแต่ยังเติมนานเกิน 60 s (D121 bit 10)
 
