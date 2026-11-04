@@ -41,7 +41,6 @@ flowchart LR
     subgraph BUSA["RS-485 บัส A (A / B, 120 Ω ที่ปลายบัส)"]
         WQ["5-in-1 Water Quality (addr 1)<br/>pH → D104 · EC → D105<br/>Water Temp → D103"]
         PAR["PAR sensor RS-485 (addr 2)<br/>PPFD → D102"]
-        LVL["Level transmitter RS-485 (addr 3)<br/>1m Range → D106"]
     end
     BUSA --> RS485["TTL to RS485 module"]
 
@@ -54,13 +53,15 @@ flowchart LR
     RS485 -- "UART 1" --> MCU
     PZEM["PZEM-004T-100A + CT<br/>Power → D108"] -- "UART 2 (TTL)" --> MCU
     I2C --> MCU
+    XKC["XKC-Y25 × 3 (65 / 70 / 90 %)<br/>Level ขั้นบันได → D106"] -- "GPIO × 3 (NPN + Pull-up)" --> MCU
     FLOW["YF-S401<br/>Flow → D107"] -- "Pulse (Divider 5V→3.3V)" --> MCU
     FLH["Float สูง"] -- "GPIO → D121" --> MCU
     FLL["Float ต่ำ"] -- "GPIO → D121" --> MCU
 ```
 
 - 5-in-1 แยกสัญญาณ pH/EC และชดเชยอุณหภูมิในตัว — ไม่ต้องใช้ Isolator และ DS18B20
-- Sensor ทุกตัวเป็น Digital — ไม่ใช้ ADS1115; Level ห้ามตัด/ปิดปลายสาย (Vent tube)
+- Sensor ทุกตัวเป็น Digital — ไม่ใช้ ADS1115
+- XKC-Y25 ติดนอกถัง: D106 = ระดับของตัวบนสุดที่เจอน้ำ (0 / 65 / 70 / 90) — 0 หมายถึงต่ำกว่า 65 %
 - EC เต็มสเกล 2000 µS/cm: ค่า ≥ 1990 ตั้ง D121 bit 13 (เกินช่วงวัด)
 - PZEM-004T เป็น TTL ไม่ใช่ RS-485 — ต่อ UART ตรง (สัญญาณ 5V ต้องลดเป็น 3.3V ก่อนเข้า RX)
 
@@ -100,7 +101,7 @@ flowchart TB
     S2 --> S3["3. ต่อ ESP32-S3 + W5500 เข้า Switch<br/>เขียน D100 / อ่าน M101, D200"]
     S3 --> S4["4. ทดสอบ Fail-safe<br/>ถอดสาย LAN, PLC STOP, D202 หยุด"]
     S4 -->|H1 ผ่าน| S5["5. Sensor อากาศ/แสง/เวลา<br/>SHT40, RTC (I²C), PAR (RS-485)"]
-    S5 -->|H2 ผ่าน| S6["6. Sensor น้ำ<br/>5-in-1 RS-485, Level, Flow, Float"]
+    S5 -->|H2 ผ่าน| S6["6. Sensor น้ำ<br/>5-in-1 RS-485, XKC-Y25, Flow, Float"]
     S6 -->|H3 ผ่าน| S7["7. PZEM-004T Power meter (UART)"]
     S7 -->|H4 ผ่าน| S8["8. Output: MOSFET / Relay / PWM<br/>+ Interlock, E-Stop, Safety limit"]
     S8 -->|H5 ผ่าน| S9["9. ย้ายวงจรลง PCB (KiCad)<br/>ทดสอบ H1–H5 ซ้ำ"]
