@@ -32,6 +32,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | 2026-11-04 | Water Level | **XKC-Y25 (Non-contact, รุ่น NPN) 3 ตัว ติดนอกถังที่ 65 / 70 / 90 %** — D106 เป็นค่าขั้นบันได (เปลี่ยนจาก Hydrostatic RS485 ตามที่ผู้ใช้ยืนยัน) |
 | 2026-11-04 | I²C | **Aideepen SHT40** (Air Temp/RH) + **DS3231 ZS-042** (RTC) ไฟ 3.3V ทั้งคู่ |
 | 2026-11-05 | Grow Light | **COB 50W LED Light Grow 12VDC** + MOSFET module (PWM) — เปลี่ยนกลับจากแผน LM301B 220V/0–10V ในวันเดียวกัน (ผู้ใช้หา 12V ได้) |
+| 2026-11-05 | Air Pump | **Magic-6600** ปั๊มลมตู้ปลา 220V, 3 W, 3 L/min, 1 หัว (แถมสาย 3 m + หัวทราย) — พอสำหรับถัง ≤ ~30 L; ขนาดถังยังไม่สรุป |
 
 ## 2. โครงสร้าง
 
@@ -90,12 +91,13 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | M101 | Humidifier (หมอก) | Relay |
 | M102 | Water Refill Pump | MOSFET (12V) |
 | M103, M104 | Nutrient Pump A, B (Peristaltic) | MOSFET (12V) |
-| M105 | Air Pump | **Relay หน้าสัมผัส NC** (ไม่มีไฟเลี้ยง = ทำงาน) |
+| M105 | Air Pump (Magic-6600, 220V 3 W) | **Relay หน้าสัมผัส NC** (ไม่มีไฟเลี้ยง = ทำงาน) |
 | M106 | pH Down Pump (Peristaltic ทนกรด) | MOSFET (12V) |
 | D200 | Grow Light Brightness 0–100 % (COB 50W 12VDC) | **MOSFET module (12V) + PWM** — D200 = 0 ดับสนิท ไม่ต้องมี Relay |
 | D201 | Fan Speed 0–100 % | PWM หรือ 0–10V ตามชนิดพัดลม |
 | D202 | PLC Heartbeat (อนุมัติแล้ว) | Ladder นับ +1 ทุก 1 s (§ 5.2) |
 
+- **Air Pump Magic-6600:** แรงลม ~1 L/min ต่อน้ำ 4–10 L → 1 ตัวพอถัง ≤ ~30 L, ถังใหญ่กว่านี้ใช้ 2 ตัว (ต่อ Relay NC ช่องเดียวกันได้) แยกหัวทรายคนละมุม; **ต้องซื้อ Check valve เพิ่ม** (ไม่แถม) หรือวางปั๊มสูงกว่าผิวน้ำ กันน้ำย้อนเข้าปั๊ม 220V ตอนไฟดับ; วางหัวทรายห่างหัววัด 5-in-1 แต่ใกล้จุดที่ปั๊มโดสหยด; เริ่มที่ลมแรงแล้วลดถ้าน้ำกระฉอกโดน Sensor
 - **Grow Light COB 50W 12VDC:**
   - กระแส ≈ 50 W / 12 V ≈ **4.2 A** ต่อดวง — MOSFET module ต้องเป็นแบบ **Logic-level** (เปิดเต็มที่ 3.3V เช่น AOD4184/D4184, IRLZ44N) ไม่ใช่ IRF520 module (Gate 3.3V เปิดไม่สุด ร้อน); สายและขั้วต่อรับ ≥ 5 A; Fuse แยกช่อง
   - **ต้องมี Heatsink + พัดลมระบาย + Thermal paste** — COB 50W ไม่มีฮีตซิงก์จะร้อนจนเสียในไม่กี่นาที; ไม่มีตัวจำกัดกระแสในตัว ใช้ Power Supply 12V ที่แรงดันนิ่ง (ไม่เกิน 12V) หรือ Constant-current driver
@@ -237,4 +239,4 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 - ขอ Modbus Register map + วิธี Calibrate + ความแม่นของ 5-in-1 จากผู้ขาย
 - เก็บ Firmware (`firmware/`, PlatformIO) และไฟล์ KiCad (`hardware/`) ใน repo นี้หรือแยก repo (repo นี้เป็น Public)
 - ต้นแบบ M3 เดิม (SLMP Gateway กับ FX5U จริง) ยังทำต่อหรือแทนด้วยแผนนี้
-- ขนาดตู้/ถัง (จำนวนต้น, ปริมาตรน้ำ) — ใช้คำนวณขนาดปั๊ม พัดลม LED และ Safety limit
+- ขนาดตู้/ถัง (จำนวนต้น, ปริมาตรน้ำ) — ใช้คำนวณขนาดปั๊ม พัดลม LED และ Safety limit (ถัง > ~30 L ต้องเพิ่ม Magic-6600 เป็น 2 ตัว)
