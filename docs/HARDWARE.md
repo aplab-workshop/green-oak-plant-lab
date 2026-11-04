@@ -30,6 +30,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | 2026-11-04 | Power | **PZEM-004T-100A (TTL UART)** ต่อ UART ของ ESP32 ตรง (ไม่ผ่าน RS-485) คล้อง CT ที่สาย 220V หลักของตู้ |
 | 2026-11-04 | RS-485 | โมดูล **TTL to RS485** แบบสลับทิศทางเอง (ไม่มีขา DE) ต่อ UART อีกช่อง |
 | 2026-11-04 | Water Level | **XKC-Y25 (Non-contact, รุ่น NPN) 3 ตัว ติดนอกถังที่ 65 / 70 / 90 %** — D106 เป็นค่าขั้นบันได (เปลี่ยนจาก Hydrostatic RS485 ตามที่ผู้ใช้ยืนยัน) |
+| 2026-11-04 | I²C | **Aideepen SHT40** (Air Temp/RH) + **DS3231 ZS-042** (RTC) ไฟ 3.3V ทั้งคู่ |
 
 ## 2. โครงสร้าง
 
@@ -51,7 +52,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 
 | Address | ค่า | อุปกรณ์ | Interface |
 |---|---|---|---|
-| D100, D101 | Air Temp, RH | SHT40/SHT31 (มีกระบอกกันฝุ่น) | I²C |
+| D100, D101 | Air Temp, RH | **Aideepen SHT40** (บอร์ด STEMMA QT/Qwiic, VIN 3–5V) | I²C `0x44` |
 | D102 | PPFD | PAR Sensor ตัวเลือก RS485 (0–2500 µmol/m²/s) | RS-485 บัส A (Slave addr 2) |
 | D103 | Water Temp | **5-in-1** (Sensor อุณหภูมิในหัว EC: T+/T−) | RS-485 บัส A (Slave addr 1) |
 | D104 | pH | **5-in-1** หัว pH แบบ BNC (เปลี่ยนหัวได้) | RS-485 บัส A (Slave addr 1) |
@@ -61,12 +62,15 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | D108 | Power | PZEM-004T-100A + CT | UART (TTL, Modbus RTU) |
 | D109 | VPD | **คำนวณ** จาก D100/D101 | — |
 | D110 | DLI today | **คำนวณ** สะสม PPFD ตั้งแต่ 00:00 | — |
-| D111, D112 | เวลาของวัน, วันที่ปลูก | **RTC** DS3231 + วันเริ่มปลูกที่ตั้งไว้ | I²C |
+| D111, D112 | เวลาของวัน, วันที่ปลูก | **RTC DS3231 + AT24C32 (บอร์ด ZS-042)** + วันเริ่มปลูกที่ตั้งไว้ | I²C `0x68` (EEPROM `0x57`) |
 | D120 | MCU Heartbeat | +1 ทุกรอบเขียน | — |
 | D121 | MCU Status bits | § 5.4 | — |
 | — | Float switch สูง/ต่ำ | Interlock + สถานะ | GPIO (และต่อ Hardware ตรง § 5.1) |
 
 - **บัส RS-485 A** (5-in-1 addr 1, PAR addr 2) ใช้ Baud rate เดียวกัน ตั้ง Slave address ไม่ชนกัน; Termination 120 Ω ที่ปลายบัส
+- **I²C bus** (SHT40 `0x44`, DS3231 `0x68`, AT24C32 `0x57` — ไม่ชนกัน): ไฟเลี้ยง **3.3V ทั้งคู่** (DS3231 ห้ามต่อ 5V — Pull-up บนบอร์ดจะดึง SDA/SCL ไป 5V); ทั้งสองบอร์ดมี Pull-up ในตัวแล้ว; สายไม่เกิน ~50 cm ที่ 100 kHz ใช้สายคู่บิด — ไกลกว่า 1 m ต้องใช้ I²C extender
+- SHT40: บอร์ดไม่มีฝาครอบกันน้ำ — วางห่างหัวหมอก Humidifier ในกล่องมีรูระบายอากาศ ไม่โดนละอองตรง
+- DS3231 (ZS-042): บอร์ดมีวงจรชาร์จแบต (ไดโอด + 200 Ω) — ใช้ **CR2032 ต้องถอด 200 Ω ออกก่อน** หรือใช้ **LIR2032** (ชาร์จได้); เช็กว่าร้านแถมแบตหรือไม่
 - Sensor ทุกตัวเป็น Digital (RS-485, I²C, UART, Pulse) — **ไม่มี Analog sensor และไม่ใช้ ADS1115**
 - **Water Level (XKC-Y25 × 3):**
   - ติดผนังนอกถังที่ความสูง 65 % (แจ้งเตือนน้ำต่ำ, เกณฑ์เดียวกับเกม), 70 % (เริ่มเติม), 90 % (หยุดเติม) — ผนังต้องไม่ใช่โลหะ หนา ≤ ~20 mm, ผิวแห้งสะอาด, ปรับความไวที่ตัว Sensor
@@ -158,7 +162,7 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 - [ ] pH/EC ไม่ต้องมี Isolator บนบอร์ด (5-in-1 แยกในตัว) — บนบอร์ดมีแค่ขั้วต่อ RS-485 A/B/GND + ไฟ 12V ไปตัวส่งสัญญาณ
 - [ ] ระดับแรงดัน: ESP32-S3 เป็น 3.3V — สัญญาณ 5V ต้องมี Level shifter/Divider: **PZEM-004T TX → RX** (ถ้าเลี้ยงฝั่ง TTL ด้วย 5V) และ **YF-S401 Pulse**
 - [ ] TVS/ESD และตัวต้านทานอนุกรมที่ขั้วต่อ Sensor ที่สายยาว
-- [ ] I²C: Pull-up 4.7 kΩ (เช็กว่าโมดูลมีอยู่แล้วหรือไม่ อย่าซ้อนจนต่ำเกิน)
+- [ ] I²C: SHT40 และ DS3231 มี Pull-up บนบอร์ดแล้ว — บน PCB ใส่ Footprint 4.7 kΩ แบบ DNP เผื่อไว้; ขั้วต่อ SHT40 ใช้ JST-SH 4 pin (STEMMA QT) หรือ Header 2.54 mm
 - [ ] RS-485: ใช้โมดูล TTL to RS485 (สลับทิศทางเอง) บน Header **หรือ** Transceiver 3.3V บนบอร์ด (MAX3485 + ขา DE/RE); Termination 120 Ω แบบ Jumper, Bias resistor
 - [ ] PZEM-004T: ขั้ว AC 220V และ CT อยู่ในกล่องแยก — บน PCB มีแค่ขั้วต่อ TTL 4 ขา (5V/3.3V, RX, TX, GND)
 - [ ] Flow sensor: Pull-up + RC filter กันสัญญาณเด้ง
