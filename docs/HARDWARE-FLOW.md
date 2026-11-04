@@ -55,8 +55,6 @@ flowchart LR
     I2C --> MCU
     XKC["XKC-Y25 × 3 (65 / 70 / 90 %)<br/>Level ขั้นบันได → D106"] -- "GPIO × 3 (NPN + Pull-up)" --> MCU
     FLOW["YF-S401<br/>Flow → D107"] -- "Pulse (Divider 5V→3.3V)" --> MCU
-    FLH["Float สูง"] -- "GPIO → D121" --> MCU
-    FLL["Float ต่ำ"] -- "GPIO → D121" --> MCU
 ```
 
 - 5-in-1 แยกสัญญาณ pH/EC และชดเชยอุณหภูมิในตัว — ไม่ต้องใช้ Isolator และ DS18B20
@@ -87,11 +85,10 @@ flowchart LR
     REL -- "NC" --> AIR["Air Pump 220V — M105"]
     REL -- "NO" --> HUM["Humidifier — M101"]
 
-    FLH["Float สูง"] -. "ตัดไฟปั๊มโดยตรง<br/>(Hardware interlock)" .-> REFILL
 ```
 
 - Air Pump ต่อขา **NC** — MCU ค้าง/ไม่มีไฟ ปั๊มลมยังทำงาน
-- เส้นประ: Float สูงตัดไฟปั๊มเติมน้ำโดยไม่ผ่าน Software
+- ไม่มี Float switch: Firmware ตัดปั๊มเติมเมื่อ XKC-Y25 ตัว 90 % เจอน้ำแต่ยังเติมนานเกิน 60 s (D121 bit 10)
 
 ## 4. ลำดับการต่อและทดสอบ (ตาม Phase)
 
@@ -101,7 +98,7 @@ flowchart TB
     S2 --> S3["3. ต่อ ESP32-S3 + W5500 เข้า Switch<br/>เขียน D100 / อ่าน M101, D200"]
     S3 --> S4["4. ทดสอบ Fail-safe<br/>ถอดสาย LAN, PLC STOP, D202 หยุด"]
     S4 -->|H1 ผ่าน| S5["5. Sensor อากาศ/แสง/เวลา<br/>SHT40, RTC (I²C), PAR (RS-485)"]
-    S5 -->|H2 ผ่าน| S6["6. Sensor น้ำ<br/>5-in-1 RS-485, XKC-Y25, Flow, Float"]
+    S5 -->|H2 ผ่าน| S6["6. Sensor น้ำ<br/>5-in-1 RS-485, XKC-Y25, Flow"]
     S6 -->|H3 ผ่าน| S7["7. PZEM-004T Power meter (UART)"]
     S7 -->|H4 ผ่าน| S8["8. Output: MOSFET / Relay / PWM<br/>+ Interlock, E-Stop, Safety limit"]
     S8 -->|H5 ผ่าน| S9["9. ย้ายวงจรลง PCB (KiCad)<br/>ทดสอบ H1–H5 ซ้ำ"]

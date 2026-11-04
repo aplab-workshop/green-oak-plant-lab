@@ -562,7 +562,7 @@ tags: [green-oak, roadmap]
 - **เกณฑ์ผ่าน:** ค่าตรงมิเตอร์อ้างอิง
 
 ### H5 — Output + Safety
-- [ ] Driver ทุกช่อง (Relay/MOSFET/PWM), Air Pump ขา NC, Float สูงตัดปั๊มเติม, E-Stop, Safety limit, D121
+- [ ] Driver ทุกช่อง (Relay/MOSFET/PWM), Air Pump ขา NC, ตัดปั๊มเติมเมื่อน้ำเกิน 90 % นาน (D121 bit 10), E-Stop, Safety limit, D121
 - **เกณฑ์ผ่าน:** ทดสอบตาราง Fail-safe (HARDWARE § 5) ทุกแถวผ่าน
 
 ### H6 — PCB (KiCad)

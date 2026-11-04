@@ -128,7 +128,7 @@ Gateway เขียน Register เหล่านี้พร้อม Sensor 
 
 | Address | ทิศทาง | Parameter | ค่า |
 |---|---|---|---|
-| D121 | MCU เขียน → PLC อ่าน | MCU Status bits | Bit 0–7 Sensor fault, 8 Refill ถูกตัด, 9 ปั๊มโดสถูกตัด, 10/11 Float สูง/ต่ำ, 12 RTC ยังไม่ตั้ง, 13 EC เกินช่วงวัด (≥ 1990 µS/cm), 15 เพิ่งออกจาก Fail-safe (HARDWARE § 5.4) |
+| D121 | MCU เขียน → PLC อ่าน | MCU Status bits | Bit 0–7 Sensor fault, 8 Refill ถูกตัด, 9 ปั๊มโดสถูกตัด, 10 Refill ถูกตัดเพราะน้ำเกิน 90 %, 11 สำรอง, 12 RTC ยังไม่ตั้ง, 13 EC เกินช่วงวัด (≥ 1990 µS/cm), 15 เพิ่งออกจาก Fail-safe (HARDWARE § 5.4) |
 | D202 | Ladder เขียน → MCU อ่าน | PLC Heartbeat | +1 ทุก 1 s; ไม่เปลี่ยน > 3 s → MCU เข้า Fail-safe (จับกรณี PLC STOP) |
 
 - Allowlist การเขียนของ MCU: D100–D112, D120–D121 เท่านั้น (ห้ามเขียน M และ D200 ขึ้นไป เหมือน FR-31)

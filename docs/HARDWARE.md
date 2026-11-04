@@ -65,7 +65,6 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | D111, D112 | เวลาของวัน, วันที่ปลูก | **RTC DS3231 + AT24C32 (บอร์ด ZS-042)** + วันเริ่มปลูกที่ตั้งไว้ | I²C `0x68` (EEPROM `0x57`) |
 | D120 | MCU Heartbeat | +1 ทุกรอบเขียน | — |
 | D121 | MCU Status bits | § 5.4 | — |
-| — | Float switch สูง/ต่ำ | Interlock + สถานะ | GPIO (และต่อ Hardware ตรง § 5.1) |
 
 - **บัส RS-485 A** (5-in-1 addr 1, PAR addr 2) ใช้ Baud rate เดียวกัน ตั้ง Slave address ไม่ชนกัน; Termination 120 Ω ที่ปลายบัส
 - **I²C bus** (SHT40 `0x44`, DS3231 `0x68`, AT24C32 `0x57` — ไม่ชนกัน): ไฟเลี้ยง **3.3V ทั้งคู่** (DS3231 ห้ามต่อ 5V — Pull-up บนบอร์ดจะดึง SDA/SCL ไป 5V); ทั้งสองบอร์ดมี Pull-up ในตัวแล้ว; สายไม่เกิน ~50 cm ที่ 100 kHz ใช้สายคู่บิด — ไกลกว่า 1 m ต้องใช้ I²C extender
@@ -78,7 +77,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
   - ตรวจความสอดคล้อง: ตัวบนเจอน้ำแต่ตัวล่างไม่เจอ → ตั้ง D121 bit 5 (Level fault) และเขียนค่าดีล่าสุด; Debounce ~1 s กันคลื่นจากหัวทราย Air Pump
   - **ใช้รุ่น NPN** + Pull-up เข้า 3.3V — ห้ามรุ่น -V ที่จ่าย 12V ออกขาสัญญาณ; ไฟเลี้ยง 5–24V ใช้ 12V ร่วมกับปั๊มได้
   - Ladder ที่ใช้เกณฑ์ 65 / 70 / 90 (เช่น `< D106 K70` เติม, `>= D106 K90` หยุด) ทำงานเหมือน Sim; เกณฑ์อื่นจะไม่ตรง — ต้องบอกนักเรียน
-  - **Float สูงแบบกลไกยังคงไว้** เป็น Hardware interlock ของปั๊มเติม (§ 5.1) ห้ามใช้ XKC-Y25 แทน
+  - **ไม่มี Float switch** (ผู้ใช้ตัดออก 2026-11-04) — กันน้ำล้นด้วย Firmware: XKC-Y25 ตัว 90 % + เวลาเปิดปั๊มเติมสูงสุด (§ 5.2); ถังควรมีรูน้ำล้น (Overflow) ต่อท่อลงถาดรอง
 - PAR Sensor: ไฟเลี้ยง 7–30V DC ใช้ 12V ร่วมกับปั๊มได้; วางหน้าเซ็นเซอร์แนวนอน (ใช้ลูกน้ำบนฐาน) ที่ระดับยอดผัก; **±2 % ของผู้ผลิตไม่ได้บอกแหล่งแสงที่ปรับเทียบ** — ใต้ LED อาจคลาดมากกว่านี้ ใช้สอน/คุมด้วย Ladder และเปรียบเทียบแบบสัมพัทธ์ได้ แต่ถ้าจะรายงาน PPFD/DLI เป็นค่าจริงในงานวิจัย ต้องวัดคู่กับเครื่องอ้างอิงที่วัดใต้ LED ได้ (เช่น Apogee SQ-500, LI-COR LI-190R) 3–5 ระดับ แล้วใส่ Correction factor ใน Firmware ก่อนเขียน D102
 - 5-in-1 ไฟเลี้ยง **DC 9–24V** ใช้ 12V ร่วมกับปั๊ม; ต้องขอ **Modbus Register map + วิธี Calibrate** จากผู้ขายก่อน H3
 - 5-in-1 ทำ Isolation และชดเชยอุณหภูมิในตัว — Firmware ไม่ต้องทำเอง
@@ -88,7 +87,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | Address | อุปกรณ์ | Driver (เสนอ) |
 |---|---|---|
 | M101 | Humidifier (หมอก) | Relay |
-| M102 | Water Refill Pump | MOSFET (12V) + Float สูงตัดวงจร |
+| M102 | Water Refill Pump | MOSFET (12V) |
 | M103, M104 | Nutrient Pump A, B (Peristaltic) | MOSFET (12V) |
 | M105 | Air Pump | **Relay หน้าสัมผัส NC** (ไม่มีไฟเลี้ยง = ทำงาน) |
 | M106 | pH Down Pump (Peristaltic ทนกรด) | MOSFET (12V) |
@@ -108,7 +107,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 - **ESP32-S3 ไม่ได้เสถียรกว่า ESP32 เดิมโดยตัวชิป** ความเสถียรมาจาก W5500 (Hardware TCP/IP), แหล่งจ่ายไฟที่ดี, Watchdog และ Firmware แบบ Non-blocking — S3 ได้เปรียบที่ GPIO และ USB
 - ต้นแบบแรก: **ESP32-S3-DevKitC-1 + โมดูล W5500** ต่อผ่าน Pin header บน PCB เพื่อเปลี่ยนได้ง่ายถ้าเสีย (ทางเลือก: บอร์ดสำเร็จรูป S3 + W5500 บนบอร์ดเดียว ถ้าขาพอ)
 - Software ที่จะทดลองใน Phase แรก: Arduino-ESP32 core 3.x (`ETH` รองรับ W5500 ผ่าน SPI) + Library Modbus TCP Client เช่น eModbus — ต้องยืนยันว่าใช้กับ W5500 ได้จริง
-- **งบขา (ประมาณ):** W5500 SPI 6 · I²C 2 · UART RS-485 บัส A 2 · UART PZEM 2 · Flow 1 · Float 2 · XKC-Y25 3 · Output on/off 6 · PWM 2 · LED สถานะ/Buzzer 2 = **~28 ขา** — DevKitC-1 พอ; ใช้ UART 2 ช่อง (S3 มี 3 ช่อง, Log ผ่าน Native USB)
+- **งบขา (ประมาณ):** W5500 SPI 6 · I²C 2 · UART RS-485 บัส A 2 · UART PZEM 2 · Flow 1 · XKC-Y25 3 · Output on/off 6 · PWM 2 · LED สถานะ/Buzzer 2 = **~26 ขา** — DevKitC-1 พอ; ใช้ UART 2 ช่อง (S3 มี 3 ช่อง, Log ผ่าน Native USB)
 
 ## 5. Fail-safe (3 ชั้น)
 
@@ -116,7 +115,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 
 ### 5.1 ชั้น Hardware (ไม่พึ่ง Software)
 - **Air Pump ต่อที่หน้าสัมผัส NC ของ Relay** — MCU ค้าง/ไม่มีไฟ/รีบูต Air Pump ยังทำงาน
-- **Float switch ระดับสูงต่ออนุกรมกับไฟของปั๊มเติมน้ำ** — น้ำเต็มแล้วปั๊มหยุดแม้ Ladder สั่งค้าง
+- **ไม่มี Hardware interlock กันน้ำล้น** (ตัด Float switch ออกตามผู้ใช้) — ชั้นนี้กันได้แค่ MCU ค้าง/รีบูต (Pull-down ทำให้ปั๊มเติม OFF); กรณี Ladder สั่งเติมค้างพึ่ง § 5.2 และรูน้ำล้นของถัง
 - ขา GPIO ที่ขับ Output ต้องมี **Pull-down** และ**ห้ามใช้ Strapping pin** (S3: GPIO0, 3, 45, 46) และ USB (19, 20) — ตอน Boot ทุก Output ต้อง OFF
 - Fuse แยกต่อช่อง, ปุ่ม **E-Stop ตัดไฟโหลด** (ไม่ตัดไฟ MCU) สำหรับครู
 - (ไม่บังคับ) สวิตช์ Hand-Off-Auto ต่อช่อง สำหรับทดสอบ/สาธิตโดยไม่ใช้ PLC
@@ -127,6 +126,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | ติดต่อ PLC ไม่ได้ | Modbus อ่าน/เขียนล้มเหลวต่อเนื่อง > 3000 ms (เท่า `PLC_COMMAND_TIMEOUT_MS`) | เข้า Fail-safe ตาม DEVICE-MAP § 5 |
 | **PLC อยู่ STOP** (ยังตอบ Modbus ได้ แต่ M ค้างค่าเดิม) | **D202 PLC Heartbeat ไม่เปลี่ยน > 3 s** | เข้า Fail-safe |
 | MCU ค้าง | Task Watchdog ของ ESP32 (ไม่มี `delay()` ใน Loop หลัก) | รีบูต → Output OFF (ชั้น 5.1) |
+| **น้ำเกิน 90 % แต่ยังเติม** | XKC-Y25 ตัว 90 % เจอน้ำ และ M102 ยัง ON นานกว่า 60 s (ปรับตามเวลาที่ถังใช้จาก 90 % ถึงขอบ) | ตัดปั๊มเติม + ตั้ง D121 bit 10 จน PLC สั่ง M102 OFF |
 | ปั๊มเติมน้ำเปิดค้าง | เปิดต่อเนื่องเกินเวลาสูงสุด (ค่าเริ่ม 10 นาที — ปรับตามอัตราไหลจริง) | ตัดปั๊ม + ตั้งบิตใน D121 จน PLC สั่ง OFF |
 | ปั๊มโดส A/B/pH Down เปิดค้าง | เกินเวลาต่อครั้ง หรือรวมต่อชั่วโมง (ค่าเริ่ม: ≤ 10 s/ครั้ง — ปรับจากการวัดจริง) | ตัดปั๊ม + ตั้งบิตใน D121 |
 
@@ -144,7 +144,8 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | 0–7 | Sensor fault: Temp/RH · PPFD · Water Temp · pH · EC · Level · Flow · Power |
 | 8 | Refill ถูกตัดเพราะเปิดนานเกิน |
 | 9 | ปั๊มโดสถูกตัดเพราะเกินขีดจำกัด |
-| 10 / 11 | Float สูง / Float ต่ำ ทำงาน |
+| 10 | Refill ถูกตัดเพราะน้ำเกิน 90 % นานเกิน (§ 5.2) |
+| 11 | (สำรอง) |
 | 12 | RTC ยังไม่ได้ตั้งเวลา |
 | 13 | EC เกินช่วงวัด (≥ 1990 µS/cm — D105 ค้างที่ 2.00 ไม่ใช่ค่าจริง) |
 | 15 | เพิ่งออกจาก Fail-safe (เคลียร์หลัง 10 s) |
