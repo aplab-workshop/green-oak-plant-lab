@@ -68,7 +68,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 
 - **บัส RS-485 A** (5-in-1 addr 1, PAR addr 2, Level addr 3) ใช้ Baud rate เดียวกัน ตั้ง Slave address ไม่ชนกัน; Termination 120 Ω ที่ปลายบัส
 - Sensor ทุกตัวเป็น Digital (RS-485, I²C, UART, Pulse) — **ไม่มี Analog sensor และไม่ใช้ ADS1115**
-- Level transmitter: วางก้นถังห่างหัวทราย Air Pump; **ห้ามตัด/พับ/ปิดปลายสาย** (Vent tube) และปลายสายอยู่ที่แห้ง; ไฟเลี้ยงระบุ dc24v — ถามผู้ขายว่าใช้ 12V ได้หรือไม่ ถ้าไม่ได้ใช้ Boost 12→24V
+- Level transmitter: วางก้นถังห่างหัวทราย Air Pump; **ห้ามตัด/พับ/ปิดปลายสาย** (Vent tube) และปลายสายอยู่ที่แห้ง; ไฟเลี้ยง DC 12–30V (ผู้ขายยืนยัน, ค่าเริ่ม 24V) — ใช้ 12V ร่วมกับปั๊มได้ ไม่ต้องมี Boost
 - 5-in-1 ไฟเลี้ยง **DC 9–24V** ใช้ 12V ร่วมกับปั๊ม; ต้องขอ **Modbus Register map + วิธี Calibrate** จากผู้ขายก่อน H3
 - 5-in-1 ทำ Isolation และชดเชยอุณหภูมิในตัว — Firmware ไม่ต้องทำเอง
 
@@ -145,7 +145,6 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 ### ไฟเลี้ยง
 - [ ] แหล่งจ่าย 12V (ปั๊ม/พัดลม) → Buck 5V → LDO 3.3V; คำนวณกระแสรวมของปั๊มที่เปิดพร้อมกัน
 - [ ] Ground ของบัส RS-485 ต่อร่วมกับ GND ของ MCU จุดเดียว; ไม่มีวงจร Analog แล้ว (ไม่ต้องแยก Analog ground)
-- [ ] ถ้า Level ต้องใช้ 24V จริง: Boost 12→24V แยก Fuse
 - [ ] Bulk capacitor ใกล้ขั้วต่อปั๊ม, Decoupling 100 nF ทุก IC
 
 ### Sensor
@@ -212,7 +211,7 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 ## 10. คำถามที่ยังเปิดอยู่
 
 - งบประมาณ; รุ่น PAR sensor (RS-485) ยังไม่เลือก
-- Level transmitter: ไฟเลี้ยง 12V ได้หรือไม่, Register map, วิธีเปลี่ยน Slave address
+- Level transmitter: Register map, วิธีเปลี่ยน Slave address (ไฟ 12V ใช้ได้แล้ว)
 - ขอ Modbus Register map + วิธี Calibrate + ความแม่นของ 5-in-1 จากผู้ขาย
 - เก็บ Firmware (`firmware/`, PlatformIO) และไฟล์ KiCad (`hardware/`) ใน repo นี้หรือแยก repo (repo นี้เป็น Public)
 - ต้นแบบ M3 เดิม (SLMP Gateway กับ FX5U จริง) ยังทำต่อหรือแทนด้วยแผนนี้
