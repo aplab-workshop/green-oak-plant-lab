@@ -68,7 +68,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 
 - **บัส RS-485 A** (5-in-1 addr 1, PAR addr 2, Level addr 3) ใช้ Baud rate เดียวกัน ตั้ง Slave address ไม่ชนกัน; Termination 120 Ω ที่ปลายบัส
 - Sensor ทุกตัวเป็น Digital (RS-485, I²C, UART, Pulse) — **ไม่มี Analog sensor และไม่ใช้ ADS1115**
-- Level transmitter: วางก้นถังห่างหัวทราย Air Pump; **ห้ามตัด/พับ/ปิดปลายสาย** (Vent tube) และปลายสายอยู่ที่แห้ง; ไฟเลี้ยง DC 12–30V (ผู้ขายยืนยัน, ค่าเริ่ม 24V) — ใช้ 12V ร่วมกับปั๊มได้ ไม่ต้องมี Boost
+- Level transmitter: วางก้นถังห่างหัวทราย Air Pump; **ห้ามตัด/พับ/ปิดปลายสาย** (Vent tube) และปลายสายอยู่ที่แห้ง; ไฟเลี้ยง DC 12–30V (ผู้ขายยืนยัน, ค่าเริ่ม 24V) — ใช้ 12V ร่วมกับปั๊มได้ ไม่ต้องมี Boost; สาย 4 เส้นตาม Datasheet: **แดง V+ → +12V, เขียว V− → GND, น้ำเงิน A → A+, เหลือง B → B−**; Shield ต่อ GND ฝั่งกล่องควบคุมด้านเดียว
 - 5-in-1 ไฟเลี้ยง **DC 9–24V** ใช้ 12V ร่วมกับปั๊ม; ต้องขอ **Modbus Register map + วิธี Calibrate** จากผู้ขายก่อน H3
 - 5-in-1 ทำ Isolation และชดเชยอุณหภูมิในตัว — Firmware ไม่ต้องทำเอง
 
