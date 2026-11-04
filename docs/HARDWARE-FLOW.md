@@ -6,7 +6,7 @@ tags: [green-oak, hardware, wiring, mermaid]
 
 # Connection Flowchart — ต้นแบบจริง
 
-เกี่ยวข้อง: [HARDWARE.md](HARDWARE.md) · [DEVICE-MAP.md](DEVICE-MAP.md)
+เกี่ยวข้อง: [HARDWARE.md](HARDWARE.md) · [DEVICE-MAP.md](DEVICE-MAP.md) · ผัง § 1–3 แบบ Obsidian Canvas: [HARDWARE-FLOW.canvas](HARDWARE-FLOW.canvas)
 
 > [!note] ผังภาพรวมการเชื่อมต่อ ยังไม่ใช่ Wiring diagram — เลขขา GPIO และรุ่นอุปกรณ์จริงจะกำหนดตอนทำ H1–H6
 

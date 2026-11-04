@@ -1,0 +1,805 @@
+{
+	"nodes": [
+		{
+			"id": "g3",
+			"type": "group",
+			"label": "3. Output — ESP32-S3 → Actuator",
+			"x": 3140,
+			"y": -120,
+			"width": 1580,
+			"height": 1116
+		},
+		{
+			"id": "g2_i2c",
+			"type": "group",
+			"label": "I²C bus (SDA / SCL)",
+			"x": 2060,
+			"y": -40,
+			"width": 380,
+			"height": 636
+		},
+		{
+			"id": "g2",
+			"type": "group",
+			"label": "2. Input — Sensor → ESP32-S3",
+			"x": 1340,
+			"y": -80,
+			"width": 1500,
+			"height": 1356
+		},
+		{
+			"id": "g1",
+			"type": "group",
+			"label": "1. ภาพรวม",
+			"x": -60,
+			"y": -80,
+			"width": 1180,
+			"height": 1142
+		},
+		{
+			"id": "o_ac",
+			"type": "text",
+			"text": "⚡ **220 VAC**",
+			"x": 400,
+			"y": 0,
+			"width": 260,
+			"height": 76,
+			"color": "2"
+		},
+		{
+			"id": "o_psu",
+			"type": "text",
+			"text": "**Power Supply**\n12 VDC",
+			"x": 0,
+			"y": 160,
+			"width": 260,
+			"height": 102,
+			"color": "2"
+		},
+		{
+			"id": "o_pc",
+			"type": "text",
+			"text": "**PC**\nGX Works3 / Modbus tool",
+			"x": 400,
+			"y": 160,
+			"width": 260,
+			"height": 102
+		},
+		{
+			"id": "o_estop",
+			"type": "text",
+			"text": "**E-Stop + Fuse**\n(ตัดเฉพาะไฟโหลด)",
+			"x": 800,
+			"y": 160,
+			"width": 260,
+			"height": 102,
+			"color": "1"
+		},
+		{
+			"id": "o_buck",
+			"type": "text",
+			"text": "**Buck**\n12V → 5V",
+			"x": 0,
+			"y": 320,
+			"width": 260,
+			"height": 102,
+			"color": "2"
+		},
+		{
+			"id": "o_sw",
+			"type": "text",
+			"text": "**Ethernet Switch**",
+			"x": 400,
+			"y": 320,
+			"width": 260,
+			"height": 76,
+			"color": "5"
+		},
+		{
+			"id": "o_w5500",
+			"type": "text",
+			"text": "**W5500**\nEthernet (SPI)",
+			"x": 200,
+			"y": 480,
+			"width": 260,
+			"height": 102,
+			"color": "5"
+		},
+		{
+			"id": "o_plc",
+			"type": "text",
+			"text": "**FX5U**\nModbus TCP Slave :502\nLadder ของนักเรียน",
+			"x": 640,
+			"y": 480,
+			"width": 260,
+			"height": 128,
+			"color": "5"
+		},
+		{
+			"id": "o_mcu",
+			"type": "text",
+			"text": "**ESP32-S3**\nModbus TCP Master\nRemote I/O + Fail-safe",
+			"x": 200,
+			"y": 680,
+			"width": 260,
+			"height": 128,
+			"color": "5"
+		},
+		{
+			"id": "o_in",
+			"type": "text",
+			"text": "📥 **Sensor ทั้งหมด**\n→ ดูกลุ่ม 2. Input",
+			"x": 0,
+			"y": 900,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "o_out",
+			"type": "text",
+			"text": "📤 **Actuator ทั้งหมด**\n→ ดูกลุ่ม 3. Output",
+			"x": 800,
+			"y": 900,
+			"width": 260,
+			"height": 102,
+			"color": "6"
+		},
+		{
+			"id": "i_par",
+			"type": "text",
+			"text": "**PAR sensor**\nPPFD → D102",
+			"x": 1400,
+			"y": 0,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "i_lvl",
+			"type": "text",
+			"text": "**Level sensor**\n→ D106",
+			"x": 1400,
+			"y": 140,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "i_ph",
+			"type": "text",
+			"text": "**pH probe**\n→ D104",
+			"x": 1400,
+			"y": 300,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "i_ec",
+			"type": "text",
+			"text": "**EC probe**\n→ D105",
+			"x": 1400,
+			"y": 440,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "i_pzem",
+			"type": "text",
+			"text": "**PZEM Power meter**\n→ D108",
+			"x": 1400,
+			"y": 600,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "i_ds",
+			"type": "text",
+			"text": "**DS18B20**\nWater Temp → D103",
+			"x": 1400,
+			"y": 740,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "i_flow",
+			"type": "text",
+			"text": "**YF-S401**\nFlow → D107",
+			"x": 1400,
+			"y": 880,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "i_flh",
+			"type": "text",
+			"text": "**Float สูง**",
+			"x": 1400,
+			"y": 1020,
+			"width": 260,
+			"height": 76,
+			"color": "4"
+		},
+		{
+			"id": "i_fll",
+			"type": "text",
+			"text": "**Float ต่ำ**",
+			"x": 1400,
+			"y": 1140,
+			"width": 260,
+			"height": 76,
+			"color": "4"
+		},
+		{
+			"id": "i_iso1",
+			"type": "text",
+			"text": "**Isolator**",
+			"x": 1760,
+			"y": 300,
+			"width": 260,
+			"height": 76,
+			"color": "1"
+		},
+		{
+			"id": "i_iso2",
+			"type": "text",
+			"text": "**Isolator**",
+			"x": 1760,
+			"y": 440,
+			"width": 260,
+			"height": 76,
+			"color": "1"
+		},
+		{
+			"id": "i_485",
+			"type": "text",
+			"text": "**MAX3485**\nRS-485",
+			"x": 1760,
+			"y": 600,
+			"width": 260,
+			"height": 102
+		},
+		{
+			"id": "i_mcu",
+			"type": "text",
+			"text": "**ESP32-S3**\nคำนวณ VPD → D109, DLI → D110\nเขียนทั้งหมดลง PLC",
+			"x": 2520,
+			"y": 560,
+			"width": 260,
+			"height": 128,
+			"color": "5"
+		},
+		{
+			"id": "i_note",
+			"type": "text",
+			"text": "⚠️ pH และ EC ต้องผ่าน **Isolator** ก่อนเข้า ADC เสมอ\n(Probe สองตัวในถังเดียวรบกวนกัน)",
+			"x": 2520,
+			"y": 860,
+			"width": 260,
+			"height": 102,
+			"color": "1"
+		},
+		{
+			"id": "i_sht",
+			"type": "text",
+			"text": "**SHT40**\nAir Temp / RH → D100, D101",
+			"x": 2120,
+			"y": 40,
+			"width": 260,
+			"height": 102,
+			"color": "4"
+		},
+		{
+			"id": "i_rtc",
+			"type": "text",
+			"text": "**DS3231 RTC**\n→ D111, D112",
+			"x": 2120,
+			"y": 180,
+			"width": 260,
+			"height": 102
+		},
+		{
+			"id": "i_adc1",
+			"type": "text",
+			"text": "**ADS1115 #1**",
+			"x": 2120,
+			"y": 320,
+			"width": 260,
+			"height": 76
+		},
+		{
+			"id": "i_adc2",
+			"type": "text",
+			"text": "**ADS1115 #2**",
+			"x": 2120,
+			"y": 460,
+			"width": 260,
+			"height": 76
+		},
+		{
+			"id": "q_mcu",
+			"type": "text",
+			"text": "**ESP32-S3**\nคำสั่งจาก PLC:\nM101–M106, D200–D201",
+			"x": 3200,
+			"y": 360,
+			"width": 260,
+			"height": 128,
+			"color": "5"
+		},
+		{
+			"id": "q_fuse",
+			"type": "text",
+			"text": "**E-Stop + Fuse**",
+			"x": 3200,
+			"y": 760,
+			"width": 260,
+			"height": 76,
+			"color": "1"
+		},
+		{
+			"id": "q_mos",
+			"type": "text",
+			"text": "**MOSFET modules**\n12V, Logic-level",
+			"x": 3600,
+			"y": 160,
+			"width": 260,
+			"height": 102
+		},
+		{
+			"id": "q_rel",
+			"type": "text",
+			"text": "**Relay module**\nOpto, สั่งที่ 3.3V",
+			"x": 3600,
+			"y": 560,
+			"width": 260,
+			"height": 102
+		},
+		{
+			"id": "q_refill",
+			"type": "text",
+			"text": "**ปั๊มเติมน้ำ** — M102",
+			"x": 4000,
+			"y": -40,
+			"width": 260,
+			"height": 76,
+			"color": "6"
+		},
+		{
+			"id": "q_nuta",
+			"type": "text",
+			"text": "**ปั๊มปุ๋ย A** — M103",
+			"x": 4000,
+			"y": 80,
+			"width": 260,
+			"height": 76,
+			"color": "6"
+		},
+		{
+			"id": "q_nutb",
+			"type": "text",
+			"text": "**ปั๊มปุ๋ย B** — M104",
+			"x": 4000,
+			"y": 200,
+			"width": 260,
+			"height": 76,
+			"color": "6"
+		},
+		{
+			"id": "q_phd",
+			"type": "text",
+			"text": "**ปั๊ม pH Down** — M106",
+			"x": 4000,
+			"y": 320,
+			"width": 260,
+			"height": 76,
+			"color": "6"
+		},
+		{
+			"id": "q_led",
+			"type": "text",
+			"text": "**Grow Light** — D200",
+			"x": 4000,
+			"y": 440,
+			"width": 260,
+			"height": 76,
+			"color": "6"
+		},
+		{
+			"id": "q_air",
+			"type": "text",
+			"text": "**Air Pump 220V** — M105\n(ต่อขา NC)",
+			"x": 4000,
+			"y": 580,
+			"width": 260,
+			"height": 102,
+			"color": "6"
+		},
+		{
+			"id": "q_hum",
+			"type": "text",
+			"text": "**Humidifier** — M101",
+			"x": 4000,
+			"y": 720,
+			"width": 260,
+			"height": 76,
+			"color": "6"
+		},
+		{
+			"id": "q_fan",
+			"type": "text",
+			"text": "**พัดลม 4-pin PWM** — D201",
+			"x": 4000,
+			"y": 860,
+			"width": 260,
+			"height": 76,
+			"color": "6"
+		},
+		{
+			"id": "q_flh",
+			"type": "text",
+			"text": "**Float สูง**",
+			"x": 4400,
+			"y": -40,
+			"width": 260,
+			"height": 76,
+			"color": "4"
+		},
+		{
+			"id": "q_note",
+			"type": "text",
+			"text": "⚠️ Air Pump ต่อขา **NC** — MCU ค้าง/ไม่มีไฟ ปั๊มลมยังทำงาน\n🔴 เส้นแดง = Hardware interlock ไม่ผ่าน Software",
+			"x": 4400,
+			"y": 560,
+			"width": 260,
+			"height": 102,
+			"color": "1"
+		}
+	],
+	"edges": [
+		{
+			"id": "e0",
+			"fromNode": "o_ac",
+			"fromSide": "left",
+			"toNode": "o_psu",
+			"toSide": "top",
+			"color": "2"
+		},
+		{
+			"id": "e1",
+			"fromNode": "o_ac",
+			"fromSide": "right",
+			"toNode": "o_estop",
+			"toSide": "top",
+			"color": "2"
+		},
+		{
+			"id": "e2",
+			"fromNode": "o_ac",
+			"fromSide": "right",
+			"toNode": "o_plc",
+			"toSide": "right",
+			"label": "ไฟเลี้ยง PLC",
+			"color": "2"
+		},
+		{
+			"id": "e3",
+			"fromNode": "o_psu",
+			"fromSide": "bottom",
+			"toNode": "o_buck",
+			"toSide": "top",
+			"color": "2"
+		},
+		{
+			"id": "e4",
+			"fromNode": "o_buck",
+			"fromSide": "bottom",
+			"toNode": "o_mcu",
+			"toSide": "left",
+			"label": "5V",
+			"color": "2"
+		},
+		{
+			"id": "e5",
+			"fromNode": "o_estop",
+			"fromSide": "bottom",
+			"toNode": "o_out",
+			"toSide": "top",
+			"label": "ไฟโหลด",
+			"color": "1"
+		},
+		{
+			"id": "e6",
+			"fromNode": "o_pc",
+			"fromSide": "bottom",
+			"toNode": "o_sw",
+			"toSide": "top",
+			"toEnd": "none",
+			"label": "LAN"
+		},
+		{
+			"id": "e7",
+			"fromNode": "o_sw",
+			"fromSide": "bottom",
+			"toNode": "o_w5500",
+			"toSide": "top",
+			"toEnd": "none",
+			"label": "LAN"
+		},
+		{
+			"id": "e8",
+			"fromNode": "o_sw",
+			"fromSide": "bottom",
+			"toNode": "o_plc",
+			"toSide": "top",
+			"toEnd": "none",
+			"label": "LAN"
+		},
+		{
+			"id": "e9",
+			"fromNode": "o_w5500",
+			"fromSide": "bottom",
+			"toNode": "o_mcu",
+			"toSide": "top",
+			"toEnd": "none",
+			"label": "SPI"
+		},
+		{
+			"id": "e10",
+			"fromNode": "o_mcu",
+			"fromSide": "right",
+			"toNode": "o_plc",
+			"toSide": "bottom",
+			"label": "เขียน D100–D112, D120–D121\nทุก 200 ms",
+			"color": "5"
+		},
+		{
+			"id": "e11",
+			"fromNode": "o_plc",
+			"fromSide": "left",
+			"toNode": "o_mcu",
+			"toSide": "top",
+			"label": "อ่าน M101–M106, D200–D202",
+			"color": "5"
+		},
+		{
+			"id": "e12",
+			"fromNode": "o_in",
+			"fromSide": "top",
+			"toNode": "o_mcu",
+			"toSide": "bottom",
+			"color": "4"
+		},
+		{
+			"id": "e13",
+			"fromNode": "o_mcu",
+			"fromSide": "bottom",
+			"toNode": "o_out",
+			"toSide": "left",
+			"color": "6"
+		},
+		{
+			"id": "e14",
+			"fromNode": "i_par",
+			"fromSide": "right",
+			"toNode": "i_adc1",
+			"toSide": "left"
+		},
+		{
+			"id": "e15",
+			"fromNode": "i_lvl",
+			"fromSide": "right",
+			"toNode": "i_adc1",
+			"toSide": "left"
+		},
+		{
+			"id": "e16",
+			"fromNode": "i_ph",
+			"fromSide": "right",
+			"toNode": "i_iso1",
+			"toSide": "left"
+		},
+		{
+			"id": "e17",
+			"fromNode": "i_ec",
+			"fromSide": "right",
+			"toNode": "i_iso2",
+			"toSide": "left"
+		},
+		{
+			"id": "e18",
+			"fromNode": "i_iso1",
+			"fromSide": "right",
+			"toNode": "i_adc2",
+			"toSide": "left"
+		},
+		{
+			"id": "e19",
+			"fromNode": "i_iso2",
+			"fromSide": "right",
+			"toNode": "i_adc2",
+			"toSide": "left"
+		},
+		{
+			"id": "e20",
+			"fromNode": "i_pzem",
+			"fromSide": "right",
+			"toNode": "i_485",
+			"toSide": "left"
+		},
+		{
+			"id": "e21",
+			"fromNode": "g2_i2c",
+			"fromSide": "right",
+			"toNode": "i_mcu",
+			"toSide": "top",
+			"label": "SDA / SCL",
+			"color": "5"
+		},
+		{
+			"id": "e22",
+			"fromNode": "i_485",
+			"fromSide": "right",
+			"toNode": "i_mcu",
+			"toSide": "left",
+			"label": "UART",
+			"color": "5"
+		},
+		{
+			"id": "e23",
+			"fromNode": "i_ds",
+			"fromSide": "right",
+			"toNode": "i_mcu",
+			"toSide": "left",
+			"label": "1-Wire",
+			"color": "5"
+		},
+		{
+			"id": "e24",
+			"fromNode": "i_flow",
+			"fromSide": "right",
+			"toNode": "i_mcu",
+			"toSide": "left",
+			"label": "Pulse (Interrupt)",
+			"color": "5"
+		},
+		{
+			"id": "e25",
+			"fromNode": "i_flh",
+			"fromSide": "right",
+			"toNode": "i_mcu",
+			"toSide": "bottom",
+			"label": "GPIO → D121",
+			"color": "5"
+		},
+		{
+			"id": "e26",
+			"fromNode": "i_fll",
+			"fromSide": "right",
+			"toNode": "i_mcu",
+			"toSide": "bottom",
+			"label": "GPIO → D121",
+			"color": "5"
+		},
+		{
+			"id": "e27",
+			"fromNode": "q_mcu",
+			"fromSide": "right",
+			"toNode": "q_mos",
+			"toSide": "left",
+			"label": "GPIO + Pull-down"
+		},
+		{
+			"id": "e28",
+			"fromNode": "q_mcu",
+			"fromSide": "right",
+			"toNode": "q_rel",
+			"toSide": "left",
+			"label": "GPIO + Pull-down"
+		},
+		{
+			"id": "e29",
+			"fromNode": "q_mcu",
+			"fromSide": "bottom",
+			"toNode": "q_fan",
+			"toSide": "left",
+			"label": "PWM"
+		},
+		{
+			"id": "e30",
+			"fromNode": "q_fuse",
+			"fromSide": "right",
+			"toNode": "q_mos",
+			"toSide": "bottom",
+			"color": "1"
+		},
+		{
+			"id": "e31",
+			"fromNode": "q_fuse",
+			"fromSide": "right",
+			"toNode": "q_rel",
+			"toSide": "bottom",
+			"color": "1"
+		},
+		{
+			"id": "e32",
+			"fromNode": "q_fuse",
+			"fromSide": "right",
+			"toNode": "q_fan",
+			"toSide": "left",
+			"color": "1"
+		},
+		{
+			"id": "e33",
+			"fromNode": "q_mos",
+			"fromSide": "right",
+			"toNode": "q_refill",
+			"toSide": "left",
+			"color": "6"
+		},
+		{
+			"id": "e34",
+			"fromNode": "q_mos",
+			"fromSide": "right",
+			"toNode": "q_nuta",
+			"toSide": "left",
+			"color": "6"
+		},
+		{
+			"id": "e35",
+			"fromNode": "q_mos",
+			"fromSide": "right",
+			"toNode": "q_nutb",
+			"toSide": "left",
+			"color": "6"
+		},
+		{
+			"id": "e36",
+			"fromNode": "q_mos",
+			"fromSide": "right",
+			"toNode": "q_phd",
+			"toSide": "left",
+			"color": "6"
+		},
+		{
+			"id": "e37",
+			"fromNode": "q_mos",
+			"fromSide": "right",
+			"toNode": "q_led",
+			"toSide": "left",
+			"label": "PWM",
+			"color": "6"
+		},
+		{
+			"id": "e38",
+			"fromNode": "q_rel",
+			"fromSide": "right",
+			"toNode": "q_air",
+			"toSide": "left",
+			"label": "NC",
+			"color": "6"
+		},
+		{
+			"id": "e39",
+			"fromNode": "q_rel",
+			"fromSide": "right",
+			"toNode": "q_hum",
+			"toSide": "left",
+			"label": "NO",
+			"color": "6"
+		},
+		{
+			"id": "e40",
+			"fromNode": "q_flh",
+			"fromSide": "left",
+			"toNode": "q_refill",
+			"toSide": "right",
+			"label": "ตัดไฟปั๊มโดยตรง\n(Hardware interlock)",
+			"color": "1"
+		}
+	]
+}
