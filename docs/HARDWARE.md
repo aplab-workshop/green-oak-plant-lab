@@ -8,7 +8,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 
 # Real Prototype — Hardware Plan
 
-เกี่ยวข้อง: [DEVICE-MAP.md](DEVICE-MAP.md) · [SPEC.md](SPEC.md) · [PHASES.md](PHASES.md)
+เกี่ยวข้อง: [DEVICE-MAP.md](DEVICE-MAP.md) · [SPEC.md](SPEC.md) · [PHASES.md](PHASES.md) · [HARDWARE-FLOW.md](HARDWARE-FLOW.md) (ผังการเชื่อมต่อ)
 
 ต้นแบบจริงของระบบปลูก Green Oak ที่ PLC FX5U ควบคุมได้ด้วย Ladder ชุดเดียวกับที่นักเรียนเขียนกับ Sim
 
