@@ -3120,7 +3120,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "10A Mini Blade"
+		(property "Value" "10A 5x20 glass"
 			(at 49.53 26.67 0)
 			(effects
 				(font
@@ -3129,7 +3129,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Fuse:Fuseholder_Blade_Mini_Keystone_3568"
+		(property "Footprint" "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal"
 			(at 45.72 25.40 0)
 			(hide yes)
 			(effects
@@ -3715,7 +3715,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "5A Mini Blade"
+		(property "Value" "5A 5x20 glass"
 			(at 29.21 102.87 0)
 			(effects
 				(font
@@ -3724,7 +3724,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Fuse:Fuseholder_Blade_Mini_Keystone_3568"
+		(property "Footprint" "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal"
 			(at 25.40 101.60 0)
 			(hide yes)
 			(effects
@@ -7246,7 +7246,7 @@
 			)
 		)
 	)
-	(label "RELAY_VCC"
+	(label "GND"
 		(at 55.88 264.16 180)
 		(effects
 			(font
@@ -7256,7 +7256,7 @@
 		)
 		(uuid "4a073439-6236-53e3-8603-552e26f3cb52")
 	)
-	(label "GND"
+	(label "RLY1_RED"
 		(at 55.88 266.70 180)
 		(effects
 			(font
@@ -7266,7 +7266,7 @@
 		)
 		(uuid "97985c8b-5bae-5d21-a524-4cf3900fc0a1")
 	)
-	(label "RLY1_RED"
+	(label "RLY2_GREEN"
 		(at 55.88 269.24 180)
 		(effects
 			(font
@@ -7276,7 +7276,7 @@
 		)
 		(uuid "775ce599-20a9-54ba-a627-5737d04108d0")
 	)
-	(label "RLY2_GREEN"
+	(label "RLY3_AIR"
 		(at 55.88 271.78 180)
 		(effects
 			(font
@@ -7286,7 +7286,7 @@
 		)
 		(uuid "f66dd5dd-497d-5afc-afcd-5f8d7346a62c")
 	)
-	(label "RLY3_AIR"
+	(label "RLY4_HUM"
 		(at 55.88 274.32 180)
 		(effects
 			(font
@@ -7296,7 +7296,7 @@
 		)
 		(uuid "0f7fba7c-1638-59ea-8c09-bad544908f96")
 	)
-	(label "RLY4_HUM"
+	(label "RELAY_VCC"
 		(at 55.88 276.86 180)
 		(effects
 			(font
@@ -8479,7 +8479,7 @@
 		)
 		(uuid "625e9ef9-24ba-501f-84a7-d6f1d5cc0245")
 	)
-	(label "FLOW_5V"
+	(label "FLOW_SIG"
 		(at 320.04 144.78 180)
 		(effects
 			(font
@@ -8507,7 +8507,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "10k"
+		(property "Value" "1k"
 			(at 374.65 143.51 0)
 			(effects
 				(font
@@ -8549,7 +8549,7 @@
 			)
 		)
 	)
-	(label "FLOW_5V"
+	(label "FLOW_SIG"
 		(at 370.84 138.43 90)
 		(effects
 			(font
@@ -8587,7 +8587,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "20k"
+		(property "Value" "10k"
 			(at 389.89 143.51 0)
 			(effects
 				(font
@@ -8629,7 +8629,7 @@
 			)
 		)
 	)
-	(label "FLOW"
+	(label "+3V3"
 		(at 386.08 138.43 90)
 		(effects
 			(font
@@ -8639,7 +8639,7 @@
 		)
 		(uuid "59c43f26-2316-5cfa-ac51-3052333f2d1d")
 	)
-	(label "GND"
+	(label "FLOW"
 		(at 386.08 146.05 270)
 		(effects
 			(font
@@ -8795,7 +8795,7 @@
 			)
 		)
 	)
-	(label "+3V3"
+	(label "GND"
 		(at 320.04 175.26 180)
 		(effects
 			(font
@@ -8805,7 +8805,7 @@
 		)
 		(uuid "725ef9f0-7132-5595-ac3a-f25a14994ee9")
 	)
-	(label "GND"
+	(label "+3V3"
 		(at 320.04 177.80 180)
 		(effects
 			(font
@@ -8901,7 +8901,7 @@
 			)
 		)
 	)
-	(label "+3V3"
+	(label "GND"
 		(at 320.04 205.74 180)
 		(effects
 			(font
@@ -8911,7 +8911,7 @@
 		)
 		(uuid "e67f00bd-6021-5f15-abeb-6a9e027595ec")
 	)
-	(label "GND"
+	(label "+3V3"
 		(at 320.04 208.28 180)
 		(effects
 			(font
@@ -9244,7 +9244,7 @@
 		)
 		(uuid "4eb2b690-5f3f-5c20-a32c-c195e1c3a815")
 	)
-	(text "YF-S401 5V GND PULSE / SHT40 + DS3231: 3V3 GND SDA SCL"
+	(text "YF-S401 5V GND PULSE / SHT40 + DS3231: GND 3V3 SDA SCL / RELAY GND IN1-4 VCC"
 		(exclude_from_sim no)
 		(at 309.88 20.32 0)
 		(effects
@@ -9266,7 +9266,7 @@
 		)
 		(uuid "2fcf0c1c-5ca0-529d-97f6-4ebac340de9d")
 	)
-	(text "Pulse 5V -> 10k/20k + 1nF"
+	(text "Open-drain pulse: 10k pull-up to 3V3, 1k series + 1nF"
 		(exclude_from_sim no)
 		(at 355.60 127.00 0)
 		(effects

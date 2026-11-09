@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "GreenOak")(type "KiCad")(uri "${KIPRJMOD}/GreenOak.pretty")(options "")(descr "Green Oak custom footprints"))
+)

@@ -127,15 +127,31 @@
 ## Schematic Rev A (2026-11-10)
 
 - ไฟล์: `hardware/kicad/GreenOak.kicad_sch` สร้างด้วย `hardware/kicad/tools/gen_schematic.py` (แก้ตารางในสคริปต์แล้วรันใหม่ — อย่าแก้ไฟล์ .kicad_sch ตรง ๆ ถ้าจะ Generate ซ้ำ); ทุกขาต่อด้วย Net label, ขาที่ไม่ใช้มี No-connect
-- **ERC: error 0** — เหลือ warning 2 ข้อ `footprint_link_issues` (Footprint ของ DevKit และ CR-DC2580 ยังไม่ได้สร้าง รอขนาดจริง)
+- **ERC: 0 violation** (error 0, warning 0) — Footprint ครบทุกชิ้น
 - Output: `output/GreenOak_schematic.pdf`, `output/GreenOak_BOM.csv`, `output/GreenOak.net`
 - 66 ชิ้น 45 Net; Net หลัก: +12V_IN → F1 10A → POWER SWITCH → +12V → F2 5A → +12V_LED / F3 PTC 0.5A → +12V_SENSOR; Buck → +5V → D1 SS34 → +5V_DEVKIT; +3V3 จาก DevKit
 - เพิ่มจากแผนภาพ: **JP1 Solder jumper เลือกไฟ Relay** (1-2 = 5V ค่าเริ่ม, 2-3 = 3V3 — Relay 3.3V 4 ช่องกินกระแส ~0.3 A จาก LDO ของ DevKit ไม่แนะนำ), **XH 4 ขา SPARE** (3V3, GND, IO14, IO47)
-- ลำดับขา XH (ขา 1 ก่อน): W5500 5V·GND·MISO·MOSI·SCLK·CS / RS485 3V3·TXD·RXD·GND / PZEM 5V·RX·TX·GND / YF-S401 5V·GND·PULSE / SHT40, DS3231 3V3·GND·SDA·SCL / Relay VCC·GND·IN1–IN4 / Fan ENA·GND — **ต้องเทียบกับสายจริงก่อนสั่งผลิต**
+- **ลำดับขา XH** (ผู้ใช้ให้เลือกตามความเหมาะสม 2026-11-10 — ขา 1 ก่อน, เรียงตาม Header ของโมดูลให้ใช้สายตรงได้):
+
+| Connector | ลำดับ | เหตุผล |
+|---|---|---|
+| J9 Relay 4CH | GND · IN1 RED · IN2 GREEN · IN3 AIR · IN4 HUM · VCC | ตรงกับ Header ของโมดูล Relay 4 ช่องทั่วไป |
+| J13 RS485 | 3V3 · TXD · RXD · GND | ตรงกับ Header ของ HW-726/XY-017 |
+| J14 PZEM-004T | 5V · RX · TX · GND | ตรงกับ Header ของ PZEM |
+| J16 SHT40 / J17 DS3231 | GND · 3V3 · SDA · SCL | ลำดับ STEMMA QT/Qwiic และตรงกับ Header 4 ขาฝั่งเดียวของ ZS-042 |
+| J12 W5500 | 5V · GND · MISO · MOSI · SCLK · CS | ตามที่ผู้ใช้ระบุ (Header ของ W5500 เป็น 2 × 5 ต้องทำสายเอง) |
+| J15 YF-S401 | 5V · GND · PULSE | แดง · ดำ · เหลือง |
+| J10 Fan | ENA · GND | |
+| J11 Spare | 3V3 · GND · IO14 · IO47 | |
+
 - Terminal ของโหลด: ขา 1 = +12V, ขา 2 = ขั้วลบของโหลด (Drain)
-- YF-S401 Divider 10k/20k: ถ้าเอาต์พุตเป็น Open-collector มี Pull-up ภายใน 10 k จะได้ ~2.5 V (ขอบล่างของ HIGH) — วัดตอน H3 ถ้าไม่พอเปลี่ยน R19 เป็น 33k
+- **YF-S401 เป็น Open-drain** (ผู้ใช้ยืนยัน): ตัด Divider ออก → R19 10k Pull-up ไป 3V3, R18 1k อนุกรม, C4 1nF — **ห้ามมี Pull-up ไป 5V ในตัวเซนเซอร์** (ตรวจตอน H3: ถอดสายสัญญาณแล้ววัดขาเหลืองต้องไม่มี 5V ลอยอยู่)
+- **ฟิวส์ F1 10 A / F2 5 A เป็นหลอดแก้ว 5×20** — Footprint `Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm` (คลิปคู่ ระยะ 20 mm) ต้องเทียบกับคลิป/ซ็อกเก็ตที่ซื้อจริง และคลิปต้องรับ ≥ 10 A
+- **Footprint ทำเอง** (`tools/gen_footprints.py` → `GreenOak.pretty`):
+  - ESP32-S3 Clone: 2 × 22 ขา Pitch 2.54, ระยะแถว **25.4 mm**, บอร์ดกว้าง 28 mm; ขา 1 (3V3) อยู่ฝั่งเสาอากาศ; **ความยาวบอร์ด 69 mm ยังเป็นค่าประมาณ** (ใช้วาด Courtyard/Keep-out เสาอากาศ)
+  - CR-DC2580: บอร์ด 30 × 20 mm, Pad 4 มุมห่างขอบ 2 mm → ระยะ Pad 26 × 16 mm (ไม่ตรง Grid 2.54 — บัดกรีขาลวด/สายตรง ไม่ใช้ Pin header)
 
 ## ถัดไป
 
-1. ขนาดจริงของโมดูลบนบอร์ด: ESP32-S3 Clone (ระยะแถวขา center-to-center, 22 ขา/แถว, ไดโอด 5V), CR-DC2580 (ตำแหน่ง Pad 4 จุด), ชนิด Fuse holder
-2. สร้าง Footprint `GreenOak.pretty` → PCB ≤ 100 × 100 mm
+1. ยืนยัน: ความยาวบอร์ด ESP32-S3 Clone และระยะจากขา 1 ถึงปลายเสาอากาศ, รุ่นคลิปฟิวส์ 5×20
+2. PCB ≤ 100 × 100 mm: วางชิ้น → Freerouting → เท GND → DRC → Silkscreen → Gerber

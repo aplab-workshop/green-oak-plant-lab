@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\Chanatip\\Desktop\\Green_oak_plan\\hardware\\kicad\\GreenOak.kicad_sch")
-		(date "2026-11-10T01:40:30")
+		(date "2026-11-10T02:26:26")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -572,11 +572,11 @@
 		)
 		(comp
 			(ref "F1")
-			(value "10A Mini Blade")
-			(footprint "Fuse:Fuseholder_Blade_Mini_Keystone_3568")
+			(value "10A 5x20 glass")
+			(footprint "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Fuse:Fuseholder_Blade_Mini_Keystone_3568")
+					(name "Footprint") "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -626,11 +626,11 @@
 		)
 		(comp
 			(ref "F2")
-			(value "5A Mini Blade")
-			(footprint "Fuse:Fuseholder_Blade_Mini_Keystone_3568")
+			(value "5A 5x20 glass")
+			(footprint "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Fuse:Fuseholder_Blade_Mini_Keystone_3568")
+					(name "Footprint") "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -2979,7 +2979,7 @@
 		)
 		(comp
 			(ref "R18")
-			(value "10k")
+			(value "1k")
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
@@ -3033,7 +3033,7 @@
 		)
 		(comp
 			(ref "R19")
-			(value "20k")
+			(value "10k")
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
@@ -4475,20 +4475,25 @@
 			)
 			(node
 				(ref "J16")
-				(pin "1")
-				(pinfunction "Pin_1_1")
+				(pin "2")
+				(pinfunction "Pin_2_2")
 				(pintype "passive")
 			)
 			(node
 				(ref "J17")
-				(pin "1")
-				(pinfunction "Pin_1_1")
+				(pin "2")
+				(pinfunction "Pin_2_2")
 				(pintype "passive")
 			)
 			(node
 				(ref "JP1")
 				(pin "3")
 				(pinfunction "B_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R19")
+				(pin "1")
 				(pintype "passive")
 			)
 			(node
@@ -4782,7 +4787,7 @@
 			)
 			(node
 				(ref "R19")
-				(pin "1")
+				(pin "2")
 				(pintype "passive")
 			)
 			(node
@@ -4794,7 +4799,7 @@
 		)
 		(net
 			(code "11")
-			(name "/FLOW_5V")
+			(name "/FLOW_SIG")
 			(class "Default")
 			(node
 				(ref "J15")
@@ -4876,14 +4881,14 @@
 			)
 			(node
 				(ref "J16")
-				(pin "2")
-				(pinfunction "Pin_2_2")
+				(pin "1")
+				(pinfunction "Pin_1_1")
 				(pintype "passive")
 			)
 			(node
 				(ref "J17")
-				(pin "2")
-				(pinfunction "Pin_2_2")
+				(pin "1")
+				(pinfunction "Pin_1_1")
 				(pintype "passive")
 			)
 			(node
@@ -4894,8 +4899,8 @@
 			)
 			(node
 				(ref "J9")
-				(pin "2")
-				(pinfunction "Pin_2_2")
+				(pin "1")
+				(pinfunction "Pin_1_1")
 				(pintype "passive")
 			)
 			(node
@@ -4960,11 +4965,6 @@
 			)
 			(node
 				(ref "R17")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R19")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -5403,8 +5403,8 @@
 			(class "Default")
 			(node
 				(ref "J9")
-				(pin "1")
-				(pinfunction "Pin_1_1")
+				(pin "6")
+				(pinfunction "Pin_6_6")
 				(pintype "passive")
 			)
 			(node
@@ -5420,8 +5420,8 @@
 			(class "Default")
 			(node
 				(ref "J9")
-				(pin "3")
-				(pinfunction "Pin_3_3")
+				(pin "2")
+				(pinfunction "Pin_2_2")
 				(pintype "passive")
 			)
 			(node
@@ -5442,8 +5442,8 @@
 			(class "Default")
 			(node
 				(ref "J9")
-				(pin "4")
-				(pinfunction "Pin_4_4")
+				(pin "3")
+				(pinfunction "Pin_3_3")
 				(pintype "passive")
 			)
 			(node
@@ -5464,8 +5464,8 @@
 			(class "Default")
 			(node
 				(ref "J9")
-				(pin "5")
-				(pinfunction "Pin_5_5")
+				(pin "4")
+				(pinfunction "Pin_4_4")
 				(pintype "passive")
 			)
 			(node
@@ -5486,8 +5486,8 @@
 			(class "Default")
 			(node
 				(ref "J9")
-				(pin "6")
-				(pinfunction "Pin_6_6")
+				(pin "5")
+				(pinfunction "Pin_5_5")
 				(pintype "passive")
 			)
 			(node

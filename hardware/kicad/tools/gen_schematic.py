@@ -174,7 +174,7 @@ FP = {
     "TB2": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
     "XH": "Connector_JST:JST_XH_B{n}B-XH-A_1x0{n}_P2.50mm_Vertical",
     "SS34": "Diode_SMD:D_SMA",
-    "FUSE": "Fuse:Fuseholder_Blade_Mini_Keystone_3568",
+    "FUSE": "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal",
     "TP": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
     "MOS": "Package_TO_SOT_SMD:TO-252-2",
 }
@@ -228,7 +228,7 @@ def g(n):
 notes.append(("POWER", g(4), g(4), 2))
 notes.append(("12V IN -> F1 main fuse -> POWER SWITCH (off-board) -> +12V rail", g(4), g(6), 1.27))
 TB2("12V IN", g(6), g(12), "+12V_IN", "GND")
-add("F", "Device:Fuse", "10A Mini Blade", FP["FUSE"], g(18), g(10), {"1": "+12V_IN", "2": "12V_FUSED"})
+add("F", "Device:Fuse", "10A 5x20 glass", FP["FUSE"], g(18), g(10), {"1": "+12V_IN", "2": "12V_FUSED"})
 TB2("POWER SWITCH", g(30), g(12), "12V_FUSED", "+12V")
 C("470uF/25V", g(46), g(12), "+12V", "GND", fp="Capacitor_THT:CP_Radial_D10.0mm_P5.00mm", polar=True)
 add("U", f"{PROJECT}:CR-DC2580", "CR-DC2580 12V->5V", f"{PROJECT}:CR-DC2580", g(12), g(26),
@@ -237,7 +237,7 @@ C("100uF/16V", g(28), g(26), "+5V", "GND", fp="Capacitor_THT:CP_Radial_D6.3mm_P2
 C("100nF", g(36), g(26), "+5V", "GND")
 SS34(g(48), g(26), "+5V", "+5V_DEVKIT")  # R6: block USB back-feed into the 5V rail
 notes.append(("D1 blocks USB back-feed into +5V (R6)", g(42), g(22), 1.27))
-add("F", "Device:Fuse", "5A Mini Blade", FP["FUSE"], g(10), g(40), {"1": "+12V", "2": "+12V_LED"})
+add("F", "Device:Fuse", "5A 5x20 glass", FP["FUSE"], g(10), g(40), {"1": "+12V", "2": "+12V_LED"})
 add("F", "Device:Polyfuse", "0.5A PTC 1812", "Fuse:Fuse_1812_4532Metric", g(24), g(40),
     {"1": "+12V", "2": "+12V_SENSOR"})
 TB2("12V SENSOR", g(36), g(40), "+12V_SENSOR", "GND")
@@ -296,8 +296,8 @@ notes.append(("Relay 4CH off-board, Active-HIGH (jumper H); Ch3 AIR PUMP on NC. 
 add("JP", "Jumper:SolderJumper_3_Bridged12", "RELAY VCC 1-2=5V 2-3=3V3",
     "Jumper:SolderJumper-3_P1.3mm_Bridged12_Pad1.0x1.5mm", g(8), g(104),
     {"1": "+5V", "2": "RELAY_VCC", "3": "+3V3"}, pos=((-6, 4), (-6, 5.5)))
-XH(6, "RELAY 4CH", g(24), g(106),
-   ["RELAY_VCC", "GND", "RLY1_RED", "RLY2_GREEN", "RLY3_AIR", "RLY4_HUM"])
+XH(6, "RELAY 4CH", g(24), g(106),  # same order as the relay module header -> straight cable
+   ["GND", "RLY1_RED", "RLY2_GREEN", "RLY3_AIR", "RLY4_HUM", "RELAY_VCC"])
 for i, net in enumerate(["RLY1_RED", "RLY2_GREEN", "RLY3_AIR", "RLY4_HUM"]):
     R("10k", g(38 + 6 * i), g(106), net, "GND")
 XH(2, "FAN L298N ENA", g(68), g(106), ["FAN_PWM", "GND"])
@@ -308,20 +308,20 @@ XH(4, "SPARE IO", g(90), g(106), ["+3V3", "GND", "SPARE_IO14", "SPARE_IO47"])
 notes.append(("COMMS + SENSORS (XH 2.50 mm)", g(122), g(4), 2))
 notes.append(("pin 1 first: W5500 5V GND MISO MOSI SCLK CS / RS485 3V3 TXD RXD GND / PZEM 5V RX TX GND",
               g(122), g(6), 1.27))
-notes.append(("YF-S401 5V GND PULSE / SHT40 + DS3231: 3V3 GND SDA SCL", g(122), g(8), 1.27))
+notes.append(("YF-S401 5V GND PULSE / SHT40 + DS3231: GND 3V3 SDA SCL / RELAY GND IN1-4 VCC", g(122), g(8), 1.27))
 XH(6, "W5500", g(128), g(16), ["+5V", "GND", "W5500_MISO", "W5500_MOSI", "W5500_SCLK", "W5500_CS"])
 XH(4, "RS485 MODULE (3V3!)", g(128), g(30), ["+3V3", "UART1_RX", "UART1_TX", "GND"])
 XH(4, "PZEM-004T", g(128), g(42), ["+5V", "UART2_TX", "PZEM_TX_5V", "GND"])
 R("2.2k", g(146), g(42), "PZEM_TX_5V", "UART2_RX")
 R("3.3k", g(152), g(42), "UART2_RX", "GND")
 notes.append(("PZEM TX 5V -> 2.2k/3.3k -> 3.0V", g(140), g(36), 1.27))
-XH(3, "YF-S401", g(128), g(56), ["+5V", "GND", "FLOW_5V"])
-R("10k", g(146), g(56), "FLOW_5V", "FLOW")
-R("20k", g(152), g(56), "FLOW", "GND")
+XH(3, "YF-S401", g(128), g(56), ["+5V", "GND", "FLOW_SIG"])
+R("1k", g(146), g(56), "FLOW_SIG", "FLOW")
+R("10k", g(152), g(56), "+3V3", "FLOW")
 C("1nF", g(158), g(56), "FLOW", "GND")
-notes.append(("Pulse 5V -> 10k/20k + 1nF", g(140), g(50), 1.27))
-XH(4, "SHT40", g(128), g(70), ["+3V3", "GND", "I2C_SDA", "I2C_SCL"])
-XH(4, "DS3231 ZS-042", g(128), g(82), ["+3V3", "GND", "I2C_SDA", "I2C_SCL"])
+notes.append(("Open-drain pulse: 10k pull-up to 3V3, 1k series + 1nF", g(140), g(50), 1.27))
+XH(4, "SHT40", g(128), g(70), ["GND", "+3V3", "I2C_SDA", "I2C_SCL"])
+XH(4, "DS3231 ZS-042", g(128), g(82), ["GND", "+3V3", "I2C_SDA", "I2C_SCL"])
 R("4.7k", g(146), g(72), "+3V3", "I2C_SDA", dnp=True)
 R("4.7k", g(152), g(72), "+3V3", "I2C_SCL", dnp=True)
 notes.append(("I2C pull-ups DNP (boards have their own)", g(140), g(66), 1.27))
