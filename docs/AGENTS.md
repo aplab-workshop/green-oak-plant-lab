@@ -223,4 +223,5 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 
 ### สถานะเพิ่มเติม 2026-11-10 — PCB Rev A (Schematic)
 - ผู้ใช้อนุมัติแบบบอร์ดใน `hardware/GreenOak_PCB_RevA.canvas`; ผลตรวจ/การตัดสินใจทั้งหมดอยู่ใน `hardware/Design_Review.md` (AOD4184A บน PCB, RS485 module นอกบอร์ด, ≤ 100 × 100 mm, Water Level กลับเป็น QDY30A)
-- Schematic สร้างด้วย `hardware/kicad/tools/gen_schematic.py` (แก้ตารางในสคริปต์แล้วรันใหม่) — ERC error 0; ถัดไปรอขนาดจริงของ ESP32-S3 Clone / CR-DC2580 เพื่อทำ Footprint + PCB
+- Schematic สร้างด้วย `hardware/kicad/tools/gen_schematic.py` (แก้ตารางในสคริปต์แล้วรันใหม่) — ERC 0
+- PCB 100 × 100 mm สร้างด้วยสคริปต์ใน `hardware/kicad/tools/` (ลำดับใน Design_Review § PCB) — DRC 0, Gerber `output/GreenOak_gerber_v1.0.zip`; **รอผู้ใช้ตรวจ 4 ข้อก่อนสั่งผลิต** (ลำดับขา/ทิศ Terminal, 3D, ลาย 12V, คลิปฟิวส์)

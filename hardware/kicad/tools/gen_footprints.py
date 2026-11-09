@@ -58,7 +58,9 @@ def devkit():
     x0, x1 = row / 2 - 14.0, row / 2 + 14.0          # 28 mm wide board
     y0, y1 = -8.0, -8.0 + 69.0                      # estimate: 8 mm antenna overhang above pin 1
     b += rect("F.Fab", x0, y0, x1, y1, 0.1, "fab")
-    b += rect("F.CrtYd", x0 - 0.25, y0 - 0.25, x1 + 0.25, y1 + 0.25, 0.05, "crt")
+    # courtyard only around the two female header rows: low SMD parts may sit under the module
+    for k, xc in (("crtL", 0), ("crtR", row)):
+        b += rect("F.CrtYd", xc - 1.6, -1.6, xc + 1.6, (n - 1) * p + 1.6, 0.05, k)
     b += rect("F.SilkS", -1.6, -1.6, row + 1.6, (n - 1) * p + 1.6, 0.12, "silk")
     b += line("F.SilkS", -2.4, -1.0, -2.4, 1.0, 0.2, "pin1")
     b += fp_text("ANTENNA - no copper", row / 2, -5.5, "Cmts.User", "ant", 0.8)

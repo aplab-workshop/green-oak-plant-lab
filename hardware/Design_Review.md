@@ -151,7 +151,28 @@
   - ESP32-S3 Clone: 2 × 22 ขา Pitch 2.54, ระยะแถว **25.4 mm**, บอร์ดกว้าง 28 mm; ขา 1 (3V3) อยู่ฝั่งเสาอากาศ; **ความยาวบอร์ด 69 mm ยังเป็นค่าประมาณ** (ใช้วาด Courtyard/Keep-out เสาอากาศ)
   - CR-DC2580: บอร์ด 30 × 20 mm, Pad 4 มุมห่างขอบ 2 mm → ระยะ Pad 26 × 16 mm (ไม่ตรง Grid 2.54 — บัดกรีขาลวด/สายตรง ไม่ใช้ Pin header)
 
+## PCB Rev A v1.0 (2026-11-10)
+
+- **ขนาด 100 × 100 mm, 2 ชั้น**, รูยึด M3 4 มุม (3.5 mm จากขอบ)
+- **DRC: 0 violation, 0 unconnected** (`output/drc.json`)
+- การจัดวาง (`tools/build_pcb.py`):
+  - ขอบซ้าย: Terminal 12V IN / POWER SWITCH / 12V SENSOR (สายเข้าทางซ้าย) + F1 10 A, F2 5 A (คลิป 5×20), Buck CR-DC2580, C1 470 µF
+  - ขอบบน: XH Relay / Fan / Spare; ESP32-S3 DevKit ตรงกลางบน **เสาอากาศยื่นพ้นขอบบนเล็กน้อย** + Keep-out ทองแดง; USB-C ชี้ลงในบอร์ด (หน้า USB มีแค่ชิ้น SMD เตี้ย)
+  - ขอบขวา: XH W5500 / RS485 / PZEM / YF-S401 / SHT40; ขอบล่างซ้าย: XH DS3231 + Test point 12V/5V/3V3/GND
+  - ขอบล่าง: Terminal โหลด 5 ช่อง (LED D200, A M103, B M104, pH M106, FILL M102 — ขา 1 = +, ขา 2 = −), AOD4184A หมุน 90° อยู่เหนือ Terminal, SS34 เหนือ MOSFET
+  - ตัวต้านทาน Gate/Pull-down และ Pull-down ของ Relay อยู่**ใต้ DevKit** (SMD 0805 สูงไม่ถึง Female header) — Courtyard ของ DevKit จึงครอบเฉพาะแถว Header
+- ลาย: Freerouting (`tools/route_pcb.py` + `patch_dsn_classes.py`) — Power 2.0 mm (+12V_IN, 12V_FUSED, +12V, +12V_LED, LIGHT_D), Supply 0.8 mm (GND, 5V, 3V3, Drain ปั๊ม ฯลฯ), สัญญาณ 0.3 mm; ลายมือ 2 เส้นใน `tools/manual_tracks.py` (+12V ไป J6/J7 ที่ Freerouting เดินไม่ผ่าน, กว้าง 1.5 / 0.8 mm + Via 1.2/0.6); GND เทเต็มทั้ง 2 ชั้น + Stitching via 0.6/0.3 (`tools/stitch_gnd.py`)
+- ทำซ้ำทั้งหมด: `build_pcb.py` → `route_pcb.py export` → patch DSN → Freerouting → `bash tools/post_route.sh`
+- Output: `output/GreenOak_gerber_v1.0.zip` (Gerber 9 ชั้น + PTH/NPTH drill + map), `GreenOak_pcb_front.pdf`, `GreenOak_pcb_back.pdf` (กลับด้าน), `GreenOak.step` (ไม่ commit — สร้างใหม่ได้)
+
+### ก่อนสั่งผลิต (ต้องให้ผู้ใช้ยืนยัน — ตรวจจากไฟล์ไม่ได้)
+
+1. **ลำดับขา Connector** เทียบสายจริงทุกตัว (ตารางลำดับ XH ด้านบน) และ **ทิศช่องเสียบสายของ Terminal 5.08** (Footprint Phoenix MKDS Horizontal — ตั้งให้ช่องเสียบหันออกขอบบอร์ด)
+2. **3D Viewer ไม่ชน**: ESP32 บน Female header สูงพอเหนือ R ใต้บอร์ด, C1 (Ø10 สูง ~16 mm) / คลิปฟิวส์ / Buck ไม่ชนกล่อง; Footprint ESP32 Clone ความยาว 69 mm ยังเป็นค่าประมาณ — วัดระยะขา 1 ถึงปลายเสาอากาศ ถ้าเสาอากาศยาวกว่า ~5 mm จากขา 1 จะยื่นพ้นขอบมากขึ้น (ไม่เสียหาย)
+3. **ลายรอบ MOSFET/ไฟ 12V** ดูด้วยตา โดยเฉพาะ Grow Light 4.2 A: +12V_LED / LIGHT_D 2.0 mm + GND เทเต็มทั้งสองชั้น
+4. **คลิปฟิวส์ 5×20** ที่ซื้อ: ระยะขา 20 mm (Littelfuse 111 Inline) และทน ≥ 10 A
+
 ## ถัดไป
 
-1. ยืนยัน: ความยาวบอร์ด ESP32-S3 Clone และระยะจากขา 1 ถึงปลายเสาอากาศ, รุ่นคลิปฟิวส์ 5×20
-2. PCB ≤ 100 × 100 mm: วางชิ้น → Freerouting → เท GND → DRC → Silkscreen → Gerber
+1. ผู้ใช้ตรวจ 4 ข้อด้านบน → สั่งผลิต
+2. รายการจัดหาอุปกรณ์ (BOM_Procurement) ให้ Codex — ถามก่อนว่ามีชิ้นไหนแล้ว

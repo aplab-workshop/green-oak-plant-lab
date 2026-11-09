@@ -3,3 +3,7 @@
 ~*.lck
 fp-info-cache
 *.kicad_prl
+route/
+_autosave-*
+output/gerber/
+output/*.step
