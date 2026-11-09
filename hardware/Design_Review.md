@@ -124,7 +124,18 @@
 - สาย TTL ระหว่าง PCB กับโมดูลให้สั้น (≤ ~30 cm)
 - เสาอากาศของ ESP32-S3 WROOM ยังต้องยื่นพ้นขอบบอร์ด หรือมี Keep-out ไม่มีทองแดงใต้เสาอากาศ
 
+## Schematic Rev A (2026-11-10)
+
+- ไฟล์: `hardware/kicad/GreenOak.kicad_sch` สร้างด้วย `hardware/kicad/tools/gen_schematic.py` (แก้ตารางในสคริปต์แล้วรันใหม่ — อย่าแก้ไฟล์ .kicad_sch ตรง ๆ ถ้าจะ Generate ซ้ำ); ทุกขาต่อด้วย Net label, ขาที่ไม่ใช้มี No-connect
+- **ERC: error 0** — เหลือ warning 2 ข้อ `footprint_link_issues` (Footprint ของ DevKit และ CR-DC2580 ยังไม่ได้สร้าง รอขนาดจริง)
+- Output: `output/GreenOak_schematic.pdf`, `output/GreenOak_BOM.csv`, `output/GreenOak.net`
+- 66 ชิ้น 45 Net; Net หลัก: +12V_IN → F1 10A → POWER SWITCH → +12V → F2 5A → +12V_LED / F3 PTC 0.5A → +12V_SENSOR; Buck → +5V → D1 SS34 → +5V_DEVKIT; +3V3 จาก DevKit
+- เพิ่มจากแผนภาพ: **JP1 Solder jumper เลือกไฟ Relay** (1-2 = 5V ค่าเริ่ม, 2-3 = 3V3 — Relay 3.3V 4 ช่องกินกระแส ~0.3 A จาก LDO ของ DevKit ไม่แนะนำ), **XH 4 ขา SPARE** (3V3, GND, IO14, IO47)
+- ลำดับขา XH (ขา 1 ก่อน): W5500 5V·GND·MISO·MOSI·SCLK·CS / RS485 3V3·TXD·RXD·GND / PZEM 5V·RX·TX·GND / YF-S401 5V·GND·PULSE / SHT40, DS3231 3V3·GND·SDA·SCL / Relay VCC·GND·IN1–IN4 / Fan ENA·GND — **ต้องเทียบกับสายจริงก่อนสั่งผลิต**
+- Terminal ของโหลด: ขา 1 = +12V, ขา 2 = ขั้วลบของโหลด (Drain)
+- YF-S401 Divider 10k/20k: ถ้าเอาต์พุตเป็น Open-collector มี Pull-up ภายใน 10 k จะได้ ~2.5 V (ขอบล่างของ HIGH) — วัดตอน H3 ถ้าไม่พอเปลี่ยน R19 เป็น 33k
+
 ## ถัดไป
 
-1. ขนาดจริงของโมดูลบนบอร์ด (ระยะแถวขา center-to-center, จำนวนขา, รูยึด): DevKitC-1, TTL to RS485, CR-DC2580, Switch System
-2. สร้าง Schematic ใน `hardware/kicad/`
+1. ขนาดจริงของโมดูลบนบอร์ด: ESP32-S3 Clone (ระยะแถวขา center-to-center, 22 ขา/แถว, ไดโอด 5V), CR-DC2580 (ตำแหน่ง Pad 4 จุด), ชนิด Fuse holder
+2. สร้าง Footprint `GreenOak.pretty` → PCB ≤ 100 × 100 mm

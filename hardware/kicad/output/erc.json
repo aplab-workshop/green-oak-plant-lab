@@ -1,0 +1,68 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-10T01:40:28",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/c6c0cd6f-be05-5333-a0c0-0280bb787554",
+            "violations": [
+                {
+                    "description": "The current configuration does not include the footprint library 'GreenOak'",
+                    "items": [
+                        {
+                            "description": "Symbol U1 [CR-DC2580]",
+                            "pos": {
+                                "x": 0.3048,
+                                "y": 0.6604
+                            },
+                            "uuid": "4c7d102e-ccac-59d8-94c9-37b723f1558a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                },
+                {
+                    "description": "The current configuration does not include the footprint library 'GreenOak'",
+                    "items": [
+                        {
+                            "description": "Symbol U2 [ESP32-S3-DevKitC-1]",
+                            "pos": {
+                                "x": 2.1844,
+                                "y": 0.8128
+                            },
+                            "uuid": "f8f9966a-9bab-5253-b9c5-ea7f04ef120f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "footprint_link_issues"
+                }
+            ]
+        }
+    ],
+    "source": "GreenOak.kicad_sch"
+}

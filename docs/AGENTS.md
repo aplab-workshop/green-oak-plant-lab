@@ -220,3 +220,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - ต้นแบบจริงใช้พัดลมอย่างเดียว ไม่มี Cooling pad; Sim ยังเย็นกว่าห้อง 9 °C ไว้ตามที่ผู้ใช้สั่งคงไว้; Dashboard ต่อต้นแบบตัดสินใจทีหลังสุด
 - ก่อนเริ่ม H1 ต้องถามผู้ใช้: เก็บ firmware/KiCad ใน repo นี้ (Public) หรือแยก, M3 เดิม (SLMP) ยังทำหรือไม่
 - อุปกรณ์จริง (HARDWARE § 1): 5-in-1 RS485 (pH/EC/Water Temp, K=1.0) + PAR RS-485 + QDY30A Level (addr 3, กลับมาใช้แทน XKC-Y25 เมื่อ 2026-11-10) บนบัส A, PZEM-004T ต่อ UART; ผัง Canvas `docs/HARDWARE-FLOW.canvas` ใช้รูปใน `image/` และ `Pasted image *.png` ที่ root — **อย่า commit `image/` และ `Pasted image *.png`** (รูปสินค้าจากร้าน, repo Public)
+
+### สถานะเพิ่มเติม 2026-11-10 — PCB Rev A (Schematic)
+- ผู้ใช้อนุมัติแบบบอร์ดใน `hardware/GreenOak_PCB_RevA.canvas`; ผลตรวจ/การตัดสินใจทั้งหมดอยู่ใน `hardware/Design_Review.md` (AOD4184A บน PCB, RS485 module นอกบอร์ด, ≤ 100 × 100 mm, Water Level กลับเป็น QDY30A)
+- Schematic สร้างด้วย `hardware/kicad/tools/gen_schematic.py` (แก้ตารางในสคริปต์แล้วรันใหม่) — ERC error 0; ถัดไปรอขนาดจริงของ ESP32-S3 Clone / CR-DC2580 เพื่อทำ Footprint + PCB

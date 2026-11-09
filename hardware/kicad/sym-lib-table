@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "GreenOak")(type "KiCad")(uri "${KIPRJMOD}/GreenOak.kicad_sym")(options "")(descr "Green Oak custom symbols"))
+)
