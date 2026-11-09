@@ -1,0 +1,479 @@
+{
+	"nodes": [
+		{
+			"id": "legend",
+			"type": "text",
+			"text": "## Green Oak Control Board — Rev A\nสี: 🟩 ตามแบบเดิม · 🟧 เพิ่มใหม่ · 🟥 แก้ความเสี่ยง · 🟦 Connector บน PCB · 🟪 นอกบอร์ด\nรายละเอียด: [[Design_Review]]",
+			"x": 0,
+			"y": -220,
+			"width": 900,
+			"height": 160
+		},
+		{
+			"id": "g_pwr",
+			"type": "group",
+			"label": "Power",
+			"x": 0,
+			"y": 0,
+			"width": 760,
+			"height": 560,
+			"color": "4"
+		},
+		{
+			"id": "p_in",
+			"type": "text",
+			"text": "**Terminal 12V** (5.08 mm)\nPSU 12V ≥ 10 A",
+			"x": 20,
+			"y": 40,
+			"width": 220,
+			"height": 90,
+			"color": "5"
+		},
+		{
+			"id": "p_fuse",
+			"type": "text",
+			"text": "**A1 ฟิวส์รวม ~10 A**\nหลัง Terminal 12V",
+			"x": 270,
+			"y": 40,
+			"width": 220,
+			"height": 90,
+			"color": "2"
+		},
+		{
+			"id": "p_sw",
+			"type": "text",
+			"text": "**Switch System**\n(Terminal 5.08 mm)",
+			"x": 520,
+			"y": 40,
+			"width": 220,
+			"height": 90,
+			"color": "4"
+		},
+		{
+			"id": "p_buck",
+			"type": "text",
+			"text": "**CR-DC2580 Buck**\n12V → 5V (8 A)",
+			"x": 520,
+			"y": 200,
+			"width": 220,
+			"height": 90,
+			"color": "4"
+		},
+		{
+			"id": "p_5v",
+			"type": "text",
+			"text": "**ราง 5V**\nDevKit 5V, Relay VCC/JD-VCC, PZEM, YF-S401\n+ R6 Schottky กันไฟย้อน USB",
+			"x": 270,
+			"y": 330,
+			"width": 470,
+			"height": 110,
+			"color": "1"
+		},
+		{
+			"id": "p_cap",
+			"type": "text",
+			"text": "**A6 Bulk cap** 470 µF/25 V ที่ 12V · 100 µF + 100 nF ที่ 5V\n**A7 Test point** 12V / 5V / 3V3 / GND",
+			"x": 20,
+			"y": 460,
+			"width": 720,
+			"height": 80,
+			"color": "2"
+		},
+		{
+			"id": "p_12v",
+			"type": "text",
+			"text": "**ราง 12V**\nMOSFET, L298N, PAR, 5-in-1, QDY30A\n≈ 7.2 A เมื่อเปิดทั้งหมด",
+			"x": 20,
+			"y": 200,
+			"width": 470,
+			"height": 110,
+			"color": "4"
+		},
+		{
+			"id": "g_mcu",
+			"type": "group",
+			"label": "Logic / MCU",
+			"x": 820,
+			"y": 0,
+			"width": 700,
+			"height": 560,
+			"color": "4"
+		},
+		{
+			"id": "m_esp",
+			"type": "text",
+			"text": "**ESP32-S3-DevKitC-1** (Pin header)\nใช้ 21 GPIO · สำรอง 14, 47\nห้าม: 0, 3, 45, 46, 19, 20, 26–32, 35–37*, 43, 44, 38/48",
+			"x": 840,
+			"y": 40,
+			"width": 420,
+			"height": 130,
+			"color": "4"
+		},
+		{
+			"id": "m_w5500",
+			"type": "text",
+			"text": "**W5500** XH 6 ขา\nVCC, GND, MISO 13, MOSI 11, SCLK 12, CS 10\n(ไม่ใช้ RST/INT)",
+			"x": 840,
+			"y": 210,
+			"width": 420,
+			"height": 110,
+			"color": "5"
+		},
+		{
+			"id": "m_i2c",
+			"type": "text",
+			"text": "**I²C** SDA 8 / SCL 9\nSHT40 0x44 · DS3231 0x68",
+			"x": 840,
+			"y": 350,
+			"width": 300,
+			"height": 80,
+			"color": "5"
+		},
+		{
+			"id": "i_sht",
+			"type": "file",
+			"file": "image/Aideepen SHT40.png",
+			"x": 1160,
+			"y": 340,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "i_rtc",
+			"type": "file",
+			"file": "image/DS3231.png",
+			"x": 1340,
+			"y": 340,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "m_rtc_note",
+			"type": "text",
+			"text": "**R7** ZS-042 + CR2032 ถอด 200 Ω · เลี้ยง 3.3V",
+			"x": 840,
+			"y": 460,
+			"width": 660,
+			"height": 70,
+			"color": "1"
+		},
+		{
+			"id": "g_sen",
+			"type": "group",
+			"label": "Sensor",
+			"x": 0,
+			"y": 620,
+			"width": 1520,
+			"height": 520,
+			"color": "4"
+		},
+		{
+			"id": "s_485",
+			"type": "text",
+			"text": "**TTL to RS485** (บนบอร์ด, เลี้ยง 3.3V)\nUART1 TX 17 / RX 18\n**A4** Jumper 120 Ω",
+			"x": 20,
+			"y": 660,
+			"width": 300,
+			"height": 120,
+			"color": "4"
+		},
+		{
+			"id": "i_485",
+			"type": "file",
+			"file": "image/TTL to RS485.png",
+			"x": 20,
+			"y": 800,
+			"width": 200,
+			"height": 90
+		},
+		{
+			"id": "s_par",
+			"type": "text",
+			"text": "**PAR** addr 2 · Terminal 4 ขา\n12V / GND / A / B",
+			"x": 360,
+			"y": 660,
+			"width": 260,
+			"height": 80,
+			"color": "5"
+		},
+		{
+			"id": "i_par",
+			"type": "file",
+			"file": "image/Par_sensor.png",
+			"x": 360,
+			"y": 750,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "s_wq",
+			"type": "text",
+			"text": "**5-in-1 pH/EC** addr 1 · Terminal 4 ขา\n12V / GND / A / B",
+			"x": 640,
+			"y": 660,
+			"width": 280,
+			"height": 80,
+			"color": "5"
+		},
+		{
+			"id": "i_wq",
+			"type": "file",
+			"file": "image/PH, EC, Temperature, Salinity, TDS 5-in-1.png",
+			"x": 640,
+			"y": 750,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "s_lvl",
+			"type": "text",
+			"text": "**QDY30A** addr 3 · Terminal 4 ขา\n12V / GND / A / B\n**R8** ยืนยัน 12V",
+			"x": 940,
+			"y": 660,
+			"width": 260,
+			"height": 100,
+			"color": "2"
+		},
+		{
+			"id": "i_lvl",
+			"type": "file",
+			"file": "image/QDY30A Water level sensor.png",
+			"x": 940,
+			"y": 770,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "s_pzem",
+			"type": "text",
+			"text": "**PZEM-004T** XH 4 ขา\nUART2 TX 15 / RX 16\n**R4** Divider ที่ TX ถ้าเลี้ยง 5V",
+			"x": 360,
+			"y": 920,
+			"width": 300,
+			"height": 110,
+			"color": "1"
+		},
+		{
+			"id": "i_pzem",
+			"type": "file",
+			"file": "image/PZEM-004T-100A-D-P AC.png",
+			"x": 680,
+			"y": 920,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "s_flow",
+			"type": "text",
+			"text": "**YF-S401** XH 3 ขา\nGPIO 7 Interrupt · Divider 5V→3.3V + RC",
+			"x": 1220,
+			"y": 660,
+			"width": 280,
+			"height": 100,
+			"color": "4"
+		},
+		{
+			"id": "i_flow",
+			"type": "file",
+			"file": "image/YF-S401.png",
+			"x": 1220,
+			"y": 770,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "g_out",
+			"type": "group",
+			"label": "Output",
+			"x": 1580,
+			"y": 0,
+			"width": 760,
+			"height": 1140,
+			"color": "4"
+		},
+		{
+			"id": "o_mos",
+			"type": "text",
+			"text": "**MOSFET Logic-level 5 ช่อง** + Pull-down\nGrow Light PWM 4 · Pump A 5 · Pump B 6 · pH Down 1 · Refill 2",
+			"x": 1600,
+			"y": 40,
+			"width": 720,
+			"height": 90,
+			"color": "4"
+		},
+		{
+			"id": "o_led",
+			"type": "text",
+			"text": "**Grow Light COB 50W** Terminal 5.08\n**A2 ฟิวส์ 5 A**",
+			"x": 1600,
+			"y": 160,
+			"width": 260,
+			"height": 90,
+			"color": "2"
+		},
+		{
+			"id": "i_led",
+			"type": "file",
+			"file": "image/50W LED Light Grow 12VDC.png",
+			"x": 1880,
+			"y": 150,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "o_pump",
+			"type": "text",
+			"text": "**ปั๊ม A / B / pH Down / Refill** Terminal 5.08\n**A3 Flyback SS34** ทุกช่อง",
+			"x": 1600,
+			"y": 290,
+			"width": 420,
+			"height": 90,
+			"color": "2"
+		},
+		{
+			"id": "i_peri",
+			"type": "file",
+			"file": "image/Peristaltic pump.png",
+			"x": 2040,
+			"y": 280,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "i_dia",
+			"type": "file",
+			"file": "image/Diaphragm pump.png",
+			"x": 2200,
+			"y": 280,
+			"width": 120,
+			"height": 110
+		},
+		{
+			"id": "o_fan",
+			"type": "text",
+			"text": "**พัดลม → L298N** (นอกบอร์ด)\nENA PWM GPIO 42 · IN1→3.3V, IN2→GND ตายตัว\n**A5** ขั้วต่อต้องมี GND",
+			"x": 1600,
+			"y": 420,
+			"width": 420,
+			"height": 110,
+			"color": "1"
+		},
+		{
+			"id": "o_rel",
+			"type": "text",
+			"text": "**Relay 4 ช่อง** (นอกบอร์ด, XH 6 ขา)\nCh1 Lamp RED 39 · Ch2 Lamp GREEN 40\nCh3 Air Pump 41 (**NC**) · Ch4 Humidifier 21 (NO)",
+			"x": 1600,
+			"y": 570,
+			"width": 460,
+			"height": 120,
+			"color": "6"
+		},
+		{
+			"id": "o_r1",
+			"type": "text",
+			"text": "**R1** ต้อง Active-HIGH / Jumper H/L = H\n**R2** Ch3 ใช้ NC (ไม่มีไฟ = ปั๊มลมทำงาน)\n**R9** เช็ค Relay ไม่กระพริบตอน Boot",
+			"x": 1600,
+			"y": 710,
+			"width": 460,
+			"height": 110,
+			"color": "1"
+		},
+		{
+			"id": "i_air",
+			"type": "file",
+			"file": "image/air pump oxygen.png",
+			"x": 2080,
+			"y": 570,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "o_hum",
+			"type": "text",
+			"text": "**Humidifier** USB-C 5V มีปุ่ม\n**R3** ทดลองว่าจ่ายไฟแล้วพ่นเอง — ถ้าไม่ ใช้ Opto คร่อมปุ่ม S1",
+			"x": 1600,
+			"y": 850,
+			"width": 460,
+			"height": 100,
+			"color": "1"
+		},
+		{
+			"id": "i_hum",
+			"type": "file",
+			"file": "image/Humidifier.png",
+			"x": 2080,
+			"y": 840,
+			"width": 150,
+			"height": 110
+		},
+		{
+			"id": "checklist",
+			"type": "text",
+			"text": "## Checklist อนุมัติ\nติ๊ก หรือเขียน `แก้:` ต่อท้าย\n\n**สิ่งที่เพิ่ม**\n- [ ] A1 ฟิวส์รวม ~10 A หลัง Terminal 12V\n- [ ] A2 ฟิวส์ Grow Light 5 A\n- [ ] A3 Flyback SS34 ทุกช่องปั๊ม\n- [ ] A4 Jumper Termination 120 Ω บัส RS-485\n- [ ] A5 ขั้วต่อพัดลมมี GND (XH 4 ขา: ENA, IN1, IN2, GND หรือ ENA + GND)\n- [ ] A6 Bulk capacitor 12V / 5V\n- [ ] A7 Test point 12V / 5V / 3V3 / GND\n\n**ความเสี่ยง**\n- [ ] R1 Relay Active-HIGH (Jumper H)\n- [ ] R2 Air Pump ที่ Ch3 NC\n- [ ] R3 ทดลอง Humidifier ก่อน\n- [ ] R4 Divider ที่ PZEM TX\n- [ ] R5 L298N: IN1→3.3V, IN2→GND ตายตัว\n- [ ] R6 Schottky 5V กันไฟย้อน USB\n- [ ] R7 DS3231 ถอด 200 Ω + 3.3V\n- [ ] R8 QDY30A ใช้ 12V ได้\n- [ ] R9 Relay บน GPIO39–41 ไม่กระพริบตอน Boot\n\n**Pin map**\n- [ ] P1 ใช้ Pin map ตาม Design_Review (21 ขา)\n\n**ข้อมูลของจริงที่ต้องบอก**\n- [ ] O1 รุ่น DevKitC-1 (N8 / N8R8 / N16R8, v1.0 / v1.1):\n- [ ] O2 โมดูล W5500 เลี้ยง 3.3V หรือ 5V:\n- [ ] O3 MOSFET module รุ่น / มี Flyback ในตัวไหม:\n- [ ] O4 ขนาดบอร์ด/กล่องที่ต้องการ:\n\n---\n**ผู้อนุมัติ:** ________  **วันที่:** ________",
+			"x": 2400,
+			"y": 0,
+			"width": 520,
+			"height": 1140,
+			"color": "3"
+		}
+	],
+	"edges": [
+		{
+			"id": "e_p_in_p_fuse",
+			"fromNode": "p_in",
+			"fromSide": "right",
+			"toNode": "p_fuse",
+			"toSide": "left"
+		},
+		{
+			"id": "e_p_fuse_p_sw",
+			"fromNode": "p_fuse",
+			"fromSide": "right",
+			"toNode": "p_sw",
+			"toSide": "left"
+		},
+		{
+			"id": "e_p_sw_p_buck",
+			"fromNode": "p_sw",
+			"fromSide": "bottom",
+			"toNode": "p_buck",
+			"toSide": "top"
+		},
+		{
+			"id": "e_p_buck_p_5v",
+			"fromNode": "p_buck",
+			"fromSide": "bottom",
+			"toNode": "p_5v",
+			"toSide": "right"
+		},
+		{
+			"id": "e_p_sw_p_12v",
+			"fromNode": "p_sw",
+			"fromSide": "bottom",
+			"toNode": "p_12v",
+			"toSide": "top"
+		},
+		{
+			"id": "e_m_w5500_m_esp",
+			"fromNode": "m_w5500",
+			"fromSide": "top",
+			"toNode": "m_esp",
+			"toSide": "bottom"
+		},
+		{
+			"id": "e_s_par_s_485",
+			"fromNode": "s_par",
+			"fromSide": "left",
+			"toNode": "s_485",
+			"toSide": "right",
+			"label": "A/B"
+		},
+		{
+			"id": "e_o_mos_o_led",
+			"fromNode": "o_mos",
+			"fromSide": "bottom",
+			"toNode": "o_led",
+			"toSide": "top"
+		}
+	]
+}

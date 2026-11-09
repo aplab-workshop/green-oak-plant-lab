@@ -236,6 +236,6 @@ Sensor เสีย: เขียน**ค่าดีล่าสุด**ต่�
 - PAR Sensor: Register map, Baud rate, วิธีเปลี่ยน Slave address, สีสาย 4 เส้น, แหล่งแสงที่ใช้ปรับเทียบ/มี Calibration certificate ไหม
 - QDY30A: Register map, วิธีเปลี่ยน Slave address เป็น 3 (ไฟ 12V ใช้ได้แล้ว)
 - ขอ Modbus Register map + วิธี Calibrate + ความแม่นของ 5-in-1 จากผู้ขาย
-- เก็บ Firmware (`firmware/`, PlatformIO) และไฟล์ KiCad (`hardware/`) ใน repo นี้หรือแยก repo (repo นี้เป็น Public)
+- ~~ไฟล์ KiCad~~ → **อยู่ใน repo นี้ที่ `hardware/`** (ผู้ใช้ตัดสิน 2026-11-10; Design review: `hardware/Design_Review.md`, อนุมัติ: `hardware/GreenOak_PCB_RevA.canvas`) — Firmware (`firmware/`) ยังไม่ได้ตัดสิน
 - ต้นแบบ M3 เดิม (SLMP Gateway กับ FX5U จริง) ยังทำต่อหรือแทนด้วยแผนนี้
 - ขนาดตู้/ถัง (จำนวนต้น, ปริมาตรน้ำ) — ใช้คำนวณขนาดปั๊ม พัดลม LED และ Safety limit (ถัง > ~30 L ต้องเพิ่ม Magic-6600 เป็น 2 ตัว)
