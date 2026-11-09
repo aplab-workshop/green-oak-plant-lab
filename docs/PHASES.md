@@ -554,8 +554,8 @@ tags: [green-oak, roadmap]
 
 ### H3 — Sensor น้ำ
 - [ ] 5-in-1 RS485 (K=1.0, OLED) บนบัส A addr 1 → pH D104, EC D105, Water Temp D103; EC ≥ 1990 µS/cm → D121 bit 13 (ต้องได้ Register map จากผู้ขายก่อน)
-- [ ] Water Level (XKC-Y25 × 3 ที่ 65 / 70 / 90 %, GPIO) → D106 ขั้นบันได + ตรวจความสอดคล้อง (D121 bit 5), YF-S401 → D107
-- **เกณฑ์ผ่าน:** pH/EC ตรงน้ำยามาตรฐานและตรงจอ OLED; XKC-Y25 แต่ละตัวเปลี่ยนสถานะตรงขีด ±1 cm; บัส A อ่านได้ครบทั้ง 2 Slave
+- [ ] Water Level (QDY30A Hydrostatic RS485, บัส A addr 3, Calibrate ถังว่าง/เต็ม) → D106 (อ่านไม่ได้ → D121 bit 5), YF-S401 → D107
+- **เกณฑ์ผ่าน:** pH/EC ตรงน้ำยามาตรฐานและตรงจอ OLED; Level ตรงไม้บรรทัด ±1 cm; บัส A อ่านได้ครบทั้ง 3 Slave
 
 ### H4 — Power Meter
 - [ ] PZEM-004T-100A (TTL UART, Modbus RTU) → D108

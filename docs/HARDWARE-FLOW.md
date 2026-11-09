@@ -41,6 +41,7 @@ flowchart LR
     subgraph BUSA["RS-485 บัส A (A / B, 120 Ω ที่ปลายบัส)"]
         WQ["5-in-1 Water Quality (addr 1)<br/>pH → D104 · EC → D105<br/>Water Temp → D103"]
         PAR["PAR sensor RS-485 (addr 2)<br/>PPFD → D102"]
+        LVL["QDY30A Hydrostatic RS-485 (addr 3)<br/>1m Range → D106"]
     end
     BUSA --> RS485["TTL to RS485 module"]
 
@@ -53,13 +54,12 @@ flowchart LR
     RS485 -- "UART 1" --> MCU
     PZEM["PZEM-004T-100A + CT<br/>Power → D108"] -- "UART 2 (TTL)" --> MCU
     I2C --> MCU
-    XKC["XKC-Y25 × 3 (65 / 70 / 90 %)<br/>Level ขั้นบันได → D106"] -- "GPIO × 3 (NPN + Pull-up)" --> MCU
     FLOW["YF-S401<br/>Flow → D107"] -- "Pulse (Divider 5V→3.3V)" --> MCU
 ```
 
 - 5-in-1 แยกสัญญาณ pH/EC และชดเชยอุณหภูมิในตัว — ไม่ต้องใช้ Isolator และ DS18B20
 - Sensor ทุกตัวเป็น Digital — ไม่ใช้ ADS1115
-- XKC-Y25 ติดนอกถัง: D106 = ระดับของตัวบนสุดที่เจอน้ำ (0 / 65 / 70 / 90) — 0 หมายถึงต่ำกว่า 65 %
+- QDY30A จุ่มก้นถัง: D106 เป็น % ต่อเนื่อง (Calibrate ถังว่าง/เต็ม); ห้ามตัด/ปิดปลายสาย (Vent tube)
 - EC เต็มสเกล 2000 µS/cm: ค่า ≥ 1990 ตั้ง D121 bit 13 (เกินช่วงวัด)
 - PZEM-004T เป็น TTL ไม่ใช่ RS-485 — ต่อ UART ตรง (สัญญาณ 5V ต้องลดเป็น 3.3V ก่อนเข้า RX)
 
@@ -89,7 +89,7 @@ flowchart LR
 
 - Grow Light COB 12V ~4.2 A: MOSFET Logic-level + PWM, 0 % ดับสนิท; ต้องมี Heatsink + พัดลมระบาย
 - Air Pump ต่อขา **NC** — MCU ค้าง/ไม่มีไฟ ปั๊มลมยังทำงาน
-- ไม่มี Float switch: Firmware ตัดปั๊มเติมเมื่อ XKC-Y25 ตัว 90 % เจอน้ำแต่ยังเติมนานเกิน 60 s (D121 bit 10)
+- ไม่มี Float switch: Firmware ตัดปั๊มเติมเมื่อ QDY30A อ่านได้ ≥ 90 % แต่ยังเติมนานเกิน 60 s (D121 bit 10)
 
 ## 4. ลำดับการต่อและทดสอบ (ตาม Phase)
 
@@ -99,7 +99,7 @@ flowchart TB
     S2 --> S3["3. ต่อ ESP32-S3 + W5500 เข้า Switch<br/>เขียน D100 / อ่าน M101, D200"]
     S3 --> S4["4. ทดสอบ Fail-safe<br/>ถอดสาย LAN, PLC STOP, D202 หยุด"]
     S4 -->|H1 ผ่าน| S5["5. Sensor อากาศ/แสง/เวลา<br/>SHT40, RTC (I²C), PAR (RS-485)"]
-    S5 -->|H2 ผ่าน| S6["6. Sensor น้ำ<br/>5-in-1 RS-485, XKC-Y25, Flow"]
+    S5 -->|H2 ผ่าน| S6["6. Sensor น้ำ<br/>5-in-1 + QDY30A RS-485, Flow"]
     S6 -->|H3 ผ่าน| S7["7. PZEM-004T Power meter (UART)"]
     S7 -->|H4 ผ่าน| S8["8. Output: MOSFET / Relay / PWM<br/>+ Interlock, E-Stop, Safety limit"]
     S8 -->|H5 ผ่าน| S9["9. ย้ายวงจรลง PCB (KiCad)<br/>ทดสอบ H1–H5 ซ้ำ"]
