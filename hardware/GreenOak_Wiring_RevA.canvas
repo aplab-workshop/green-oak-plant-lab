@@ -122,7 +122,7 @@
 		{
 			"id": "p_d1",
 			"type": "text",
-			"text": "### D1 SS34\n`+5V` → `+5V_DEVKIT` → ขา **5V** ของ DevKit\nกันไฟจาก USB ย้อนเข้าราง 5V",
+			"text": "### D1 SK34SMA-3G\n`+5V` → `+5V_DEVKIT` → ขา **5V** ของ DevKit\nกันไฟจาก USB ย้อนเข้าราง 5V",
 			"x": -900,
 			"y": 1040,
 			"width": 330,
@@ -392,7 +392,7 @@
 		{
 			"id": "ch0",
 			"type": "text",
-			"text": "### Grow Light COB 50W — D200 (PWM)\n**GPIO4** `LIGHT_PWM`\n\n1. R1 100R: `LIGHT_PWM` → `LIGHT_G` (Gate)\n2. R2 10k: `LIGHT_PWM` → GND (Pull-down ตอน Boot)\n3. Q1 AOD4184A: G=`LIGHT_G` · D=`LIGHT_D` · S=`GND`\n\n**J4** ขา 1 = `+12V_LED` (+ โหลด) · ขา 2 = `LIGHT_D` (− โหลด)",
+			"text": "### Grow Light COB 50W — D200 (PWM)\n**GPIO4** `LIGHT_PWM`\n\n1. R1 100R: `LIGHT_PWM` → `LIGHT_G` (Gate)\n2. R2 10k: `LIGHT_PWM` → GND (Pull-down ตอน Boot)\n3. Q1 RD3G500GNTL: G=`LIGHT_G` · D=`LIGHT_D` · S=`GND`\n\n**J4** ขา 1 = `+12V_LED` (+ โหลด) · ขา 2 = `LIGHT_D` (− โหลด)",
 			"x": 20,
 			"y": 1640,
 			"width": 455,
@@ -411,7 +411,7 @@
 		{
 			"id": "ch1",
 			"type": "text",
-			"text": "### ปั๊มปุ๋ย A — M103\n**GPIO5** `PUMP_A`\n\n1. R3 100R: `PUMP_A` → `PUMPA_G` (Gate)\n2. R4 10k: `PUMP_A` → GND (Pull-down ตอน Boot)\n3. Q2 AOD4184A: G=`PUMPA_G` · D=`PUMPA_D` · S=`GND`\n4. D2 SS34 Flyback: A=`PUMPA_D` · K=`+12V`\n\n**J5** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PUMPA_D` (− โหลด)",
+			"text": "### ปั๊มปุ๋ย A — M103\n**GPIO5** `PUMP_A`\n\n1. R3 100R: `PUMP_A` → `PUMPA_G` (Gate)\n2. R4 10k: `PUMP_A` → GND (Pull-down ตอน Boot)\n3. Q2 RD3G500GNTL: G=`PUMPA_G` · D=`PUMPA_D` · S=`GND`\n4. D2 SK34SMA-3G Flyback: A=`PUMPA_D` · K=`+12V`\n\n**J5** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PUMPA_D` (− โหลด)",
 			"x": 495,
 			"y": 1640,
 			"width": 455,
@@ -430,7 +430,7 @@
 		{
 			"id": "ch2",
 			"type": "text",
-			"text": "### ปั๊มปุ๋ย B — M104\n**GPIO6** `PUMP_B`\n\n1. R5 100R: `PUMP_B` → `PUMPB_G` (Gate)\n2. R6 10k: `PUMP_B` → GND (Pull-down ตอน Boot)\n3. Q3 AOD4184A: G=`PUMPB_G` · D=`PUMPB_D` · S=`GND`\n4. D3 SS34 Flyback: A=`PUMPB_D` · K=`+12V`\n\n**J6** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PUMPB_D` (− โหลด)",
+			"text": "### ปั๊มปุ๋ย B — M104\n**GPIO6** `PUMP_B`\n\n1. R5 100R: `PUMP_B` → `PUMPB_G` (Gate)\n2. R6 10k: `PUMP_B` → GND (Pull-down ตอน Boot)\n3. Q3 RD3G500GNTL: G=`PUMPB_G` · D=`PUMPB_D` · S=`GND`\n4. D3 SK34SMA-3G Flyback: A=`PUMPB_D` · K=`+12V`\n\n**J6** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PUMPB_D` (− โหลด)",
 			"x": 970,
 			"y": 1640,
 			"width": 455,
@@ -449,7 +449,7 @@
 		{
 			"id": "ch3",
 			"type": "text",
-			"text": "### ปั๊ม pH Down — M106\n**GPIO1** `PH_DOWN`\n\n1. R7 100R: `PH_DOWN` → `PHDOWN_G` (Gate)\n2. R8 10k: `PH_DOWN` → GND (Pull-down ตอน Boot)\n3. Q4 AOD4184A: G=`PHDOWN_G` · D=`PHDOWN_D` · S=`GND`\n4. D4 SS34 Flyback: A=`PHDOWN_D` · K=`+12V`\n\n**J7** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PHDOWN_D` (− โหลด)",
+			"text": "### ปั๊ม pH Down — M106\n**GPIO1** `PH_DOWN`\n\n1. R7 100R: `PH_DOWN` → `PHDOWN_G` (Gate)\n2. R8 10k: `PH_DOWN` → GND (Pull-down ตอน Boot)\n3. Q4 RD3G500GNTL: G=`PHDOWN_G` · D=`PHDOWN_D` · S=`GND`\n4. D4 SK34SMA-3G Flyback: A=`PHDOWN_D` · K=`+12V`\n\n**J7** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PHDOWN_D` (− โหลด)",
 			"x": 1445,
 			"y": 1640,
 			"width": 455,
@@ -468,7 +468,7 @@
 		{
 			"id": "ch4",
 			"type": "text",
-			"text": "### ปั๊มเติมน้ำ — M102\n**GPIO2** `REFILL`\n\n1. R9 100R: `REFILL` → `REFILL_G` (Gate)\n2. R10 10k: `REFILL` → GND (Pull-down ตอน Boot)\n3. Q5 AOD4184A: G=`REFILL_G` · D=`REFILL_D` · S=`GND`\n4. D5 SS34 Flyback: A=`REFILL_D` · K=`+12V`\n\n**J8** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `REFILL_D` (− โหลด)",
+			"text": "### ปั๊มเติมน้ำ — M102\n**GPIO2** `REFILL`\n\n1. R9 100R: `REFILL` → `REFILL_G` (Gate)\n2. R10 10k: `REFILL` → GND (Pull-down ตอน Boot)\n3. Q5 RD3G500GNTL: G=`REFILL_G` · D=`REFILL_D` · S=`GND`\n4. D5 SK34SMA-3G Flyback: A=`REFILL_D` · K=`+12V`\n\n**J8** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `REFILL_D` (− โหลด)",
 			"x": 1920,
 			"y": 1640,
 			"width": 455,

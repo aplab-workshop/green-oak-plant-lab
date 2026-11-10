@@ -3307,6 +3307,42 @@
 				)
 			)
 		)
+		(property "MPN" "EGK477M1EG16RRSMP"
+			(at 116.84 30.48 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Samxon"
+			(at 116.84 30.48 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 116.84 30.48 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0566-0313-9"
+			(at 116.84 30.48 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "5f25217b-f857-50bb-a771-3b769c83d340")
 		)
@@ -3493,6 +3529,42 @@
 				)
 			)
 		)
+		(property "MPN" "RE1CM101E110T"
+			(at 71.12 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "AiSHi"
+			(at 71.12 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 71.12 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0825-0097-0"
+			(at 71.12 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "fa995d3c-86e9-50aa-bdc9-53ea2c202492")
 		)
@@ -3573,6 +3645,42 @@
 				)
 			)
 		)
+		(property "MPN" "08055C104K4T2A"
+			(at 91.44 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "KYOCERA AVX"
+			(at 91.44 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 91.44 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "1721-0040-7"
+			(at 91.44 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "0cab2bed-0dc0-53cc-b180-39a86e43fafd")
 		)
@@ -3626,7 +3734,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 118.92 71.04 0)
 			(effects
 				(font
@@ -3653,7 +3761,34 @@
 				)
 			)
 		)
-		(property "MPN" "SS34"
+		(property "MPN" "SK34SMA-3G"
+			(at 121.92 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Diotec"
+			(at 121.92 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 121.92 66.04 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "1998-0113-5"
 			(at 121.92 66.04 0)
 			(hide yes)
 			(effects
@@ -5060,6 +5195,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1000T5E"
+			(at 15.24 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 15.24 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 15.24 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1757-1"
+			(at 15.24 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "b9651976-b071-55a2-a0a2-ca427453d8dc")
 		)
@@ -5140,6 +5311,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 25.40 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 25.40 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 25.40 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
+			(at 25.40 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "9e7ff210-d0c9-56a2-a819-7b4bf141ff0a")
 		)
@@ -5193,7 +5400,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 49.53 207.01 0)
 			(effects
 				(font
@@ -5220,7 +5427,34 @@
 				)
 			)
 		)
-		(property "MPN" "AOD4184A"
+		(property "MPN" "RD3G500GNTL"
+			(at 45.72 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "ROHM"
+			(at 45.72 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 45.72 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0176-0653-6"
 			(at 45.72 205.74 0)
 			(hide yes)
 			(effects
@@ -5402,6 +5636,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1000T5E"
+			(at 73.66 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 73.66 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 73.66 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1757-1"
+			(at 73.66 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "c3a0a1d9-b735-5f9d-8aa2-4c9a0230aa4e")
 		)
@@ -5482,6 +5752,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 83.82 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 83.82 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 83.82 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
+			(at 83.82 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "bc93ac3a-819e-5599-b423-d72e5b168664")
 		)
@@ -5535,7 +5841,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 107.95 207.01 0)
 			(effects
 				(font
@@ -5562,7 +5868,34 @@
 				)
 			)
 		)
-		(property "MPN" "AOD4184A"
+		(property "MPN" "RD3G500GNTL"
+			(at 104.14 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "ROHM"
+			(at 104.14 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 104.14 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0176-0653-6"
 			(at 104.14 205.74 0)
 			(hide yes)
 			(effects
@@ -5717,7 +6050,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 111.30 231.06 0)
 			(effects
 				(font
@@ -5744,7 +6077,34 @@
 				)
 			)
 		)
-		(property "MPN" "SS34"
+		(property "MPN" "SK34SMA-3G"
+			(at 114.30 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Diotec"
+			(at 114.30 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 114.30 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "1998-0113-5"
 			(at 114.30 226.06 0)
 			(hide yes)
 			(effects
@@ -5833,6 +6193,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1000T5E"
+			(at 132.08 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 132.08 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 132.08 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1757-1"
+			(at 132.08 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "697c55a6-0891-5b60-b3da-cbd35a4176e2")
 		)
@@ -5913,6 +6309,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 142.24 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 142.24 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 142.24 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
+			(at 142.24 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "42b5b947-31fc-509f-b212-a2b637e7caaa")
 		)
@@ -5966,7 +6398,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 166.37 207.01 0)
 			(effects
 				(font
@@ -5993,7 +6425,34 @@
 				)
 			)
 		)
-		(property "MPN" "AOD4184A"
+		(property "MPN" "RD3G500GNTL"
+			(at 162.56 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "ROHM"
+			(at 162.56 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 162.56 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0176-0653-6"
 			(at 162.56 205.74 0)
 			(hide yes)
 			(effects
@@ -6148,7 +6607,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 169.72 231.06 0)
 			(effects
 				(font
@@ -6175,7 +6634,34 @@
 				)
 			)
 		)
-		(property "MPN" "SS34"
+		(property "MPN" "SK34SMA-3G"
+			(at 172.72 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Diotec"
+			(at 172.72 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 172.72 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "1998-0113-5"
 			(at 172.72 226.06 0)
 			(hide yes)
 			(effects
@@ -6264,6 +6750,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1000T5E"
+			(at 190.50 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 190.50 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 190.50 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1757-1"
+			(at 190.50 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "95820ae6-4c51-5063-9907-e884f89ddd40")
 		)
@@ -6344,6 +6866,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 200.66 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 200.66 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 200.66 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
+			(at 200.66 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "4c51fa08-5deb-536f-af53-1e022a5e9b99")
 		)
@@ -6397,7 +6955,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 224.79 207.01 0)
 			(effects
 				(font
@@ -6424,7 +6982,34 @@
 				)
 			)
 		)
-		(property "MPN" "AOD4184A"
+		(property "MPN" "RD3G500GNTL"
+			(at 220.98 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "ROHM"
+			(at 220.98 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 220.98 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0176-0653-6"
 			(at 220.98 205.74 0)
 			(hide yes)
 			(effects
@@ -6579,7 +7164,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 228.14 231.06 0)
 			(effects
 				(font
@@ -6606,7 +7191,34 @@
 				)
 			)
 		)
-		(property "MPN" "SS34"
+		(property "MPN" "SK34SMA-3G"
+			(at 231.14 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Diotec"
+			(at 231.14 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 231.14 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "1998-0113-5"
 			(at 231.14 226.06 0)
 			(hide yes)
 			(effects
@@ -6695,6 +7307,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1000T5E"
+			(at 248.92 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 248.92 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 248.92 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1757-1"
+			(at 248.92 198.12 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "663e7d3e-0c94-50b6-84f3-52d0a0c6ddec")
 		)
@@ -6775,6 +7423,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 259.08 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 259.08 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 259.08 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
+			(at 259.08 218.44 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "8b3d52c0-fe35-5ad3-a83a-c81f58ef4fc0")
 		)
@@ -6828,7 +7512,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 283.21 207.01 0)
 			(effects
 				(font
@@ -6855,7 +7539,34 @@
 				)
 			)
 		)
-		(property "MPN" "AOD4184A"
+		(property "MPN" "RD3G500GNTL"
+			(at 279.40 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "ROHM"
+			(at 279.40 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 279.40 205.74 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0176-0653-6"
 			(at 279.40 205.74 0)
 			(hide yes)
 			(effects
@@ -7010,7 +7721,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 286.56 231.06 0)
 			(effects
 				(font
@@ -7037,7 +7748,34 @@
 				)
 			)
 		)
-		(property "MPN" "SS34"
+		(property "MPN" "SK34SMA-3G"
+			(at 289.56 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Diotec"
+			(at 289.56 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 289.56 226.06 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "1998-0113-5"
 			(at 289.56 226.06 0)
 			(hide yes)
 			(effects
@@ -7351,6 +8089,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 96.52 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 96.52 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 96.52 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
+			(at 96.52 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "6a179c58-1108-5d9a-9e53-089052466774")
 		)
@@ -7423,6 +8197,42 @@
 			)
 		)
 		(property "Datasheet" ""
+			(at 111.76 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 111.76 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 111.76 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 111.76 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
 			(at 111.76 269.24 0)
 			(hide yes)
 			(effects
@@ -7511,6 +8321,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 127.00 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 127.00 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 127.00 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
+			(at 127.00 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "c9095767-a2aa-57f1-800f-c57a90557b43")
 		)
@@ -7583,6 +8429,42 @@
 			)
 		)
 		(property "Datasheet" ""
+			(at 142.24 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 142.24 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 142.24 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 142.24 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
 			(at 142.24 269.24 0)
 			(hide yes)
 			(effects
@@ -7743,6 +8625,42 @@
 			)
 		)
 		(property "Datasheet" ""
+			(at 198.12 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 198.12 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 198.12 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 198.12 269.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
 			(at 198.12 269.24 0)
 			(hide yes)
 			(effects
@@ -8281,6 +9199,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F2201T5E"
+			(at 370.84 106.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 370.84 106.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 370.84 106.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1875-8"
+			(at 370.84 106.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "4a3ac26f-7f39-5491-90cf-fc71c7c2f221")
 		)
@@ -8353,6 +9307,42 @@
 			)
 		)
 		(property "Datasheet" ""
+			(at 386.08 106.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0805W8F3301T5E"
+			(at 386.08 106.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 386.08 106.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 386.08 106.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1836-5"
 			(at 386.08 106.68 0)
 			(hide yes)
 			(effects
@@ -8534,6 +9524,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1001T5E"
+			(at 370.84 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 370.84 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 370.84 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1758-4"
+			(at 370.84 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "40253dd5-3428-5191-9d74-ca1372b45ef6")
 		)
@@ -8614,6 +9640,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F1002T5E"
+			(at 386.08 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 386.08 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 386.08 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1831-0"
+			(at 386.08 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "0b3b7e27-717c-5289-aa77-55638d677631")
 		)
@@ -8686,6 +9748,42 @@
 			)
 		)
 		(property "Datasheet" ""
+			(at 401.32 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0805N102J500CT"
+			(at 401.32 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Walsin"
+			(at 401.32 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 401.32 142.24 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0328-0182-8"
 			(at 401.32 142.24 0)
 			(hide yes)
 			(effects
@@ -8986,6 +10084,42 @@
 				)
 			)
 		)
+		(property "MPN" "0805W8F4701T5E"
+			(at 370.84 182.88 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 370.84 182.88 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 370.84 182.88 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1882-3"
+			(at 370.84 182.88 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "9ccf67ee-54b5-5b88-931a-102b924fc035")
 		)
@@ -9058,6 +10192,42 @@
 			)
 		)
 		(property "Datasheet" ""
+			(at 386.08 182.88 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "0805W8F4701T5E"
+			(at 386.08 182.88 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Royalohm"
+			(at 386.08 182.88 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "Electronics Source (es.co.th)"
+			(at 386.08 182.88 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier_PN" "0150-1882-3"
 			(at 386.08 182.88 0)
 			(hide yes)
 			(effects

@@ -194,6 +194,10 @@
 - เปิด 3D Viewer ดูฐานฟิวส์ BLX-A (สูง 13 mm) และ Buck บน Pin header ไม่ชนกัน/ไม่ชนกล่อง
 - ทิศ Footprint ของ APLab ตรงกับการวางจริง (ขา 1 Buck = VIN+ มุมบนซ้าย)
 
+## เบอร์ชิ้นส่วนจริง (2026-11-10)
+
+Codex หาที่ ES แล้ว ผู้ออกแบบตรวจ Datasheet อนุมัติครบ (`BOM_Procurement_QCDR.md` § ผลตรวจ): **Q1–Q5 = ROHM RD3G500GNTL** แทน AOD4184A (ดีกว่าที่ Gate 3.3 V), **D1–D5 = Diotec SK34SMA-3G** แทน SS34 (SMA เหมือนกัน) — Footprint ไม่เปลี่ยน, ทองแดง/Gerber v1.1 ไม่เปลี่ยน (แก้แค่ Value/MPN ใน Schematic, BOM, PCB)
+
 ## ถัดไป
 
-1. รายการจัดหาอุปกรณ์ (BOM_Procurement) ให้ Codex — ถามก่อนว่ามีชิ้นไหนแล้ว
+1. (เสร็จ) รายการจัดหาอุปกรณ์ (BOM_Procurement) ให้ Codex — ถามก่อนว่ามีชิ้นไหนแล้ว

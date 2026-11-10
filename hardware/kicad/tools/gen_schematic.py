@@ -326,6 +326,30 @@ R("4.7k", g(146), g(72), "+3V3", "I2C_SDA", dnp=True)
 R("4.7k", g(152), g(72), "+3V3", "I2C_SCL", dnp=True)
 notes.append(("I2C pull-ups DNP (boards have their own)", g(140), g(66), 1.27))
 
+# ---- Sourcing (BOM_Procurement_QCDR.md, checked against datasheets 2026-11-10) ----
+_ES = lambda mpn, mfr, pn, **kw: dict(MPN=mpn, Manufacturer=mfr, Supplier="Electronics Source (es.co.th)",
+                                      Supplier_PN=pn, **kw)
+SOURCING = {  # schematic value -> (new value or None, fields)
+    "AOD4184A": ("RD3G500GNTL", _ES("RD3G500GNTL", "ROHM", "0176-0653-6")),
+    "SS34": ("SK34SMA-3G", _ES("SK34SMA-3G", "Diotec", "1998-0113-5")),
+    "470uF/25V": (None, _ES("EGK477M1EG16RRSMP", "Samxon", "0566-0313-9")),
+    "100uF/16V": (None, _ES("RE1CM101E110T", "AiSHi", "0825-0097-0")),
+    "100nF": (None, _ES("08055C104K4T2A", "KYOCERA AVX", "1721-0040-7")),
+    "1nF": (None, _ES("0805N102J500CT", "Walsin", "0328-0182-8")),
+    "100R": (None, _ES("0805W8F1000T5E", "Royalohm", "0150-1757-1")),
+    "10k": (None, _ES("0805W8F1002T5E", "Royalohm", "0150-1831-0")),
+    "2.2k": (None, _ES("0805W8F2201T5E", "Royalohm", "0150-1875-8")),
+    "3.3k": (None, _ES("0805W8F3301T5E", "Royalohm", "0150-1836-5")),
+    "1k": (None, _ES("0805W8F1001T5E", "Royalohm", "0150-1758-4")),
+    "4.7k": (None, _ES("0805W8F4701T5E", "Royalohm", "0150-1882-3")),
+}
+for _p in parts:
+    if _p["value"] in SOURCING:
+        _new, _fields = SOURCING[_p["value"]]
+        _p["extra"].update(_fields)
+        if _new:
+            _p["value"] = _new
+
 # ---------------------------------------------------------------- emit
 
 def prop(k, v, x, y, hide=False):

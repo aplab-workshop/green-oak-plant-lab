@@ -225,9 +225,9 @@ for i, (q, j, rg, rpd, d, name, addr, picture) in enumerate(CH):
     txt = [f"### {name} — {addr}", f"**{gpio_of(gpio_net)}** `{gpio_net}`", "",
            f"1. {rg} {VALUE[rg]}: `{gpio_net}` → `{net(rg, '2')}` (Gate)",
            f"2. {rpd} {VALUE[rpd]}: `{gpio_net}` → GND (Pull-down ตอน Boot)",
-           f"3. {q} AOD4184A: G=`{net(q, '1')}` · D=`{net(q, '2')}` · S=`{net(q, '3')}`"]
+           f"3. {q} {VALUE[q]}: G=`{net(q, '1')}` · D=`{net(q, '2')}` · S=`{net(q, '3')}`"]
     if d:
-        txt.append(f"4. {d} SS34 Flyback: A=`{net(d, '2')}` · K=`{net(d, '1')}`")
+        txt.append(f"4. {d} {VALUE[d]} Flyback: A=`{net(d, '2')}` · K=`{net(d, '1')}`")
     txt += ["", f"**{j}** ขา 1 = `{net(j, '1')}` (+ โหลด) · ขา 2 = `{net(j, '2')}` (− โหลด)"]
     card(f"ch{i}", "\n".join(txt), x, 1640, 455, 400, "1" if i == 0 else "4")
     img(f"ch{i}_img", picture, x + 140, 2080, 175, 130)

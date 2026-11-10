@@ -458,7 +458,7 @@
 				)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 0 2.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -1165,7 +1165,7 @@
 				)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 0 4.5 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -1471,7 +1471,7 @@
 				)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 0 2.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -7525,7 +7525,7 @@
 				)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 0 2.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -8085,7 +8085,7 @@
 				)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 0 4.5 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -10845,7 +10845,7 @@
 				)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 0 4.5 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -12942,7 +12942,7 @@
 				)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 0 4.5 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -13248,7 +13248,7 @@
 				)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 0 2.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -14463,7 +14463,7 @@
 				)
 			)
 		)
-		(property "Value" "SS34"
+		(property "Value" "SK34SMA-3G"
 			(at 0 2.6 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -15442,7 +15442,7 @@
 				)
 			)
 		)
-		(property "Value" "AOD4184A"
+		(property "Value" "RD3G500GNTL"
 			(at 0 4.5 90)
 			(layer "F.Fab")
 			(hide yes)

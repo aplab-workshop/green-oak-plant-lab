@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\Chanatip\\Desktop\\Green_oak_plan\\hardware\\kicad\\GreenOak.kicad_sch")
-		(date "2026-11-10T17:39:40")
+		(date "2026-11-10T19:25:25")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -60,6 +60,14 @@
 			(footprint "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm")
 			(fields
 				(field
+					(name "MPN") "EGK477M1EG16RRSMP")
+				(field
+					(name "Manufacturer") "Samxon")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0566-0313-9")
+				(field
 					(name "Footprint") "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm")
 				(field
 					(name "Datasheet")
@@ -72,6 +80,22 @@
 				(lib "Device")
 				(part "C_Polarized")
 				(description "Polarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "EGK477M1EG16RRSMP")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Samxon")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0566-0313-9")
 			)
 			(property
 				(name "Sheetname")
@@ -114,6 +138,14 @@
 			(footprint "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm")
 			(fields
 				(field
+					(name "MPN") "RE1CM101E110T")
+				(field
+					(name "Manufacturer") "AiSHi")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0825-0097-0")
+				(field
 					(name "Footprint") "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm")
 				(field
 					(name "Datasheet")
@@ -126,6 +158,22 @@
 				(lib "Device")
 				(part "C_Polarized")
 				(description "Polarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "RE1CM101E110T")
+			)
+			(property
+				(name "Manufacturer")
+				(value "AiSHi")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0825-0097-0")
 			)
 			(property
 				(name "Sheetname")
@@ -168,6 +216,14 @@
 			(footprint "Capacitor_SMD:C_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "08055C104K4T2A")
+				(field
+					(name "Manufacturer") "KYOCERA AVX")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "1721-0040-7")
+				(field
 					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -180,6 +236,22 @@
 				(lib "Device")
 				(part "C")
 				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "08055C104K4T2A")
+			)
+			(property
+				(name "Manufacturer")
+				(value "KYOCERA AVX")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "1721-0040-7")
 			)
 			(property
 				(name "Sheetname")
@@ -222,6 +294,14 @@
 			(footprint "Capacitor_SMD:C_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805N102J500CT")
+				(field
+					(name "Manufacturer") "Walsin")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0328-0182-8")
+				(field
 					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -234,6 +314,22 @@
 				(lib "Device")
 				(part "C")
 				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "MPN")
+				(value "0805N102J500CT")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Walsin")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0328-0182-8")
 			)
 			(property
 				(name "Sheetname")
@@ -272,11 +368,17 @@
 		)
 		(comp
 			(ref "D1")
-			(value "SS34")
+			(value "SK34SMA-3G")
 			(footprint "Diode_SMD:D_SMA")
 			(fields
 				(field
-					(name "MPN") "SS34")
+					(name "MPN") "SK34SMA-3G")
+				(field
+					(name "Manufacturer") "Diotec")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "1998-0113-5")
 				(field
 					(name "Footprint") "Diode_SMD:D_SMA")
 				(field
@@ -293,7 +395,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "SS34")
+				(value "SK34SMA-3G")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Diotec")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "1998-0113-5")
 			)
 			(property
 				(name "Sheetname")
@@ -332,11 +446,17 @@
 		)
 		(comp
 			(ref "D2")
-			(value "SS34")
+			(value "SK34SMA-3G")
 			(footprint "Diode_SMD:D_SMA")
 			(fields
 				(field
-					(name "MPN") "SS34")
+					(name "MPN") "SK34SMA-3G")
+				(field
+					(name "Manufacturer") "Diotec")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "1998-0113-5")
 				(field
 					(name "Footprint") "Diode_SMD:D_SMA")
 				(field
@@ -353,7 +473,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "SS34")
+				(value "SK34SMA-3G")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Diotec")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "1998-0113-5")
 			)
 			(property
 				(name "Sheetname")
@@ -392,11 +524,17 @@
 		)
 		(comp
 			(ref "D3")
-			(value "SS34")
+			(value "SK34SMA-3G")
 			(footprint "Diode_SMD:D_SMA")
 			(fields
 				(field
-					(name "MPN") "SS34")
+					(name "MPN") "SK34SMA-3G")
+				(field
+					(name "Manufacturer") "Diotec")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "1998-0113-5")
 				(field
 					(name "Footprint") "Diode_SMD:D_SMA")
 				(field
@@ -413,7 +551,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "SS34")
+				(value "SK34SMA-3G")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Diotec")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "1998-0113-5")
 			)
 			(property
 				(name "Sheetname")
@@ -452,11 +602,17 @@
 		)
 		(comp
 			(ref "D4")
-			(value "SS34")
+			(value "SK34SMA-3G")
 			(footprint "Diode_SMD:D_SMA")
 			(fields
 				(field
-					(name "MPN") "SS34")
+					(name "MPN") "SK34SMA-3G")
+				(field
+					(name "Manufacturer") "Diotec")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "1998-0113-5")
 				(field
 					(name "Footprint") "Diode_SMD:D_SMA")
 				(field
@@ -473,7 +629,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "SS34")
+				(value "SK34SMA-3G")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Diotec")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "1998-0113-5")
 			)
 			(property
 				(name "Sheetname")
@@ -512,11 +680,17 @@
 		)
 		(comp
 			(ref "D5")
-			(value "SS34")
+			(value "SK34SMA-3G")
 			(footprint "Diode_SMD:D_SMA")
 			(fields
 				(field
-					(name "MPN") "SS34")
+					(name "MPN") "SK34SMA-3G")
+				(field
+					(name "Manufacturer") "Diotec")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "1998-0113-5")
 				(field
 					(name "Footprint") "Diode_SMD:D_SMA")
 				(field
@@ -533,7 +707,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "SS34")
+				(value "SK34SMA-3G")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Diotec")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "1998-0113-5")
 			)
 			(property
 				(name "Sheetname")
@@ -1766,11 +1952,17 @@
 		)
 		(comp
 			(ref "Q1")
-			(value "AOD4184A")
+			(value "RD3G500GNTL")
 			(footprint "Package_TO_SOT_SMD:TO-252-2")
 			(fields
 				(field
-					(name "MPN") "AOD4184A")
+					(name "MPN") "RD3G500GNTL")
+				(field
+					(name "Manufacturer") "ROHM")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0176-0653-6")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:TO-252-2")
 				(field
@@ -1787,7 +1979,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "AOD4184A")
+				(value "RD3G500GNTL")
+			)
+			(property
+				(name "Manufacturer")
+				(value "ROHM")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0176-0653-6")
 			)
 			(property
 				(name "Sheetname")
@@ -1825,11 +2029,17 @@
 		)
 		(comp
 			(ref "Q2")
-			(value "AOD4184A")
+			(value "RD3G500GNTL")
 			(footprint "Package_TO_SOT_SMD:TO-252-2")
 			(fields
 				(field
-					(name "MPN") "AOD4184A")
+					(name "MPN") "RD3G500GNTL")
+				(field
+					(name "Manufacturer") "ROHM")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0176-0653-6")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:TO-252-2")
 				(field
@@ -1846,7 +2056,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "AOD4184A")
+				(value "RD3G500GNTL")
+			)
+			(property
+				(name "Manufacturer")
+				(value "ROHM")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0176-0653-6")
 			)
 			(property
 				(name "Sheetname")
@@ -1884,11 +2106,17 @@
 		)
 		(comp
 			(ref "Q3")
-			(value "AOD4184A")
+			(value "RD3G500GNTL")
 			(footprint "Package_TO_SOT_SMD:TO-252-2")
 			(fields
 				(field
-					(name "MPN") "AOD4184A")
+					(name "MPN") "RD3G500GNTL")
+				(field
+					(name "Manufacturer") "ROHM")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0176-0653-6")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:TO-252-2")
 				(field
@@ -1905,7 +2133,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "AOD4184A")
+				(value "RD3G500GNTL")
+			)
+			(property
+				(name "Manufacturer")
+				(value "ROHM")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0176-0653-6")
 			)
 			(property
 				(name "Sheetname")
@@ -1943,11 +2183,17 @@
 		)
 		(comp
 			(ref "Q4")
-			(value "AOD4184A")
+			(value "RD3G500GNTL")
 			(footprint "Package_TO_SOT_SMD:TO-252-2")
 			(fields
 				(field
-					(name "MPN") "AOD4184A")
+					(name "MPN") "RD3G500GNTL")
+				(field
+					(name "Manufacturer") "ROHM")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0176-0653-6")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:TO-252-2")
 				(field
@@ -1964,7 +2210,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "AOD4184A")
+				(value "RD3G500GNTL")
+			)
+			(property
+				(name "Manufacturer")
+				(value "ROHM")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0176-0653-6")
 			)
 			(property
 				(name "Sheetname")
@@ -2002,11 +2260,17 @@
 		)
 		(comp
 			(ref "Q5")
-			(value "AOD4184A")
+			(value "RD3G500GNTL")
 			(footprint "Package_TO_SOT_SMD:TO-252-2")
 			(fields
 				(field
-					(name "MPN") "AOD4184A")
+					(name "MPN") "RD3G500GNTL")
+				(field
+					(name "Manufacturer") "ROHM")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0176-0653-6")
 				(field
 					(name "Footprint") "Package_TO_SOT_SMD:TO-252-2")
 				(field
@@ -2023,7 +2287,19 @@
 			)
 			(property
 				(name "MPN")
-				(value "AOD4184A")
+				(value "RD3G500GNTL")
+			)
+			(property
+				(name "Manufacturer")
+				(value "ROHM")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0176-0653-6")
 			)
 			(property
 				(name "Sheetname")
@@ -2065,6 +2341,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1000T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1757-1")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2077,6 +2361,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1000T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1757-1")
 			)
 			(property
 				(name "Sheetname")
@@ -2119,6 +2419,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2131,6 +2439,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2173,6 +2497,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1000T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1757-1")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2185,6 +2517,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1000T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1757-1")
 			)
 			(property
 				(name "Sheetname")
@@ -2227,6 +2575,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2239,6 +2595,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2281,6 +2653,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1000T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1757-1")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2293,6 +2673,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1000T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1757-1")
 			)
 			(property
 				(name "Sheetname")
@@ -2335,6 +2731,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2347,6 +2751,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2389,6 +2809,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1000T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1757-1")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2401,6 +2829,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1000T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1757-1")
 			)
 			(property
 				(name "Sheetname")
@@ -2443,6 +2887,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2455,6 +2907,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2497,6 +2965,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1000T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1757-1")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2509,6 +2985,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1000T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1757-1")
 			)
 			(property
 				(name "Sheetname")
@@ -2551,6 +3043,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2563,6 +3063,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2605,6 +3121,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2617,6 +3141,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2659,6 +3199,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2671,6 +3219,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2713,6 +3277,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2725,6 +3297,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2767,6 +3355,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2779,6 +3375,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2821,6 +3433,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2833,6 +3453,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -2875,6 +3511,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F2201T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1875-8")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2887,6 +3531,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F2201T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1875-8")
 			)
 			(property
 				(name "Sheetname")
@@ -2929,6 +3589,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F3301T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1836-5")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2941,6 +3609,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F3301T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1836-5")
 			)
 			(property
 				(name "Sheetname")
@@ -2983,6 +3667,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1001T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1758-4")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -2995,6 +3687,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1001T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1758-4")
 			)
 			(property
 				(name "Sheetname")
@@ -3037,6 +3745,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F1002T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1831-0")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -3049,6 +3765,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F1002T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1831-0")
 			)
 			(property
 				(name "Sheetname")
@@ -3091,6 +3823,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F4701T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1882-3")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -3103,6 +3843,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F4701T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1882-3")
 			)
 			(property
 				(name "Sheetname")
@@ -3148,6 +3904,14 @@
 			(footprint "Resistor_SMD:R_0805_2012Metric")
 			(fields
 				(field
+					(name "MPN") "0805W8F4701T5E")
+				(field
+					(name "Manufacturer") "Royalohm")
+				(field
+					(name "Supplier") "Electronics Source (es.co.th)")
+				(field
+					(name "Supplier_PN") "0150-1882-3")
+				(field
 					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
 				(field
 					(name "Datasheet")
@@ -3160,6 +3924,22 @@
 				(lib "Device")
 				(part "R")
 				(description "Resistor")
+			)
+			(property
+				(name "MPN")
+				(value "0805W8F4701T5E")
+			)
+			(property
+				(name "Manufacturer")
+				(value "Royalohm")
+			)
+			(property
+				(name "Supplier")
+				(value "Electronics Source (es.co.th)")
+			)
+			(property
+				(name "Supplier_PN")
+				(value "0150-1882-3")
 			)
 			(property
 				(name "Sheetname")
