@@ -92,6 +92,5 @@ def buck():
 
 if __name__ == "__main__":
     os.makedirs(LIB, exist_ok=True)
-    devkit()
-    buck()
+    devkit()   # CR-DC2580 now uses the measured APLab:CR-DC2580_Module
     print("wrote", sorted(os.listdir(LIB)))

@@ -2137,7 +2137,7 @@
 			(on_board yes)
 			(property "Reference" "U" (at 0 7.62 0) (effects (font (size 1.27 1.27))))
 			(property "Value" "CR-DC2580 12V->5V" (at 0 -7.62 0) (effects (font (size 1.27 1.27))))
-			(property "Footprint" "GreenOak:CR-DC2580" (at 0 0.00 0) (hide yes) (effects (font (size 1.27 1.27))))
+			(property "Footprint" "APLab:CR-DC2580_Module" (at 0 0.00 0) (hide yes) (effects (font (size 1.27 1.27))))
 			(property "Datasheet" "" (at 0 0.00 0) (hide yes) (effects (font (size 1.27 1.27))))
 			(property "Description" "Mini DC-DC step-down buck module (IN 6-25V, OUT 5V)" (at 0 0.00 0) (hide yes) (effects (font (size 1.27 1.27))))
 			(symbol "CR-DC2580_0_1"
@@ -3129,7 +3129,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal"
+		(property "Footprint" "APLab:Fuseholder_5x20_BLX-A"
 			(at 45.72 25.40 0)
 			(hide yes)
 			(effects
@@ -3369,7 +3369,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "GreenOak:CR-DC2580"
+		(property "Footprint" "APLab:CR-DC2580_Module"
 			(at 30.48 66.04 0)
 			(hide yes)
 			(effects
@@ -3724,7 +3724,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal"
+		(property "Footprint" "APLab:Fuseholder_5x20_BLX-A"
 			(at 25.40 101.60 0)
 			(hide yes)
 			(effects

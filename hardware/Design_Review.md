@@ -174,6 +174,26 @@
 
 **ผู้ใช้ตรวจผ่านครบ 4 ข้อ (2026-11-10) → `GreenOak_gerber_v1.0.zip` พร้อมสั่งผลิต** — แก้หลังส่งผลิตให้ขึ้น v1.1 (แก้ Silkscreen ชื่อบอร์ด + zip ใหม่) อย่าทับ v1.0
 
+## PCB Rev A v1.1 (2026-11-10) — **ใช้ไฟล์นี้แทน v1.0**
+
+ผู้ใช้แจ้งว่าขนาด U1, F1, F2 ใน v1.0 ไม่ตรงของจริง → ใช้ Footprint ที่วัดจริงจาก**ไลบรารีกลาง APLab** (`C:\Users\Chanatip\Desktop\Main\PCB_Kidcad\Library\APLab.pretty`, ลงทะเบียน Global ชื่อ `APLab` — อยู่นอก repo):
+
+| Ref | v1.0 | v1.1 | ขนาดจริง |
+|---|---|---|---|
+| U1 | `GreenOak:CR-DC2580` (Pad 26 × 16 mm) | `APLab:CR-DC2580_Module` | รุ่น V5: ขา 1→3 26.12 mm, 3→4 12.6 mm, บอร์ด 30.2 × 20 mm, ติดด้วย Pin header |
+| F1, F2 | Littelfuse 111 Inline (คลิป P20 mm) | `APLab:Fuseholder_5x20_BLX-A` | ฐาน BLX-A 2 ขา ห่าง 22.2 mm, รู 1.3 mm, ตัว 27.8 × 9.5 mm สูง 13 mm, รับ 10 A |
+
+- ลบ `GreenOak.pretty/CR-DC2580.kicad_mod` (ใช้ของ APLab แทน)
+- จัดวางใหม่: F1 ลงมาที่ y 53.5 (ฐานกว้างขึ้น), C1/C2/C3/D1/F3 ขยับลง; **J10 FAN ย้ายไปมุมบนขวา** ข้าง GPIO42 และ J11 SPARE มาแทนที่เดิม (ลายพัดลมสั้นลง)
+- +3V3 เดินเป็นลายสัญญาณ 0.3 mm (กระแส < 0.3 A) เพื่อให้ Freerouting เดินครบ
+- ไม่มีลายมือแล้ว: `tools/route_all.sh` ทำทั้งหมด (วางชิ้น → DSN → Freerouting วนจนครบ 100 % → Import → ใส่ Silkscreen หลังเดินลาย → GND stitching → ต่อ Pad ที่ thermal ขาดแบบทึบ → DRC) — Silkscreen ใส่หลังเดินลายเพราะข้อความบนบอร์ดเปลี่ยนผลของ Freerouting
+- **ERC 0, DRC 0 violation / 0 unconnected**
+- Output: `output/GreenOak_gerber_v1.1.zip` (v1.0 zip เก็บไว้ไม่ทับ), PDF หน้า/หลัง, Wiring canvas สร้างใหม่จาก Netlist
+
+### ก่อนสั่งผลิต v1.1
+- เปิด 3D Viewer ดูฐานฟิวส์ BLX-A (สูง 13 mm) และ Buck บน Pin header ไม่ชนกัน/ไม่ชนกล่อง
+- ทิศ Footprint ของ APLab ตรงกับการวางจริง (ขา 1 Buck = VIN+ มุมบนซ้าย)
+
 ## ถัดไป
 
 1. รายการจัดหาอุปกรณ์ (BOM_Procurement) ให้ Codex — ถามก่อนว่ามีชิ้นไหนแล้ว

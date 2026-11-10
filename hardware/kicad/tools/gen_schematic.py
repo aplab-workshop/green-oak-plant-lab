@@ -158,7 +158,7 @@ def write_custom_lib():
     buck = custom_symbol(
         "CR-DC2580", "U", "CR-DC2580 12V->5V",
         "Mini DC-DC step-down buck module (IN 6-25V, OUT 5V)",
-        f"{PROJECT}:CR-DC2580", (-7.62, 5.08, 7.62, -5.08),
+        "APLab:CR-DC2580_Module", (-7.62, 5.08, 7.62, -5.08),
         [("passive", -11.43, 2.54, 0, "IN+", "1"), ("passive", -11.43, -2.54, 0, "IN-", "2"),
          ("passive", 11.43, 2.54, 180, "OUT+", "3"), ("passive", 11.43, -2.54, 180, "OUT-", "4")])
     lib = ("(kicad_symbol_lib\n\t(version 20241209)\n\t(generator \"gen_schematic.py\")\n"
@@ -174,7 +174,7 @@ FP = {
     "TB2": "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
     "XH": "Connector_JST:JST_XH_B{n}B-XH-A_1x0{n}_P2.50mm_Vertical",
     "SS34": "Diode_SMD:D_SMA",
-    "FUSE": "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal",
+    "FUSE": "APLab:Fuseholder_5x20_BLX-A",  # measured part, global APLab library
     "TP": "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm",
     "MOS": "Package_TO_SOT_SMD:TO-252-2",
 }
@@ -231,7 +231,7 @@ TB2("12V IN", g(6), g(12), "+12V_IN", "GND")
 add("F", "Device:Fuse", "10A 5x20 glass", FP["FUSE"], g(18), g(10), {"1": "+12V_IN", "2": "12V_FUSED"})
 TB2("POWER SWITCH", g(30), g(12), "12V_FUSED", "+12V")
 C("470uF/25V", g(46), g(12), "+12V", "GND", fp="Capacitor_THT:CP_Radial_D10.0mm_P5.00mm", polar=True)
-add("U", f"{PROJECT}:CR-DC2580", "CR-DC2580 12V->5V", f"{PROJECT}:CR-DC2580", g(12), g(26),
+add("U", f"{PROJECT}:CR-DC2580", "CR-DC2580 12V->5V", "APLab:CR-DC2580_Module", g(12), g(26),
     {"1": "+12V", "2": "GND", "3": "+5V", "4": "GND"}, pos=((-7.6, -7.6), (-7.6, 7.6)))
 C("100uF/16V", g(28), g(26), "+5V", "GND", fp="Capacitor_THT:CP_Radial_D6.3mm_P2.50mm", polar=True)
 C("100nF", g(36), g(26), "+5V", "GND")

@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\Chanatip\\Desktop\\Green_oak_plan\\hardware\\kicad\\GreenOak.kicad_sch")
-		(date "2026-11-10T02:26:26")
+		(date "2026-11-10T17:39:40")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -573,10 +573,10 @@
 		(comp
 			(ref "F1")
 			(value "10A 5x20 glass")
-			(footprint "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal")
+			(footprint "APLab:Fuseholder_5x20_BLX-A")
 			(fields
 				(field
-					(name "Footprint") "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal")
+					(name "Footprint") "APLab:Fuseholder_5x20_BLX-A")
 				(field
 					(name "Datasheet")
 				)
@@ -627,10 +627,10 @@
 		(comp
 			(ref "F2")
 			(value "5A 5x20 glass")
-			(footprint "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal")
+			(footprint "APLab:Fuseholder_5x20_BLX-A")
 			(fields
 				(field
-					(name "Footprint") "Fuse:Fuseholder_Clip-5x20mm_Littelfuse_111_Inline_P20.00x5.00mm_D1.05mm_Horizontal")
+					(name "Footprint") "APLab:Fuseholder_5x20_BLX-A")
 				(field
 					(name "Datasheet")
 				)
@@ -3406,10 +3406,10 @@
 		(comp
 			(ref "U1")
 			(value "CR-DC2580 12V->5V")
-			(footprint "GreenOak:CR-DC2580")
+			(footprint "APLab:CR-DC2580_Module")
 			(fields
 				(field
-					(name "Footprint") "GreenOak:CR-DC2580")
+					(name "Footprint") "APLab:CR-DC2580_Module")
 				(field
 					(name "Datasheet")
 				)
@@ -4084,7 +4084,7 @@
 				(field
 					(name "Value") "CR-DC2580 12V->5V")
 				(field
-					(name "Footprint") "GreenOak:CR-DC2580")
+					(name "Footprint") "APLab:CR-DC2580_Module")
 				(field
 					(name "Datasheet")
 				)
