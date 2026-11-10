@@ -1,0 +1,809 @@
+{
+	"nodes": [
+		{
+			"id": "title",
+			"type": "text",
+			"text": "# Green Oak Control Board — Wiring (Rev A v1.0)\nสร้างจาก `hardware/kicad/output/GreenOak.net` ด้วย `tools/gen_wiring_canvas.py` — ตรงกับ Schematic/PCB เสมอ\n\nสี: 🟥 ไฟ 12V/กำลัง · 🟧 5V/3V3 · 🟦 Connector บน PCB · 🟪 อุปกรณ์นอกบอร์ด · 🟩 วงจรบนบอร์ด\nลูกศร = ทางเดินไฟ/สัญญาณ, ป้ายบนเส้น = Net หรือ GPIO",
+			"x": 0,
+			"y": -330,
+			"width": 860,
+			"height": 260
+		},
+		{
+			"id": "g_pwr",
+			"type": "group",
+			"label": "POWER — 12V → ฟิวส์ → สวิตช์ → +12V / 5V / 3V3",
+			"x": -1300,
+			"y": 0,
+			"width": 1100,
+			"height": 1560,
+			"color": "1"
+		},
+		{
+			"id": "p_psu",
+			"type": "text",
+			"text": "### PSU 12V ≥ 10 A\n(นอกบอร์ด)\nขาเข้า 220V ผ่าน CT ของ PZEM",
+			"x": -1280,
+			"y": 40,
+			"width": 260,
+			"height": 130,
+			"color": "6"
+		},
+		{
+			"id": "p_j1",
+			"type": "text",
+			"text": "### J1 12V IN (Terminal 5.08)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `+12V_IN` | +12V จาก PSU |\n| 2 | `GND` | GND จาก PSU |",
+			"x": -980,
+			"y": 40,
+			"width": 360,
+			"height": 170,
+			"color": "5"
+		},
+		{
+			"id": "p_f1",
+			"type": "text",
+			"text": "### F1 10A 5x20 glass\nฟิวส์รวม (คลิป 5×20)\n`+12V_IN` → `12V_FUSED`",
+			"x": -580,
+			"y": 40,
+			"width": 330,
+			"height": 130,
+			"color": "1"
+		},
+		{
+			"id": "p_j2",
+			"type": "text",
+			"text": "### J2 POWER SWITCH (Terminal, สวิตช์อยู่นอกบอร์ด)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `12V_FUSED` | ขาเข้าสวิตช์ |\n| 2 | `+12V` | ขาออกสวิตช์ = ราง +12V |",
+			"x": -980,
+			"y": 260,
+			"width": 420,
+			"height": 190,
+			"color": "5"
+		},
+		{
+			"id": "p_rail",
+			"type": "text",
+			"text": "## ราง +12V\nต่อกับ: C1.1, D2.1, D3.1, D4.1, D5.1, F2.1, F3.1, J2.2, J5.1, J6.1, J7.1, J8.1, TP1.1, U1.1\n\n- C1 470uF/25V กรองไฟ\n- TP1 = จุดวัด +12V",
+			"x": -520,
+			"y": 260,
+			"width": 300,
+			"height": 260,
+			"color": "1"
+		},
+		{
+			"id": "p_f2",
+			"type": "text",
+			"text": "### F2 5A 5x20 glass\n`+12V` → `+12V_LED`\nเลี้ยง Grow Light อย่างเดียว",
+			"x": -980,
+			"y": 520,
+			"width": 330,
+			"height": 130,
+			"color": "1"
+		},
+		{
+			"id": "p_f3",
+			"type": "text",
+			"text": "### F3 0.5A PTC 1812\n`+12V` → `+12V_SENSOR`\nกันสาย Sensor ลัดวงจร",
+			"x": -580,
+			"y": 580,
+			"width": 330,
+			"height": 130,
+			"color": "1"
+		},
+		{
+			"id": "p_j3",
+			"type": "text",
+			"text": "### J3 12V SENSOR (Terminal)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `+12V_SENSOR` | +12V ไป PAR / 5-in-1 / QDY30A (สายแดง) |\n| 2 | `GND` | GND ของ Sensor ทั้ง 3 |",
+			"x": -580,
+			"y": 760,
+			"width": 360,
+			"height": 190,
+			"color": "5"
+		},
+		{
+			"id": "p_buck",
+			"type": "text",
+			"text": "### U1 CR-DC2580 12V->5V\n| ขา | Net |\n|---|---|\n| IN+ | `+12V` |\n| IN− | `GND` |\n| OUT+ | `+5V` |\n| OUT− | `GND` |\nC2 100uF/16V + C3 100nF ที่ +5V",
+			"x": -1280,
+			"y": 700,
+			"width": 320,
+			"height": 300,
+			"color": "2"
+		},
+		{
+			"id": "p_5v",
+			"type": "text",
+			"text": "## ราง +5V\nต่อกับ: C2.1, C3.1, D1.2, J12.1, J14.1, J15.1, JP1.1, TP2.1, U1.3\n\nใช้เลี้ยง: W5500, PZEM (ฝั่ง TTL), YF-S401, Relay (ถ้า JP1 = 5V)",
+			"x": -1280,
+			"y": 1040,
+			"width": 320,
+			"height": 260,
+			"color": "2"
+		},
+		{
+			"id": "p_d1",
+			"type": "text",
+			"text": "### D1 SS34\n`+5V` → `+5V_DEVKIT` → ขา **5V** ของ DevKit\nกันไฟจาก USB ย้อนเข้าราง 5V",
+			"x": -900,
+			"y": 1040,
+			"width": 330,
+			"height": 150,
+			"color": "2"
+		},
+		{
+			"id": "p_3v3",
+			"type": "text",
+			"text": "## ราง +3V3 (จาก LDO ของ DevKit)\nต่อกับ: J11.1, J13.1, J16.2, J17.2, JP1.3, R19.1, R20.1, R21.1, TP3.1, U2.1, U2.2\n\nใช้เลี้ยง: RS485 module, SHT40, DS3231, Pull-up YF-S401, Spare",
+			"x": -900,
+			"y": 1230,
+			"width": 400,
+			"height": 230,
+			"color": "2"
+		},
+		{
+			"id": "p_tp",
+			"type": "text",
+			"text": "### Test point\nTP1 +12V · TP2 +5V · TP3 +3V3 · TP4 GND\n(มุมล่างซ้ายของบอร์ด)",
+			"x": -480,
+			"y": 1000,
+			"width": 260,
+			"height": 130,
+			"color": "4"
+		},
+		{
+			"id": "mcu",
+			"type": "text",
+			"text": "## U2 ESP32-S3-DevKitC-1 N16R8\n(Clone 2022-V1.3 บน Female header 2×22)\n\n| ขา | ชื่อ | Net | ไปที่ |\n|---|---|---|---|\n| 1 | 3V3 | `+3V3` | ราง +3V3 |\n| 2 | 3V3 | `+3V3` | ราง +3V3 |\n| 3 | EN | `unconnected-(U2-EN-Pad3)` |  |\n| 4 | IO4 | `LIGHT_PWM` | R1.1, R2.1 |\n| 5 | IO5 | `PUMP_A` | R3.1, R4.1 |\n| 6 | IO6 | `PUMP_B` | R5.1, R6.1 |\n| 7 | IO7 | `FLOW` | C4.1, R18.2, R19.2 |\n| 8 | IO15 | `UART2_TX` | J14.2 |\n| 9 | IO16 | `UART2_RX` | R16.2, R17.1 |\n| 10 | IO17 | `UART1_TX` | J13.3 |\n| 11 | IO18 | `UART1_RX` | J13.2 |\n| 12 | IO8 | `I2C_SDA` | J16.3, J17.3, R20.2 |\n| 13 | IO3 | `unconnected-(U2-IO3-Pad13)` |  |\n| 14 | IO46 | `unconnected-(U2-IO46-Pad14)` |  |\n| 15 | IO9 | `I2C_SCL` | J16.4, J17.4, R21.2 |\n| 16 | IO10 | `W5500_CS` | J12.6 |\n| 17 | IO11 | `W5500_MOSI` | J12.4 |\n| 18 | IO12 | `W5500_SCLK` | J12.5 |\n| 19 | IO13 | `W5500_MISO` | J12.3 |\n| 20 | IO14 | `SPARE_IO14` | J11.3 |\n| 21 | 5V | `+5V_DEVKIT` | D1.1 |\n| 22 | GND | `GND` | ราง GND |\n| 23 | GND | `GND` | ราง GND |\n| 24 | TX/IO43 | `unconnected-(U2-TX{slash}IO43-Pad24)` |  |\n| 25 | RX/IO44 | `unconnected-(U2-RX{slash}IO44-Pad25)` |  |\n| 26 | IO1 | `PH_DOWN` | R7.1, R8.1 |\n| 27 | IO2 | `REFILL` | R10.1, R9.1 |\n| 28 | IO42 | `FAN_PWM` | J10.1, R15.1 |\n| 29 | IO41 | `RLY3_AIR` | J9.4, R13.1 |\n| 30 | IO40 | `RLY2_GREEN` | J9.3, R12.1 |\n| 31 | IO39 | `RLY1_RED` | J9.2, R11.1 |\n| 32 | IO38 | `unconnected-(U2-IO38-Pad32)` |  |\n| 33 | IO37 | `unconnected-(U2-IO37-Pad33)` |  |\n| 34 | IO36 | `unconnected-(U2-IO36-Pad34)` |  |\n| 35 | IO35 | `unconnected-(U2-IO35-Pad35)` |  |\n| 36 | IO0 | `unconnected-(U2-IO0-Pad36)` |  |\n| 37 | IO45 | `unconnected-(U2-IO45-Pad37)` |  |\n| 38 | IO48 | `unconnected-(U2-IO48-Pad38)` |  |\n| 39 | IO47 | `SPARE_IO47` | J11.4 |\n| 40 | IO21 | `RLY4_HUM` | J9.5, R14.1 |\n| 41 | IO20 | `unconnected-(U2-IO20-Pad41)` |  |\n| 42 | IO19 | `unconnected-(U2-IO19-Pad42)` |  |\n| 43 | GND | `GND` | ราง GND |\n| 44 | GND | `GND` | ราง GND |\n\n**ไม่ใช้ (NC):** EN, IO0, IO3, IO45, IO46 (Strapping), IO19/20 (USB), IO35–37 (PSRAM), IO38/48 (RGB), TX/RX IO43/44 (UART0 Log)",
+			"x": 0,
+			"y": 0,
+			"width": 760,
+			"height": 1460,
+			"color": "4"
+		},
+		{
+			"id": "g_rly",
+			"type": "group",
+			"label": "RELAY 4CH / พัดลม / Spare",
+			"x": 900,
+			"y": -1250,
+			"width": 1500,
+			"height": 820,
+			"color": "3"
+		},
+		{
+			"id": "rly",
+			"type": "text",
+			"text": "### J9 RELAY 4CH (XH 6 ขา → Header ของโมดูล Relay)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `GND` | GND |\n| 2 | `RLY1_RED` | IN1 → Ch1 Lamp RED (Pull-down R11 10k) — **GPIO39** |\n| 3 | `RLY2_GREEN` | IN2 → Ch2 Lamp GREEN (Pull-down R12) — **GPIO40** |\n| 4 | `RLY3_AIR` | IN3 → Ch3 Air Pump M105 **ขา NC** (R13) — **GPIO41** |\n| 5 | `RLY4_HUM` | IN4 → Ch4 Humidifier M101 ขา NO (R14) — **GPIO21** |\n| 6 | `RELAY_VCC` | VCC ของโมดูล (เลือกด้วย JP1) |",
+			"x": 920,
+			"y": -1210,
+			"width": 620,
+			"height": 330,
+			"color": "5"
+		},
+		{
+			"id": "jp1",
+			"type": "text",
+			"text": "### JP1 Solder jumper\nRELAY VCC 1-2=5V 2-3=3V3\n1 = +5V · 2 = `RELAY_VCC` · 3 = +3V3\n**ค่าเริ่ม: บัดกรี 1-2 (5V)**",
+			"x": 920,
+			"y": -850,
+			"width": 360,
+			"height": 170,
+			"color": "2"
+		},
+		{
+			"id": "rly_dev",
+			"type": "text",
+			"text": "### โมดูล Relay 4CH (นอกบอร์ด, Active-HIGH / Jumper H)\n| Ch | หน้าสัมผัส | โหลด |\n|---|---|---|\n| 1 | NO | Lamp RED |\n| 2 | NO | Lamp GREEN |\n| 3 | **NC** | Air Pump 220V (ไม่มีไฟ = ทำงาน) |\n| 4 | NO | Humidifier 5V (USB) |\n\n⚠ 220V อยู่ที่โมดูล Relay เท่านั้น ไม่ผ่าน PCB",
+			"x": 1600,
+			"y": -1210,
+			"width": 460,
+			"height": 330,
+			"color": "6"
+		},
+		{
+			"id": "i_air",
+			"type": "file",
+			"file": "image/air pump oxygen.png",
+			"x": 2100,
+			"y": -1210,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "i_hum",
+			"type": "file",
+			"file": "image/Humidifier.png",
+			"x": 2100,
+			"y": -1060,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "fan",
+			"type": "text",
+			"text": "### J10 FAN → L298N (XH 2 ขา)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `FAN_PWM` | ENA (PWM D201, Pull-down R15) — **GPIO42** |\n| 2 | `GND` | GND ร่วม L298N |\n\nบน L298N: IN1 → +5V ของ L298N, IN2 → GND (สายจั๊ม) · พัดลม 12V ต่อ OUT1/OUT2",
+			"x": 1320,
+			"y": -850,
+			"width": 520,
+			"height": 260,
+			"color": "5"
+		},
+		{
+			"id": "spare",
+			"type": "text",
+			"text": "### J11 SPARE (XH 4 ขา)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `+3V3` | +3V3 |\n| 2 | `GND` | GND |\n| 3 | `SPARE_IO14` | ว่าง — **GPIO14** |\n| 4 | `SPARE_IO47` | ว่าง — **GPIO47** |",
+			"x": 1880,
+			"y": -850,
+			"width": 500,
+			"height": 230,
+			"color": "5"
+		},
+		{
+			"id": "g_com",
+			"type": "group",
+			"label": "COMMS + SENSORS (XH 2.50 mm บนขอบขวาของบอร์ด)",
+			"x": 900,
+			"y": -380,
+			"width": 1500,
+			"height": 1920,
+			"color": "5"
+		},
+		{
+			"id": "w5500",
+			"type": "text",
+			"text": "### J12 W5500 Ethernet (XH 6)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `+5V` | VCC 5V |\n| 2 | `GND` | GND |\n| 3 | `W5500_MISO` | MISO — **GPIO13** |\n| 4 | `W5500_MOSI` | MOSI — **GPIO11** |\n| 5 | `W5500_SCLK` | SCLK — **GPIO12** |\n| 6 | `W5500_CS` | CS — **GPIO10** |\n\nRJ45 → Switch → FX5U (Modbus TCP)",
+			"x": 920,
+			"y": -340,
+			"width": 640,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "rs485",
+			"type": "text",
+			"text": "### J13 RS485 module (XH 4, **เลี้ยง 3V3**)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `+3V3` | VCC 3V3 |\n| 2 | `UART1_RX` | TXD ของโมดูล → ESP RX — **GPIO18** |\n| 3 | `UART1_TX` | RXD ของโมดูล ← ESP TX — **GPIO17** |\n| 4 | `GND` | GND |\n\nบัส A/B ที่ขั้วสกรูของโมดูล: 5-in-1 (addr 1), PAR (addr 2), QDY30A (addr 3)\nไฟ 12V ของ Sensor มาจาก **J3**",
+			"x": 920,
+			"y": -10,
+			"width": 640,
+			"height": 330,
+			"color": "5"
+		},
+		{
+			"id": "rs485_i0",
+			"type": "file",
+			"file": "image/TTL to RS485.png",
+			"x": 1600,
+			"y": 0,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "rs485_i1",
+			"type": "file",
+			"file": "image/Par_sensor.png",
+			"x": 1790,
+			"y": 0,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "rs485_i2",
+			"type": "file",
+			"file": "image/PH, EC, Temperature, Salinity, TDS 5-in-1.png",
+			"x": 1980,
+			"y": 0,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "rs485_i3",
+			"type": "file",
+			"file": "image/QDY30A Water level sensor.png",
+			"x": 2170,
+			"y": 0,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "pzem",
+			"type": "text",
+			"text": "### J14 PZEM-004T (XH 4)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `+5V` | 5V |\n| 2 | `UART2_TX` | RX ของ PZEM ← ESP TX — **GPIO15** |\n| 3 | `PZEM_TX_5V` | TX ของ PZEM (5V) |\n| 4 | `GND` | GND |\n\nTX 5V → R16 2.2k → `UART2_RX` → R17 3.3k ลง GND ≈ 3.0V",
+			"x": 920,
+			"y": 350,
+			"width": 640,
+			"height": 300,
+			"color": "5"
+		},
+		{
+			"id": "pzem_i0",
+			"type": "file",
+			"file": "image/PZEM-004T-100A-D-P AC.png",
+			"x": 1600,
+			"y": 360,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "flow",
+			"type": "text",
+			"text": "### J15 YF-S401 Flow (XH 3)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `+5V` | 5V (แดง) |\n| 2 | `GND` | GND (ดำ) |\n| 3 | `FLOW_SIG` | PULSE Open-drain (เหลือง) |\n\n`FLOW_SIG` → R18 1k → `FLOW` + R19 10k Pull-up 3V3 + C4 1nF",
+			"x": 920,
+			"y": 680,
+			"width": 640,
+			"height": 280,
+			"color": "5"
+		},
+		{
+			"id": "flow_i0",
+			"type": "file",
+			"file": "image/YF-S401.png",
+			"x": 1600,
+			"y": 690,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "sht",
+			"type": "text",
+			"text": "### J16 SHT40 (XH 4)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `GND` | GND |\n| 2 | `+3V3` | 3V3 |\n| 3 | `I2C_SDA` | SDA — **GPIO8** |\n| 4 | `I2C_SCL` | SCL — **GPIO9** |",
+			"x": 920,
+			"y": 990,
+			"width": 640,
+			"height": 220,
+			"color": "5"
+		},
+		{
+			"id": "sht_i0",
+			"type": "file",
+			"file": "image/Aideepen SHT40.png",
+			"x": 1600,
+			"y": 1000,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "rtc",
+			"type": "text",
+			"text": "### J17 DS3231 ZS-042 (XH 4, มุมล่างซ้ายบอร์ด)\n| ขา | Net | ต่อกับ |\n|---|---|---|\n| 1 | `GND` | GND |\n| 2 | `+3V3` | 3V3 |\n| 3 | `I2C_SDA` | SDA — **GPIO8** |\n| 4 | `I2C_SCL` | SCL — **GPIO9** |\n\nR20/R21 4.7k Pull-up = **DNP** (บอร์ดโมดูลมีแล้ว)",
+			"x": 920,
+			"y": 1240,
+			"width": 640,
+			"height": 250,
+			"color": "5"
+		},
+		{
+			"id": "rtc_i0",
+			"type": "file",
+			"file": "image/DS3231.png",
+			"x": 1600,
+			"y": 1250,
+			"width": 170,
+			"height": 125
+		},
+		{
+			"id": "g_out",
+			"type": "group",
+			"label": "OUTPUTS 12V — AOD4184A Low-side (Terminal ขอบล่าง: ขา 1 = +, ขา 2 = −)",
+			"x": 0,
+			"y": 1600,
+			"width": 2400,
+			"height": 900,
+			"color": "1"
+		},
+		{
+			"id": "ch0",
+			"type": "text",
+			"text": "### Grow Light COB 50W — D200 (PWM)\n**GPIO4** `LIGHT_PWM`\n\n1. R1 100R: `LIGHT_PWM` → `LIGHT_G` (Gate)\n2. R2 10k: `LIGHT_PWM` → GND (Pull-down ตอน Boot)\n3. Q1 AOD4184A: G=`LIGHT_G` · D=`LIGHT_D` · S=`GND`\n\n**J4** ขา 1 = `+12V_LED` (+ โหลด) · ขา 2 = `LIGHT_D` (− โหลด)",
+			"x": 20,
+			"y": 1640,
+			"width": 455,
+			"height": 400,
+			"color": "1"
+		},
+		{
+			"id": "ch0_img",
+			"type": "file",
+			"file": "image/50W LED Light Grow 12VDC.png",
+			"x": 160,
+			"y": 2080,
+			"width": 175,
+			"height": 130
+		},
+		{
+			"id": "ch1",
+			"type": "text",
+			"text": "### ปั๊มปุ๋ย A — M103\n**GPIO5** `PUMP_A`\n\n1. R3 100R: `PUMP_A` → `PUMPA_G` (Gate)\n2. R4 10k: `PUMP_A` → GND (Pull-down ตอน Boot)\n3. Q2 AOD4184A: G=`PUMPA_G` · D=`PUMPA_D` · S=`GND`\n4. D2 SS34 Flyback: A=`PUMPA_D` · K=`+12V`\n\n**J5** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PUMPA_D` (− โหลด)",
+			"x": 495,
+			"y": 1640,
+			"width": 455,
+			"height": 400,
+			"color": "4"
+		},
+		{
+			"id": "ch1_img",
+			"type": "file",
+			"file": "image/Peristaltic pump.png",
+			"x": 635,
+			"y": 2080,
+			"width": 175,
+			"height": 130
+		},
+		{
+			"id": "ch2",
+			"type": "text",
+			"text": "### ปั๊มปุ๋ย B — M104\n**GPIO6** `PUMP_B`\n\n1. R5 100R: `PUMP_B` → `PUMPB_G` (Gate)\n2. R6 10k: `PUMP_B` → GND (Pull-down ตอน Boot)\n3. Q3 AOD4184A: G=`PUMPB_G` · D=`PUMPB_D` · S=`GND`\n4. D3 SS34 Flyback: A=`PUMPB_D` · K=`+12V`\n\n**J6** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PUMPB_D` (− โหลด)",
+			"x": 970,
+			"y": 1640,
+			"width": 455,
+			"height": 400,
+			"color": "4"
+		},
+		{
+			"id": "ch2_img",
+			"type": "file",
+			"file": "image/Peristaltic pump.png",
+			"x": 1110,
+			"y": 2080,
+			"width": 175,
+			"height": 130
+		},
+		{
+			"id": "ch3",
+			"type": "text",
+			"text": "### ปั๊ม pH Down — M106\n**GPIO1** `PH_DOWN`\n\n1. R7 100R: `PH_DOWN` → `PHDOWN_G` (Gate)\n2. R8 10k: `PH_DOWN` → GND (Pull-down ตอน Boot)\n3. Q4 AOD4184A: G=`PHDOWN_G` · D=`PHDOWN_D` · S=`GND`\n4. D4 SS34 Flyback: A=`PHDOWN_D` · K=`+12V`\n\n**J7** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `PHDOWN_D` (− โหลด)",
+			"x": 1445,
+			"y": 1640,
+			"width": 455,
+			"height": 400,
+			"color": "4"
+		},
+		{
+			"id": "ch3_img",
+			"type": "file",
+			"file": "image/Peristaltic pump.png",
+			"x": 1585,
+			"y": 2080,
+			"width": 175,
+			"height": 130
+		},
+		{
+			"id": "ch4",
+			"type": "text",
+			"text": "### ปั๊มเติมน้ำ — M102\n**GPIO2** `REFILL`\n\n1. R9 100R: `REFILL` → `REFILL_G` (Gate)\n2. R10 10k: `REFILL` → GND (Pull-down ตอน Boot)\n3. Q5 AOD4184A: G=`REFILL_G` · D=`REFILL_D` · S=`GND`\n4. D5 SS34 Flyback: A=`REFILL_D` · K=`+12V`\n\n**J8** ขา 1 = `+12V` (+ โหลด) · ขา 2 = `REFILL_D` (− โหลด)",
+			"x": 1920,
+			"y": 1640,
+			"width": 455,
+			"height": 400,
+			"color": "4"
+		},
+		{
+			"id": "ch4_img",
+			"type": "file",
+			"file": "image/Diaphragm pump.png",
+			"x": 2060,
+			"y": 2080,
+			"width": 175,
+			"height": 130
+		},
+		{
+			"id": "gnd",
+			"type": "text",
+			"text": "## GND\nเทเต็มทั้งสองชั้น + Stitching via\nทุก Connector มีขา GND ร่วมกัน\n(ทั้งหมด 38 ขา)",
+			"x": -1300,
+			"y": 1640,
+			"width": 400,
+			"height": 170,
+			"color": "4"
+		}
+	],
+	"edges": [
+		{
+			"id": "e0",
+			"fromNode": "p_psu",
+			"fromSide": "right",
+			"toNode": "p_j1",
+			"toSide": "left",
+			"label": "+12V / GND",
+			"color": "1"
+		},
+		{
+			"id": "e1",
+			"fromNode": "p_j1",
+			"fromSide": "right",
+			"toNode": "p_f1",
+			"toSide": "left",
+			"label": "+12V_IN",
+			"color": "1"
+		},
+		{
+			"id": "e2",
+			"fromNode": "p_f1",
+			"fromSide": "bottom",
+			"toNode": "p_j2",
+			"toSide": "top",
+			"label": "12V_FUSED",
+			"color": "1"
+		},
+		{
+			"id": "e3",
+			"fromNode": "p_j2",
+			"fromSide": "right",
+			"toNode": "p_rail",
+			"toSide": "left",
+			"label": "+12V",
+			"color": "1"
+		},
+		{
+			"id": "e4",
+			"fromNode": "p_rail",
+			"fromSide": "bottom",
+			"toNode": "p_f2",
+			"toSide": "top",
+			"label": "+12V",
+			"color": "1"
+		},
+		{
+			"id": "e5",
+			"fromNode": "p_rail",
+			"fromSide": "bottom",
+			"toNode": "p_f3",
+			"toSide": "top",
+			"label": "+12V",
+			"color": "1"
+		},
+		{
+			"id": "e6",
+			"fromNode": "p_f3",
+			"fromSide": "bottom",
+			"toNode": "p_j3",
+			"toSide": "top",
+			"label": "+12V_SENSOR",
+			"color": "1"
+		},
+		{
+			"id": "e7",
+			"fromNode": "p_rail",
+			"fromSide": "left",
+			"toNode": "p_buck",
+			"toSide": "top",
+			"label": "+12V",
+			"color": "1"
+		},
+		{
+			"id": "e8",
+			"fromNode": "p_buck",
+			"fromSide": "bottom",
+			"toNode": "p_5v",
+			"toSide": "top",
+			"label": "+5V",
+			"color": "2"
+		},
+		{
+			"id": "e9",
+			"fromNode": "p_5v",
+			"fromSide": "right",
+			"toNode": "p_d1",
+			"toSide": "left",
+			"label": "+5V",
+			"color": "2"
+		},
+		{
+			"id": "e10",
+			"fromNode": "p_d1",
+			"fromSide": "right",
+			"toNode": "mcu",
+			"toSide": "left",
+			"label": "+5V_DEVKIT → ขา 21 (5V)",
+			"color": "2"
+		},
+		{
+			"id": "e11",
+			"fromNode": "mcu",
+			"fromSide": "left",
+			"toNode": "p_3v3",
+			"toSide": "right",
+			"label": "ขา 1, 2 (3V3)",
+			"color": "2"
+		},
+		{
+			"id": "e12",
+			"fromNode": "mcu",
+			"fromSide": "top",
+			"toNode": "rly",
+			"toSide": "bottom",
+			"label": "GPIO39/40/41/21"
+		},
+		{
+			"id": "e13",
+			"fromNode": "jp1",
+			"fromSide": "top",
+			"toNode": "rly",
+			"toSide": "bottom",
+			"label": "RELAY_VCC",
+			"color": "2"
+		},
+		{
+			"id": "e14",
+			"fromNode": "rly",
+			"fromSide": "right",
+			"toNode": "rly_dev",
+			"toSide": "left",
+			"label": "สาย 6 เส้นตรง"
+		},
+		{
+			"id": "e15",
+			"fromNode": "mcu",
+			"fromSide": "top",
+			"toNode": "fan",
+			"toSide": "bottom",
+			"label": "GPIO42 PWM"
+		},
+		{
+			"id": "e16",
+			"fromNode": "mcu",
+			"fromSide": "top",
+			"toNode": "spare",
+			"toSide": "bottom",
+			"label": "GPIO14 / GPIO47"
+		},
+		{
+			"id": "e17",
+			"fromNode": "mcu",
+			"fromSide": "right",
+			"toNode": "w5500",
+			"toSide": "left",
+			"label": "SPI: GPIO10–13"
+		},
+		{
+			"id": "e18",
+			"fromNode": "mcu",
+			"fromSide": "right",
+			"toNode": "rs485",
+			"toSide": "left",
+			"label": "UART1: GPIO17 TX / GPIO18 RX"
+		},
+		{
+			"id": "e19",
+			"fromNode": "mcu",
+			"fromSide": "right",
+			"toNode": "pzem",
+			"toSide": "left",
+			"label": "UART2: GPIO15 TX / GPIO16 RX"
+		},
+		{
+			"id": "e20",
+			"fromNode": "mcu",
+			"fromSide": "right",
+			"toNode": "flow",
+			"toSide": "left",
+			"label": "GPIO7 (Interrupt)"
+		},
+		{
+			"id": "e21",
+			"fromNode": "mcu",
+			"fromSide": "right",
+			"toNode": "sht",
+			"toSide": "left",
+			"label": "I2C: GPIO8 SDA / GPIO9 SCL"
+		},
+		{
+			"id": "e22",
+			"fromNode": "mcu",
+			"fromSide": "right",
+			"toNode": "rtc",
+			"toSide": "left",
+			"label": "I2C ร่วมกับ SHT40"
+		},
+		{
+			"id": "e23",
+			"fromNode": "p_j3",
+			"fromSide": "bottom",
+			"toNode": "rs485_i1",
+			"toSide": "bottom",
+			"label": "+12V_SENSOR (ไฟเลี้ยง Sensor)",
+			"color": "1"
+		},
+		{
+			"id": "e24",
+			"fromNode": "ch0",
+			"fromSide": "bottom",
+			"toNode": "ch0_img",
+			"toSide": "top",
+			"label": "J4",
+			"color": "1"
+		},
+		{
+			"id": "e25",
+			"fromNode": "mcu",
+			"fromSide": "bottom",
+			"toNode": "ch0",
+			"toSide": "top",
+			"label": "GPIO4"
+		},
+		{
+			"id": "e26",
+			"fromNode": "ch1",
+			"fromSide": "bottom",
+			"toNode": "ch1_img",
+			"toSide": "top",
+			"label": "J5",
+			"color": "1"
+		},
+		{
+			"id": "e27",
+			"fromNode": "mcu",
+			"fromSide": "bottom",
+			"toNode": "ch1",
+			"toSide": "top",
+			"label": "GPIO5"
+		},
+		{
+			"id": "e28",
+			"fromNode": "ch2",
+			"fromSide": "bottom",
+			"toNode": "ch2_img",
+			"toSide": "top",
+			"label": "J6",
+			"color": "1"
+		},
+		{
+			"id": "e29",
+			"fromNode": "mcu",
+			"fromSide": "bottom",
+			"toNode": "ch2",
+			"toSide": "top",
+			"label": "GPIO6"
+		},
+		{
+			"id": "e30",
+			"fromNode": "ch3",
+			"fromSide": "bottom",
+			"toNode": "ch3_img",
+			"toSide": "top",
+			"label": "J7",
+			"color": "1"
+		},
+		{
+			"id": "e31",
+			"fromNode": "mcu",
+			"fromSide": "bottom",
+			"toNode": "ch3",
+			"toSide": "top",
+			"label": "GPIO1"
+		},
+		{
+			"id": "e32",
+			"fromNode": "ch4",
+			"fromSide": "bottom",
+			"toNode": "ch4_img",
+			"toSide": "top",
+			"label": "J8",
+			"color": "1"
+		},
+		{
+			"id": "e33",
+			"fromNode": "mcu",
+			"fromSide": "bottom",
+			"toNode": "ch4",
+			"toSide": "top",
+			"label": "GPIO2"
+		},
+		{
+			"id": "e34",
+			"fromNode": "p_f2",
+			"fromSide": "bottom",
+			"toNode": "ch0",
+			"toSide": "left",
+			"label": "+12V_LED (2.0 mm)",
+			"color": "1"
+		},
+		{
+			"id": "e35",
+			"fromNode": "p_rail",
+			"fromSide": "bottom",
+			"toNode": "ch1",
+			"toSide": "left",
+			"label": "+12V → ขา 1 ของ J5–J8",
+			"color": "1"
+		}
+	]
+}
