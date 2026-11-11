@@ -88,7 +88,7 @@ tags: [green-oak, hardware, esp32, modbus, fx5u, kicad]
 | Address | อุปกรณ์ | Driver (เสนอ) |
 |---|---|---|
 | M101 | Humidifier (หมอก) | Relay |
-| M102 | Water Refill Pump | MOSFET (12V) |
+| M102 | Water Refill Pump (12V 6A 72W) | MOSFET (12V) → **Relay รถยนต์ 30/40 A** + PSU ปั๊มแยก (`hardware/Design_Review.md` § ปั๊มเติมน้ำ 72 W) |
 | M103, M104 | Nutrient Pump A, B (Peristaltic) | MOSFET (12V) |
 | M105 | Air Pump (Magic-6600, 220V 3 W) | **Relay หน้าสัมผัส NC** (ไม่มีไฟเลี้ยง = ทำงาน) |
 | M106 | pH Down Pump (Peristaltic ทนกรด) | MOSFET (12V) |

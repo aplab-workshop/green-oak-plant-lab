@@ -76,7 +76,7 @@
 ```
 12V PSU (≥10 A) → Terminal 12V → A1 Fuse ~10 A → Switch System → ราง 12V
   ├─ A2 Fuse 5 A → MOSFET → Grow Light COB 50W (~4.2 A)
-  ├─ MOSFET → Refill (diaphragm ~0.5–1 A), Pump A/B, pH Down (peristaltic ~0.3 A ต่อตัว)
+  ├─ MOSFET → Refill → Coil Relay รถยนต์ (~0.15 A; ปั๊ม 72 W ใช้ PSU แยก — § ปั๊มเติมน้ำ 72 W), Pump A/B, pH Down (peristaltic ~0.3 A ต่อตัว)
   ├─ L298N → พัดลม (~0.3 A)
   ├─ PAR, 5-in-1, QDY30A (รวม < 0.2 A)
   └─ CR-DC2580 Buck → 5V
@@ -197,6 +197,24 @@
 ## เบอร์ชิ้นส่วนจริง (2026-11-10)
 
 Codex หาที่ ES แล้ว ผู้ออกแบบตรวจ Datasheet อนุมัติครบ (`BOM_Procurement_QCDR.md` § ผลตรวจ): **Q1–Q5 = ROHM RD3G500GNTL** แทน AOD4184A (ดีกว่าที่ Gate 3.3 V), **D1–D5 = Diotec SK34SMA-3G** แทน SS34 (SMA เหมือนกัน) — Footprint ไม่เปลี่ยน, ทองแดง/Gerber v1.1 ไม่เปลี่ยน (แก้แค่ Value/MPN ใน Schematic, BOM, PCB)
+
+## ปั๊มเติมน้ำ 72 W ผ่าน Relay ภายนอก (2026-11-11)
+
+ผู้ใช้เลือกปั๊ม Refill 12 V 6 A 72 W — **ต่อตรงที่ J8 ไม่ได้** (ลาย `REFILL_D` 0.8 mm ≈ 2 A, Flyback SK34 3 A, F1 10 A ไม่พอเมื่อรวม LED 4.2 A และกระแสสตาร์ทมอเตอร์ 2–3 เท่า) → ผู้ใช้เลือก **ทาง A: J8 ขับ Coil ของ Relay รถยนต์** — บอร์ด v1.1 ไม่ต้องแก้, Firmware ไม่ต้องแก้ (M102 เปิด/ปิดเหมือนเดิม)
+
+```
+บอร์ด J8 ขา 1 (+12V) ────── Relay ขา 86 (Coil +)
+บอร์ด J8 ขา 2 (REFILL_D) ── Relay ขา 85 (Coil −)     ← Q5 ขับ Coil ~0.15 A, D5 เป็น Flyback ของ Coil
+
+PSU ปั๊ม 12V ≥ 10 A (+) ── ฟิวส์ใบมีด 10 A ── Relay ขา 30 → ขา 87 (NO) ── ปั๊ม (+)
+PSU ปั๊ม 12V (−) ─────────────────────────────────────────────────── ปั๊ม (−)
+```
+
+- Relay รถยนต์ 12 V 30/40 A แบบ 4 ขา (86/85 Coil, 30/87 NO) + ซ็อกเก็ต; ใช้ขา **87 (NO)** เพื่อให้ไฟดับ/บอร์ดค้าง = ปั๊มหยุด (ตรงกับ Fail-safe Refill = OFF)
+- กระแสปั๊มไม่ผ่านบอร์ดเลย — สาย 30 → 87 → ปั๊มใช้ ≥ 1.5 mm² (AWG 16) ฟิวส์ใกล้ขั้ว + ของ PSU
+- PSU ปั๊มแยกจาก PSU บอร์ดได้ ไม่ต้องต่อ GND ร่วม (Relay แยกวงจรแล้ว); ถ้าจะใช้ PSU ตัวเดียว ต้อง ≥ 15–20 A และต่อปั๊มจากขั้ว PSU โดยตรง ไม่ผ่าน J1/F1
+- Coil ห้ามต่อ Diode ซ้ำที่ Relay ถ้าเป็นแบบมี Diode ในตัว ให้ตรวจขั้ว 86 = + ให้ตรง
+- 72 W แรงเกินจำเป็นสำหรับเติมถัง DWC — ถ้าน้ำพุ่งแรงให้ตั้ง Refill Timeout (Fail-safe § 5.2) ให้สั้นลงตอน H5
 
 ## ถัดไป
 
