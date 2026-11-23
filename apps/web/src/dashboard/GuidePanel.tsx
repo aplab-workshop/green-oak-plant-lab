@@ -69,8 +69,8 @@ function DeviceRationaleList() {
 }
 
 /** คู่มือในเกม (เมนู 📖) */
-export function GuidePanel() {
-  const [tab, setTab] = useState<(typeof TABS)[number]['key']>('level');
+export function GuidePanel({ initialTab = 'level' }: { initialTab?: (typeof TABS)[number]['key'] }) {
+  const [tab, setTab] = useState<(typeof TABS)[number]['key']>(initialTab);
   return <div className="space-y-4 p-5">
     <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1" role="tablist" aria-label="หัวข้อคู่มือ">
       {TABS.map((t) => <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}

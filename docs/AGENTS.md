@@ -225,3 +225,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - ผู้ใช้อนุมัติแบบบอร์ดใน `hardware/GreenOak_PCB_RevA.canvas`; ผลตรวจ/การตัดสินใจทั้งหมดอยู่ใน `hardware/Design_Review.md` (AOD4184A บน PCB, RS485 module นอกบอร์ด, ≤ 100 × 100 mm, Water Level กลับเป็น QDY30A)
 - Schematic สร้างด้วย `hardware/kicad/tools/gen_schematic.py` (แก้ตารางในสคริปต์แล้วรันใหม่) — ERC 0
 - PCB 100 × 100 mm สร้างด้วยสคริปต์ใน `hardware/kicad/tools/` (ลำดับใน Design_Review § PCB) — DRC 0, Gerber `output/GreenOak_gerber_v1.0.zip`; v1.0 ผู้ใช้ตรวจผ่าน; **v1.1 (`GreenOak_gerber_v1.1.zip`) ใช้ Footprint วัดจริงจากไลบรารี Global `APLab` (Buck, ฐานฟิวส์ BLX-A)** — สร้างบอร์ดใหม่ด้วย `bash tools/route_all.sh`
+
+### สถานะเพิ่มเติม 2026-11-24 — P52 หน้า Home
+- เสร็จและ commit แล้ว (ยังไม่ push): หน้า Home / Main Menu Overlay บนฉาก 3D (Play, คู่มือการปลูก) — `app/HomeScreen.tsx` (SPEC § 4.35); tests 337/337
+- push ขึ้น GitHub (= อัปเดต Pages) รอผู้ใช้อนุญาต

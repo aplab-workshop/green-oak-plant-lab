@@ -221,3 +221,30 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
 @media (max-width: 1099px) { .garden-hud { flex-wrap: wrap; } }
 @media (prefers-reduced-motion: reduce) { .growth-float { animation: none; opacity: 0; } }
 
+
+/* ===== P52: หน้า Home / Main Menu — Overlay บนฉาก 3D (SPEC § 4.35) ===== */
+.home-screen { position: relative; height: 100%; overflow: hidden; background: #e5eee5; }
+.home-scene { position: absolute; inset: 0; pointer-events: none; }
+/* ไล่ขาวจากซ้ายให้เมนูอ่านง่าย โดยฉากฝั่งขวายังเห็นชัด */
+.home-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, #ffffffd9 0%, #ffffff8c 28%, #ffffff00 52%); }
+.home-menu { position: relative; display: flex; height: 100%; max-width: 620px; flex-direction: column; gap: 40px; padding: 56px 0 40px 64px; }
+.home-title { align-self: flex-start; border-radius: 22px; background: #1f6b3d; padding: 22px 30px 18px; color: white; box-shadow: 0 8px 0 #154d2b, 0 18px 36px #1f6b3d40; }
+.home-title h1 { font-size: 40px; font-weight: 800; line-height: 1.05; letter-spacing: 0.02em; white-space: nowrap; }
+.home-title p { margin-top: 12px; display: inline-block; border-radius: 999px; background: white; padding: 4px 14px; font-size: 15px; font-weight: 600; color: #1f6b3d; }
+.home-buttons { display: flex; width: 340px; flex-direction: column; gap: 18px; }
+.home-btn { display: flex; align-items: center; justify-content: center; gap: 12px; border-radius: 16px; padding: 16px 24px; font-size: 26px; font-weight: 700; transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease; }
+.home-btn:focus-visible { outline: 3px solid #86efac; outline-offset: 3px; }
+.home-btn-primary { background: #22a35a; color: white; box-shadow: 0 6px 0 #17783f, 0 14px 28px #17783f40; }
+.home-btn-primary:hover { background: #26b864; transform: translateY(-2px); box-shadow: 0 8px 0 #17783f, 0 18px 32px #17783f52; }
+.home-btn-secondary { border: 2px solid #22a35a; background: white; color: #17783f; font-size: 22px; box-shadow: 0 5px 0 #bfe6cd, 0 12px 24px #17783f24; }
+.home-btn-secondary:hover { background: #f0fbf4; transform: translateY(-2px); box-shadow: 0 7px 0 #bfe6cd, 0 16px 28px #17783f33; }
+.home-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #17783f; }
+.home-note { font-size: 12px; font-weight: 600; color: #8a5a00; }
+@media (max-width: 699px) {
+  .home-shade { background: linear-gradient(180deg, #ffffffe6 0%, #ffffff99 45%, #ffffff00 70%); }
+  .home-menu { max-width: none; align-items: center; gap: 24px; padding: 28px 16px; }
+  .home-title { align-self: center; padding: 16px 20px 14px; text-align: center; }
+  .home-title h1 { font-size: 28px; }
+  .home-buttons { width: min(320px, 100%); }
+  .home-btn { font-size: 22px; padding: 13px 20px; }
+}

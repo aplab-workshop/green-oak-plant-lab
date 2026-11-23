@@ -527,6 +527,12 @@ tags: [green-oak, roadmap]
 - **ผลตรวจ:** AC-65 ผ่าน; Workflow run 40177388788 สำเร็จ (build + deploy); https://aplab-workshop.github.io/green-oak-plant-lab/ เปิดเกมได้ ป้าย Demo, Mascot sprite 200, เริ่มปลูก + 1440x เวลาเดิน ไม่มี Console error; ลบ Artifact claude.ai แล้ว
 - **หมายเหตุ:** Actions เตือน Node 20 deprecated ใน action v4 (ยังทำงาน) และ ubuntu-latest จะย้ายเป็น Ubuntu 26 — ไม่กระทบตอนนี้; อีเมลผู้ commit อยู่ใน history สาธารณะ
 
+### P52 — หน้า Home / Main Menu ✅
+- [x] ผู้ใช้ (2026-11-24): หน้า Home Overlay บนฉาก 3D สไตล์ Code Market โทนขาว-เขียว ปุ่ม Play + คู่มือการปลูก → SPEC § 4.35 + AC-66
+- [x] `app/HomeScreen.tsx` (ชื่อเกมกล่องเขียวเข้ม + คำโปรย, ปุ่ม Play / คู่มือการปลูก), `App` เริ่มที่ `home` แล้ว Play เข้า HUD; `PlantView home` = ฉาก 3D อย่างเดียว (ไม่มีป้ายผัก/การ์ดอุปกรณ์/แถบเครื่องมือ/คำแนะนำ), `Scene3D home` ปิด Orbit + `HomeViewOffset` (`camera.setViewOffset` เลื่อนภาพขวา 20 % ของความกว้าง; จอ < 700 px เลื่อนลง 18 %); `DetailDialog` แยกเป็นไฟล์ใช้ร่วม; `GuidePanel initialTab`; CSS `.home-*` (Hover ยกขึ้น 2 px + เปลี่ยนสี, Active กดลง, Focus ring)
+- **ผลตรวจ:** AC-66 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser 1280×760: หน้า Home ไม่มี HUD/Header/Dock โรงเรือนเยื้องขวา, Hover ปุ่มรอง → พื้นเขียวอ่อน + ยก 2 px, คู่มือการปลูกเปิด Modal แท็บ "ทำอะไรตอนไหน" ปิด X กลับ Home, Play → HUD + หน้าภารกิจก่อนเริ่มปลูก; 375×812 เมนูอยู่บน ฉากเลื่อนลง; Console มีเฉพาะ HMR error ระหว่างแก้ไฟล์ค้าง (ไม่เกิดหลังโหลดใหม่)
+- **หมายเหตุ:** ฝั่ง Web ยังไม่มีชุดเทสต์ Component (ไม่มี jsdom/testing-library) จึงตรวจหน้า Home ผ่าน Browser; ยังไม่มีปุ่มกลับหน้า Home จาก HUD (ไม่ได้ขอ) — รีเฟรชหน้าเพื่อกลับ
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

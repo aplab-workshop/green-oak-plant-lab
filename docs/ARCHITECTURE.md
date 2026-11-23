@@ -900,3 +900,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 
 - Repo: https://github.com/aplab-workshop/green-oak-plant-lab (public, remote `origin`) · Demo: https://aplab-workshop.github.io/green-oak-plant-lab/
 - `pages.yml` สร้างจาก `npm run build:demo` เท่านั้น (ไม่รัน `npm test` ใน CI เพราะเทสต์ยาวบางข้อไวต่อเครื่องช้า — รันบนเครื่องตามกติกาเดิม); deploy ใช้ `actions/upload-pages-artifact` + `actions/deploy-pages`
+
+### 11.48 Implementation Notes (P52 — Home / Main Menu)
+
+- หน้า Home เป็น State ฝั่ง Web (`App` `home`) — Server/Simulation ทำงานตามปกติเบื้องหลัง; Home กับ HUD เป็น Tree คนละชุด จึง Mount Canvas ใหม่หนึ่งครั้งตอนกด Play
+- เลื่อนองค์ประกอบภาพด้วย `PerspectiveCamera.setViewOffset` (ไม่แตะตำแหน่งกล้อง/Orbit target) แล้ว `clearViewOffset` ตอนออก — ฉากยังขับด้วย Snapshot ไม่มี Animation กล้องที่เล่นเอง; ชั้นฉากตั้ง `pointer-events: none`

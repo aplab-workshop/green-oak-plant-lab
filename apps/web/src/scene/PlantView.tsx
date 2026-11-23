@@ -30,7 +30,8 @@ const CrossSection = ({ unavailable = false }: { unavailable?: boolean }) => (
   </div>
 );
 
-export function PlantView() {
+/** home = หน้า Home (P52): ฉาก 3D อย่างเดียว ไม่มี HUD/ป้าย/แถบเครื่องมือ และเลื่อนภาพให้โรงเรือนเยื้องขวา */
+export function PlantView({ home = false }: { home?: boolean }) {
   const overflowing = useLabStore((s) => !!s.snapshot?.commands.refillPump && (s.snapshot?.tank.overflowFlowLpm ?? 0) > 0);
   const penalty = useLabStore((s) => s.snapshot?.game.overflowPenalty ?? 0);
   const view = useSceneStore((s) => s.view);
@@ -46,19 +47,21 @@ export function PlantView() {
           }}
         >
           <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-400">กำลังโหลด 3D…</div>}>
-            <Scene3D />
+            <Scene3D home={home} />
           </Suspense>
-          <PlantBadges />
-          <DeviceInfo />
-          <p className="pointer-events-none absolute bottom-2 left-2 rounded bg-white/80 px-2 py-0.5 text-[10px] text-slate-500">
-            ลากเพื่อหมุน · Scroll เพื่อ Zoom · คลิกขวาลากเพื่อ Pan · คลิกต้นผักหรืออุปกรณ์เพื่อดูข้อมูล · ดับเบิลคลิกต้นผักเพื่อซูม
-          </p>
+          {!home && <>
+            <PlantBadges />
+            <DeviceInfo />
+            <p className="pointer-events-none absolute bottom-2 left-2 rounded bg-white/80 px-2 py-0.5 text-[10px] text-slate-500">
+              ลากเพื่อหมุน · Scroll เพื่อ Zoom · คลิกขวาลากเพื่อ Pan · คลิกต้นผักหรืออุปกรณ์เพื่อดูข้อมูล · ดับเบิลคลิกต้นผักเพื่อซูม
+            </p>
+          </>}
         </WebGLBoundary>
       ) : (
         <CrossSection unavailable={webglUnavailable} />
       )}
-      <SceneToolbar webglUnavailable={webglUnavailable} />
-      {overflowing && <div role="status" className="pointer-events-none absolute bottom-24 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 shadow">💧 น้ำล้น — ปิดปั๊มเติมน้ำ{penalty > 0 && ` · เสียคะแนน −${penalty}`}</div>}
+      {!home && <SceneToolbar webglUnavailable={webglUnavailable} />}
+      {!home && overflowing && <div role="status" className="pointer-events-none absolute bottom-24 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900 shadow">💧 น้ำล้น — ปิดปั๊มเติมน้ำ{penalty > 0 && ` · เสียคะแนน −${penalty}`}</div>}
     </div>
   );
 }

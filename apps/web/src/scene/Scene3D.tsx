@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { Color, MathUtils, type DirectionalLight, type HemisphereLight } from 'three';
+import { Color, MathUtils, type DirectionalLight, type HemisphereLight, type PerspectiveCamera } from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { useLabStore } from '../store/labStore';
 import { Actuators } from './Actuators';
@@ -64,7 +64,26 @@ function Ambience() {
   );
 }
 
-function Controls() {
+/**
+ * P52: หน้า Home — เลื่อนภาพ (View offset) ให้โรงเรือนเยื้องขวา เหลือที่ว่างฝั่งซ้ายสำหรับเมนู
+ * จอแคบ (เมนูอยู่บน) เลื่อนลงแทน; ไม่ขยับกล้อง/Orbit จึงไม่มี Animation ที่เล่นเอง
+ */
+function HomeViewOffset() {
+  const camera = useThree((s) => s.camera) as PerspectiveCamera;
+  const size = useThree((s) => s.size);
+  useEffect(() => {
+    const narrow = size.width < 700;
+    camera.setViewOffset(size.width, size.height, narrow ? 0 : -size.width * 0.2, narrow ? -size.height * 0.18 : 0, size.width, size.height);
+    camera.updateProjectionMatrix();
+    return () => {
+      camera.clearViewOffset();
+      camera.updateProjectionMatrix();
+    };
+  }, [camera, size]);
+  return null;
+}
+
+function Controls({ enabled = true }: { enabled?: boolean }) {
   const ref = useRef<OrbitControlsImpl>(null);
   const seq = useSceneStore((s) => s.cameraResetSeq);
   const focus = useSceneStore((s) => s.focus);
@@ -91,6 +110,7 @@ function Controls() {
     <OrbitControls
       ref={ref}
       makeDefault
+      enabled={enabled}
       target={TARGET}
       enablePan
       enableDamping
@@ -118,7 +138,7 @@ function Plants() {
  * 3D DWC Scene — ภาพทั้งหมดอ่านค่าจาก Snapshot ของ Server
  * (ไม่มี Animation ที่เล่นเองโดยไม่ขึ้นกับ Simulation)
  */
-export default function Scene3D() {
+export default function Scene3D({ home = false }: { home?: boolean }) {
   const low = useSceneStore((s) => s.lowGraphics);
   const plantCount = useLabStore((s) => s.snapshot?.plants.length ?? 6);
   return (
@@ -131,7 +151,8 @@ export default function Scene3D() {
       onPointerMissed={() => useSceneStore.getState().selectDevice(null)}
     >
       <Ambience />
-      <Controls />
+      <Controls enabled={!home} />
+      {home && <HomeViewOffset />}
       <Greenhouse />
       <Tank plantCount={plantCount} />
       <Plants />

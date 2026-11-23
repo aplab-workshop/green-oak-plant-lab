@@ -18,6 +18,8 @@ import { LevelWatch } from '../game/LevelWatch';
 import { GrowthMeter } from '../game/GrowthMeter';
 import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
+import { DetailDialog } from './DetailDialog';
+import { HomeScreen } from './HomeScreen';
 
 type Detail = 'sensors' | 'actuators' | 'plant' | 'scenario' | 'trends' | 'timeline' | 'score' | 'guide';
 const PINNABLE: Detail[] = ['sensors', 'plant', 'actuators', 'trends'];
@@ -30,27 +32,6 @@ const ITEMS: { key: Detail; label: string; icon: ReactNode }[] = [
   { key: 'timeline', label: 'Timeline', icon: <List /> },
   { key: 'guide', label: 'คู่มือ', icon: <BookOpen /> },
 ];
-
-/** Native dialog จัดการ Focus trap และ Escape; ปิดแล้วคืน Focus ให้ปุ่มเดิม */
-function DetailDialog({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = ref.current!;
-    const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    dialog.showModal();
-    return () => { dialog.close(); if (trigger?.isConnected) trigger.focus(); };
-  }, []);
-  return <dialog ref={ref} className="detail-dialog" aria-label={title} onCancel={close}
-    onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
-    <div className="detail-shell">
-      <header className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-        <h2 className="font-semibold text-slate-800">{title}</h2>
-        <button autoFocus className="rounded-full p-2 hover:bg-slate-100" aria-label="ปิดรายละเอียด" onClick={close}><X size={20} /></button>
-      </header>
-      <div className="detail-content">{children}</div>
-    </div>
-  </dialog>;
-}
 
 function ScoreDetail() {
   const game = useLabStore((s) => s.snapshot?.game);
@@ -112,6 +93,8 @@ export function App() {
   const [seenWin, setSeenWin] = useState('');
   const gameMode = !!snap?.level;
   const showWin = gameMode && game?.status === 'won' && seenWin !== round && !showLevels;
+  // P52: เปิดเว็บเจอหน้า Home ก่อน (State ฝั่ง Web) — Play แล้วเข้า HUD
+  const [home, setHome] = useState(true);
   const closeDetail = () => setDetail(null);
   const open = (key: Detail) => setDetail(key);
   const toggle = (key: Detail) => {
@@ -168,6 +151,7 @@ export function App() {
       </span>
     </button>
   );
+  if (home) return <HomeScreen onPlay={() => setHome(false)} />;
   return <div className="game-app">
     <Header />
     <main className="game-main">
