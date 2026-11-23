@@ -533,6 +533,11 @@ tags: [green-oak, roadmap]
 - **ผลตรวจ:** AC-66 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser 1280×760: หน้า Home ไม่มี HUD/Header/Dock โรงเรือนเยื้องขวา, Hover ปุ่มรอง → พื้นเขียวอ่อน + ยก 2 px, คู่มือการปลูกเปิด Modal แท็บ "ทำอะไรตอนไหน" ปิด X กลับ Home, Play → HUD + หน้าภารกิจก่อนเริ่มปลูก; 375×812 เมนูอยู่บน ฉากเลื่อนลง; Console มีเฉพาะ HMR error ระหว่างแก้ไฟล์ค้าง (ไม่เกิดหลังโหลดใหม่)
 - **หมายเหตุ:** ฝั่ง Web ยังไม่มีชุดเทสต์ Component (ไม่มี jsdom/testing-library) จึงตรวจหน้า Home ผ่าน Browser; ยังไม่มีปุ่มกลับหน้า Home จาก HUD (ไม่ได้ขอ) — รีเฟรชหน้าเพื่อกลับ
 
+### P53 — หน้า Home มีชีวิตชีวา (กล้องหมุน) ✅
+- [x] ผู้ใช้ (2026-11-24): ให้หน้า Home หมุน ๆ มีชีวิตชีวา → SPEC § 4.36 + AC-67 (ข้อยกเว้นเฉพาะกล้องหน้า Home)
+- [x] `Controls home`: หมุนกล้องรอบ Target เองใน `useFrame` ตาม dt (1 รอบ/50 วินาที) — ไม่ใช้ `autoRotate` ของ OrbitControls เพราะหมุนต่อเฟรม (Browser ทดสอบได้ 12 fps หมุนช้า 5 เท่า) และ drei เรียก `update()` เฉพาะตอน `enabled` จึงเปิด Controls ไว้แต่ปิด Rotate/Zoom/Pan ด้วยมือ; `Ambience home` แสงกลางวันเต็ม; `prefers-reduced-motion` ไม่หมุน
+- **ผลตรวจ:** AC-67 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser 1280×760: ฉากสว่างแบบกลางวัน, 6 วินาทีหมุน ~40°, มุมต่าง ๆ โรงเรือนอยู่ฝั่งขวาไม่บังเมนู (View offset ทำงานต่อระหว่างหมุน), Play → HUD กล้องนิ่งมุมปกติและ Day/Night ตามเวลาจำลอง; ไม่มี Console error ใหม่
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

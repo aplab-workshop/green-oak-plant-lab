@@ -26,7 +26,8 @@ export function daylight(minuteOfDay: number): number {
 }
 
 /** แสงห้องและสีพื้นหลังตามเวลาจำลอง (Day/Night visualization) */
-function Ambience() {
+/** home (P53): หน้า Home ใช้แสงกลางวันเต็มที่ ไม่ตาม Day/Night ของเวลาจำลอง */
+function Ambience({ home = false }: { home?: boolean }) {
   const scene = useThree((s) => s.scene);
   const hemi = useRef<HemisphereLight>(null);
   const sun = useRef<DirectionalLight>(null);
@@ -36,7 +37,7 @@ function Ambience() {
 
   useFrame((_, dt) => {
     const minute = useLabStore.getState().snapshot?.sim.minuteOfDay ?? 720;
-    const target = useSceneStore.getState().dayNight ? daylight(minute) : 1;
+    const target = !home && useSceneStore.getState().dayNight ? daylight(minute) : 1;
     level.current = level.current === null ? target : MathUtils.damp(level.current, target, 2, Math.min(dt, 0.1));
     const d = level.current;
     bg.current.copy(NIGHT_BG).lerp(DAY_BG, d);
@@ -83,7 +84,16 @@ function HomeViewOffset() {
   return null;
 }
 
-function Controls({ enabled = true }: { enabled?: boolean }) {
+/** P53: ผู้ใช้ปิด Animation ในระบบ → ไม่หมุนกล้องหน้า Home */
+const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** หน้า Home หมุนรอบโรงเรือน 1 รอบต่อ 50 วินาทีจริง (rad/s) — ตามเวลา ไม่ตามจำนวนเฟรม */
+const HOME_ORBIT_RAD_S = (2 * Math.PI) / 50;
+
+/**
+ * home = หน้า Home: ผู้ใช้หมุน/ซูมไม่ได้ และกล้องหมุนรอบโรงเรือนช้า ๆ ตามเวลาจริง
+ * — ข้อยกเว้นของกฎ "ภาพขับด้วย Server" เฉพาะกล้องหน้า Home (P53 / SPEC § 4.36) ไม่ใช่ข้อมูล Simulation
+ */
+function Controls({ home = false }: { home?: boolean }) {
   const ref = useRef<OrbitControlsImpl>(null);
   const seq = useSceneStore((s) => s.cameraResetSeq);
   const focus = useSceneStore((s) => s.focus);
@@ -106,13 +116,24 @@ function Controls({ enabled = true }: { enabled?: boolean }) {
     camera.position.set(x + 0.18 * size, y + 0.14 * size, z + 0.22 * size);
     ref.current.update();
   }, [focus, camera]);
+  // P53: autoRotate ของ OrbitControls หมุนต่อเฟรม (เครื่องช้า = หมุนช้า) จึงหมุนเองตาม dt แทน
+  useFrame((_, dt) => {
+    if (!home || !ref.current || reducedMotion()) return;
+    const t = ref.current.target;
+    const a = HOME_ORBIT_RAD_S * Math.min(dt, 0.1);
+    const x = camera.position.x - t.x, z = camera.position.z - t.z;
+    camera.position.x = t.x + x * Math.cos(a) - z * Math.sin(a);
+    camera.position.z = t.z + x * Math.sin(a) + z * Math.cos(a);
+  });
   return (
     <OrbitControls
       ref={ref}
       makeDefault
-      enabled={enabled}
+      // หน้า Home: ปิดการควบคุมด้วยมือ (กล้องหมุนเองใน useFrame ด้านบน)
+      enableRotate={!home}
+      enableZoom={!home}
       target={TARGET}
-      enablePan
+      enablePan={!home}
       enableDamping
       minDistance={0.25}
       maxDistance={5}
@@ -150,8 +171,8 @@ export default function Scene3D({ home = false }: { home?: boolean }) {
       camera={{ position: CAMERA_POS, fov: 40, near: 0.01, far: 10 }}
       onPointerMissed={() => useSceneStore.getState().selectDevice(null)}
     >
-      <Ambience />
-      <Controls enabled={!home} />
+      <Ambience home={home} />
+      <Controls home={home} />
       {home && <HomeViewOffset />}
       <Greenhouse />
       <Tank plantCount={plantCount} />

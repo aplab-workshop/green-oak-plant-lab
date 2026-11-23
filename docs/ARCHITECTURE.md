@@ -905,3 +905,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 
 - หน้า Home เป็น State ฝั่ง Web (`App` `home`) — Server/Simulation ทำงานตามปกติเบื้องหลัง; Home กับ HUD เป็น Tree คนละชุด จึง Mount Canvas ใหม่หนึ่งครั้งตอนกด Play
 - เลื่อนองค์ประกอบภาพด้วย `PerspectiveCamera.setViewOffset` (ไม่แตะตำแหน่งกล้อง/Orbit target) แล้ว `clearViewOffset` ตอนออก — ฉากยังขับด้วย Snapshot ไม่มี Animation กล้องที่เล่นเอง; ชั้นฉากตั้ง `pointer-events: none`
+
+### 11.49 Implementation Notes (P53 — Living Home)
+
+- **ข้อยกเว้นกฎ Animation (SPEC § 4.36):** กล้องหน้า Home หมุนตามเวลาจริง — เป็นการนำเสนอ ไม่ใช่ข้อมูล Simulation; ทุกอย่างในฉากยังขับด้วย Snapshot; HUD ไม่มี Animation กล้องที่เล่นเอง
+- หมุนด้วยสูตรหมุนรอบแกน Y ผ่าน Target ใน `useFrame` (`dt` clamp 0.1 s) ให้ความเร็วเท่ากันทุกเฟรมเรต; View offset (P52) อยู่ใน Screen space จึงคงโรงเรือนไว้ฝั่งขวาทุกมุม

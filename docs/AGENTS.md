@@ -229,3 +229,4 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ### สถานะเพิ่มเติม 2026-11-24 — P52 หน้า Home
 - เสร็จและ commit แล้ว (ยังไม่ push): หน้า Home / Main Menu Overlay บนฉาก 3D (Play, คู่มือการปลูก) — `app/HomeScreen.tsx` (SPEC § 4.35); tests 337/337
 - push ขึ้น GitHub (= อัปเดต Pages) รอผู้ใช้อนุญาต
+- P53 (2026-11-24): หน้า Home กล้องหมุนช้า ๆ + แสงกลางวัน — **ข้อยกเว้นกฎ Animation เฉพาะกล้องหน้า Home** (SPEC § 4.36); ยังไม่ push
