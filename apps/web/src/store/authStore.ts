@@ -13,7 +13,8 @@ const DEMO_API = (import.meta.env.VITE_ACCOUNTS_API as string | undefined)?.repl
 const BASE = DEMO ? DEMO_API : '';
 const STORAGE_KEY = 'gol.auth.v1';
 
-export type AuthStatus = 'checking' | 'off' | 'signedOut' | 'signedIn' | 'error';
+/** guest = เล่นโดยไม่ Login (P56) — ไม่ส่งอะไรขึ้น Server, ไม่จำข้ามการรีเฟรช */
+export type AuthStatus = 'checking' | 'off' | 'signedOut' | 'signedIn' | 'guest' | 'error';
 
 interface Saved {
   token: string;
@@ -93,6 +94,12 @@ async function submit(path: string, body: LoginRequest | RegisterRequest): Promi
 
 export const login = (body: LoginRequest) => submit('/api/auth/login', body);
 export const register = (body: RegisterRequest) => submit('/api/auth/register', body);
+
+/** P56 / SPEC § 4.47: เล่นโดยไม่ Login — ไม่บันทึกอะไร */
+export function playAsGuest(): void {
+  writeSaved(null);
+  useAuthStore.setState({ status: 'guest', player: null, token: null, message: null });
+}
 
 export function logout(): void {
   writeSaved(null);

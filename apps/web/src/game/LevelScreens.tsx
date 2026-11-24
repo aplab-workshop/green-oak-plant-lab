@@ -92,9 +92,10 @@ export function WinScreen({ onLevels, onClose }: { onLevels: () => void; onClose
 
 /** W6: ผลการบันทึกคะแนนบน Server ของรอบนี้ */
 function SubmitStatus({ round }: { round: string }) {
-  const signedIn = useAuthStore((s) => s.status === 'signedIn');
+  const status = useAuthStore((s) => s.status);
   const submit = useScoreStore((s) => (s.lastSubmit?.round === round ? s.lastSubmit.response.score : undefined));
-  if (!signedIn) return null;
+  if (status === 'guest') return <p className="text-sm text-slate-500">☁️ ไม่ได้บันทึกคะแนน (ผู้เยี่ยมชม) — Login เพื่อขึ้นตารางอันดับ</p>;
+  if (status !== 'signedIn') return null;
   if (!submit) return <p className="text-xs text-slate-500">☁️ กำลังบันทึกคะแนน…</p>;
   if (submit.ranked) return <p className="text-sm font-semibold text-sky-800">☁️ บันทึกคะแนนแล้ว{submit.rank !== null && ` · อันดับ #${submit.rank} ของด่านนี้`}</p>;
   return <p className="text-sm text-amber-800">☁️ บันทึกแล้วแต่ไม่นับอันดับ: {submit.reasons.map((r) => SCORE_REJECT_TEXT[r]).join(', ')}</p>;

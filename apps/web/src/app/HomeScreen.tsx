@@ -33,7 +33,7 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
   }, [status]);
 
   const play = () => {
-    if (status === 'off' || status === 'signedIn') onPlay();
+    if (status === 'off' || status === 'signedIn' || status === 'guest') onPlay();
     else if (status === 'signedOut') setAuth(true);
   };
 
@@ -43,6 +43,10 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
     {status === 'signedIn' && player && <div className="home-account">
       <span className="home-account-name"><UserRound size={16} /> {player.username}</span>
       <button type="button" className="home-account-logout" onClick={logout}><LogOut size={15} /> ออกจากระบบ</button>
+    </div>}
+    {status === 'guest' && <div className="home-account">
+      <span className="home-account-name text-slate-600"><UserRound size={16} /> ผู้เยี่ยมชม · ไม่บันทึก</span>
+      <button type="button" className="home-account-logout" onClick={() => setAuth(true)}>เข้าสู่ระบบ</button>
     </div>}
     <section className="home-menu" aria-label="เมนูหลัก">
       <header className="home-title">

@@ -98,6 +98,7 @@ export function App() {
   const [home, setHome] = useState(true);
   // P55: แสดงผู้ใช้ที่ Login อยู่ในหน้าเกม
   const player = useAuthStore((s) => (s.status === 'signedIn' ? s.player : null));
+  const guest = useAuthStore((s) => s.status === 'guest');
   const closeDetail = () => setDetail(null);
   const open = (key: Detail) => setDetail(key);
   const toggle = (key: Detail) => {
@@ -166,6 +167,7 @@ export function App() {
             setHome(true);
           }}><House size={16} /> หน้าแรก</button>
           {player && <span className="game-user" title="ผู้ใช้ที่เล่นอยู่">👤 {player.username}</span>}
+          {guest && <span className="game-user game-user-guest" title="ไม่ได้ Login — ไม่บันทึกคะแนน/Log">👤 ผู้เยี่ยมชม · ไม่บันทึก</span>}
           <div><span className="text-xs font-semibold tracking-[0.15em] text-emerald-700">GREEN OAK GARDEN</span><p className="text-xs text-slate-500">ดูแลสวนของคุณให้เติบโต</p></div>
         </div>
         <div className="flex flex-wrap items-center gap-3"><LevelButton onOpen={() => setShowLevels(true)} /><AutoPauseToggle /><SimControls /></div>

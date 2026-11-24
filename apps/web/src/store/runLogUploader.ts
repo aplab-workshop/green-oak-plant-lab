@@ -18,6 +18,8 @@ interface Run {
   /** ผลรอบล่าสุดจาก Snapshot (W5: ส่งพร้อม Log ตอนจบรอบ) */
   game: CareProgress | null;
   started: boolean;
+  /** P56: เริ่มรอบตอนไม่ได้ Login (Guest) → ไม่ส่งรอบนี้เลย แม้ Login ภายหลัง */
+  anonymous: boolean;
   ended: boolean;
   /** ส่งฉบับจบรอบแล้ว (ฉบับ "ออกกลางคัน" ส่งซ้ำ/แทนได้) */
   done: boolean;
@@ -68,7 +70,7 @@ const toLogEvent = ({ at, simTimeS, kind, severity, message, plantId, value }: E
  * Reload หน้าเว็บกลางรอบ (โหมดห้องเรียน) จึงใช้รหัสเดิม และ Server แทนฉบับ "ออกกลางคัน" ด้วยฉบับใหม่ได้
  */
 function finishRun(r: Run, abandoned: boolean, keepalive = false): void {
-  if (r.done || !r.started || r.events.size === 0) return;
+  if (r.done || !r.started || r.anonymous || r.events.size === 0) return;
   const { status, token } = useAuthStore.getState();
   if (status !== 'signedIn' || !token) return;
   const sorted = [...r.events.values()].sort((a, b) => a.id - b.id);
@@ -117,14 +119,17 @@ function track(): void {
     if (run) finishRun(run, !run.ended);
     if (endTimer) clearTimeout(endTimer);
     endTimer = null;
-    run = { labId, labRunId: snap.runId, levelId: 'free', events: new Map(), simTimeS: 0, game: null, started: false, ended: false, done: false };
+    run = { labId, labRunId: snap.runId, levelId: 'free', events: new Map(), simTimeS: 0, game: null, started: false, anonymous: false, ended: false, done: false };
   }
   const r = run;
   r.levelId = snap.level?.id ?? 'free';
   r.simTimeS = snap.simTimeS;
   r.game = snap.game;
   for (const e of events) if (e.runId === r.labRunId && r.events.size < RUN_LOG_MAX_EVENTS) r.events.set(e.id, e);
-  if (snap.game.status !== 'ready') r.started = true;
+  if (snap.game.status !== 'ready' && !r.started) {
+    r.started = true;
+    r.anonymous = useAuthStore.getState().status !== 'signedIn';
+  }
   r.ended = snap.game.status === 'won' || snap.game.status === 'lost';
   if (r.ended && !r.done && !endTimer) {
     endTimer = setTimeout(() => {

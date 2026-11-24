@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
 import { PASSWORD_MIN } from '@gol/shared';
-import { login, register } from '../store/authStore';
+import { login, playAsGuest, register } from '../store/authStore';
 
 type Tab = 'login' | 'register';
 
@@ -82,6 +82,13 @@ export function AuthDialog({ close, onDone }: { close: () => void; onDone: () =>
           {busy ? 'กำลังส่ง…' : isRegister ? 'สมัครและเริ่มเล่น' : 'เข้าสู่ระบบและเล่น'}
         </button>
       </form>
+      {/* P56: ปุ่มรอง — เล่นแบบ Guest ไม่บันทึกอะไร */}
+      <div className="auth-guest">
+        <button type="button" className="auth-guest-btn" onClick={() => { playAsGuest(); onDone(); }}>
+          เล่นโดยไม่ Login
+        </button>
+        <small>ไม่บันทึกคะแนน/Log และไม่ขึ้นตารางอันดับ</small>
+      </div>
     </div>
   </dialog>;
 }

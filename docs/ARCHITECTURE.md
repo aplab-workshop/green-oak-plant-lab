@@ -986,3 +986,9 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 ### 11.59 Implementation Notes (P55 — Back to Home + Current User)
 
 - `App.tsx` แถบบน: ปุ่ม `.game-home-btn` → `sendCommand({type:'pause'})` เมื่อ `game.status === 'playing' && !paused` แล้ว `setHome(true)` (State ฝั่ง Web — ไม่ Reset Lab); ป้าย `.game-user` จาก `useAuthStore` (selector คืน `player` หรือ null — ไม่สร้าง object ใหม่)
+
+### 11.60 Implementation Notes (P56 — Guest Play)
+
+- `authStore`: สถานะใหม่ `guest` (`playAsGuest()`) — ไม่เขียน localStorage จึงหายเมื่อรีเฟรช; Server ไม่ถูกเรียกเลย
+- `runLogUploader`: ตอนรอบเปลี่ยนเป็นเริ่มเล่น บันทึก `anonymous = status !== 'signedIn'` → รอบนั้นไม่ส่งตลอด (กัน Login กลางรอบแล้วส่งรอบ Guest)
+- UI: `AuthDialog` ปุ่ม `.auth-guest-btn`, `HomeScreen` มุมบัญชีแบบ Guest + ปุ่มเข้าสู่ระบบ, `App` ป้าย `.game-user-guest`, `SubmitStatus` ข้อความ Guest
