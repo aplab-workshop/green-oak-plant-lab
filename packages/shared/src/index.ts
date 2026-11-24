@@ -5,3 +5,4 @@ export * from './protocol';
 export * from './sensorRanges';
 export * from './plantFeedback';
 export * from './auth';
+export * from './runLog';

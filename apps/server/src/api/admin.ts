@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { PASSWORD_MAX, PASSWORD_MIN, normalizeInviteCode, normalizeUsername } from '@gol/shared';
+import { buildRunLogCsv } from '../accounts/csv';
 import { randomInviteCode, randomTempPassword } from '../accounts/inviteCode';
 import { hashPassword } from '../accounts/password';
 import { RateLimiter } from '../accounts/rateLimit';
@@ -84,6 +85,20 @@ export function registerAdminRoutes(app: FastifyInstance, accounts: Accounts | n
         return { dryRun: false, withAccounts, ...(await store().deleteInviteData(code, withAccounts)) };
       },
     );
+
+    /** W4: CSV ของ Log การเล่น กรองตามรหัสเชิญ/ผู้เล่น/ด่าน */
+    admin.get<{ Querystring: { invite?: string; player?: string; level?: string } }>('/api/admin/logs.csv', async (req, reply) => {
+      const { invite, player, level } = req.query;
+      const logs = await store().listRunLogs({
+        ...(invite ? { inviteCode: normalizeInviteCode(invite) } : {}),
+        ...(player ? { username: normalizeUsername(player) } : {}),
+        ...(level ? { levelId: level.trim() } : {}),
+      });
+      return reply
+        .header('content-type', 'text/csv; charset=utf-8')
+        .header('x-run-count', String(logs.length))
+        .send(buildRunLogCsv(logs));
+    });
 
     admin.get<{ Querystring: { invite?: string } }>('/api/admin/players', async (req) =>
       store().listPlayers(req.query.invite ? normalizeInviteCode(req.query.invite) : undefined),

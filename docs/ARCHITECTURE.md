@@ -942,3 +942,12 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `AccountStore`: `countInviteData`, `deleteInviteData` (ธุรกรรมเดียว, ไม่ลด used_count), `stats` (`pg_database_size()::float8` — ฐาน PGlite เปล่า ~7.5 MB)
 - `accounts/inviteCode.ts`: สุ่มด้วย `crypto.randomInt` จากชุดตัวอักษร 31 ตัว (ไม่มี 0/O/1/I/L)
 - `zod` เพิ่มเป็น dependency ตรงของ `@gol/server` (เดิมใช้ผ่าน shared)
+
+### 11.54 Implementation Notes (W4 — Play Log CSV)
+
+- `EventEntry.value` (shared) — `LabSession.log(kind, severity, message, value?)`: actuator (ON/OFF หรือ %), `sim.speed`, `dose.start` (วินาที), `game.won/over` (คะแนน ใส่ตอน `drainSimEvents`)
+- Web `store/runLogUploader.ts` (เริ่มใน `main.tsx`): subscribe `useLabStore` เก็บ Event ของ runId ปัจจุบันใน Map ของตัวเอง (ไม่ขึ้นกับ `MAX_EVENTS` ของ Store); จบรอบรอ 1 s ให้ Event จบรอบมาถึงแล้วส่ง; รอบเปลี่ยน/`pagehide` ส่งพร้อม `run.abandoned` (keepalive ≤ 60 KB)
+- รหัสรอบ UUID จำใน localStorage (`gol.runlog.v1`) ด้วยคีย์ `labId:runId:at ของ Event แรก` — runId ของ Lab เริ่มนับใหม่เมื่อ Server/Demo เริ่มใหม่ จึงใช้เป็นรหัสตรง ๆ ไม่ได้
+- `AccountStore.insertRunLog`: `INSERT … ON CONFLICT DO UPDATE … WHERE events -> -1 ->> 'kind' = 'run.abandoned'` — ฉบับ "ออกกลางคัน" ถูกแทนได้ ฉบับจบรอบแทนไม่ได้ (409)
+- `api/runs.ts` `POST /api/runs/log` (bodyLimit 2 MB, `authenticate()`), Admin `GET /api/admin/logs.csv` (`x-run-count`), `accounts/csv.ts` (`buildRunLogCsv`: BOM, CRLF, เวลา Asia/Bangkok ด้วย `Intl`, เลขรอบต่อผู้เล่น+ด่าน, กันสูตร Excel)
+- วันจำลองใน CSV = `floor(simTimeS / 86400)` เหมือนหน้า "เหตุการณ์" ในเกม (เป็นอายุผัก เช่น วัน 14 ตอนเริ่ม L1) ไม่ใช่ "วัน x/5" ของด่าน

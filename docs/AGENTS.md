@@ -247,3 +247,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ### สถานะเพิ่มเติม 2026-11-24 — W3 เครื่องมือครู
 - เสร็จและ commit (ยังไม่ push): `npm run admin -- …` (invite create/list/close/open, player list/reset-password/delete, data delete --invite, stats) เรียก Admin API ด้วย `ADMIN_KEY` (SPEC § 4.40); tests 366/366
 - ถัดไป W4 Log การเล่น (CSV) — รอผู้ใช้ตรวจรับ W3
+
+### สถานะเพิ่มเติม 2026-11-24 — W4 Log การเล่น (CSV)
+- เสร็จและ commit (ยังไม่ push): Web ส่ง Log รอบขึ้น Server เมื่อ Login (จบรอบ/ออกกลางคัน), ครูโหลด CSV ด้วย `npm run admin -- log export` (SPEC § 4.41); tests 372/372
+- ถัดไป W5 ส่งคะแนน + ตรวจความสมเหตุสมผล — รอผู้ใช้ตรวจรับ W4

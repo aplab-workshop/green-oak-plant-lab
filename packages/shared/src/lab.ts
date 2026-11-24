@@ -34,6 +34,8 @@ export interface EventEntry {
   severity: EventSeverity;
   message: string;
   plantId?: number;
+  /** W4: ค่าที่ตั้ง (สวิตช์ ON/OFF, %, Speed, วินาทีโดส, คะแนนจบรอบ) — ใช้ในคอลัมน์ "ค่า" ของ CSV */
+  value?: number | string;
 }
 
 /** ข้อมูลย้อนหลังสำหรับกราฟ (สุ่มเก็บทุก 10 นาทีจำลอง) */

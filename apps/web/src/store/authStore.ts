@@ -50,7 +50,8 @@ function writeSaved(saved: Saved | null): void {
   }
 }
 
-const authFetch = (path: string, init?: RequestInit) => fetch(`${BASE}${path}`, init);
+/** fetch ไป Server ของระบบบัญชี (Demo = VITE_ACCOUNTS_API, ปกติ = Server เดิม) */
+export const authFetch = (path: string, init?: RequestInit) => fetch(`${BASE}${path}`, init);
 
 /** ตรวจว่าระบบบัญชีเปิดไหม และ Token ที่เก็บไว้ยังใช้ได้ไหม */
 export async function initAuth(): Promise<void> {

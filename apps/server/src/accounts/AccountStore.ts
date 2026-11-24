@@ -82,6 +82,7 @@ export interface DatabaseStats {
 
 export interface RunFilter {
   playerId?: number;
+  username?: string;
   inviteCode?: string;
   levelId?: string;
 }
@@ -153,6 +154,7 @@ function runWhere(f: RunFilter): { sql: string; params: unknown[] } {
   const parts: string[] = [];
   const params: unknown[] = [];
   if (f.playerId !== undefined) parts.push(`r.player_id = $${params.push(f.playerId)}`);
+  if (f.username !== undefined) parts.push(`p.username = $${params.push(f.username)}`);
   if (f.inviteCode !== undefined) parts.push(`p.invite_code = $${params.push(f.inviteCode)}`);
   if (f.levelId !== undefined) parts.push(`r.level_id = $${params.push(f.levelId)}`);
   return { sql: parts.length ? `WHERE ${parts.join(' AND ')}` : '', params };
@@ -324,18 +326,19 @@ export class AccountStore {
     return rows.map(toScore);
   }
 
-  /** null = ผู้เล่นคนนี้ส่ง Log ของรอบนี้ไปแล้ว */
+  /**
+   * null = ผู้เล่นคนนี้ส่ง Log ของรอบนี้ไปแล้ว
+   * W4: Log เดิมที่จบด้วย "ออกกลางคัน" (run.abandoned) ถูกแทนด้วยฉบับใหม่ได้ — เช่น Reload หน้าเว็บแล้วเล่นรอบเดิมต่อ (โหมดห้องเรียน)
+   */
   async insertRunLog(log: RunLogInput): Promise<number | null> {
-    try {
-      const { rows } = await this.db.query<{ id: number }>(
-        'INSERT INTO run_logs (player_id, run_id, level_id, events) VALUES ($1, $2, $3, $4) RETURNING id',
-        [log.playerId, log.runId, log.levelId, JSON.stringify(log.events)],
-      );
-      return rows[0]!.id;
-    } catch (err) {
-      if (isUniqueViolation(err)) return null;
-      throw err;
-    }
+    const { rows } = await this.db.query<{ id: number }>(
+      `INSERT INTO run_logs (player_id, run_id, level_id, events) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (player_id, run_id) DO UPDATE SET events = EXCLUDED.events, level_id = EXCLUDED.level_id
+       WHERE run_logs.events -> -1 ->> 'kind' = 'run.abandoned'
+       RETURNING id`,
+      [log.playerId, log.runId, log.levelId, JSON.stringify(log.events)],
+    );
+    return rows[0]?.id ?? null;
   }
 
   async listRunLogs(filter: RunFilter = {}): Promise<RunLogRow[]> {

@@ -1,3 +1,5 @@
+import { writeFile } from 'node:fs/promises';
+
 /**
  * เครื่องมือครู (W3 / SPEC § 4.40) — `npm run admin -- <คำสั่ง>` เรียก Admin API ของ Server
  * แยกจาก main.ts เพื่อให้เทสต์เรียก runAdmin() ได้โดยไม่ต้องเปิด Process ใหม่
@@ -20,6 +22,8 @@ export const HELP = `เครื่องมือครู — Green Oak Virtu
   player reset-password <ID> [--password <ใหม่>]             ตั้ง Password ใหม่ (ไม่ใส่ = สุ่ม)
   player delete <ID> --yes                                    ลบบัญชี + คะแนน + Log
   data delete --invite <รหัส> [--with-accounts] --yes         ลบคะแนน + Log ทั้งรหัส (เช่น จบเทอม)
+  log export [--invite <รหัส>] [--player <ID>] [--level <ด่าน>] [--out <ไฟล์.csv>]
+                                                              ดาวน์โหลด Log การเล่นเป็น CSV (เปิดด้วย Excel ได้)
   stats                                                       จำนวนข้อมูลและขนาดฐานข้อมูล
 
 ตั้งค่าใน .env: ADMIN_KEY=<กุญแจเดียวกับ Server>  GOL_API_URL=<URL ของ Server>  (หรือใส่ --url <URL>)
@@ -71,7 +75,7 @@ export async function runAdmin(argv: string[], target: AdminTarget, print: (line
   const url = (typeof args.flags.get('url') === 'string' ? (args.flags.get('url') as string) : target.url).replace(/\/+$/, '');
   const [group, action, arg] = args.positional;
 
-  const call = async <T>(method: string, path: string, body?: unknown): Promise<T> => {
+  const request = async (method: string, path: string, body?: unknown): Promise<Response> => {
     if (!target.key) throw new CliError('ยังไม่ได้ตั้ง ADMIN_KEY (ใส่ในไฟล์ .env ให้ตรงกับ Server)');
     let res: Response;
     try {
@@ -83,10 +87,14 @@ export async function runAdmin(argv: string[], target: AdminTarget, print: (line
     } catch {
       throw new CliError(`ติดต่อ Server ที่ ${url} ไม่ได้ (Server เปิดอยู่ไหม / URL ถูกไหม)`);
     }
-    const data = (await res.json().catch(() => ({}))) as T & { error?: string };
-    if (!res.ok) throw new CliError(data.error ?? `HTTP ${res.status}`);
-    return data;
+    if (!res.ok) {
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new CliError(data.error ?? `HTTP ${res.status}`);
+    }
+    return res;
   };
+  const call = async <T>(method: string, path: string, body?: unknown): Promise<T> =>
+    (await (await request(method, path, body)).json()) as T;
 
   try {
     switch (`${group ?? ''} ${action ?? ''}`.trim()) {
@@ -154,6 +162,20 @@ export async function runAdmin(argv: string[], target: AdminTarget, print: (line
           return 1;
         }
         print(`ลบของรหัส ${invite.toUpperCase()} แล้ว: ${what}`);
+        return 0;
+      }
+      case 'log export': {
+        const invite = flagText(args, 'invite');
+        const player = flagText(args, 'player');
+        const level = flagText(args, 'level');
+        const q = new URLSearchParams({ ...(invite ? { invite } : {}), ...(player ? { player } : {}), ...(level ? { level } : {}) }).toString();
+        const res = await request('GET', `/api/admin/logs.csv${q ? `?${q}` : ''}`);
+        const csv = Buffer.from(await res.arrayBuffer());
+        const runs = Number(res.headers.get('x-run-count') ?? 0);
+        const stamp = new Date().toISOString().slice(0, 10);
+        const out = flagText(args, 'out') ?? `play-log-${(invite ?? player ?? 'all').toUpperCase()}-${stamp}.csv`;
+        await writeFile(out, csv);
+        print(`บันทึก ${out} แล้ว — ${runs} รอบ, ${csv.toString('utf8').split('\r\n').length - 2} แถว`);
         return 0;
       }
       case 'stats': {

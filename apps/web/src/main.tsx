@@ -3,8 +3,10 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import { App } from './app/App';
 import { startConnection } from './store/wsClient';
+import { startRunLogUploader } from './store/runLogUploader';
 
 startConnection();
+startRunLogUploader();
 
 const root = document.getElementById('root');
 if (!root) throw new Error('#root not found');

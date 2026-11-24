@@ -260,7 +260,9 @@ export class LabSession {
         // P39: เก็บเกี่ยวอัตโนมัติ/จบรอบใน Step → หยุดเวลาเหมือนกดเก็บเกี่ยวเอง
         this.clock.pause();
       }
-      this.events.add({ at: this.now(), ...e });
+      // W4: จบรอบเก็บคะแนนไว้ในคอลัมน์ "ค่า" ของ CSV
+      const ended = e.kind === 'game.over' || e.kind === 'game.won';
+      this.events.add({ at: this.now(), ...e, ...(ended ? { value: this.sim.game.score } : {}) });
       if (e.kind === 'challenge.warning' || e.kind === 'challenge.start') this.autoPause(e.message);
     }
   }
@@ -404,7 +406,7 @@ export class LabSession {
       cur.remainingS += per;
       cur.totalS += per;
     } else this.doses.set(device, { device, remainingS: per, totalS: per });
-    this.log('dose.start', 'info', (by === 'helper' ? 'ผู้ช่วยฟาร์ม: ' : '') + DOSE_LABEL[device] + ' — ' + per + ' s จำลอง');
+    this.log('dose.start', 'info', (by === 'helper' ? 'ผู้ช่วยฟาร์ม: ' : '') + DOSE_LABEL[device] + ' — ' + per + ' s จำลอง', per);
     return true;
   }
 
@@ -465,18 +467,18 @@ export class LabSession {
   private logActuatorChanges(prev: ActuatorCommands, next: ActuatorCommands): void {
     for (const bit of COMMAND_BITS) {
       if (prev[bit.key] !== next[bit.key]) {
-        this.log('actuator.change', 'info', `${bit.label} (${deviceName('M', bit.address)}): ${next[bit.key] ? 'ON' : 'OFF'}`);
+        this.log('actuator.change', 'info', `${bit.label} (${deviceName('M', bit.address)}): ${next[bit.key] ? 'ON' : 'OFF'}`, next[bit.key] ? 'ON' : 'OFF');
       }
     }
     for (const reg of [LED_COMMAND_REGISTER, FAN_COMMAND_REGISTER]) {
       if (prev[reg.key] !== next[reg.key]) {
-        this.log('actuator.change', 'info', `${reg.label} (${deviceName('D', reg.address)}): ${next[reg.key]}%`);
+        this.log('actuator.change', 'info', `${reg.label} (${deviceName('D', reg.address)}): ${next[reg.key]}%`, next[reg.key]);
       }
     }
   }
 
-  private log(kind: string, severity: 'info' | 'warning' | 'critical', message: string): void {
-    this.events.add({ at: this.now(), simTimeS: this.sim.simTimeS, kind, severity, message });
+  private log(kind: string, severity: 'info' | 'warning' | 'critical', message: string, value?: number | string): void {
+    this.events.add({ at: this.now(), simTimeS: this.sim.simTimeS, kind, severity, message, ...(value !== undefined ? { value } : {}) });
   }
 
   /** รับคำสั่งจาก UI/API */
@@ -484,7 +486,7 @@ export class LabSession {
     switch (cmd.type) {
       case 'setSpeed':
         this.clock.setSpeed(cmd.speed);
-        this.log('sim.speed', 'info', `Simulation speed: ${cmd.speed}x`);
+        this.log('sim.speed', 'info', `Simulation speed: ${cmd.speed}x`, cmd.speed);
         return;
       case 'pause':
         this.clock.pause();
