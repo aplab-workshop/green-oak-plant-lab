@@ -24,6 +24,13 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
   useEffect(() => {
     if (useAuthStore.getState().status === 'checking') void initAuth();
   }, []);
+  // W7: Server ฟรีบน Cloud หลับเมื่อไม่มีคนใช้ — เชื่อมต่อนานเกิน 4 s บอกให้รอ
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (status !== 'checking') return setSlow(false);
+    const t = setTimeout(() => setSlow(true), 4000);
+    return () => clearTimeout(t);
+  }, [status]);
 
   const play = () => {
     if (status === 'off' || status === 'signedIn') onPlay();
@@ -53,6 +60,9 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
           {status === 'signedIn' && <button type="button" className="home-btn home-btn-secondary" onClick={() => setBoard(true)}>
             <Trophy size={24} /> ตารางอันดับ
           </button>}
+          {status === 'checking' && slow && <p role="status" className="home-auth-error">
+            ⏳ Server กำลังตื่น (แพ็กเกจฟรีหลับเมื่อไม่มีคนใช้) อาจใช้เวลาถึง 1 นาที
+          </p>}
           {status === 'error' && <p role="alert" className="home-auth-error">
             {message} <button type="button" className="underline" onClick={() => void initAuth()}>ลองใหม่</button>
           </p>}

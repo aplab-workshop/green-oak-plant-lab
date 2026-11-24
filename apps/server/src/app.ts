@@ -39,8 +39,9 @@ export async function buildApp(
   app.decorate('labs', labs);
   app.decorate('accounts', await openAccounts(app, config, opts.now ?? Date.now));
 
-  // Server ใช้ใน LAN เท่านั้น — CORS เปิดเพื่อให้ Vite dev server (คนละพอร์ต) เรียกได้
-  await app.register(cors, { origin: true });
+  // LAN/Dev: CORS เปิดทุกโดเมน (Vite dev server คนละพอร์ต); W7 Cloud: เฉพาะ CORS_ORIGINS (เช่นโดเมน GitHub Pages)
+  const origins = config.corsOrigins ?? [];
+  await app.register(cors, { origin: origins.length ? origins : true });
   await app.register(websocket);
   registerRoutes(app);
   registerAuthRoutes(app, app.accounts);

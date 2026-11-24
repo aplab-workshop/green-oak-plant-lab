@@ -52,12 +52,15 @@ export interface ServerConfig {
   trustProxy?: boolean;
   /** W3: กุญแจของครูสำหรับ Admin API (npm run admin) — ไม่ตั้ง = ปิด */
   adminKey?: string;
+  /** W7: โดเมนที่เรียก API ได้ (CORS) — ว่าง = ทุกโดเมน (LAN/Dev) */
+  corsOrigins?: string[];
 }
 
 export function loadConfig(): ServerConfig {
   return {
     host: process.env.SERVER_HOST ?? '127.0.0.1',
-    port: num('SERVER_PORT', 3001),
+    // W7: Cloud (Render) กำหนดพอร์ตผ่าน PORT
+    port: num('SERVER_PORT', num('PORT', 3001)),
     heartbeatMs: num('WS_HEARTBEAT_MS', 1000),
     labCount: num('LAB_COUNT', 1),
     tickMs: num('SIM_TICK_MS', 100),
@@ -72,5 +75,6 @@ export function loadConfig(): ServerConfig {
     authSecret: process.env.AUTH_SECRET || undefined,
     trustProxy: bool('TRUST_PROXY', false),
     adminKey: process.env.ADMIN_KEY || undefined,
+    corsOrigins: (process.env.CORS_ORIGINS ?? '').split(',').map((o) => o.trim().replace(/\/+$/, '')).filter(Boolean),
   };
 }

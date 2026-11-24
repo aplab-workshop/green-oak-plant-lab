@@ -1,0 +1,33 @@
+# W7 (SPEC § 4.44 / docs/DEPLOY.md): Server ระบบบัญชีบน Render — Render Dashboard → New → Blueprint → เลือก repo นี้
+# Server บน Cloud ทำแค่ บัญชี / คะแนน / Log (เกมรันในเบราว์เซอร์บน GitHub Pages)
+services:
+  - type: web
+    name: green-oak-accounts
+    runtime: node
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: SERVER_HOST
+        value: 0.0.0.0
+      # ไม่รัน Simulation/Lab บน Server ฟรี
+      - key: LAB_COUNT
+        value: "0"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: CORS_ORIGINS
+        value: https://aplab-workshop.github.io
+      # Render สุ่มให้ครั้งเดียว (Token เดิมใช้ได้ข้ามการรีสตาร์ท)
+      - key: AUTH_SECRET
+        generateValue: true
+      # กรอกเองใน Render Dashboard — ห้ามใส่ใน repo
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_KEY
+        sync: false

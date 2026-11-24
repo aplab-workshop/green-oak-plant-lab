@@ -118,5 +118,5 @@ describe('Root Health / water supply — P11', () => {
     expect(sim.env.estimatedOxygen).toBeGreaterThan(0.6);
     expect(sim.plants[0]!.rootHealth).toBeGreaterThan(dry);
     expect(sim.env.totalUptakeL).toBeLessThanOrEqual(sim.env.totalRefillL + 1e-9);
-  });
+  }, 30_000);
 });

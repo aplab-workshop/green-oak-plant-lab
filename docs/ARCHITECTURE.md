@@ -966,3 +966,12 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `AccountStore.myScores`: `max(...) FILTER (WHERE ranked AND status='won')`, `count(*) FILTER …` ต่อด่าน
 - `api/leaderboard.ts`: `GET /api/leaderboard?level&scope=all|group` (group = invite_code ของผู้เรียก, ไม่ส่ง invite_code ออกไป), `GET /api/me/scores`; `POST /api/runs/log` ตอบ `score.rank` เมื่อชนะและนับ
 - Web: `store/scoreStore.ts` (`myScores`, `lastSubmit` ผูก `labId:runId`, ล้างเมื่อเปลี่ยนบัญชี), `game/Leaderboard.tsx` (`LeaderboardPanel`, `myBestText`), ปุ่ม Home, การ์ดเลือกด่าน, `WinScreen` แยก `WinBody` (Hook หลัง early return ไม่ได้) + `SubmitStatus`
+
+### 11.57 Implementation Notes (W7a — Cloud Prep)
+
+- `config.ts`: `port` = `SERVER_PORT` → `PORT` → 3001; `corsOrigins` จาก `CORS_ORIGINS` (ตัด `/` ท้าย); `app.ts` ส่ง array ให้ `@fastify/cors` (ว่าง = `origin: true` แบบเดิม)
+- Cloud ใช้ `LAB_COUNT=0` — LabManager ไม่มี Lab, Timer เดินบน Map ว่าง (เบามาก); `WEB_DIST` ไม่มีโฟลเดอร์ = ไม่เสิร์ฟหน้าเว็บ
+- `render.yaml` Blueprint (free, singapore, `npm ci` → `npm start`, healthCheck `/api/health`, `AUTH_SECRET` generateValue, `DATABASE_URL`/`ADMIN_KEY` `sync: false`)
+- `.github/workflows/pages.yml`: `VITE_ACCOUNTS_API: ${{ vars.ACCOUNTS_API_URL }}` ตอน `build:demo` — Vite อ่าน `VITE_*` จาก process.env
+- Web: HomeScreen ข้อความ "Server กำลังตื่น" หลัง checking 4 s; AuthDialog แท็บสมัครแสดงนโยบายข้อมูล
+- คู่มือ `docs/DEPLOY.md` (Neon → Render → GitHub variable → `.env` ครู → ทดสอบ → สำรอง → นโยบายข้อมูล → แก้ปัญหา)

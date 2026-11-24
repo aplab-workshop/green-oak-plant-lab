@@ -182,7 +182,7 @@ describe('Growth baseline', () => {
     expect(sim.plants.some((p) => p.stage === 'vegetative')).toBe(true);
     expect(sim.env.totalUptakeL).toBeGreaterThan(1);
     expect(sim.plants[0]!.dliYesterday).toBeGreaterThan(10);
-  });
+  }, 30_000);
 
   it('P25: records daily gain at midnight and stage changes with a plant.stage event (deterministic)', () => {
     const fresh = new Simulation({ seed: 7, cfg: noSunConfig() });

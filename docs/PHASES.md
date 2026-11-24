@@ -605,7 +605,10 @@ tags: [green-oak, roadmap]
 - **ผลตรวจ:** AC-74 ผ่าน (SPEC § 4.43); `test/leaderboard.test.ts` 4 ข้อ; tests 392/392 (47 files), typecheck, build และ build:demo ผ่าน; Browser (Server ทดสอบพอร์ต 3002, seed 4 คน 2 รหัส): Home มีปุ่ม 🏆 ตารางอันดับ → ด่าน 1 เรียง 1310/1240/1180/990 ไฮไลต์แถวฉัน, "กลุ่มของฉัน" เหลือ 2 คน, การ์ดเลือกด่านแสดง "☁️ ดีที่สุดของฉัน 1240 ⭐⭐⭐ · ชนะ 1/1 รอบ"; ข้อความผลการบันทึกบนหน้าผ่านด่านตรวจด้วยเทสต์ (ยังไม่ได้ชนะจริงใน Browser)
 
 ### W7 — Deploy + เอกสาร
-- [ ] ขึ้น Cloud ตาม D8, ตั้ง CORS/Env, Pages ชี้ API URL ผ่าน GitHub Actions Variables; README วิธีตั้งค่า + สำรองข้อมูล; นโยบายข้อมูล (เก็บอะไร, Log ไม่หมดอายุจนครูลบ, ลบบัญชีได้)
+แบ่งเป็น **W7a** เตรียมทุกอย่างที่ไม่ต้องใช้บัญชี (Claude ทำ) และ **W7b** Deploy จริง (ผู้ใช้สมัคร Neon/Render, ใส่ความลับ, อนุญาต push) — SPEC § 4.44
+- [x] W7a: CORS_ORIGINS, PORT, LAB_COUNT=0, `render.yaml`, Pages workflow ส่ง `ACCOUNTS_API_URL`, ข้อความ Server กำลังตื่น/นโยบายข้อมูล, `docs/DEPLOY.md`, สแกนความลับ
+- **ผลตรวจ W7a:** AC-75a ผ่าน; `test/cloud.test.ts` 3 ข้อ; tests 395/395 (48 files), typecheck, build และ build:demo ผ่าน; จำลองแบบ Pages ↔ Render ในเครื่อง: Demo build (`VITE_ACCOUNTS_API=http://127.0.0.1:3002`) ที่พอร์ต 4174 ↔ Server บัญชี (LAB_COUNT=0, CORS_ORIGINS=http://localhost:4174) พอร์ต 3002 → สมัครผ่านหน้าต่างจริง (เห็นนโยบายข้อมูล), เล่น L1 ที่ 1440x จนแพ้ → `score list` เห็นรอบ "นับ" เวลาจริง 1:19, Console ไม่มี Error; สแกนความลับใน repo ไม่พบ (มีแค่ URL ปลอมในเทสต์); เพิ่ม timeout 30 s ให้เทสต์ sim-core ยาว 2 ข้อที่หมดเวลาตอนเครื่องทำงานหนัก
+- [ ] W7b: ขึ้น Cloud ตาม D8 — ผู้ใช้ทำตาม `docs/DEPLOY.md` ข้อ 1–5 แล้ว Claude ตรวจครบวงจร (ข้อ 6), ตั้ง CORS/Env, Pages ชี้ API URL ผ่าน GitHub Actions Variables; README วิธีตั้งค่า + สำรองข้อมูล; นโยบายข้อมูล (เก็บอะไร, Log ไม่หมดอายุจนครูลบ, ลบบัญชีได้)
 - **เกณฑ์ผ่าน:** ครบวงจรบนเน็ตจริง: สร้างรหัส → สมัคร → เล่น → คะแนนขึ้นอันดับ → ครูโหลด CSV; สแกนไม่มีความลับใน repo ก่อน push
 
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)

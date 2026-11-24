@@ -259,3 +259,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ### สถานะเพิ่มเติม 2026-11-24 — W6 ตารางอันดับ
 - เสร็จและ commit (ยังไม่ push): ตารางอันดับรายด่าน (ทุกคน/กลุ่มของฉัน, ไม่แสดงรหัสเชิญ), คะแนนของฉันบนการ์ดด่าน, หน้าผ่านด่านบอกผลบันทึก/อันดับ (SPEC § 4.43); tests 392/392
 - ถัดไป W7 Deploy ขึ้น Cloud (Render + Neon) — ต้องให้ผู้ใช้สมัครบัญชีเอง และต้องได้รับอนุญาตก่อน push; รอผู้ใช้ตรวจรับ W6
+
+### สถานะเพิ่มเติม 2026-11-24 — W7a เตรียม Deploy
+- เสร็จและ commit (ยังไม่ push): CORS_ORIGINS/PORT/LAB_COUNT=0, `render.yaml`, Pages ส่ง `vars.ACCOUNTS_API_URL`, คู่มือ `docs/DEPLOY.md` (SPEC § 4.44); tests 395/395; จำลอง Pages ↔ Server ข้ามโดเมนในเครื่องผ่าน
+- W7b ต้องให้ผู้ใช้: สมัคร Neon + Render, กรอก `DATABASE_URL`/`ADMIN_KEY` ใน Render, ตั้ง GitHub variable `ACCOUNTS_API_URL`, **อนุญาต push** (render.yaml ต้องอยู่บน GitHub ก่อน Render อ่านได้) — อย่าขอ/รับความลับในแชต

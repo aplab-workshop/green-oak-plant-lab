@@ -74,6 +74,9 @@ export function AuthDialog({ close, onDone }: { close: () => void; onDone: () =>
           <input name="inviteCode" autoComplete="off" autoCapitalize="characters" spellCheck={false} maxLength={64}
             value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} placeholder="เช่น GO-7K3P-9QX2" required />
         </label>}
+        {isRegister && <p className="text-xs text-slate-500">
+          🔒 เก็บแค่ ID, Password (เข้ารหัส), รหัสเชิญ, คะแนนและ Log การเล่น — ไม่เก็บชื่อจริงหรืออีเมล ขอให้ครูลบบัญชีได้ทุกเมื่อ
+        </p>}
         {error && <p role="alert" className="auth-error">{error}</p>}
         <button type="submit" className="home-btn home-btn-primary auth-submit" disabled={busy}>
           {busy ? 'กำลังส่ง…' : isRegister ? 'สมัครและเริ่มเล่น' : 'เข้าสู่ระบบและเล่น'}
