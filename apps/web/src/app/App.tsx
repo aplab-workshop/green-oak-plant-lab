@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Activity, BookOpen, ChartNoAxesCombined, ChevronRight, Droplets, Leaf, List, Maximize2, SlidersHorizontal, Sprout, Trophy, X } from 'lucide-react';
+import { Activity, BookOpen, House, ChartNoAxesCombined, ChevronRight, Droplets, Leaf, List, Maximize2, SlidersHorizontal, Sprout, Trophy, X } from 'lucide-react';
 import { Header } from './Header';
 import { SensorPanel } from '../dashboard/SensorPanel';
 import { ActuatorPanel } from '../dashboard/ActuatorPanel';
@@ -20,6 +20,7 @@ import { useLabStore } from '../store/labStore';
 import { sendCommand } from '../store/api';
 import { DetailDialog } from './DetailDialog';
 import { HomeScreen } from './HomeScreen';
+import { useAuthStore } from '../store/authStore';
 
 type Detail = 'sensors' | 'actuators' | 'plant' | 'scenario' | 'trends' | 'timeline' | 'score' | 'guide';
 const PINNABLE: Detail[] = ['sensors', 'plant', 'actuators', 'trends'];
@@ -95,6 +96,8 @@ export function App() {
   const showWin = gameMode && game?.status === 'won' && seenWin !== round && !showLevels;
   // P52: เปิดเว็บเจอหน้า Home ก่อน (State ฝั่ง Web) — Play แล้วเข้า HUD
   const [home, setHome] = useState(true);
+  // P55: แสดงผู้ใช้ที่ Login อยู่ในหน้าเกม
+  const player = useAuthStore((s) => (s.status === 'signedIn' ? s.player : null));
   const closeDetail = () => setDetail(null);
   const open = (key: Detail) => setDetail(key);
   const toggle = (key: Detail) => {
@@ -156,7 +159,15 @@ export function App() {
     <Header />
     <main className="game-main">
       <div className="game-topbar">
-        <div><span className="text-xs font-semibold tracking-[0.15em] text-emerald-700">GREEN OAK GARDEN</span><p className="text-xs text-slate-500">ดูแลสวนของคุณให้เติบโต</p></div>
+        <div className="flex items-center gap-3">
+          {/* P55 (SPEC § 4.46): กลับหน้า Home — กำลังเล่นอยู่หยุดเวลาให้ก่อน */}
+          <button type="button" className="game-home-btn" title="กลับหน้าแรก" onClick={() => {
+            if (snap?.game.status === 'playing' && !snap.paused) void sendCommand({ type: 'pause' });
+            setHome(true);
+          }}><House size={16} /> หน้าแรก</button>
+          {player && <span className="game-user" title="ผู้ใช้ที่เล่นอยู่">👤 {player.username}</span>}
+          <div><span className="text-xs font-semibold tracking-[0.15em] text-emerald-700">GREEN OAK GARDEN</span><p className="text-xs text-slate-500">ดูแลสวนของคุณให้เติบโต</p></div>
+        </div>
         <div className="flex flex-wrap items-center gap-3"><LevelButton onOpen={() => setShowLevels(true)} /><AutoPauseToggle /><SimControls /></div>
       </div>
       <div className="garden-stage">

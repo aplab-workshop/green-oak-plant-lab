@@ -982,3 +982,7 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `admin/adminApi.ts`: `adminRequest()` ผ่าน `authFetch` (Base เดียวกับระบบบัญชี: Demo = `VITE_ACCOUNTS_API`, ปกติ = Server เดิม); Key ใน `sessionStorage` (`gol.admin.key`) + ตัวแปรในหน่วยความจำ
 - `admin/AdminApp.tsx`: สถานะ checking/off/login/ready/down, 5 แท็บ, `useLoad()` (โหลด + reload), ดาวน์โหลด CSV ผ่าน `Blob` + `<a download>`, ยืนยันการลบด้วย `confirm`/`prompt` (ลบบัญชีต้องพิมพ์ ID)
 - `app.ts` CORS: `methods` เพิ่ม PATCH/DELETE (ค่าเริ่ม @fastify/cors มีแค่ GET/HEAD/POST), `exposedHeaders: x-run-count, retry-after`
+
+### 11.59 Implementation Notes (P55 — Back to Home + Current User)
+
+- `App.tsx` แถบบน: ปุ่ม `.game-home-btn` → `sendCommand({type:'pause'})` เมื่อ `game.status === 'playing' && !paused` แล้ว `setHome(true)` (State ฝั่ง Web — ไม่ Reset Lab); ป้าย `.game-user` จาก `useAuthStore` (selector คืน `player` หรือ null — ไม่สร้าง object ใหม่)

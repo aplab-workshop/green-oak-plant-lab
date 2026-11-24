@@ -628,6 +628,11 @@ tags: [green-oak, roadmap]
 - [x] **แก้ Bug จาก W7a:** Server อ่าน `PORT` → เครื่องมือ Dev ตั้ง `PORT=5173` ให้ทั้ง `npm run dev` → Server ไปฟัง 5173 แทน 3001 (หน้า Dev เรียก API ได้ 502) — เลิกอ่าน `PORT`, `render.yaml` ตั้ง `SERVER_PORT=10000` แทน
 - **ผลตรวจ:** AC-77 ผ่าน; tests 396/396, typecheck, build และ build:demo ผ่าน; Browser: Server บัญชีเปิด (3002) เห็นลิงก์ `href=/?admin target=_blank`; Dev (บัญชีปิด) ไม่เห็นลิงก์ และ Dev Server กลับมาฟัง 3001 เรียก API ได้
 
+### P55 — กลับหน้า Home จากหน้าเกม + แสดงผู้ใช้ ✅ (ผู้ใช้สั่ง 2026-11-24)
+- [x] ปุ่ม 🏠 หน้าแรก ซ้ายของ "GREEN OAK GARDEN" — กำลังเล่นอยู่หยุดเวลาให้ก่อน, รอบ/ด่านไม่หาย (SPEC § 4.46)
+- [x] ป้าย 👤 ID ของผู้ใช้ที่ Login อยู่ ข้างปุ่มหน้าแรก (ระบบบัญชีปิด = ไม่แสดง)
+- **ผลตรวจ:** AC-78 ผ่าน; tests 396/396, typecheck, build และ build:demo ผ่าน; Browser Dev: เริ่มรอบ (playing) → กดหน้าแรก → เห็นหน้า Home, Server `paused: true`, runId เดิม → Play กลับมารอบเดิม; Server บัญชีเปิด (3002): หน้าเกมแสดง "👤 student_p55"
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

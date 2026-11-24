@@ -304,3 +304,9 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
 @media (max-width: 699px) {
   .home-admin-link { left: 12px; bottom: 64px; }
 }
+
+/* P55 (SPEC § 4.46): ปุ่มกลับหน้า Home ในหน้าเกม */
+.game-home-btn { display: flex; align-items: center; gap: 6px; border: 1px solid #bfe6cd; border-radius: 999px; background: white; padding: 6px 12px; font-size: 13px; font-weight: 700; color: #17783f; white-space: nowrap; }
+.game-home-btn:hover { background: #f0fbf4; }
+.game-home-btn:focus-visible { outline: 3px solid #86efac; outline-offset: 2px; }
+.game-user { border-radius: 999px; background: #ecfdf3; padding: 5px 11px; font-size: 13px; font-weight: 700; color: #17783f; white-space: nowrap; }
