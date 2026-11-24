@@ -41,7 +41,12 @@ export async function buildApp(
 
   // LAN/Dev: CORS เปิดทุกโดเมน (Vite dev server คนละพอร์ต); W7 Cloud: เฉพาะ CORS_ORIGINS (เช่นโดเมน GitHub Pages)
   const origins = config.corsOrigins ?? [];
-  await app.register(cors, { origin: origins.length ? origins : true });
+  // W8: หน้าครูบน Pages ใช้ PATCH/DELETE และอ่าน x-run-count/retry-after ข้ามโดเมน
+  await app.register(cors, {
+    origin: origins.length ? origins : true,
+    methods: ['GET', 'HEAD', 'POST', 'PATCH', 'DELETE'],
+    exposedHeaders: ['x-run-count', 'retry-after'],
+  });
   await app.register(websocket);
   registerRoutes(app);
   registerAuthRoutes(app, app.accounts);

@@ -975,3 +975,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `.github/workflows/pages.yml`: `VITE_ACCOUNTS_API: ${{ vars.ACCOUNTS_API_URL }}` ตอน `build:demo` — Vite อ่าน `VITE_*` จาก process.env
 - Web: HomeScreen ข้อความ "Server กำลังตื่น" หลัง checking 4 s; AuthDialog แท็บสมัครแสดงนโยบายข้อมูล
 - คู่มือ `docs/DEPLOY.md` (Neon → Render → GitHub variable → `.env` ครู → ทดสอบ → สำรอง → นโยบายข้อมูล → แก้ปัญหา)
+
+### 11.58 Implementation Notes (W8 — Teacher Admin Page)
+
+- `main.tsx`: `?admin` → `lazy(() => import('./admin/AdminApp'))` และไม่เรียก `startConnection`/`startRunLogUploader` (หน้าครูไม่ต่อ Lab/WS ไม่โหลดฉาก 3D — แยก chunk `AdminApp-*.js`)
+- `admin/adminApi.ts`: `adminRequest()` ผ่าน `authFetch` (Base เดียวกับระบบบัญชี: Demo = `VITE_ACCOUNTS_API`, ปกติ = Server เดิม); Key ใน `sessionStorage` (`gol.admin.key`) + ตัวแปรในหน่วยความจำ
+- `admin/AdminApp.tsx`: สถานะ checking/off/login/ready/down, 5 แท็บ, `useLoad()` (โหลด + reload), ดาวน์โหลด CSV ผ่าน `Blob` + `<a download>`, ยืนยันการลบด้วย `confirm`/`prompt` (ลบบัญชีต้องพิมพ์ ID)
+- `app.ts` CORS: `methods` เพิ่ม PATCH/DELETE (ค่าเริ่ม @fastify/cors มีแค่ GET/HEAD/POST), `exposedHeaders: x-run-count, retry-after`

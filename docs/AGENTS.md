@@ -273,3 +273,6 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - ครบวงจรบนเน็ตจริงผ่าน: รหัส `GO-EQ5X-2CVJ` (ทดสอบ, 5 คน), ผู้เล่น `test` ชนะ L1 1492 นับอันดับ, CSV 148 แถว; `.env` ของผู้ใช้อยู่ที่ root (อย่า commit/อย่าเปิดอ่าน — มี ADMIN_KEY) ใช้ `npm run -s admin -- …` ตรวจได้
 - DEPLOY.md เพิ่มเรื่อง channel_binding / ปุ่ม Run workflow / ไฟล์ .env ว่าง
 - ถัดไป W8 หน้าครูบนเว็บ — รอผู้ใช้สั่งเริ่ม; อย่า push โดยไม่ได้รับอนุญาต
+
+### สถานะเพิ่มเติม 2026-11-24 — W8 หน้าครูบนเว็บ
+- เสร็จและ commit (ยังไม่ push): `?admin` บนหน้าเว็บเดิม (Pages/ห้องเรียน) ใส่ ADMIN_KEY → แท็บ รหัสเชิญ/ผู้เล่น/คะแนน/Log CSV/ระบบ (SPEC § 4.45); Server CORS เพิ่ม PATCH/DELETE — **ต้อง push เพื่อให้ Render + Pages ได้ทั้งคู่**; tests 396/396

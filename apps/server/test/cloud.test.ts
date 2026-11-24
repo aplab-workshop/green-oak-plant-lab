@@ -53,6 +53,22 @@ describe('cloud mode (W7a)', () => {
     expect((await app.inject({ method: 'GET', url: '/api/health' })).statusCode).toBe(200);
   }, 30_000);
 
+  it('W8: the admin page on Pages may use PATCH/DELETE and read x-run-count across origins', async () => {
+    const app = await buildApp(testConfig({ labCount: 0, databaseUrl: 'memory://', authSecret: 's', adminKey: 'teacher-key-0123456789', corsOrigins: [PAGES] }), { startLabs: false });
+    apps.push(app);
+    for (const method of ['PATCH', 'DELETE']) {
+      const pre = await app.inject({
+        method: 'OPTIONS',
+        url: '/api/admin/invites/X',
+        headers: { origin: PAGES, 'access-control-request-method': method, 'access-control-request-headers': 'authorization,content-type' },
+      });
+      expect(String(pre.headers['access-control-allow-methods'])).toContain(method);
+    }
+    const csv = await app.inject({ method: 'GET', url: '/api/admin/logs.csv', headers: { origin: PAGES, authorization: 'Bearer teacher-key-0123456789' } });
+    expect(csv.statusCode).toBe(200);
+    expect(String(csv.headers['access-control-expose-headers'])).toContain('x-run-count');
+  }, 30_000);
+
   it('LAN/dev keeps allowing any origin when CORS_ORIGINS is empty', async () => {
     const app = await buildApp(testConfig(), { startLabs: false });
     apps.push(app);
