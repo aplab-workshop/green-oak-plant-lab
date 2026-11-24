@@ -959,3 +959,10 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `AccountStore.saveRun`: ธุรกรรมเดียว — Upsert Log (แทนฉบับ "ออกกลางคัน" ได้) แล้ว `INSERT scores … ON CONFLICT DO NOTHING`; คะแนนซ้ำ → throw Symbol ให้ ROLLBACK ทั้งคู่ → 409; ตัวเลขปลอมใหญ่เกิน INTEGER ถูก clamp ±2e9 ก่อนเก็บ (เก็บไว้ให้ครูเห็น)
 - `buildApp(…, { now })` ส่งนาฬิกาให้ระบบบัญชี (เทสต์ `future_time`/Token)
 - Admin `GET /api/admin/scores` + CLI `score list` แปลงรหัสเหตุผลเป็นคำไทย
+
+### 11.56 Implementation Notes (W6 — Leaderboard)
+
+- `AccountStore.leaderboard(levelId, {inviteCode?, limit, meId})`: CTE `DISTINCT ON (player_id)` เลือกรอบดีที่สุด (ชนะ + ranked) → `ROW_NUMBER()` เรียง score DESC, real_seconds ASC, created_at ASC → คืน `rank <= limit OR player_id = me`; `playerRank()` ใช้ limit 0 ดึงแถวตัวเอง
+- `AccountStore.myScores`: `max(...) FILTER (WHERE ranked AND status='won')`, `count(*) FILTER …` ต่อด่าน
+- `api/leaderboard.ts`: `GET /api/leaderboard?level&scope=all|group` (group = invite_code ของผู้เรียก, ไม่ส่ง invite_code ออกไป), `GET /api/me/scores`; `POST /api/runs/log` ตอบ `score.rank` เมื่อชนะและนับ
+- Web: `store/scoreStore.ts` (`myScores`, `lastSubmit` ผูก `labId:runId`, ล้างเมื่อเปลี่ยนบัญชี), `game/Leaderboard.tsx` (`LeaderboardPanel`, `myBestText`), ปุ่ม Home, การ์ดเลือกด่าน, `WinScreen` แยก `WinBody` (Hook หลัง early return ไม่ได้) + `SubmitStatus`

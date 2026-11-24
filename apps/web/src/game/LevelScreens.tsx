@@ -1,5 +1,9 @@
-import type { HistorySample, LabSnapshot, LevelId, PlayerDevice } from '@gol/shared';
+import { useEffect, useState } from 'react';
+import { SCORE_REJECT_TEXT, type HistorySample, type LabSnapshot, type LevelId, type PlayerDevice } from '@gol/shared';
 import { useLabStore } from '../store/labStore';
+import { useAuthStore } from '../store/authStore';
+import { refreshMyScores, useScoreStore } from '../store/scoreStore';
+import { LeaderboardPanel, myBestText } from './Leaderboard';
 import { DEMO } from '../demo/mode';
 import { sendCommand } from '../store/api';
 
@@ -15,6 +19,12 @@ export function LevelSelect({ onDone }: { onDone: () => void }) {
   const levels = useLabStore((s) => s.snapshot?.levels);
   const current = useLabStore((s) => s.snapshot?.level?.id ?? 'free');
   const devUnlockAll = useLabStore((s) => s.snapshot?.devUnlockAll ?? false);
+  // W6: คะแนนดีที่สุดของฉันจาก Server (เมื่อ Login)
+  const signedIn = useAuthStore((s) => s.status === 'signedIn');
+  const myScores = useScoreStore((s) => s.myScores);
+  useEffect(() => {
+    if (signedIn) void refreshMyScores();
+  }, [signedIn]);
   const choose = async (levelId: LevelId | 'free') => {
     if (await sendCommand({ type: 'selectLevel', levelId })) onDone();
   };
@@ -41,6 +51,7 @@ export function LevelSelect({ onDone }: { onDone: () => void }) {
             <span className="block text-xs text-slate-600">เป้า {l.targetG} g · {l.timeLimitDays} วัน · งบไฟ {l.energyBudgetKWh} kWh</span>
             <span className="block text-sm" aria-label="อุปกรณ์ที่คุม">{l.playerDevices.map((d) => DEVICE_ICON[d]).join(' ')}</span>
             <span className="mt-1 block text-lg">{l.unlocked ? '⭐'.repeat(l.bestStars) + '☆'.repeat(3 - l.bestStars) : 'ผ่านด่านก่อนหน้าเพื่อปลดล็อก'}</span>
+            {signedIn && myScores && <span className="block text-xs font-semibold text-sky-800">{myBestText(myScores.find((m) => m.levelId === l.id))}</span>}
           </button>
         );
       })}
@@ -75,6 +86,27 @@ export function WinScreen({ onLevels, onClose }: { onLevels: () => void; onClose
   const idx = levels.findIndex((l) => l.id === s.level?.id);
   const next = idx >= 0 ? levels[idx + 1] : undefined;
   return (
+    <WinBody s={s} gain={gain} dead={dead} next={next} onLevels={onLevels} onClose={onClose} />
+  );
+}
+
+/** W6: ผลการบันทึกคะแนนบน Server ของรอบนี้ */
+function SubmitStatus({ round }: { round: string }) {
+  const signedIn = useAuthStore((s) => s.status === 'signedIn');
+  const submit = useScoreStore((s) => (s.lastSubmit?.round === round ? s.lastSubmit.response.score : undefined));
+  if (!signedIn) return null;
+  if (!submit) return <p className="text-xs text-slate-500">☁️ กำลังบันทึกคะแนน…</p>;
+  if (submit.ranked) return <p className="text-sm font-semibold text-sky-800">☁️ บันทึกคะแนนแล้ว{submit.rank !== null && ` · อันดับ #${submit.rank} ของด่านนี้`}</p>;
+  return <p className="text-sm text-amber-800">☁️ บันทึกแล้วแต่ไม่นับอันดับ: {submit.reasons.map((r) => SCORE_REJECT_TEXT[r]).join(', ')}</p>;
+}
+
+function WinBody({ s, gain, dead, next, onLevels, onClose }: {
+  s: LabSnapshot; gain: number | null; dead: Set<number>; next: LabSnapshot['levels'][number] | undefined; onLevels: () => void; onClose: () => void;
+}) {
+  const g = s.game;
+  const signedIn = useAuthStore((st) => st.status === 'signedIn');
+  const [board, setBoard] = useState(false);
+  return (
     <div className="space-y-4 p-6">
       <div className="text-center">
         <p className="text-5xl">{'⭐'.repeat(g.stars)}{'☆'.repeat(3 - g.stars)}</p>
@@ -85,6 +117,7 @@ export function WinScreen({ onLevels, onClose }: { onLevels: () => void; onClose
         </p>
         {g.overflowL > 0 && <p className="mt-1 text-sm text-rose-700">💧 น้ำล้น {g.overflowL.toFixed(1)} L · ⚡ {g.overflowKWh.toFixed(3)} kWh · หักคะแนน −{g.overflowPenalty}</p>}
         {gain !== null && <p className="mt-1 text-sm font-semibold text-emerald-700">ผักโตขึ้นเฉลี่ย +{gain.toFixed(1)} g ต่อต้น</p>}
+        <div className="mt-2"><SubmitStatus round={`${s.labId}:${s.runId}`} /></div>
       </div>
       <ul className="grid grid-cols-3 gap-2 text-center text-xs sm:grid-cols-6">
         {s.plants.map((p) => (
@@ -115,7 +148,13 @@ export function WinScreen({ onLevels, onClose }: { onLevels: () => void; onClose
         <button type="button" className="rounded-xl border px-4 py-2 text-sm" onClick={onLevels}>
           เลือกด่าน
         </button>
+        {signedIn && s.level && (
+          <button type="button" className="rounded-xl border px-4 py-2 text-sm" onClick={() => setBoard((b) => !b)}>
+            🏆 {board ? 'ซ่อนตารางอันดับ' : 'ตารางอันดับ'}
+          </button>
+        )}
       </div>
+      {board && s.level && <LeaderboardPanel initialLevel={s.level.id} />}
     </div>
   );
 }

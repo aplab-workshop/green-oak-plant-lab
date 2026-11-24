@@ -1,3 +1,4 @@
+import type { LeaderboardRow, MyLevelScore } from '@gol/shared';
 import type { Database, Sql } from './db';
 
 /**
@@ -348,6 +349,51 @@ export class AccountStore {
       if (isUniqueViolation(err)) return null;
       throw err;
     }
+  }
+
+  /**
+   * W6: ตารางอันดับของด่าน — รอบชนะที่นับอันดับ คนละแถว (ดีที่สุด)
+   * เรียง คะแนนมาก → เวลาจริงน้อย → ส่งก่อน; คืน limit อันดับแรก + แถวของ meId (ถ้ามี)
+   */
+  async leaderboard(levelId: string, opts: { inviteCode?: string; limit: number; meId?: number }): Promise<(Omit<LeaderboardRow, 'me'> & { playerId: number })[]> {
+    const params: unknown[] = [levelId, opts.limit, opts.meId ?? -1];
+    const group = opts.inviteCode !== undefined ? `AND p.invite_code = $${params.push(opts.inviteCode)}` : '';
+    const { rows } = await this.db.query(
+      `WITH best AS (
+         SELECT DISTINCT ON (s.player_id) s.player_id, p.username, s.score, s.stars, s.biomass_g, s.real_seconds, s.created_at
+         FROM scores s JOIN players p ON p.id = s.player_id
+         WHERE s.level_id = $1 AND s.ranked AND s.status = 'won' ${group}
+         ORDER BY s.player_id, s.score DESC, s.real_seconds ASC, s.created_at ASC
+       ), ranked AS (
+         SELECT *, (ROW_NUMBER() OVER (ORDER BY score DESC, real_seconds ASC, created_at ASC))::int AS rank FROM best
+       )
+       SELECT * FROM ranked WHERE rank <= $2 OR player_id = $3 ORDER BY rank`,
+      params,
+    );
+    return rows.map((r) => ({
+      rank: r.rank as number,
+      playerId: r.player_id as number,
+      username: r.username as string,
+      score: r.score as number,
+      stars: r.stars as number,
+      yieldG: r.biomass_g as number,
+      realSeconds: r.real_seconds as number,
+      at: (r.created_at as Date).toISOString(),
+    }));
+  }
+
+  /** W6: คะแนนของฉันต่อด่าน */
+  async myScores(playerId: number): Promise<MyLevelScore[]> {
+    const { rows } = await this.db.query<MyLevelScore>(
+      `SELECT level_id AS "levelId",
+         max(score) FILTER (WHERE ranked AND status = 'won') AS "bestScore",
+         max(stars) FILTER (WHERE ranked AND status = 'won') AS "bestStars",
+         (count(*) FILTER (WHERE status = 'won'))::int AS wins,
+         count(*)::int AS rounds
+       FROM scores WHERE player_id = $1 GROUP BY level_id ORDER BY level_id`,
+      [playerId],
+    );
+    return rows;
   }
 
   async listScores(filter: RunFilter = {}): Promise<ScoreRow[]> {

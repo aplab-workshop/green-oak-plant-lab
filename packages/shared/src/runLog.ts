@@ -43,6 +43,43 @@ export const RunLogUpload = z.object({
   result: RunResult.optional(),
 });
 
+/** W6 (SPEC § 4.43): ตารางอันดับ — ไม่มีรหัสเชิญ (เป็นความลับที่ใช้สมัคร) */
+export type LeaderboardScope = 'all' | 'group';
+
+export interface LeaderboardRow {
+  rank: number;
+  username: string;
+  score: number;
+  stars: number;
+  yieldG: number;
+  realSeconds: number;
+  /** เวลาที่ส่ง (ISO) */
+  at: string;
+  me: boolean;
+}
+
+export interface Leaderboard {
+  levelId: string;
+  scope: LeaderboardScope;
+  rows: LeaderboardRow[];
+  /** แถวของฉัน (null = ยังไม่มีรอบชนะที่นับในด่านนี้) */
+  me: LeaderboardRow | null;
+}
+
+export interface MyLevelScore {
+  levelId: string;
+  bestScore: number | null;
+  bestStars: number | null;
+  wins: number;
+  rounds: number;
+}
+
+/** ผลการส่งรอบที่ Web ได้กลับมา (W5/W6) */
+export interface RunSubmitResponse {
+  saved: number;
+  score: { ranked: boolean; reasons: ScoreRejectReason[]; rank: number | null } | null;
+}
+
 /** เหตุผลที่ไม่นับอันดับ (W5) */
 export type ScoreRejectReason =
   | 'not_level'

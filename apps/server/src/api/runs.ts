@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify';
-import { RunLogUpload } from '@gol/shared';
+import { RunLogUpload, type RunSubmitResponse } from '@gol/shared';
 import { checkRun } from '../accounts/plausibility';
 import { authenticate, type Accounts } from './auth';
+import { playerRank } from './leaderboard';
 
 /**
  * W4 / SPEC § 4.41: Web ส่ง Log ของรอบขึ้น Server (ต้อง Login)
@@ -34,6 +35,10 @@ export function registerRunRoutes(app: FastifyInstance, accounts: Accounts | nul
         : undefined,
     );
     if (!saved) return reply.code(409).send({ error: 'ส่งผลรอบนี้ไปแล้ว', code: 'duplicate_run' });
-    return reply.code(201).send({ saved: events.length, score: check ? { ranked: check.reasons.length === 0, reasons: check.reasons } : null });
+    const ranked = check !== null && check.reasons.length === 0;
+    // W6: รอบชนะที่นับ → บอกอันดับปัจจุบันของผู้เล่นในด่านนี้ (ใช้รอบดีที่สุด)
+    const rank = ranked && result?.status === 'won' ? await playerRank(accounts, levelId, player.id) : null;
+    const body: RunSubmitResponse = { saved: events.length, score: check ? { ranked, reasons: check.reasons, rank } : null };
+    return reply.code(201).send(body);
   });
 }

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, LogOut, Play, UserRound } from 'lucide-react';
+import { BookOpen, LogOut, Play, Trophy, UserRound } from 'lucide-react';
 import { PlantView } from '../scene/PlantView';
 import { GuidePanel } from '../dashboard/GuidePanel';
 import { DEMO } from '../demo/mode';
 import { initAuth, logout, useAuthStore } from '../store/authStore';
 import { AuthDialog } from './AuthDialog';
+import { LeaderboardPanel } from '../game/Leaderboard';
 import { DetailDialog } from './DetailDialog';
 
 /**
@@ -15,6 +16,7 @@ import { DetailDialog } from './DetailDialog';
 export function HomeScreen({ onPlay }: { onPlay: () => void }) {
   const [guide, setGuide] = useState(false);
   const [auth, setAuth] = useState(false);
+  const [board, setBoard] = useState(false);
   const status = useAuthStore((s) => s.status);
   const player = useAuthStore((s) => s.player);
   const message = useAuthStore((s) => s.message);
@@ -48,6 +50,9 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
           <button type="button" className="home-btn home-btn-secondary" onClick={() => setGuide(true)}>
             <BookOpen size={24} /> คู่มือการปลูก
           </button>
+          {status === 'signedIn' && <button type="button" className="home-btn home-btn-secondary" onClick={() => setBoard(true)}>
+            <Trophy size={24} /> ตารางอันดับ
+          </button>}
           {status === 'error' && <p role="alert" className="home-auth-error">
             {message} <button type="button" className="underline" onClick={() => void initAuth()}>ลองใหม่</button>
           </p>}
@@ -62,6 +67,9 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
     </section>
     {guide && <DetailDialog title="📖 คู่มือการปลูก" close={() => setGuide(false)}>
       <GuidePanel initialTab="routine" />
+    </DetailDialog>}
+    {board && <DetailDialog title="🏆 ตารางอันดับ" close={() => setBoard(false)}>
+      <LeaderboardPanel />
     </DetailDialog>}
     {auth && <AuthDialog close={() => setAuth(false)} onDone={() => { setAuth(false); onPlay(); }} />}
   </div>;

@@ -1,7 +1,8 @@
-import { RUN_ABANDONED_KIND, RUN_LOG_MAX_EVENTS, RUN_LOG_MAX_MESSAGE, type CareProgress, type EventEntry, type RunLogEvent, type RunLogUpload, type RunResult } from '@gol/shared';
+import { RUN_ABANDONED_KIND, RUN_LOG_MAX_EVENTS, RUN_LOG_MAX_MESSAGE, type CareProgress, type EventEntry, type RunLogEvent, type RunLogUpload, type RunResult, type RunSubmitResponse } from '@gol/shared';
 import { useLabStore } from './labStore';
 import { authFetch, useAuthStore } from './authStore';
 import { useConnectionStore } from './connectionStore';
+import { recordSubmit } from './scoreStore';
 
 /**
  * Log การเล่นต่อรอบ (W4 / SPEC § 4.41) — เก็บ Event ของรอบที่ Web ได้รับ แล้วส่งขึ้น Server เมื่อ Login อยู่
@@ -93,14 +94,20 @@ function finishRun(r: Run, abandoned: boolean, keepalive = false): void {
   if (!abandoned) r.done = true;
   sent[key] = { uuid, full: !abandoned };
   writeSent(sent);
+  const round = `${r.labId}:${r.labRunId}`;
   void authFetch('/api/runs/log', {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
     body: json,
     keepalive,
-  }).catch(() => {
-    // เครือข่ายขัดข้อง — Log รอบนี้หาย แต่เกมเล่นต่อได้
-  });
+  })
+    .then(async (res) => {
+      // W6: หน้าผ่านด่านแสดงผลการบันทึก/อันดับ
+      if (res.ok && result) recordSubmit(round, (await res.json()) as RunSubmitResponse);
+    })
+    .catch(() => {
+      // เครือข่ายขัดข้อง — Log รอบนี้หาย แต่เกมเล่นต่อได้
+    });
 }
 
 function track(): void {
