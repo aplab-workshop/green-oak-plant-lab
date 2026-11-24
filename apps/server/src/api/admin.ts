@@ -100,6 +100,16 @@ export function registerAdminRoutes(app: FastifyInstance, accounts: Accounts | n
         .send(buildRunLogCsv(logs));
     });
 
+    /** W5: คะแนนทุกรอบ (รวมที่ไม่นับอันดับ) */
+    admin.get<{ Querystring: { invite?: string; player?: string; level?: string } }>('/api/admin/scores', async (req) => {
+      const { invite, player, level } = req.query;
+      return store().listScores({
+        ...(invite ? { inviteCode: normalizeInviteCode(invite) } : {}),
+        ...(player ? { username: normalizeUsername(player) } : {}),
+        ...(level ? { levelId: level.trim() } : {}),
+      });
+    });
+
     admin.get<{ Querystring: { invite?: string } }>('/api/admin/players', async (req) =>
       store().listPlayers(req.query.invite ? normalizeInviteCode(req.query.invite) : undefined),
     );

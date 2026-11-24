@@ -951,3 +951,11 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `AccountStore.insertRunLog`: `INSERT … ON CONFLICT DO UPDATE … WHERE events -> -1 ->> 'kind' = 'run.abandoned'` — ฉบับ "ออกกลางคัน" ถูกแทนได้ ฉบับจบรอบแทนไม่ได้ (409)
 - `api/runs.ts` `POST /api/runs/log` (bodyLimit 2 MB, `authenticate()`), Admin `GET /api/admin/logs.csv` (`x-run-count`), `accounts/csv.ts` (`buildRunLogCsv`: BOM, CRLF, เวลา Asia/Bangkok ด้วย `Intl`, เลขรอบต่อผู้เล่น+ด่าน, กันสูตร Excel)
 - วันจำลองใน CSV = `floor(simTimeS / 86400)` เหมือนหน้า "เหตุการณ์" ในเกม (เป็นอายุผัก เช่น วัน 14 ตอนเริ่ม L1) ไม่ใช่ "วัน x/5" ของด่าน
+
+### 11.55 Implementation Notes (W5 — Score Submission)
+
+- `RunLogUpload.result` (shared `runLog.ts`: `RunResult`, `ScoreRejectReason`, `SCORE_REJECT_TEXT`) — Web (`runLogUploader`) แนบจาก `snapshot.game` ตอนจบรอบ + `serverVersion` จาก `connectionStore`
+- `accounts/plausibility.ts` `checkRun(levelId, result, events, now)`: เพดานคะแนน `maxScore + harvestBonus` จาก `makeConfig().game`, เวลาด่านจาก `LEVELS`, ความเร็วสูงสุดจาก `uiSpeeds()` (1440); เวลาจริง = `game.won/over.at − game.start.at`; ตรวจเวลาจำลองใน Log ตรงกับ `elapsedS` (±1 ชม.) กันส่ง elapsedS ต่ำเพื่อเลี่ยง `too_fast`
+- `AccountStore.saveRun`: ธุรกรรมเดียว — Upsert Log (แทนฉบับ "ออกกลางคัน" ได้) แล้ว `INSERT scores … ON CONFLICT DO NOTHING`; คะแนนซ้ำ → throw Symbol ให้ ROLLBACK ทั้งคู่ → 409; ตัวเลขปลอมใหญ่เกิน INTEGER ถูก clamp ±2e9 ก่อนเก็บ (เก็บไว้ให้ครูเห็น)
+- `buildApp(…, { now })` ส่งนาฬิกาให้ระบบบัญชี (เทสต์ `future_time`/Token)
+- Admin `GET /api/admin/scores` + CLI `score list` แปลงรหัสเหตุผลเป็นคำไทย

@@ -89,6 +89,12 @@ export interface RunFilter {
 
 const PLAYER_COLS = 'id, username, invite_code, created_at, last_login_at';
 
+/** W4: เพิ่ม Log ของรอบ — แทนได้เฉพาะฉบับเดิมที่จบด้วย "ออกกลางคัน" (run.abandoned) */
+const UPSERT_RUN_LOG = `INSERT INTO run_logs (player_id, run_id, level_id, events) VALUES ($1, $2, $3, $4)
+  ON CONFLICT (player_id, run_id) DO UPDATE SET events = EXCLUDED.events, level_id = EXCLUDED.level_id
+  WHERE run_logs.events -> -1 ->> 'kind' = 'run.abandoned'
+  RETURNING id`;
+
 type Row = Record<string, unknown>;
 
 const toInvite = (r: Row): InviteCode => ({
@@ -302,6 +308,33 @@ export class AccountStore {
 
   // ---------- คะแนน / Log ของรอบ ----------
 
+  /**
+   * W5: บันทึก Log + คะแนนของรอบในธุรกรรมเดียว — null = รอบนี้มีผลแล้ว (ไม่บันทึกอะไรเลย)
+   * Log ฉบับ "ออกกลางคัน" ถูกแทนได้เหมือน insertRunLog
+   */
+  async saveRun(log: RunLogInput, score?: Omit<ScoreInput, 'playerId' | 'runId' | 'levelId'>): Promise<{ logId: number; scoreId: number | null } | null> {
+    const DUPLICATE = Symbol('duplicate');
+    try {
+      return await this.db.transaction(async (tx) => {
+        const l = await tx.query<{ id: number }>(UPSERT_RUN_LOG, [log.playerId, log.runId, log.levelId, JSON.stringify(log.events)]);
+        if (!l.rows[0]) return null;
+        if (!score) return { logId: l.rows[0].id, scoreId: null };
+        const int = (n: number) => Math.max(-2e9, Math.min(2e9, Math.round(n)));
+        const s = await tx.query<{ id: number }>(
+          `INSERT INTO scores (player_id, run_id, level_id, status, score, stars, biomass_g, sim_seconds, real_seconds, game_version, ranked, reject_reason)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT (player_id, run_id) DO NOTHING RETURNING id`,
+          [log.playerId, log.runId, log.levelId, score.status, int(score.score), score.stars, score.biomassG, int(score.simSeconds), int(score.realSeconds), score.gameVersion, score.ranked, score.rejectReason],
+        );
+        // มีคะแนนรอบนี้แล้ว → ยกเลิกทั้งธุรกรรม (Log ไม่ถูกแทน)
+        if (!s.rows[0]) throw DUPLICATE;
+        return { logId: l.rows[0].id, scoreId: s.rows[0].id };
+      });
+    } catch (err) {
+      if (err === DUPLICATE) return null;
+      throw err;
+    }
+  }
+
   /** null = ผู้เล่นคนนี้ส่งรอบนี้ไปแล้ว */
   async insertScore(s: ScoreInput): Promise<number | null> {
     try {
@@ -331,13 +364,7 @@ export class AccountStore {
    * W4: Log เดิมที่จบด้วย "ออกกลางคัน" (run.abandoned) ถูกแทนด้วยฉบับใหม่ได้ — เช่น Reload หน้าเว็บแล้วเล่นรอบเดิมต่อ (โหมดห้องเรียน)
    */
   async insertRunLog(log: RunLogInput): Promise<number | null> {
-    const { rows } = await this.db.query<{ id: number }>(
-      `INSERT INTO run_logs (player_id, run_id, level_id, events) VALUES ($1, $2, $3, $4)
-       ON CONFLICT (player_id, run_id) DO UPDATE SET events = EXCLUDED.events, level_id = EXCLUDED.level_id
-       WHERE run_logs.events -> -1 ->> 'kind' = 'run.abandoned'
-       RETURNING id`,
-      [log.playerId, log.runId, log.levelId, JSON.stringify(log.events)],
-    );
+    const { rows } = await this.db.query<{ id: number }>(UPSERT_RUN_LOG, [log.playerId, log.runId, log.levelId, JSON.stringify(log.events)]);
     return rows[0]?.id ?? null;
   }
 

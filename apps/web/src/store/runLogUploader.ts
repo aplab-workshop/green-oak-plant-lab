@@ -1,6 +1,7 @@
-import { RUN_ABANDONED_KIND, RUN_LOG_MAX_EVENTS, RUN_LOG_MAX_MESSAGE, type EventEntry, type RunLogEvent, type RunLogUpload } from '@gol/shared';
+import { RUN_ABANDONED_KIND, RUN_LOG_MAX_EVENTS, RUN_LOG_MAX_MESSAGE, type CareProgress, type EventEntry, type RunLogEvent, type RunLogUpload, type RunResult } from '@gol/shared';
 import { useLabStore } from './labStore';
 import { authFetch, useAuthStore } from './authStore';
+import { useConnectionStore } from './connectionStore';
 
 /**
  * Log การเล่นต่อรอบ (W4 / SPEC § 4.41) — เก็บ Event ของรอบที่ Web ได้รับ แล้วส่งขึ้น Server เมื่อ Login อยู่
@@ -13,6 +14,8 @@ interface Run {
   levelId: string;
   events: Map<number, EventEntry>;
   simTimeS: number;
+  /** ผลรอบล่าสุดจาก Snapshot (W5: ส่งพร้อม Log ตอนจบรอบ) */
+  game: CareProgress | null;
   started: boolean;
   ended: boolean;
   /** ส่งฉบับจบรอบแล้ว (ฉบับ "ออกกลางคัน" ส่งซ้ำ/แทนได้) */
@@ -78,7 +81,13 @@ function finishRun(r: Run, abandoned: boolean, keepalive = false): void {
     const simTimeS = Math.max(r.simTimeS, sorted[sorted.length - 1]!.simTimeS);
     events.push({ at: Date.now(), simTimeS, kind: RUN_ABANDONED_KIND, severity: 'warning', message: 'ออกกลางคัน — ยังไม่จบรอบ' });
   }
-  const body: RunLogUpload = { runId: uuid, levelId: r.levelId, events };
+  const g = r.game;
+  const result: RunResult | undefined =
+    !abandoned && g && (g.status === 'won' || g.status === 'lost')
+      ? { status: g.status, score: g.score, stars: g.stars, yieldG: g.yieldG ?? 0, elapsedS: g.elapsedS, testRun: g.testRun,
+          gameVersion: (useConnectionStore.getState().serverVersion ?? 'unknown').slice(0, 40) }
+      : undefined;
+  const body: RunLogUpload = { runId: uuid, levelId: r.levelId, events, ...(result ? { result } : {}) };
   const json = JSON.stringify(body);
   if (keepalive && json.length > KEEPALIVE_MAX_BYTES) return;
   if (!abandoned) r.done = true;
@@ -101,11 +110,12 @@ function track(): void {
     if (run) finishRun(run, !run.ended);
     if (endTimer) clearTimeout(endTimer);
     endTimer = null;
-    run = { labId, labRunId: snap.runId, levelId: 'free', events: new Map(), simTimeS: 0, started: false, ended: false, done: false };
+    run = { labId, labRunId: snap.runId, levelId: 'free', events: new Map(), simTimeS: 0, game: null, started: false, ended: false, done: false };
   }
   const r = run;
   r.levelId = snap.level?.id ?? 'free';
   r.simTimeS = snap.simTimeS;
+  r.game = snap.game;
   for (const e of events) if (e.runId === r.labRunId && r.events.size < RUN_LOG_MAX_EVENTS) r.events.set(e.id, e);
   if (snap.game.status !== 'ready') r.started = true;
   r.ended = snap.game.status === 'won' || snap.game.status === 'lost';

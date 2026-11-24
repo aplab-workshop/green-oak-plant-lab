@@ -1,4 +1,5 @@
 import { writeFile } from 'node:fs/promises';
+import { SCORE_REJECT_TEXT, type ScoreRejectReason } from '@gol/shared';
 
 /**
  * เครื่องมือครู (W3 / SPEC § 4.40) — `npm run admin -- <คำสั่ง>` เรียก Admin API ของ Server
@@ -22,6 +23,8 @@ export const HELP = `เครื่องมือครู — Green Oak Virtu
   player reset-password <ID> [--password <ใหม่>]             ตั้ง Password ใหม่ (ไม่ใส่ = สุ่ม)
   player delete <ID> --yes                                    ลบบัญชี + คะแนน + Log
   data delete --invite <รหัส> [--with-accounts] --yes         ลบคะแนน + Log ทั้งรหัส (เช่น จบเทอม)
+  score list [--invite <รหัส>] [--player <ID>] [--level <ด่าน>] [--unranked]
+                                                              ดูคะแนนทุกรอบ (--unranked = เฉพาะที่ไม่นับอันดับ)
   log export [--invite <รหัส>] [--player <ID>] [--level <ด่าน>] [--out <ไฟล์.csv>]
                                                               ดาวน์โหลด Log การเล่นเป็น CSV (เปิดด้วย Excel ได้)
   stats                                                       จำนวนข้อมูลและขนาดฐานข้อมูล
@@ -162,6 +165,25 @@ export async function runAdmin(argv: string[], target: AdminTarget, print: (line
           return 1;
         }
         print(`ลบของรหัส ${invite.toUpperCase()} แล้ว: ${what}`);
+        return 0;
+      }
+      case 'score list': {
+        const invite = flagText(args, 'invite');
+        const player = flagText(args, 'player');
+        const level = flagText(args, 'level');
+        const q = new URLSearchParams({ ...(invite ? { invite } : {}), ...(player ? { player } : {}), ...(level ? { level } : {}) }).toString();
+        type Row = { username: string; levelId: string; status: string; score: number; stars: number; biomassG: number; realSeconds: number; ranked: boolean; rejectReason: string | null; createdAt: string };
+        let list = await call<Row[]>('GET', `/api/admin/scores${q ? `?${q}` : ''}`);
+        if (args.flags.get('unranked') === true) list = list.filter((s) => !s.ranked);
+        if (list.length === 0) return print('ยังไม่มีคะแนน'), 0;
+        const reasons = (r: string | null) =>
+          (r ?? '').split(',').filter(Boolean).map((c) => SCORE_REJECT_TEXT[c as ScoreRejectReason] ?? c).join(', ');
+        const minSec = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+        table([
+          ['ID', 'ด่าน', 'ผล', 'คะแนน', 'ดาว', 'น้ำหนัก', 'เวลาจริง', 'ส่งเมื่อ', 'นับอันดับ'],
+          ...list.map((s) => [s.username, s.levelId, s.status === 'won' ? 'ชนะ' : 'แพ้', String(s.score), '⭐'.repeat(s.stars) || '-', `${s.biomassG.toFixed(1)} g`, minSec(s.realSeconds), when(s.createdAt), s.ranked ? 'นับ' : `ไม่นับ: ${reasons(s.rejectReason)}`]),
+        ]).forEach((l) => print(l));
+        print(`รวม ${list.length} รอบ (ไม่นับอันดับ ${list.filter((s) => !s.ranked).length})`);
         return 0;
       }
       case 'log export': {

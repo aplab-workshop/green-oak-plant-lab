@@ -31,12 +31,12 @@ declare module 'fastify' {
  */
 export async function buildApp(
   config: ServerConfig,
-  opts: { logger?: boolean; startLabs?: boolean } = {},
+  opts: { logger?: boolean; startLabs?: boolean; /** เวลาจริงของระบบบัญชี (เทสต์) */ now?: () => number } = {},
 ): Promise<FastifyInstance> {
   const app = Fastify({ logger: opts.logger ?? false, trustProxy: config.trustProxy ?? false });
   const labs = new LabManager(config);
   app.decorate('labs', labs);
-  app.decorate('accounts', await openAccounts(app, config));
+  app.decorate('accounts', await openAccounts(app, config, opts.now ?? Date.now));
 
   // Server ใช้ใน LAN เท่านั้น — CORS เปิดเพื่อให้ Vite dev server (คนละพอร์ต) เรียกได้
   await app.register(cors, { origin: true });
@@ -60,7 +60,7 @@ export async function buildApp(
 }
 
 /** W2 / SPEC § 4.39: เปิดฐานข้อมูลบัญชี + Migration เมื่อตั้ง DATABASE_URL */
-async function openAccounts(app: FastifyInstance, config: ServerConfig): Promise<Accounts | null> {
+async function openAccounts(app: FastifyInstance, config: ServerConfig, now: () => number): Promise<Accounts | null> {
   if (!config.databaseUrl) return null;
   const db = await openDatabase(config.databaseUrl);
   await migrate(db);
@@ -70,5 +70,5 @@ async function openAccounts(app: FastifyInstance, config: ServerConfig): Promise
     secret = randomBytes(32).toString('hex');
     app.log.warn('AUTH_SECRET ไม่ได้ตั้ง — สุ่มกุญแจชั่วคราว ผู้เล่นต้อง Login ใหม่หลังรีสตาร์ท Server');
   }
-  return { store: new AccountStore(db), secret, now: Date.now };
+  return { store: new AccountStore(db), secret, now };
 }

@@ -18,11 +18,52 @@ export const RunLogEvent = z.object({
 });
 export type RunLogEvent = z.infer<typeof RunLogEvent>;
 
+/** W5 (SPEC § 4.42): ผลรอบที่ส่งมาพร้อม Log เมื่อจบรอบ — Server ตรวจความสมเหตุสมผล */
+export const RunResult = z.object({
+  status: z.enum(['won', 'lost']),
+  score: z.number().finite(),
+  stars: z.number().int().min(0).max(3),
+  /** น้ำหนักรวมที่เก็บเกี่ยว (g) — แพ้ = 0 */
+  yieldG: z.number().finite().nonnegative(),
+  /** เวลาจำลองที่ใช้ (s) */
+  elapsedS: z.number().finite(),
+  /** เคยใช้ Mock PLC Auto ขณะเล่น */
+  testRun: z.boolean(),
+  gameVersion: z.string().max(40),
+});
+export type RunResult = z.infer<typeof RunResult>;
+
 export const RunLogUpload = z.object({
   /** UUID สุ่มฝั่ง Web ต่อรอบ */
   runId: z.string().regex(/^[0-9a-f-]{16,64}$/i),
   /** id ของด่าน หรือ "free" (Free Play) */
   levelId: z.string().min(1).max(32),
   events: z.array(RunLogEvent).min(1).max(RUN_LOG_MAX_EVENTS),
+  /** มีเมื่อจบรอบ (ชนะ/แพ้) — ออกกลางคันไม่มี */
+  result: RunResult.optional(),
 });
+
+/** เหตุผลที่ไม่นับอันดับ (W5) */
+export type ScoreRejectReason =
+  | 'not_level'
+  | 'test_run'
+  | 'score_range'
+  | 'result_mismatch'
+  | 'yield_below_target'
+  | 'time_over_limit'
+  | 'too_fast'
+  | 'log_incomplete'
+  | 'future_time';
+
+export const SCORE_REJECT_TEXT: Record<ScoreRejectReason, string> = {
+  not_level: 'ไม่ใช่ด่าน (Free Play)',
+  test_run: 'รอบทดสอบ (ใช้ PLC Auto)',
+  score_range: 'คะแนนเกินช่วง 0–1500',
+  result_mismatch: 'ดาว/คะแนนไม่ตรงกับผลรอบ',
+  yield_below_target: 'น้ำหนักไม่ถึงเป้า',
+  time_over_limit: 'เวลาจำลองเกินเวลาด่าน',
+  too_fast: 'เร็วกว่าความเร็วสูงสุด 1440x',
+  log_incomplete: 'Log ไม่ครบ/ไม่ตรง',
+  future_time: 'เวลาใน Log ล้ำเวลา Server',
+};
 export type RunLogUpload = z.infer<typeof RunLogUpload>;
