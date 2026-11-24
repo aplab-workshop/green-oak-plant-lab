@@ -19,12 +19,12 @@ afterEach(async () => {
 });
 
 describe('cloud mode (W7a)', () => {
-  it('reads PORT from the cloud when SERVER_PORT is not set, and CORS_ORIGINS as a list', () => {
+  it('ignores PORT (dev tools set it for the web page) and reads CORS_ORIGINS as a list', () => {
     delete process.env.SERVER_PORT;
-    process.env.PORT = '10000';
+    process.env.PORT = '5173';
     process.env.CORS_ORIGINS = ` ${PAGES}/ , http://localhost:4174 `;
     const c = loadConfig();
-    expect(c.port).toBe(10000);
+    expect(c.port).toBe(3001);
     expect(c.corsOrigins).toEqual([PAGES, 'http://localhost:4174']);
     process.env.SERVER_PORT = '3005';
     expect(loadConfig().port).toBe(3005);

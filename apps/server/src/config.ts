@@ -59,8 +59,9 @@ export interface ServerConfig {
 export function loadConfig(): ServerConfig {
   return {
     host: process.env.SERVER_HOST ?? '127.0.0.1',
-    // W7: Cloud (Render) กำหนดพอร์ตผ่าน PORT
-    port: num('SERVER_PORT', num('PORT', 3001)),
+    // ไม่อ่าน PORT: เครื่องมือ Dev (เช่น preview) ตั้ง PORT ของหน้าเว็บให้ทั้ง npm run dev → Server ชนพอร์ต Vite
+    // Render ตั้ง SERVER_PORT=10000 (= PORT ค่าเริ่มของ Render) ใน render.yaml แทน
+    port: num('SERVER_PORT', 3001),
     heartbeatMs: num('WS_HEARTBEAT_MS', 1000),
     labCount: num('LAB_COUNT', 1),
     tickMs: num('SIM_TICK_MS', 100),

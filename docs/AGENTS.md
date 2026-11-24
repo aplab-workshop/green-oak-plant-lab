@@ -276,3 +276,6 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 
 ### สถานะเพิ่มเติม 2026-11-24 — W8 หน้าครูบนเว็บ
 - เสร็จและ commit (ยังไม่ push): `?admin` บนหน้าเว็บเดิม (Pages/ห้องเรียน) ใส่ ADMIN_KEY → แท็บ รหัสเชิญ/ผู้เล่น/คะแนน/Log CSV/ระบบ (SPEC § 4.45); Server CORS เพิ่ม PATCH/DELETE — **ต้อง push เพื่อให้ Render + Pages ได้ทั้งคู่**; tests 396/396
+
+### สถานะเพิ่มเติม 2026-11-24 — W8b ลิงก์หน้าครู + แก้พอร์ต
+- เสร็จและ commit: ลิงก์ "สำหรับครู" บนหน้า Home (แสดงเมื่อบัญชีเปิด) → `?admin` แท็บใหม่; **Server ไม่อ่าน `PORT` แล้ว** (เครื่องมือ Dev ตั้ง PORT=5173 ทำให้ Server ชน Vite) — Render ใช้ `SERVER_PORT=10000` ใน render.yaml; ต้อง push แล้วเช็กว่า Render Deploy ผ่าน (health ok)

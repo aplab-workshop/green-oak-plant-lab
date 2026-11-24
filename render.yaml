@@ -16,6 +16,9 @@ services:
         value: "22"
       - key: SERVER_HOST
         value: 0.0.0.0
+      # = PORT ค่าเริ่มของ Render (Server ไม่อ่าน PORT เพราะเครื่องมือ Dev ใช้ชื่อนี้กับหน้าเว็บ)
+      - key: SERVER_PORT
+        value: "10000"
       # ไม่รัน Simulation/Lab บน Server ฟรี
       - key: LAB_COUNT
         value: "0"

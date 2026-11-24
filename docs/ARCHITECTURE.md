@@ -969,7 +969,7 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 
 ### 11.57 Implementation Notes (W7a — Cloud Prep)
 
-- `config.ts`: `port` = `SERVER_PORT` → `PORT` → 3001; `corsOrigins` จาก `CORS_ORIGINS` (ตัด `/` ท้าย); `app.ts` ส่ง array ให้ `@fastify/cors` (ว่าง = `origin: true` แบบเดิม)
+- `config.ts`: `port` = `SERVER_PORT` → 3001 (W8b: เลิกอ่าน `PORT` — เครื่องมือ Dev ตั้ง PORT ของ Vite; Render ใช้ `SERVER_PORT=10000` ใน render.yaml); `corsOrigins` จาก `CORS_ORIGINS` (ตัด `/` ท้าย); `app.ts` ส่ง array ให้ `@fastify/cors` (ว่าง = `origin: true` แบบเดิม)
 - Cloud ใช้ `LAB_COUNT=0` — LabManager ไม่มี Lab, Timer เดินบน Map ว่าง (เบามาก); `WEB_DIST` ไม่มีโฟลเดอร์ = ไม่เสิร์ฟหน้าเว็บ
 - `render.yaml` Blueprint (free, singapore, `npm ci` → `npm start`, healthCheck `/api/health`, `AUTH_SECRET` generateValue, `DATABASE_URL`/`ADMIN_KEY` `sync: false`)
 - `.github/workflows/pages.yml`: `VITE_ACCOUNTS_API: ${{ vars.ACCOUNTS_API_URL }}` ตอน `build:demo` — Vite อ่าน `VITE_*` จาก process.env

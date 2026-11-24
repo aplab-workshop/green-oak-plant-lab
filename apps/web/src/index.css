@@ -296,3 +296,11 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
 @media (max-width: 699px) {
   .home-account { top: auto; bottom: 16px; right: 50%; transform: translateX(50%); }
 }
+
+/* W8b (SPEC § 4.45): ลิงก์หน้าครูบนหน้า Home */
+.home-admin-link { position: absolute; left: 18px; bottom: 14px; z-index: 2; border-radius: 999px; background: #ffffffcc; padding: 5px 12px; font-size: 13px; font-weight: 600; color: #475569; box-shadow: 0 4px 12px #17783f1f; }
+.home-admin-link:hover { background: white; color: #17783f; }
+.home-admin-link:focus-visible { outline: 3px solid #86efac; outline-offset: 2px; }
+@media (max-width: 699px) {
+  .home-admin-link { left: 12px; bottom: 64px; }
+}

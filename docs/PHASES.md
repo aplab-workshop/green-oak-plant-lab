@@ -623,6 +623,11 @@ tags: [green-oak, roadmap]
 - **เกณฑ์ผ่าน:** ทำทุกอย่างของ CLI ได้จากหน้าเว็บ; Key ผิด/ไม่ใส่ใช้ไม่ได้; ปิดแท็บแล้วต้องใส่ Key ใหม่; ไม่มี Console error
 - **ผลตรวจ:** AC-76 ผ่าน (SPEC § 4.45); `apps/web/src/admin/` (โหลดแยกแบบ lazy ไม่ต่อ Lab); Server CORS เพิ่ม PATCH/DELETE + expose `x-run-count`; `test/cloud.test.ts` +1 ข้อ; tests 396/396, typecheck, build และ build:demo ผ่าน; Browser จำลอง Pages ↔ Server ข้ามโดเมน (4174 ↔ 3002): Key ผิดขึ้น "Admin key ไม่ถูกต้อง", Key ถูกเข้าได้, สร้างรหัส (หมายเหตุ ม.5/1), ปิดการสมัคร (PATCH), คะแนน, ดาวน์โหลด CSV (BOM + x-run-count, ทดสอบโดยดักลิงก์ไม่บันทึกไฟล์), ตรวจจำนวนก่อนลบ (DELETE dryRun), รีเซ็ต Password, ออกจากระบบแล้ว Key หายจาก sessionStorage และไม่อยู่ใน localStorage; หน้าเกมปกติยังเปิดได้
 
+### W8b — ทางเข้าหน้าครูจากหน้าเกม ✅ (ผู้ใช้สั่ง 2026-11-24)
+- [x] หน้า Home ลิงก์ "🧑‍🏫 สำหรับครู" มุมซ้ายล่าง → `?admin` แท็บใหม่ แสดงเมื่อระบบบัญชีเปิด (SPEC § 4.45)
+- [x] **แก้ Bug จาก W7a:** Server อ่าน `PORT` → เครื่องมือ Dev ตั้ง `PORT=5173` ให้ทั้ง `npm run dev` → Server ไปฟัง 5173 แทน 3001 (หน้า Dev เรียก API ได้ 502) — เลิกอ่าน `PORT`, `render.yaml` ตั้ง `SERVER_PORT=10000` แทน
+- **ผลตรวจ:** AC-77 ผ่าน; tests 396/396, typecheck, build และ build:demo ผ่าน; Browser: Server บัญชีเปิด (3002) เห็นลิงก์ `href=/?admin target=_blank`; Dev (บัญชีปิด) ไม่เห็นลิงก์ และ Dev Server กลับมาฟัง 3001 เรียก API ได้
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

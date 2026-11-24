@@ -75,6 +75,12 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
       </div>
       {DEMO && <p className="home-note">🧪 Demo — Simulation ในเบราว์เซอร์ (Mock PLC)</p>}
     </section>
+    {/* W8b: ทางเข้าหน้าครู (แท็บใหม่) — แสดงเมื่อระบบบัญชีเปิด; เข้าใช้ได้ต้องมี ADMIN_KEY */}
+    {status !== 'off' && status !== 'checking' && (
+      <a className="home-admin-link" href={`${window.location.pathname}?admin`} target="_blank" rel="noopener">
+        🧑‍🏫 สำหรับครู
+      </a>
+    )}
     {guide && <DetailDialog title="📖 คู่มือการปลูก" close={() => setGuide(false)}>
       <GuidePanel initialTab="routine" />
     </DetailDialog>}

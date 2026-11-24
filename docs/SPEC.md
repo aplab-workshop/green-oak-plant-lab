@@ -669,7 +669,7 @@ Briefing, Loss story และคู่มือ 📖 ใช้ของเด�
 แบ่งเป็น **W7a เตรียม (ไม่ต้องใช้บัญชี Cloud)** และ **W7b Deploy จริง (ผู้ใช้สมัคร/ตั้งค่าบัญชีเอง + อนุญาต push)**
 
 - **Server บน Cloud = บัญชีอย่างเดียว:** `LAB_COUNT=0` (ไม่รัน Simulation/Lab บน Server ฟรี 0.1 CPU — เกมรันในเบราว์เซอร์) และไม่เสิร์ฟหน้าเว็บ (หน้าเว็บอยู่ GitHub Pages)
-- **Port:** ใช้ `SERVER_PORT` หรือ `PORT` ที่ Cloud กำหนด (Render ตั้ง `PORT` ให้) — Host `0.0.0.0`
+- **Port:** ใช้ `SERVER_PORT` เท่านั้น — `render.yaml` ตั้ง `10000` (= `PORT` ค่าเริ่มของ Render); ไม่อ่าน `PORT` เพราะเครื่องมือ Dev ตั้ง `PORT` ของหน้าเว็บให้ทั้ง `npm run dev` แล้ว Server ไปชนพอร์ต Vite (แก้ 2026-11-24) — Host `0.0.0.0`
 - **CORS:** `CORS_ORIGINS` (คั่นด้วย `,`) = รายชื่อโดเมนที่เรียก API ได้ เช่น `https://aplab-workshop.github.io`; เว้นว่าง = เปิดทุกโดเมนแบบเดิม (LAN/Dev) — โดเมนอื่นไม่ได้รับ Header CORS (เบราว์เซอร์บล็อก)
 - **`render.yaml` (Blueprint):** Web Service ฟรี Region Singapore, `npm ci` → `npm start`, Health check `/api/health`, Env: `NODE_VERSION`, `SERVER_HOST=0.0.0.0`, `LAB_COUNT=0`, `TRUST_PROXY=1`, `CORS_ORIGINS`, `AUTH_SECRET` (Render สุ่มให้), `DATABASE_URL` และ `ADMIN_KEY` (ผู้ใช้กรอกเองใน Dashboard — ไม่อยู่ใน repo)
 - **GitHub Pages:** Workflow ส่ง Repository variable `ACCOUNTS_API_URL` เป็น `VITE_ACCOUNTS_API` ตอน build Demo — ไม่ตั้ง = Demo เล่นได้เลยไม่ต้อง Login (เหมือนเดิม)
@@ -683,7 +683,8 @@ Briefing, Loss story และคู่มือ 📖 ใช้ของเด�
 
 หน้าเว็บสำหรับครูแทนการพิมพ์ `npm run admin` (CLI ยังใช้คู่กันได้) — ใช้ Admin API เดิม (§ 4.40–4.43) ทั้งหมด
 
-- **เปิดที่ `?admin`** ของหน้าเว็บเดิม เช่น `https://aplab-workshop.github.io/green-oak-plant-lab/?admin` (หรือ `http://<IP>:3001/?admin` ในห้องเรียน) — เป็นหน้าแยก ไม่โหลดเกม/ฉาก 3D และไม่มีลิงก์จากหน้าเกม
+- **เปิดที่ `?admin`** ของหน้าเว็บเดิม เช่น `https://aplab-workshop.github.io/green-oak-plant-lab/?admin` (หรือ `http://<IP>:3001/?admin` ในห้องเรียน) — เป็นหน้าแยก ไม่โหลดเกม/ฉาก 3D
+- **ทางเข้าจากหน้าเกม (W8b, ผู้ใช้สั่ง 2026-11-24):** หน้า Home มีลิงก์เล็ก "🧑‍🏫 สำหรับครู" มุมซ้ายล่าง เปิด `?admin` ในแท็บใหม่ (เกมในแท็บเดิมไม่หาย) — แสดงเฉพาะเมื่อระบบบัญชีเปิด; นักเรียนกดได้แต่เข้าไม่ได้ถ้าไม่มี Key
 - **เข้าใช้ด้วย `ADMIN_KEY`:** ตรวจกับ Server ทันที (ผิด = ข้อความไทย, ผิด 10 ครั้ง = พักตาม § 4.40); เก็บใน `sessionStorage` เท่านั้น (ปิดแท็บ = ต้องใส่ใหม่), ไม่ใส่ใน URL/localStorage, ไม่แสดงบนจอ; ปุ่ม "ออกจากระบบ"
 - ระบบบัญชีปิด (Demo ไม่ได้ตั้ง `VITE_ACCOUNTS_API`/Server ไม่มี DATABASE_URL) → บอกว่าใช้หน้าครูไม่ได้
 - **แท็บ:**
@@ -864,6 +865,7 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 ### 8.10 P36–P37 — วางระบบด่านใหม่
 
 - [x] AC-50 🧪 **P36 / SPEC § 4.19:** แดดตามเวลา (0 ก่อน 06:00/หลัง 19:00, สูงสุด 300 ตอน 13:00) รวมกับ LED ใน PPFD ต้น/Sensor/DLI; แดดเพิ่มความร้อนและพัดลมลดได้; ไฟดับเหลือแดด; สูตรเติม LED ให้ PPFD ~300 ผ่านด่าน 1–4 ⭐⭐⭐ และ Ladder Auto ปรับ LED ตาม D102; tests/typecheck/build ผ่าน
+- [x] AC-77 **W8b / SPEC § 4.45:** หน้า Home มีลิงก์ "สำหรับครู" เมื่อระบบบัญชีเปิด (ระบบบัญชีปิดไม่แสดง) → เปิดหน้าครูในแท็บใหม่
 - [x] AC-76 **W8 / SPEC § 4.45:** `?admin` เข้าด้วย Key ถูก, Key ผิดเข้าไม่ได้, ปิดแท็บต้องใส่ใหม่; ทำได้ครบ: สร้าง/ปิด/เปิดรหัส, ดู/รีเซ็ต/ลบผู้เล่น, ดูคะแนน+เหตุผล, โหลด CSV, ดูขนาด/ลบข้อมูลรายรหัส; ใช้ข้ามโดเมน (Pages → Server) ได้รวม PATCH/DELETE; ไม่มี Console error
 - [x] AC-75b **W7b / SPEC § 4.44:** ครบวงจรบนเน็ตจริง: ครูสร้างรหัส → นักเรียนสมัครบน Pages → เล่น → คะแนนขึ้นตารางอันดับ → ครูโหลด CSV
 - [x] AC-75a **W7a / SPEC § 4.44:** Server โหมด Cloud (LAB_COUNT=0, PORT, CORS_ORIGINS) ทำงาน — โดเมนที่อนุญาตได้ Header CORS, โดเมนอื่นไม่ได้; Demo build ที่ชี้ API ข้ามโดเมนสมัคร/Login/ส่ง Log ได้; render.yaml + workflow + DEPLOY.md ครบ; สแกนไม่พบความลับใน repo
