@@ -992,3 +992,7 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `authStore`: สถานะใหม่ `guest` (`playAsGuest()`) — ไม่เขียน localStorage จึงหายเมื่อรีเฟรช; Server ไม่ถูกเรียกเลย
 - `runLogUploader`: ตอนรอบเปลี่ยนเป็นเริ่มเล่น บันทึก `anonymous = status !== 'signedIn'` → รอบนั้นไม่ส่งตลอด (กัน Login กลางรอบแล้วส่งรอบ Guest)
 - UI: `AuthDialog` ปุ่ม `.auth-guest-btn`, `HomeScreen` มุมบัญชีแบบ Guest + ปุ่มเข้าสู่ระบบ, `App` ป้าย `.game-user-guest`, `SubmitStatus` ข้อความ Guest
+
+### 11.61 Implementation Notes (P57 — Free Play Closed)
+
+- `game/LevelScreens.tsx` การ์ด Free Play เป็น `<button disabled>` (ใช้สไตล์ `.level-card:disabled` เดิมของด่านที่ล็อก) — ไม่ลบโค้ด Free Play ฝั่ง Server/Sim; เปิดใหม่ = คืน `onClick={() => void choose('free')}`

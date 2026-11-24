@@ -639,6 +639,11 @@ tags: [green-oak, roadmap]
 - [x] รอบที่เริ่มตอน Guest ไม่ถูกส่งแม้ Login ระหว่างรอบ (`anonymous` ใน runLogUploader)
 - **ผลตรวจ:** AC-79 ผ่าน; tests 396/396, typecheck, build และ build:demo ผ่าน; Browser (Server บัญชีพอร์ต 3002): Guest เล่น L1 ที่ 1440x จนแพ้ → ไม่มีคำขอ `/api/runs`, จำนวนบน Server ไม่เปลี่ยน; เริ่มรอบเป็น Guest → Login กลางรอบ → จบรอบ → ไม่ถูกส่ง; รอบถัดไปหลัง Login ถูกบันทึก (`student_p55` "นับ"); ไม่มี Console error
 
+### P57 — ปิด Free Play ไว้ก่อน ✅ (ผู้ใช้สั่ง 2026-11-24)
+- [x] การ์ด Free Play ในหน้าเลือกด่านกดไม่ได้ + ป้าย "🚧 เร็ว ๆ นี้ — ยังไม่เปิดให้เล่น" (SPEC § 4.48); คำสั่ง `selectLevel: 'free'` ฝั่ง Server ยังอยู่
+- **ผลตรวจ:** AC-80 ผ่าน; tests 396/396, typecheck, build และ build:demo ผ่าน; Browser Dev: การ์ดด่าน 1–4 กดได้ (disabled=false), Free Play disabled=true จางลงพร้อมป้ายเร็ว ๆ นี้, ไม่มี Console error
+- เปิดใหม่เมื่อเริ่มพัฒนา Free Play จริง (เกี่ยวกับ M3 PLC จริง)
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

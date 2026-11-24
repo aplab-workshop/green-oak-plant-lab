@@ -14,7 +14,7 @@ const DEVICE_ICON: Record<PlayerDevice, string> = {
   led: '💡', refillPump: '🚰', nutrient: '🧪', fan: '🌀', humidifier: '🌫️', airPump: '🫧', phDown: '⚗️',
 };
 
-/** หน้าเลือกด่าน: การ์ด 4 ใบ + Free Play */
+/** หน้าเลือกด่าน: การ์ด 4 ใบ + Free Play (P57: ยังกดไม่ได้) */
 export function LevelSelect({ onDone }: { onDone: () => void }) {
   const levels = useLabStore((s) => s.snapshot?.levels);
   const current = useLabStore((s) => s.snapshot?.level?.id ?? 'free');
@@ -55,10 +55,11 @@ export function LevelSelect({ onDone }: { onDone: () => void }) {
           </button>
         );
       })}
-      <button type="button" onClick={() => void choose('free')} className={`level-card sm:col-span-2 ${current === 'free' ? 'level-current' : ''}`}>
+      {/* P57 (SPEC § 4.48): Free Play ยังไม่เปิด — กดไม่ได้ กันผู้เล่นเข้าใจผิด */}
+      <button type="button" disabled className={`level-card sm:col-span-2 ${current === 'free' ? 'level-current' : ''}`}>
         <span className="text-2xl">🧑‍🔬</span>
-        <span className="block text-base font-bold text-slate-800">Free Play — ห้องแล็บฝึก PLC</span>
-        <span className="block text-xs text-slate-600">ไม่มีเวลาจำกัด ใช้แผงเดิมครบ เหมาะกับทดสอบ Ladder และ Scenario</span>
+        <span className="block text-base font-bold text-slate-800">Free Play — ฝึกเขียน Ladder / ทดลองอิสระ</span>
+        <span className="block text-xs font-semibold text-amber-700">🚧 เร็ว ๆ นี้ — ยังไม่เปิดให้เล่น</span>
       </button>
     </div>
   );
