@@ -263,3 +263,9 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 ### สถานะเพิ่มเติม 2026-11-24 — W7a เตรียม Deploy
 - เสร็จและ commit (ยังไม่ push): CORS_ORIGINS/PORT/LAB_COUNT=0, `render.yaml`, Pages ส่ง `vars.ACCOUNTS_API_URL`, คู่มือ `docs/DEPLOY.md` (SPEC § 4.44); tests 395/395; จำลอง Pages ↔ Server ข้ามโดเมนในเครื่องผ่าน
 - W7b ต้องให้ผู้ใช้: สมัคร Neon + Render, กรอก `DATABASE_URL`/`ADMIN_KEY` ใน Render, ตั้ง GitHub variable `ACCOUNTS_API_URL`, **อนุญาต push** (render.yaml ต้องอยู่บน GitHub ก่อน Render อ่านได้) — อย่าขอ/รับความลับในแชต
+
+### สถานะเพิ่มเติม 2026-11-24 — W7b กำลังทำ + แผน W8
+- Push แล้ว (906b253); Render `https://green-oak-accounts.onrender.com` ทำงาน (health ok, accounts enabled, CORS เฉพาะ Pages); GitHub variable `ACCOUNTS_API_URL` ตั้งแล้ว และหน้า Login บน Pages ขึ้นแล้ว
+- เหลือ W7b: ผู้ใช้สร้าง `.env` + รหัสเชิญ → ทดสอบครบวงจร; คู่มือ DEPLOY ต้องเพิ่ม: ลบ `&channel_binding=require` จาก Neon, ปุ่ม Run workflow อยู่แถบฟ้าในแท็บ Actions
+- W8 หน้าครูบนเว็บ (แผนใน PHASES) — ผู้ใช้สั่งเพิ่ม เริ่มหลัง W7b ผ่าน
+
