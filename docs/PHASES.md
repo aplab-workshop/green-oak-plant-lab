@@ -538,6 +538,11 @@ tags: [green-oak, roadmap]
 - [x] `Controls home`: หมุนกล้องรอบ Target เองใน `useFrame` ตาม dt (1 รอบ/50 วินาที) — ไม่ใช้ `autoRotate` ของ OrbitControls เพราะหมุนต่อเฟรม (Browser ทดสอบได้ 12 fps หมุนช้า 5 เท่า) และ drei เรียก `update()` เฉพาะตอน `enabled` จึงเปิด Controls ไว้แต่ปิด Rotate/Zoom/Pan ด้วยมือ; `Ambience home` แสงกลางวันเต็ม; `prefers-reduced-motion` ไม่หมุน
 - **ผลตรวจ:** AC-67 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser 1280×760: ฉากสว่างแบบกลางวัน, 6 วินาทีหมุน ~40°, มุมต่าง ๆ โรงเรือนอยู่ฝั่งขวาไม่บังเมนู (View offset ทำงานต่อระหว่างหมุน), Play → HUD กล้องนิ่งมุมปกติและ Day/Night ตามเวลาจำลอง; ไม่มี Console error ใหม่
 
+### P54 — หน้า Home ฉากนิ่ง + Mascot ทักทาย (แทนกล้องหมุน) ✅
+- [x] ผู้ใช้ (2026-11-24): กล้องหมุนกระตุก ไม่เหมือนเกม ให้เสนอหน้าแรกที่เหมาะ → เสนอ 3 แบบ ผู้ใช้เลือก "ฉากนิ่ง + Mascot ทักทาย" → SPEC § 4.37 + AC-68
+- [x] ลบการหมุนกล้องใน `Scene3D` (`Controls home` → `enabled={!home}`), คง `Ambience home` แสงกลางวัน; `public/mascot/wave.png` (331×520 ตัดพื้นขาว/ช่องอะตอม/เงาพื้นจาก `6-edited-v2.png`); `HomeScreen` แถว `.home-actions` ปุ่ม + Mascot; CSS keyframes เด้ง −12 px + squash เล็กน้อย 2.4 s และเงาพื้นหดตาม; reduced-motion นิ่ง; จอ < 700 px ซ่อน Mascot
+- **ผลตรวจ:** AC-68 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser 1280×760: ฉากนิ่ง แสงกลางวัน โรงเรือนขวา, Mascot โบกมือข้างปุ่ม เด้ง 0 → −12 → 0 px ต่อเนื่อง, ไม่มี Console error; 375×812 Mascot ซ่อน ปุ่มกว้าง 320 px
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |

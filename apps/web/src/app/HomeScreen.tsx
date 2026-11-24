@@ -19,13 +19,20 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
         <h1>GREEN OAK<br />VIRTUAL PLANT LAB</h1>
         <p>ดูแลสวนของคุณให้เติบโต</p>
       </header>
-      <div className="home-buttons">
-        <button type="button" autoFocus className="home-btn home-btn-primary" onClick={onPlay}>
-          <Play size={26} fill="currentColor" /> Play
-        </button>
-        <button type="button" className="home-btn home-btn-secondary" onClick={() => setGuide(true)}>
-          <BookOpen size={24} /> คู่มือการปลูก
-        </button>
+      <div className="home-actions">
+        <div className="home-buttons">
+          <button type="button" autoFocus className="home-btn home-btn-primary" onClick={onPlay}>
+            <Play size={26} fill="currentColor" /> Play
+          </button>
+          <button type="button" className="home-btn home-btn-secondary" onClick={() => setGuide(true)}>
+            <BookOpen size={24} /> คู่มือการปลูก
+          </button>
+        </div>
+        {/* P54: Mascot โบกมือ เด้งแบบ Idle (DOM + CSS ไม่ใช่วัตถุในฉาก 3D) */}
+        <figure className="home-mascot" aria-hidden="true">
+          <img src={`${import.meta.env.BASE_URL}mascot/wave.png`} alt="" draggable={false} />
+          <span className="home-mascot-shadow" />
+        </figure>
       </div>
       {DEMO && <p className="home-note">🧪 Demo — Simulation ในเบราว์เซอร์ (Mock PLC)</p>}
     </section>

@@ -248,3 +248,25 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
   .home-buttons { width: min(320px, 100%); }
   .home-btn { font-size: 22px; padding: 13px 20px; }
 }
+
+/* ===== P54: Mascot ทักทายบนหน้า Home (SPEC § 4.37) ===== */
+.home-actions { display: flex; align-items: flex-end; gap: 28px; }
+.home-mascot { position: relative; width: 150px; flex: none; margin: 0 0 -6px; }
+.home-mascot img { display: block; width: 100%; transform-origin: 50% 100%; animation: home-mascot-bob 2.4s ease-in-out infinite; filter: drop-shadow(0 6px 10px #17783f2e); user-select: none; }
+.home-mascot-shadow { position: absolute; left: 50%; bottom: -4px; width: 96px; height: 16px; margin-left: -48px; border-radius: 50%; background: #1f6b3d33; animation: home-mascot-shadow 2.4s ease-in-out infinite; }
+@keyframes home-mascot-bob {
+  0%, 100% { transform: translateY(0) scale(1.02, 0.98); }
+  45% { transform: translateY(-12px) scale(0.99, 1.01); }
+  55% { transform: translateY(-12px) scale(0.99, 1.01); }
+}
+@keyframes home-mascot-shadow {
+  0%, 100% { transform: scaleX(1); opacity: 1; }
+  50% { transform: scaleX(0.78); opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-mascot img, .home-mascot-shadow { animation: none; }
+}
+@media (max-width: 699px) {
+  .home-actions { width: min(320px, 100%); }
+  .home-mascot { display: none; }
+}

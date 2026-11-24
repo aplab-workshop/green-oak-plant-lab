@@ -84,15 +84,7 @@ function HomeViewOffset() {
   return null;
 }
 
-/** P53: ผู้ใช้ปิด Animation ในระบบ → ไม่หมุนกล้องหน้า Home */
-const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-/** หน้า Home หมุนรอบโรงเรือน 1 รอบต่อ 50 วินาทีจริง (rad/s) — ตามเวลา ไม่ตามจำนวนเฟรม */
-const HOME_ORBIT_RAD_S = (2 * Math.PI) / 50;
-
-/**
- * home = หน้า Home: ผู้ใช้หมุน/ซูมไม่ได้ และกล้องหมุนรอบโรงเรือนช้า ๆ ตามเวลาจริง
- * — ข้อยกเว้นของกฎ "ภาพขับด้วย Server" เฉพาะกล้องหน้า Home (P53 / SPEC § 4.36) ไม่ใช่ข้อมูล Simulation
- */
+/** home = หน้า Home: กล้องนิ่ง ผู้ใช้หมุน/ซูม/เลื่อนไม่ได้ (P54 / SPEC § 4.37 — เลิกหมุนกล้องของ P53) */
 function Controls({ home = false }: { home?: boolean }) {
   const ref = useRef<OrbitControlsImpl>(null);
   const seq = useSceneStore((s) => s.cameraResetSeq);
@@ -116,24 +108,13 @@ function Controls({ home = false }: { home?: boolean }) {
     camera.position.set(x + 0.18 * size, y + 0.14 * size, z + 0.22 * size);
     ref.current.update();
   }, [focus, camera]);
-  // P53: autoRotate ของ OrbitControls หมุนต่อเฟรม (เครื่องช้า = หมุนช้า) จึงหมุนเองตาม dt แทน
-  useFrame((_, dt) => {
-    if (!home || !ref.current || reducedMotion()) return;
-    const t = ref.current.target;
-    const a = HOME_ORBIT_RAD_S * Math.min(dt, 0.1);
-    const x = camera.position.x - t.x, z = camera.position.z - t.z;
-    camera.position.x = t.x + x * Math.cos(a) - z * Math.sin(a);
-    camera.position.z = t.z + x * Math.sin(a) + z * Math.cos(a);
-  });
   return (
     <OrbitControls
       ref={ref}
       makeDefault
-      // หน้า Home: ปิดการควบคุมด้วยมือ (กล้องหมุนเองใน useFrame ด้านบน)
-      enableRotate={!home}
-      enableZoom={!home}
+      enabled={!home}
       target={TARGET}
-      enablePan={!home}
+      enablePan
       enableDamping
       minDistance={0.25}
       maxDistance={5}

@@ -910,3 +910,8 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 
 - **ข้อยกเว้นกฎ Animation (SPEC § 4.36):** กล้องหน้า Home หมุนตามเวลาจริง — เป็นการนำเสนอ ไม่ใช่ข้อมูล Simulation; ทุกอย่างในฉากยังขับด้วย Snapshot; HUD ไม่มี Animation กล้องที่เล่นเอง
 - หมุนด้วยสูตรหมุนรอบแกน Y ผ่าน Target ใน `useFrame` (`dt` clamp 0.1 s) ให้ความเร็วเท่ากันทุกเฟรมเรต; View offset (P52) อยู่ใน Screen space จึงคงโรงเรือนไว้ฝั่งขวาทุกมุม
+
+### 11.50 Implementation Notes (P54 — Still Home + Waving Mascot)
+
+- กล้องหมุน (P53) กระตุกเพราะฉากเต็มความละเอียดวาดใหม่ทุกเฟรม → เลิกหมุน; หน้า Home ฉาก 3D นิ่ง (วาดใหม่เฉพาะเมื่อ Snapshot เปลี่ยน) ส่วนความ "มีชีวิต" ย้ายไปที่ Mascot แบบ DOM + CSS keyframes (Compositor ทำงาน transform อย่างเดียว ลื่นแม้ Main thread/GPU ยุ่งกับ Canvas)
+- กฎ "ภาพ 3D ขับด้วย Server" กลับมาเต็มรูปแบบ — ไม่มีข้อยกเว้นแล้ว (Mascot บนหน้า Home ไม่ใช่วัตถุในฉาก 3D)
