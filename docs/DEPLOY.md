@@ -22,7 +22,8 @@ Render (Server ฟรี, Singapore) ──► Neon (Postgres ฟรี, Singapo
 2. **Create project** → ชื่อ `green-oak` → Region **AWS Asia Pacific (Singapore)**
 3. หน้า Dashboard → **Connect** → คัดลอก **Connection string** หน้าตาประมาณ
    `postgresql://<user>:<password>@ep-xxxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require`
-4. เก็บไว้เป็นความลับ (ใช้ในข้อ 3) — **ห้ามใส่ใน repo / ห้ามส่งในแชตกลุ่ม**
+4. **ลบ `&channel_binding=require` ท้ายข้อความออก** ให้ลงท้ายแค่ `?sslmode=require` (ไลบรารี `pg` อาจไม่รองรับ) — Connection pooling เปิดไว้ได้
+5. เก็บไว้เป็นความลับ (ใช้ในข้อ 3) — **ห้ามใส่ใน repo / ห้ามส่งในแชตกลุ่ม**
 
 ตารางจะถูกสร้างเองตอน Server เริ่มครั้งแรก (Migration อัตโนมัติ)
 
@@ -52,14 +53,14 @@ node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"
 1. Repo → **Settings → Secrets and variables → Actions → Variables → New repository variable**
    - Name: `ACCOUNTS_API_URL`
    - Value: URL ของ Render (ข้อ 3.4) **ไม่มี / ท้าย**
-2. **Actions → Deploy demo to GitHub Pages → Run workflow** (หรือ push main ครั้งถัดไป)
+2. แท็บ **Actions** → แถบซ้ายเลือก **Deploy demo to GitHub Pages** → แถบฟ้าด้านขวา "This workflow has a workflow_dispatch event trigger" กด **Run workflow ▾** → Branch `main` → **Run workflow** (หรือ push main ครั้งถัดไป)
 3. เปิด https://aplab-workshop.github.io/green-oak-plant-lab/ → กด Play ต้องขึ้นหน้าต่าง "เข้าสู่ระบบ / สมัคร"
 
 ลบตัวแปร `ACCOUNTS_API_URL` แล้ว Run workflow ใหม่ = กลับเป็น Demo เล่นได้เลยไม่ต้อง Login
 
 ## 5. เครื่องครู — คำสั่ง `npm run admin`
 
-สร้างไฟล์ `.env` ที่โฟลเดอร์โปรเจกต์ (ไฟล์นี้ไม่ถูก commit):
+สร้างไฟล์ `.env` ที่โฟลเดอร์โปรเจกต์ (ไฟล์นี้ไม่ถูก commit) — เช่น `notepad .env` แล้ว **กด Ctrl+S** (ไฟล์ว่าง = ขึ้น "ยังไม่ได้ตั้ง ADMIN_KEY"):
 
 ```
 GOL_API_URL=https://green-oak-accounts.onrender.com
