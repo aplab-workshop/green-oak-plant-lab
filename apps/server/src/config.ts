@@ -44,6 +44,12 @@ export interface ServerConfig {
   unlockAllLevels: boolean;
   /** โฟลเดอร์หน้าเว็บที่จะเสิร์ฟ (ถ้ามี) */
   webDist?: string;
+  /** W2: ฐานข้อมูลบัญชี — ตั้ง = เปิดระบบบัญชี (postgres://… / memory:// / โฟลเดอร์ PGlite) */
+  databaseUrl?: string;
+  /** W2: กุญแจลงชื่อ Token — ไม่ตั้ง = สุ่มใหม่ทุกครั้งที่เริ่ม Server */
+  authSecret?: string;
+  /** W2: รันหลัง Proxy ของ Cloud (ใช้ IP จริงของผู้เล่นจาก X-Forwarded-For) */
+  trustProxy?: boolean;
 }
 
 export function loadConfig(): ServerConfig {
@@ -60,5 +66,8 @@ export function loadConfig(): ServerConfig {
     // P47: ค่าเริ่ม = รันด้วย npm run dev (โหมดผู้พัฒนา); ห้องเรียน (npm start/serve) ล็อกตามปกติ
     unlockAllLevels: bool('UNLOCK_ALL_LEVELS', process.env.npm_lifecycle_event === 'dev'),
     webDist: process.env.WEB_DIST || DEFAULT_WEB_DIST,
+    databaseUrl: process.env.DATABASE_URL || undefined,
+    authSecret: process.env.AUTH_SECRET || undefined,
+    trustProxy: bool('TRUST_PROXY', false),
   };
 }

@@ -8,3 +8,5 @@ coverage/
 *.db
 .DS_Store
 .obsidian/workspace*.json
+# ฐานข้อมูลบัญชี PGlite ในเครื่อง (W2)
+data/

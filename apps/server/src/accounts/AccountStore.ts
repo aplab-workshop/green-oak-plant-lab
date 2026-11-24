@@ -211,6 +211,13 @@ export class AccountStore {
     return rows[0] ? toPlayer(rows[0]) : null;
   }
 
+  /** ใช้ตรวจ Token (เทียบลายนิ้วมือ Password) */
+  async getPlayerWithHash(id: number): Promise<PlayerWithHash | null> {
+    const { rows } = await this.db.query(`SELECT ${PLAYER_COLS}, password_hash FROM players WHERE id = $1`, [id]);
+    const r = rows[0];
+    return r ? { ...toPlayer(r), passwordHash: r.password_hash as string } : null;
+  }
+
   async getPlayerForLogin(username: string): Promise<PlayerWithHash | null> {
     const { rows } = await this.db.query(`SELECT ${PLAYER_COLS}, password_hash FROM players WHERE username = $1`, [username]);
     const r = rows[0];

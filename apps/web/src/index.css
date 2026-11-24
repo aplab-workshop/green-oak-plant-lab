@@ -270,3 +270,29 @@ button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
   .home-actions { width: min(320px, 100%); }
   .home-mascot { display: none; }
 }
+
+/* W2 (SPEC § 4.39): บัญชีผู้เล่นบนหน้า Home + Modal เข้าสู่ระบบ/สมัคร */
+.home-btn:disabled { cursor: wait; opacity: 0.75; transform: none; }
+.home-account { position: absolute; top: 18px; right: 18px; z-index: 2; display: flex; white-space: nowrap; align-items: center; gap: 6px; border-radius: 999px; background: #ffffffe6; padding: 5px 6px 5px 14px; box-shadow: 0 6px 18px #17783f26; }
+.home-account-name { display: flex; align-items: center; gap: 6px; font-weight: 700; color: #17783f; }
+.home-account-logout { display: flex; align-items: center; gap: 4px; border-radius: 999px; padding: 5px 11px; font-size: 13px; font-weight: 600; color: #475569; }
+.home-account-logout:hover { background: #f1f5f9; color: #b91c1c; }
+.home-auth-error { border-radius: 12px; background: #fff7ed; padding: 8px 12px; font-size: 13px; color: #9a3412; }
+.auth-dialog { margin: auto; padding: 0; width: min(420px, calc(100vw - 24px)); border: 0; border-radius: 22px; background: white; box-shadow: 0 24px 80px #0003; }
+.auth-dialog::backdrop { background: #112f2b66; backdrop-filter: blur(3px); }
+.auth-shell { display: flex; flex-direction: column; }
+.auth-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid #f1f5f9; padding: 12px 12px 12px 16px; }
+.auth-tabs { display: flex; gap: 4px; border-radius: 999px; background: #f1f5f9; padding: 4px; }
+.auth-tab { border-radius: 999px; padding: 6px 16px; font-weight: 700; color: #64748b; }
+.auth-tab[aria-selected='true'] { background: white; color: #17783f; box-shadow: 0 2px 6px #0f172a1a; }
+.auth-form { display: flex; flex-direction: column; gap: 14px; padding: 18px 20px 22px; }
+.auth-field { display: flex; flex-direction: column; gap: 4px; }
+.auth-field span { font-size: 14px; font-weight: 700; color: #334155; }
+.auth-field input { border: 2px solid #e2e8f0; border-radius: 12px; padding: 9px 12px; font-size: 16px; }
+.auth-field input:focus { border-color: #22a35a; outline: none; }
+.auth-field small { font-size: 12px; color: #94a3b8; }
+.auth-error { border-radius: 12px; background: #fef2f2; padding: 8px 12px; font-size: 14px; color: #b91c1c; }
+.auth-submit { margin-top: 4px; font-size: 20px; padding: 12px 20px; }
+@media (max-width: 699px) {
+  .home-account { top: auto; bottom: 16px; right: 50%; transform: translateX(50%); }
+}

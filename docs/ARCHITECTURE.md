@@ -925,3 +925,11 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - `run_logs.events` เป็น JSONB ต่อรอบ (1 แถว/รอบ) — CSV (W4) แตกเป็นแถวตอนส่งออก
 - ยังไม่ได้ทดสอบ Adapter `pg` กับ Postgres จริง (ไม่มีในเครื่อง) — ทดสอบกับ Neon ตอน W7
 
+### 11.52 Implementation Notes (W2 — Register + Login)
+
+- Server: `api/auth.ts` (`registerAuthRoutes`, `authenticate()` สำหรับ W4–W6 ใช้ต่อ), `accounts/password.ts` (scrypt N=16384 r=8 p=1, `dummyHash()` ให้ ID ที่ไม่มีใช้เวลาเท่ากัน), `accounts/token.ts` (HMAC-SHA256, payload `{p, v, e}` — `v` = sha256(password_hash) 12 ตัวแรก จึงไม่ต้องมีตาราง Session), `accounts/rateLimit.ts` (Fixed window ในหน่วยความจำ)
+- `buildApp` เปิดฐานข้อมูล + Migration เมื่อมี `config.databaseUrl` แล้ว decorate `app.accounts` (null = ปิด); `trustProxy` จาก `TRUST_PROXY`
+- Shared: `auth.ts` (zod `RegisterRequest`/`LoginRequest` แปลง ID เป็นตัวพิมพ์เล็ก รหัสเชิญเป็นตัวพิมพ์ใหญ่ ก่อนตรวจรูปแบบ)
+- Web: `store/authStore.ts` — status `checking/off/signedOut/signedIn/error`; ใช้ `fetch` ตรง ไม่ผ่าน `apiFetch` ของ Demo (บัญชีต้องอยู่บน Server จริง); Demo เปิดเมื่อมี `VITE_ACCOUNTS_API`; Token ใน localStorage (`gol.auth.v1`) ตรวจซ้ำด้วย `/api/auth/me` ตอนเปิดหน้า
+- `app/AuthDialog.tsx` (native `<dialog>` แท็บเข้าสู่ระบบ/สมัคร), `HomeScreen` ปุ่ม Play ตามสถานะ + ป้าย 👤 ID มุมขวาบน (จอแคบอยู่ล่าง)
+- ตรวจใน Browser ด้วย Server แยกพอร์ต (tsx + env file ชั่วคราว, PGlite โฟลเดอร์ที่ seed รหัสเชิญด้วยสคริปต์) — ยังไม่มีเครื่องมือครูสร้างรหัส (W3)

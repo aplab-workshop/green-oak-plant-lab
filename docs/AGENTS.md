@@ -239,3 +239,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - ผู้ใช้อนุมัติ Milestone W; W1 เสร็จและ commit (ยังไม่ push): `apps/server/src/accounts/` — PostgreSQL อย่างเดียว (PGlite ในเครื่อง/เทสต์ ↔ `pg` กับ Neon), Migration เลขเวอร์ชัน, `AccountStore` (สมัครใช้สิทธิ์รหัสเชิญแบบ atomic) (SPEC § 4.38); tests 347/347
 - ยังไม่ต่อเข้า `app.ts` — ถัดไป W2 สมัคร/Login (บังคับก่อน Play) — รอผู้ใช้ตรวจรับ W1
 
+### สถานะเพิ่มเติม 2026-11-24 — W2 สมัคร/Login
+- เสร็จและ commit (ยังไม่ push): `/api/auth/register|login|me|config`, scrypt + Token HMAC (ผูก Password), จำกัดการลอง, หน้า Home ต้อง Login เมื่อระบบบัญชีเปิด (SPEC § 4.39); tests 358/358
+- ระบบบัญชีเปิดเมื่อตั้ง `DATABASE_URL` เท่านั้น — Dev/ห้องเรียน/Demo ปัจจุบันเล่นได้เหมือนเดิม; ตอนนี้ยังสร้างรหัสเชิญได้แค่ผ่านโค้ด (W3 ทำ CLI ครู)
+- ถัดไป W3 เครื่องมือครู — รอผู้ใช้ตรวจรับ W2

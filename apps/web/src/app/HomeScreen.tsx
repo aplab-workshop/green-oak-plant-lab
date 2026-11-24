@@ -1,19 +1,40 @@
-import { useState } from 'react';
-import { BookOpen, Play } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BookOpen, LogOut, Play, UserRound } from 'lucide-react';
 import { PlantView } from '../scene/PlantView';
 import { GuidePanel } from '../dashboard/GuidePanel';
 import { DEMO } from '../demo/mode';
+import { initAuth, logout, useAuthStore } from '../store/authStore';
+import { AuthDialog } from './AuthDialog';
 import { DetailDialog } from './DetailDialog';
 
 /**
  * หน้า Home / Main Menu (P52 / SPEC § 4.35) — Overlay บนฉาก 3D เดิมแบบไม่มี HUD
  * Play → เข้า HUD ปกติ · คู่มือการปลูก → Modal คู่มือเกม ปิดแล้วกลับมาที่นี่
+ * W2 (SPEC § 4.39): ระบบบัญชีเปิด → ต้อง Login ก่อน Play
  */
 export function HomeScreen({ onPlay }: { onPlay: () => void }) {
   const [guide, setGuide] = useState(false);
+  const [auth, setAuth] = useState(false);
+  const status = useAuthStore((s) => s.status);
+  const player = useAuthStore((s) => s.player);
+  const message = useAuthStore((s) => s.message);
+
+  useEffect(() => {
+    if (useAuthStore.getState().status === 'checking') void initAuth();
+  }, []);
+
+  const play = () => {
+    if (status === 'off' || status === 'signedIn') onPlay();
+    else if (status === 'signedOut') setAuth(true);
+  };
+
   return <div className="home-screen">
     <div className="home-scene" aria-hidden="true"><PlantView home /></div>
     <div className="home-shade" />
+    {status === 'signedIn' && player && <div className="home-account">
+      <span className="home-account-name"><UserRound size={16} /> {player.username}</span>
+      <button type="button" className="home-account-logout" onClick={logout}><LogOut size={15} /> ออกจากระบบ</button>
+    </div>}
     <section className="home-menu" aria-label="เมนูหลัก">
       <header className="home-title">
         <h1>GREEN OAK<br />VIRTUAL PLANT LAB</h1>
@@ -21,12 +42,15 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
       </header>
       <div className="home-actions">
         <div className="home-buttons">
-          <button type="button" autoFocus className="home-btn home-btn-primary" onClick={onPlay}>
-            <Play size={26} fill="currentColor" /> Play
+          <button type="button" autoFocus className="home-btn home-btn-primary" onClick={play} disabled={status === 'checking' || status === 'error'}>
+            <Play size={26} fill="currentColor" /> {status === 'checking' ? 'กำลังเชื่อมต่อ…' : 'Play'}
           </button>
           <button type="button" className="home-btn home-btn-secondary" onClick={() => setGuide(true)}>
             <BookOpen size={24} /> คู่มือการปลูก
           </button>
+          {status === 'error' && <p role="alert" className="home-auth-error">
+            {message} <button type="button" className="underline" onClick={() => void initAuth()}>ลองใหม่</button>
+          </p>}
         </div>
         {/* P54: Mascot โบกมือ เด้งแบบ Idle (DOM + CSS ไม่ใช่วัตถุในฉาก 3D) */}
         <figure className="home-mascot" aria-hidden="true">
@@ -39,5 +63,6 @@ export function HomeScreen({ onPlay }: { onPlay: () => void }) {
     {guide && <DetailDialog title="📖 คู่มือการปลูก" close={() => setGuide(false)}>
       <GuidePanel initialTab="routine" />
     </DetailDialog>}
+    {auth && <AuthDialog close={() => setAuth(false)} onDone={() => { setAuth(false); onPlay(); }} />}
   </div>;
 }

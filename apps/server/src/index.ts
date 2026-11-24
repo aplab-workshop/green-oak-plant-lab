@@ -27,6 +27,7 @@ console.log('  Green Oak Virtual Plant Lab');
 console.log(hasWeb ? '  เปิดหน้าเว็บที่:' : '  API พร้อมใช้งาน (ยังไม่ได้ build หน้าเว็บ — รัน npm run build ก่อน หรือใช้ npm run dev):');
 for (const u of urls) console.log(`    ${u}`);
 console.log(`  Labs: ${app.labs.labIds.join(', ')} · Mock PLC: ${config.mockMode}`);
+console.log(`  บัญชีผู้เล่น: ${app.accounts ? 'เปิด (ต้อง Login ก่อนเล่น)' : 'ปิด (ไม่ได้ตั้ง DATABASE_URL)'}`);
 console.log('');
 
 const shutdown = async () => {

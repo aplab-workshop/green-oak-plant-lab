@@ -574,11 +574,12 @@ tags: [green-oak, roadmap]
 - **เกณฑ์ผ่าน:** เทสต์ CRUD + Migration ผ่านบน PGlite (AC-69)
 - **ผลตรวจ:** AC-69 ผ่าน; `apps/server/src/accounts/` (db, migrations, AccountStore) + `test/accounts.test.ts` 10 ข้อ; tests 347/347 (42 files), typecheck, build และ build:demo ผ่าน; ยังไม่ต่อ API (W2) และยังไม่ทดสอบกับ Neon จริง (W7)
 
-### W2 — สมัครด้วยรหัสเชิญ + Login (บังคับก่อนเล่น)
-- [ ] `POST /api/auth/register` (ID a–z 0–9 _ 4–20 ตัว, Password ≥ 8, รหัสเชิญ) — ตรวจ+เพิ่ม `used_count` **ในธุรกรรมเดียว** กันสมัครพร้อมกันเกิน N; `POST /api/auth/login` → Token (หมดอายุ เช่น 7 วัน)
-- [ ] จำกัดการลองผิดต่อ IP/ID
-- [ ] หน้า Home: ปุ่ม **Play ต้อง Login** → Modal "เข้าสู่ระบบ / สมัคร"; แสดง ID มุมจอ + ออกจากระบบ
+### W2 — สมัครด้วยรหัสเชิญ + Login (บังคับก่อนเล่น) ✅
+- [x] `POST /api/auth/register` (ID a–z 0–9 _ 4–20 ตัว, Password ≥ 8, รหัสเชิญ) — ตรวจ+เพิ่ม `used_count` **ในธุรกรรมเดียว** กันสมัครพร้อมกันเกิน N; `POST /api/auth/login` → Token (หมดอายุ เช่น 7 วัน)
+- [x] จำกัดการลองผิดต่อ IP/ID
+- [x] หน้า Home: ปุ่ม **Play ต้อง Login** → Modal "เข้าสู่ระบบ / สมัคร"; แสดง ID มุมจอ + ออกจากระบบ
 - **เกณฑ์ผ่าน:** รหัส max 3 สมัครได้ 3 คนที่ 4 ถูกปฏิเสธ; ยิงพร้อมกัน 10 คำขอสำเร็จ 3 พอดี; ID ซ้ำ/รหัสผิด/ปิดแล้วถูกปฏิเสธ; ไม่ Login กด Play ไม่ได้
+- **ผลตรวจ:** AC-70 ผ่าน (SPEC § 4.39); `test/auth.test.ts` 11 ข้อ; tests 358/358 (43 files), typecheck, build และ build:demo ผ่าน; Browser (Server ทดสอบ PGlite โฟลเดอร์ + รหัสเชิญทดสอบ): Play ยังไม่ Login → Modal, รหัสผิดขึ้นข้อความไทย, สมัคร (ID/รหัสพิมพ์เล็กถูกแปลง) แล้วเข้าเกม, Reload ยังเข้าสู่ระบบ, ออกจากระบบ → Play เปิด Modal, Password ผิด/ถูก, จอ 375 px ป้าย ID อยู่ล่าง; Dev ปกติ (ไม่มี DATABASE_URL) Play เข้าเกมทันที; Console มีเฉพาะ 401/403 ของคำขอที่ตั้งใจให้ผิด
 
 ### W3 — เครื่องมือครู
 - [ ] CLI บนเครื่องครู (`npm run admin -- invite create --max 100`) ใช้ Admin key: สร้างรหัส (สุ่ม เช่น `GO-7K3P-9QX2`), ดูจำนวนที่ใช้, ปิดรหัส, รีเซ็ต Password, ลบบัญชี, **ลบ Log/คะแนนรายรหัสเชิญ** (เช่น จบเทอม), ดูพื้นที่ฐานข้อมูลที่ใช้ไป
