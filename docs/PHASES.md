@@ -543,6 +543,64 @@ tags: [green-oak, roadmap]
 - [x] ลบการหมุนกล้องใน `Scene3D` (`Controls home` → `enabled={!home}`), คง `Ambience home` แสงกลางวัน; `public/mascot/wave.png` (331×520 ตัดพื้นขาว/ช่องอะตอม/เงาพื้นจาก `6-edited-v2.png`); `HomeScreen` แถว `.home-actions` ปุ่ม + Mascot; CSS keyframes เด้ง −12 px + squash เล็กน้อย 2.4 s และเงาพื้นหดตาม; reduced-motion นิ่ง; จอ < 700 px ซ่อน Mascot
 - **ผลตรวจ:** AC-68 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser 1280×760: ฉากนิ่ง แสงกลางวัน โรงเรือนขวา, Mascot โบกมือข้างปุ่ม เด้ง 0 → −12 → 0 px ต่อเนื่อง, ไม่มี Console error; 375×812 Mascot ซ่อน ปุ่มกว้าง 320 px
 
+## Milestone W — บัญชีผู้เล่น + รหัสเชิญ + บันทึกคะแนน (ร่าง 2026-11-24 · รอผู้ใช้อนุมัติ)
+
+เป้าหมาย: Demo บน GitHub Pages มีระบบ **สมัคร/Login** โดยผู้เล่นกรอก **ID + Password + รหัสเชิญ** ที่ครูสร้าง (รหัสหนึ่งสมัครได้ไม่เกิน N ID) แล้ว**บันทึกคะแนน/ดาวรายด่าน** ได้อย่างเชื่อถือได้
+
+### การตัดสินใจที่ต้องตอบก่อนเริ่ม W1 (แนะนำไว้ ✅)
+| # | เรื่อง | ทางเลือก | แนะนำ |
+|---|---|---|---|
+| D1 | Backend | **Supabase** (Postgres + Auth + Functions, Free tier) / Server เราบน Cloud (Render/Railway) | ✅ Supabase สำหรับบัญชี/คะแนน + ดู D3 |
+| D2 | ระดับกันโกงคะแนน | ตรวจความสมเหตุสมผลอย่างเดียว / **Server เล่นซ้ำจาก Seed + คำสั่ง (Replay)** / เกมรันบน Server ตลอด | ✅ Replay (Sim เป็น Deterministic อยู่แล้ว) |
+| D3 | ที่รัน Replay | Supabase Edge Function (จำกัด CPU ~2 วินาที/คำขอ — **Replay ด่าน 5 วันที่ dt 1 s ≈ 430,000 Step น่าจะเกิน**) / **Worker Node เล็ก ๆ** (Render free) ดึงคิวจาก DB | ✅ วัดก่อนใน W4 แล้วเลือก; สำรอง = Worker Node |
+| D4 | รหัสเชิญ | จำกัดจำนวนอย่างเดียว / **+ วันหมดอายุ + ชื่อกลุ่ม (ห้อง)** | ✅ ครบทั้งสาม — กลุ่มใช้แยกตารางอันดับ |
+| D5 | ตารางอันดับ | ไม่มี / **ในกลุ่มเดียวกัน** / ทุกคน | ✅ ในกลุ่ม + ของตัวเอง |
+| D6 | ผู้เล่นไม่ Login | เล่นไม่ได้ / **เล่นได้แต่ไม่บันทึก** | ✅ เล่นได้ (Guest) |
+| D7 | บัญชีบริการ | ผู้ใช้สมัคร Supabase/Cloud **เอง** และเก็บคีย์เอง (Agent สมัครแทนไม่ได้) | — |
+
+### หลักการที่ใช้ทุก Phase
+- ไม่เก็บรหัสผ่านเอง — ใช้ Auth ของ Supabase (Hash ให้); ID แปลงเป็นอีเมลสมมติ `<id>@players.greenoak.local` (ปิด Email confirm) ไม่ขออีเมล/ชื่อจริงนักเรียน (PDPA, ผู้เยาว์)
+- คีย์ `anon` อยู่ในหน้าเว็บได้ (ป้องกันด้วย Row Level Security); คีย์ `service_role` **ห้ามอยู่ใน repo/หน้าเว็บ** ใช้เฉพาะ Function/Worker ผ่าน Secrets
+- โหมดห้องเรียน (`npm run serve`) และ Dev ไม่ต้องพึ่ง Supabase — ระบบบัญชีเปิดเฉพาะ Build demo ที่ตั้งค่าไว้
+- ทุก Phase: เทสต์ + typecheck ผ่าน, docs, commit `phase(Wx)`, หยุดให้ผู้ใช้ตรวจ; push ขึ้น GitHub เมื่อผู้ใช้อนุญาต
+
+### W1 — โครง Backend + ฐานข้อมูล
+- [ ] ผู้ใช้สร้างโปรเจกต์ Supabase; ไฟล์ SQL Migration ใน repo (`supabase/migrations/`)
+- [ ] ตาราง `profiles` (user_id, username unique, group_id), `invite_codes` (code_hash, group_label, max_uses, used_count, expires_at, active), `scores` (user_id, level_id, sim_version, score, stars, yield_g, elapsed_s, verified, created_at)
+- [ ] Row Level Security: อ่าน/เขียนเฉพาะของตัวเอง; ตารางอันดับอ่านผ่าน View ที่เปิดเฉพาะ username + คะแนนในกลุ่มเดียวกัน
+- **เกณฑ์ผ่าน:** เทสต์ SQL/Policy (ผู้ใช้ A อ่าน/แก้ข้อมูล B ไม่ได้, anon เขียนไม่ได้)
+
+### W2 — สมัครด้วยรหัสเชิญ + Login
+- [ ] Function `register(id, password, invite)`: ตรวจรูปแบบ ID (a–z 0–9 _ 4–20 ตัว) / Password ≥ 8 → ล็อกแถวรหัสเชิญแล้วตรวจ ใช้งานได้ ยังไม่หมดอายุ `used_count < max_uses` → สร้างบัญชี → `used_count + 1` **ในธุรกรรมเดียว** (กันสมัครพร้อมกันเกิน N)
+- [ ] จำกัดการลองผิด (สมัคร/Login) ต่อ IP และต่อ ID
+- [ ] UI บนหน้า Home: ปุ่ม "เข้าสู่ระบบ / สมัคร" (Modal), แสดง ID ที่ Login อยู่, ออกจากระบบ; ไม่ Login ยังกด Play ได้ (Guest ไม่บันทึก)
+- **เกณฑ์ผ่าน:** รหัส max 3 → สมัครครบ 3 แล้วคนที่ 4 ถูกปฏิเสธ; สมัครพร้อมกัน 10 คำขอกับรหัส max 3 สำเร็จ 3 พอดี; รหัสหมดอายุ/ปิดถูกปฏิเสธ; ID ซ้ำถูกปฏิเสธ
+
+### W3 — เครื่องมือครู
+- [ ] สร้างรหัสเชิญ (สุ่ม เช่น `GO-7K3P-9QX2`) กำหนด กลุ่ม / จำนวน / วันหมดอายุ — เริ่มด้วยสคริปต์ CLI (`npm run invite:create`) ใช้คีย์ service จากเครื่องครู
+- [ ] ดูการใช้รหัส, ปิดรหัส, รีเซ็ต Password นักเรียน (เพราะไม่มีอีเมล), ลบบัญชี
+- **เกณฑ์ผ่าน:** ครูทำครบทุกอย่างจาก CLI โดยคีย์ service ไม่ออกจากเครื่อง
+
+### W4 — บันทึกรอบเล่น + Replay (Spike ก่อน)
+- [ ] บันทึก "Run log" ระหว่างเล่น: ด่าน, Seed, `sim_version`, และคำสั่งที่มีผลจริงพร้อม `simTimeS` (การเปลี่ยน Actuator/Dose/Speed ไม่ต้องเก็บ — Speed ไม่มีผลต่อผล)
+- [ ] `replayRun(log)` แบบ Headless (ใช้ LabSession/Simulation เดิม) ได้คะแนน/ดาว**ตรงกับที่เล่นจริงทุกครั้ง**
+- [ ] วัดเวลา Replay ด่าน 1–4 → เลือกที่รัน (D3)
+- **เกณฑ์ผ่าน:** เล่นจริง 20 รอบ (หลาย Speed, มี Pause/เหตุการณ์/โดส) Replay ได้ผลเท่ากันทั้ง 20; รู้เวลา Replay ต่อด่าน
+- **ความเสี่ยง:** คำสั่งจาก Mock PLC มีผลตามรอบ Poll (เวลาจริง) — ต้องบันทึกตาม `simTimeS` ที่มีผลจริง ไม่ใช่เวลาที่กด
+
+### W5 — ส่งคะแนนและตรวจ
+- [ ] จบรอบ (won/lost) ขณะ Login → ส่ง Run log; Server Replay แล้วบันทึก `scores.verified = true` เฉพาะผลจาก Replay (ไม่เชื่อตัวเลขจากหน้าเว็บ)
+- [ ] ปฏิเสธ `sim_version` ที่ไม่ตรงกับ Server, Log ใหญ่ผิดปกติ, ส่งซ้ำ
+- **เกณฑ์ผ่าน:** แก้คะแนนใน Browser แล้วส่ง → คะแนนที่บันทึกยังเป็นค่าจริง; Log ปลอม/ผิดเวอร์ชันถูกปฏิเสธ
+
+### W6 — คะแนนของฉัน + ตารางอันดับ
+- [ ] หน้าเลือกด่านแสดง Best/ดาวจาก Server (แทน Memory) เมื่อ Login; Modal ตารางอันดับรายด่านในกลุ่ม
+- **เกณฑ์ผ่าน:** Login จากเครื่องอื่นเห็นคะแนนเดิม; ตารางอันดับเห็นเฉพาะกลุ่มตัวเอง
+
+### W7 — Deploy + เอกสาร + ความเป็นส่วนตัว
+- [ ] ตั้งค่า URL/anon key ผ่าน GitHub Actions Variables ตอน `build:demo`; README วิธีตั้ง Supabase/Worker; นโยบายข้อมูล (เก็บอะไร เก็บนานเท่าไร ลบบัญชีได้)
+- **เกณฑ์ผ่าน:** Pages ใช้งานสมัคร → เล่น → คะแนนขึ้นตารางอันดับ ครบวงจร; ไม่มีความลับใน repo (สแกนก่อน push)
+
 ## Milestone 3–5 (แตก Phase ละเอียดเมื่อถึงรอบ)
 
 | Milestone | Phase คร่าว ๆ |
