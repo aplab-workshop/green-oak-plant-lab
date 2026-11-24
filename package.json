@@ -19,7 +19,8 @@
     "test:watch": "vitest",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "serve": "npm run build && npm run start",
-    "build:demo": "npm run build:demo -w @gol/web"
+    "build:demo": "npm run build:demo -w @gol/web",
+    "admin": "tsx apps/server/src/admin/main.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.5",

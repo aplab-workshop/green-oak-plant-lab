@@ -243,3 +243,7 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 - เสร็จและ commit (ยังไม่ push): `/api/auth/register|login|me|config`, scrypt + Token HMAC (ผูก Password), จำกัดการลอง, หน้า Home ต้อง Login เมื่อระบบบัญชีเปิด (SPEC § 4.39); tests 358/358
 - ระบบบัญชีเปิดเมื่อตั้ง `DATABASE_URL` เท่านั้น — Dev/ห้องเรียน/Demo ปัจจุบันเล่นได้เหมือนเดิม; ตอนนี้ยังสร้างรหัสเชิญได้แค่ผ่านโค้ด (W3 ทำ CLI ครู)
 - ถัดไป W3 เครื่องมือครู — รอผู้ใช้ตรวจรับ W2
+
+### สถานะเพิ่มเติม 2026-11-24 — W3 เครื่องมือครู
+- เสร็จและ commit (ยังไม่ push): `npm run admin -- …` (invite create/list/close/open, player list/reset-password/delete, data delete --invite, stats) เรียก Admin API ด้วย `ADMIN_KEY` (SPEC § 4.40); tests 366/366
+- ถัดไป W4 Log การเล่น (CSV) — รอผู้ใช้ตรวจรับ W3

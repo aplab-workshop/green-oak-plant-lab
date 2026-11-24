@@ -933,3 +933,12 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 - Web: `store/authStore.ts` — status `checking/off/signedOut/signedIn/error`; ใช้ `fetch` ตรง ไม่ผ่าน `apiFetch` ของ Demo (บัญชีต้องอยู่บน Server จริง); Demo เปิดเมื่อมี `VITE_ACCOUNTS_API`; Token ใน localStorage (`gol.auth.v1`) ตรวจซ้ำด้วย `/api/auth/me` ตอนเปิดหน้า
 - `app/AuthDialog.tsx` (native `<dialog>` แท็บเข้าสู่ระบบ/สมัคร), `HomeScreen` ปุ่ม Play ตามสถานะ + ป้าย 👤 ID มุมขวาบน (จอแคบอยู่ล่าง)
 - ตรวจใน Browser ด้วย Server แยกพอร์ต (tsx + env file ชั่วคราว, PGlite โฟลเดอร์ที่ seed รหัสเชิญด้วยสคริปต์) — ยังไม่มีเครื่องมือครูสร้างรหัส (W3)
+
+### 11.53 Implementation Notes (W3 — Teacher Admin Tools)
+
+- `api/admin.ts`: Admin API ใน Fastify plugin เดียว (`onRequest` guard: ระบบบัญชีปิด/ไม่มี ADMIN_KEY ≥ 16 ตัว → 403, Key ผิด → 401 + RateLimiter ต่อ IP → 429); เทียบ Key ด้วย `timingSafeEqual(sha256)` (ความยาวเท่ากันเสมอ)
+- เส้นทาง: `GET/POST /api/admin/invites`, `PATCH /api/admin/invites/:code` (active), `DELETE /api/admin/invites/:code/data?dryRun=1&withAccounts=1`, `GET /api/admin/players?invite=`, `POST /api/admin/players/:username/password`, `DELETE /api/admin/players/:username`, `GET /api/admin/stats`
+- `admin/cli.ts` (`runAdmin(argv, {url,key}, print)` → Exit code; Parser ไม่ใช้ไลบรารี) + `admin/main.ts` (`process.loadEnvFile('.env')` — ค่าใน Environment ชนะ); สคริปต์ราก `npm run admin`
+- `AccountStore`: `countInviteData`, `deleteInviteData` (ธุรกรรมเดียว, ไม่ลด used_count), `stats` (`pg_database_size()::float8` — ฐาน PGlite เปล่า ~7.5 MB)
+- `accounts/inviteCode.ts`: สุ่มด้วย `crypto.randomInt` จากชุดตัวอักษร 31 ตัว (ไม่มี 0/O/1/I/L)
+- `zod` เพิ่มเป็น dependency ตรงของ `@gol/server` (เดิมใช้ผ่าน shared)

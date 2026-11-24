@@ -65,6 +65,21 @@ export interface RunLogRow extends RunLogInput {
   createdAt: Date;
 }
 
+/** จำนวนข้อมูลของรหัสเชิญ (ใช้ก่อน/หลังลบ) */
+export interface InviteDataCount {
+  players: number;
+  scores: number;
+  runLogs: number;
+}
+
+export interface DatabaseStats {
+  invites: number;
+  players: number;
+  scores: number;
+  runLogs: number;
+  databaseBytes: number;
+}
+
 export interface RunFilter {
   playerId?: number;
   inviteCode?: string;
@@ -244,6 +259,43 @@ export class AccountStore {
   async deletePlayer(id: number): Promise<boolean> {
     const { rows } = await this.db.query('DELETE FROM players WHERE id = $1 RETURNING id', [id]);
     return rows.length > 0;
+  }
+
+  async countInviteData(inviteCode: string): Promise<InviteDataCount> {
+    const { rows } = await this.db.query<InviteDataCount>(
+      `SELECT
+         (SELECT count(*)::int FROM players WHERE invite_code = $1) AS players,
+         (SELECT count(*)::int FROM scores s JOIN players p ON p.id = s.player_id WHERE p.invite_code = $1) AS scores,
+         (SELECT count(*)::int FROM run_logs l JOIN players p ON p.id = l.player_id WHERE p.invite_code = $1) AS "runLogs"`,
+      [inviteCode],
+    );
+    return rows[0]!;
+  }
+
+  /**
+   * ลบคะแนน + Log ของทุกคนในรหัสเชิญ (เช่น จบเทอม) — withAccounts ลบบัญชีด้วย
+   * used_count ของรหัสไม่ลด (นับ "จำนวนครั้งที่สมัคร" ไม่ใช่จำนวนบัญชีที่เหลือ)
+   */
+  async deleteInviteData(inviteCode: string, withAccounts: boolean): Promise<InviteDataCount> {
+    return this.db.transaction(async (tx) => {
+      const ids = 'SELECT id FROM players WHERE invite_code = $1';
+      const scores = await tx.query(`DELETE FROM scores WHERE player_id IN (${ids}) RETURNING id`, [inviteCode]);
+      const logs = await tx.query(`DELETE FROM run_logs WHERE player_id IN (${ids}) RETURNING id`, [inviteCode]);
+      const players = withAccounts ? await tx.query('DELETE FROM players WHERE invite_code = $1 RETURNING id', [inviteCode]) : { rows: [] };
+      return { players: players.rows.length, scores: scores.rows.length, runLogs: logs.rows.length };
+    });
+  }
+
+  async stats(): Promise<DatabaseStats> {
+    const { rows } = await this.db.query<DatabaseStats>(
+      `SELECT
+         (SELECT count(*)::int FROM invite_codes) AS invites,
+         (SELECT count(*)::int FROM players) AS players,
+         (SELECT count(*)::int FROM scores) AS scores,
+         (SELECT count(*)::int FROM run_logs) AS "runLogs",
+         pg_database_size(current_database())::float8 AS "databaseBytes"`,
+    );
+    return rows[0]!;
   }
 
   // ---------- คะแนน / Log ของรอบ ----------

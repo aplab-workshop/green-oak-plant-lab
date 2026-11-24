@@ -50,6 +50,8 @@ export interface ServerConfig {
   authSecret?: string;
   /** W2: รันหลัง Proxy ของ Cloud (ใช้ IP จริงของผู้เล่นจาก X-Forwarded-For) */
   trustProxy?: boolean;
+  /** W3: กุญแจของครูสำหรับ Admin API (npm run admin) — ไม่ตั้ง = ปิด */
+  adminKey?: string;
 }
 
 export function loadConfig(): ServerConfig {
@@ -69,5 +71,6 @@ export function loadConfig(): ServerConfig {
     databaseUrl: process.env.DATABASE_URL || undefined,
     authSecret: process.env.AUTH_SECRET || undefined,
     trustProxy: bool('TRUST_PROXY', false),
+    adminKey: process.env.ADMIN_KEY || undefined,
   };
 }

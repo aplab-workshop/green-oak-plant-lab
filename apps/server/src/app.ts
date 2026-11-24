@@ -8,6 +8,7 @@ import type { ServerConfig } from './config';
 import { registerRoutes } from './api/routes';
 import { registerWs } from './api/ws';
 import { registerAuthRoutes, type Accounts } from './api/auth';
+import { registerAdminRoutes } from './api/admin';
 import { AccountStore } from './accounts/AccountStore';
 import { openDatabase } from './accounts/db';
 import { migrate } from './accounts/migrations';
@@ -41,6 +42,7 @@ export async function buildApp(
   await app.register(websocket);
   registerRoutes(app);
   registerAuthRoutes(app, app.accounts);
+  registerAdminRoutes(app, app.accounts, config.adminKey);
   registerWs(app, config);
 
   // โหมดใช้งานจริงใน LAN: Server เสิร์ฟหน้าเว็บที่ build แล้ว (apps/web/dist) บนพอร์ตเดียวกัน
