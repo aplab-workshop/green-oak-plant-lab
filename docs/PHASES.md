@@ -543,7 +543,7 @@ tags: [green-oak, roadmap]
 - [x] ลบการหมุนกล้องใน `Scene3D` (`Controls home` → `enabled={!home}`), คง `Ambience home` แสงกลางวัน; `public/mascot/wave.png` (331×520 ตัดพื้นขาว/ช่องอะตอม/เงาพื้นจาก `6-edited-v2.png`); `HomeScreen` แถว `.home-actions` ปุ่ม + Mascot; CSS keyframes เด้ง −12 px + squash เล็กน้อย 2.4 s และเงาพื้นหดตาม; reduced-motion นิ่ง; จอ < 700 px ซ่อน Mascot
 - **ผลตรวจ:** AC-68 ผ่าน; tests 337/337 (41 files), typecheck, build และ build:demo ผ่าน; Browser 1280×760: ฉากนิ่ง แสงกลางวัน โรงเรือนขวา, Mascot โบกมือข้างปุ่ม เด้ง 0 → −12 → 0 px ต่อเนื่อง, ไม่มี Console error; 375×812 Mascot ซ่อน ปุ่มกว้าง 320 px
 
-## Milestone W — บัญชีผู้เล่น + รหัสเชิญ + บันทึกคะแนน + Log (แก้ 2026-11-24 · รอผู้ใช้อนุมัติ)
+## Milestone W — บัญชีผู้เล่น + รหัสเชิญ + บันทึกคะแนน + Log (ผู้ใช้อนุมัติ 2026-11-24)
 
 เป้าหมาย: เกมบน GitHub Pages ต้อง **Login ก่อนเล่น**; สมัครด้วย **ID + Password + รหัสเชิญ** ที่ครูสร้าง (รหัสหนึ่งสมัครได้ไม่เกิน N ID); บันทึก**คะแนน/ดาวรายด่าน** และ **Log การปรับอุปกรณ์ตลอดรอบ** ให้ครูดาวน์โหลดเป็น **CSV** แยกตามรหัสเชิญได้
 
@@ -568,10 +568,11 @@ tags: [green-oak, roadmap]
 - Password Hash ด้วย `scrypt` (ใน Node อยู่แล้ว ไม่ต้องเพิ่มไลบรารี); ไม่เก็บอีเมล/ชื่อจริง (PDPA, ผู้เยาว์); ความลับอยู่ใน Environment ของ Cloud เท่านั้น
 - โหมดห้องเรียน (`npm run serve`) และ Dev ทำงานได้เหมือนเดิมโดยไม่ต้อง Login (เปิดระบบบัญชีด้วย Config)
 
-### W1 — ฐานข้อมูล + API บัญชีบน Server เดิม
-- [ ] ตาราง `invite_codes` (code, max_uses, used_count, active, created_at), `players` (id, username unique, password_hash, invite_code, created_at), `scores`, `run_logs`
-- [ ] ชั้นเก็บข้อมูลแยก Interface (SQLite ในเครื่อง/เทสต์ ↔ Postgres บน Cloud ตาม D8)
-- **เกณฑ์ผ่าน:** เทสต์ CRUD + Migration ผ่านบน SQLite
+### W1 — ฐานข้อมูล + API บัญชีบน Server เดิม ✅
+- [x] ตาราง `invite_codes` (code, max_uses, used_count, active, created_at), `players` (id, username unique, password_hash, invite_code, created_at), `scores`, `run_logs`
+- [x] ชั้นเก็บข้อมูลแยก Interface — **เปลี่ยนจาก SQLite เป็น PGlite** (Postgres ใน Node) ในเครื่อง/เทสต์ ↔ Neon Postgres บน Cloud: SQL ชุดเดียวกัน (SPEC § 4.38)
+- **เกณฑ์ผ่าน:** เทสต์ CRUD + Migration ผ่านบน PGlite (AC-69)
+- **ผลตรวจ:** AC-69 ผ่าน; `apps/server/src/accounts/` (db, migrations, AccountStore) + `test/accounts.test.ts` 10 ข้อ; tests 347/347 (42 files), typecheck, build และ build:demo ผ่าน; ยังไม่ต่อ API (W2) และยังไม่ทดสอบกับ Neon จริง (W7)
 
 ### W2 — สมัครด้วยรหัสเชิญ + Login (บังคับก่อนเล่น)
 - [ ] `POST /api/auth/register` (ID a–z 0–9 _ 4–20 ตัว, Password ≥ 8, รหัสเชิญ) — ตรวจ+เพิ่ม `used_count` **ในธุรกรรมเดียว** กันสมัครพร้อมกันเกิน N; `POST /api/auth/login` → Token (หมดอายุ เช่น 7 วัน)

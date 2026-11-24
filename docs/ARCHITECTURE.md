@@ -915,3 +915,13 @@ Root ยาวเกินก้นถัง: ความยาวรากท�
 
 - กล้องหมุน (P53) กระตุกเพราะฉากเต็มความละเอียดวาดใหม่ทุกเฟรม → เลิกหมุน; หน้า Home ฉาก 3D นิ่ง (วาดใหม่เฉพาะเมื่อ Snapshot เปลี่ยน) ส่วนความ "มีชีวิต" ย้ายไปที่ Mascot แบบ DOM + CSS keyframes (Compositor ทำงาน transform อย่างเดียว ลื่นแม้ Main thread/GPU ยุ่งกับ Canvas)
 - กฎ "ภาพ 3D ขับด้วย Server" กลับมาเต็มรูปแบบ — ไม่มีข้อยกเว้นแล้ว (Mascot บนหน้า Home ไม่ใช่วัตถุในฉาก 3D)
+
+### 11.51 Implementation Notes (W1 — Account Database)
+
+- `apps/server/src/accounts/`: `db.ts` (Interface `Database` = `query`/`exec`/`transaction`/`close`; `openDatabase(url)` เลือก `pg` Pool เมื่อเป็น `postgres://`, ไม่งั้น PGlite — `memory://` หรือโฟลเดอร์), `migrations.ts` (`MIGRATIONS` เลขเวอร์ชัน + `schema_migrations`, แต่ละเวอร์ชันรันในธุรกรรม), `AccountStore.ts` (CRUD รหัสเชิญ/ผู้เล่น/คะแนน/Log)
+- ไลบรารีโหลดแบบ `await import()` — LabManager/Demo build ไม่ดึง PGlite/pg ไปด้วย; ยังไม่ต่อเข้ากับ `app.ts` (W2)
+- ใช้ PGlite แทน SQLite: SQL/Constraint/Error code (`23505`) เหมือน Neon จริง; ID ใช้ `INTEGER` (ไม่ใช่ `BIGINT`) เพราะ `pg` คืน int8 เป็น string; น้ำหนักใช้ `DOUBLE PRECISION` (REAL = float4 ทำให้ค่าเพี้ยน)
+- สมัคร: `UPDATE … used_count < max_uses RETURNING` แล้ว INSERT ในธุรกรรมเดียว; ล้มเหลวโยน Error ออกนอกธุรกรรม (ROLLBACK) แล้วแปลงเป็นผล `RegisterFailure` — ไม่จับ Error ภายในธุรกรรมเพราะ Postgres อยู่สถานะ aborted
+- `run_logs.events` เป็น JSONB ต่อรอบ (1 แถว/รอบ) — CSV (W4) แตกเป็นแถวตอนส่งออก
+- ยังไม่ได้ทดสอบ Adapter `pg` กับ Postgres จริง (ไม่มีในเครื่อง) — ทดสอบกับ Neon ตอน W7
+

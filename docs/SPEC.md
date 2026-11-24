@@ -571,6 +571,17 @@ Briefing, Loss story และคู่มือ 📖 ใช้ของเด�
 - **Mascot AP LAB ท่าโบกมือ** (`public/mascot/wave.png` ตัดจาก `AP_LAB_Mascot/6-edited-v2.png`) ยืนข้างปุ่มเมนู เป็น DOM ไม่ใช่วัตถุในฉาก 3D: เด้งขึ้นลงเบา ๆ แบบ Idle ของเกม (CSS keyframes ~2.4 s) พร้อมเงาพื้นที่หดตามจังหวะ — ลื่นทุกเครื่องเพราะไม่ต้องวาดฉาก 3D ใหม่
 - `prefers-reduced-motion: reduce` → Mascot นิ่ง; จอแคบ (< 700 px) ซ่อน Mascot ให้ปุ่มเต็มความกว้าง
 
+### 4.38 W1 — Account Database (Milestone W, 2026-11-24)
+
+ฐานข้อมูลของระบบบัญชีผู้เล่น (แผน Milestone W ใน PHASES) — W1 ทำเฉพาะชั้นเก็บข้อมูล ยังไม่มี API/หน้าจอ (W2)
+
+- **ฐานข้อมูลเดียวคือ PostgreSQL:** บน Cloud ใช้ Neon ผ่าน `pg` (D8); ในเครื่อง/เทสต์ใช้ **PGlite** (Postgres ที่รันใน Node แบบ WASM ไม่ต้องติดตั้ง) — SQL ชุดเดียวกันทั้งสองที่ จึงไม่มีความต่างของ Dialect แบบ SQLite ↔ Postgres
+- เลือกด้วย `DATABASE_URL`: `postgres://…`/`postgresql://…` = Server จริง, `memory://` = PGlite ในหน่วยความจำ, อย่างอื่น = โฟลเดอร์ข้อมูล PGlite
+- **ตาราง:** `invite_codes` (code, max_uses > 0, used_count ≤ max_uses, active, note), `players` (username ไม่ซ้ำ, password_hash, invite_code ที่ใช้สมัคร), `scores` (ผลรอบ: ด่าน, คะแนน, ดาว 0–3, ชนะ/แพ้, น้ำหนัก, เวลาจำลอง/จริง, เวอร์ชัน, นับอันดับหรือไม่ + เหตุผล), `run_logs` (เหตุการณ์ของรอบเป็น JSON array, ด่าน) — `scores`/`run_logs` ไม่ซ้ำต่อ (ผู้เล่น, รอบ) และลบตามเมื่อลบผู้เล่น
+- **Migration มีเลขเวอร์ชัน** เก็บใน `schema_migrations` รันซ้ำได้ไม่พัง (ข้ามเวอร์ชันที่ทำแล้ว)
+- **สมัคร = ธุรกรรมเดียว:** ใช้สิทธิ์รหัสเชิญด้วย `UPDATE … WHERE active AND used_count < max_uses` (atomic) แล้วสร้างผู้เล่น; ID ซ้ำ → ยกเลิกทั้งธุรกรรม (ไม่เสียสิทธิ์รหัส); ผลเป็น `invite_not_found` / `invite_inactive` / `invite_full` / `username_taken`
+- ตัวเลข `count`/`bigint` แปลงเป็น `int` ใน SQL (pg คืน bigint เป็น string)
+
 ## 5. Functional Requirements
 
 รหัส `FR-xx` ใช้อ้างอิงใน Test และ Commit, คอลัมน์ **M** = Milestone ที่ต้องทำเสร็จ
@@ -741,6 +752,7 @@ M1 ผ่านเมื่อทุกข้อเป็นจริง (ข้
 ### 8.10 P36–P37 — วางระบบด่านใหม่
 
 - [x] AC-50 🧪 **P36 / SPEC § 4.19:** แดดตามเวลา (0 ก่อน 06:00/หลัง 19:00, สูงสุด 300 ตอน 13:00) รวมกับ LED ใน PPFD ต้น/Sensor/DLI; แดดเพิ่มความร้อนและพัดลมลดได้; ไฟดับเหลือแดด; สูตรเติม LED ให้ PPFD ~300 ผ่านด่าน 1–4 ⭐⭐⭐ และ Ladder Auto ปรับ LED ตาม D102; tests/typecheck/build ผ่าน
+- [x] AC-69 **W1 / SPEC § 4.38:** Migration สร้าง 4 ตารางและรันซ้ำได้; CRUD รหัสเชิญ/ผู้เล่น/คะแนน/Log ผ่านบน PGlite; รหัส max 2 สมัครได้ 2 คนที่ 3 ได้ `invite_full`; ID ซ้ำไม่เสียสิทธิ์รหัส; รอบซ้ำถูกปฏิเสธ; ลบผู้เล่นแล้วคะแนน/Log หายตาม; ข้อมูลอยู่ครบหลังปิด-เปิดฐานข้อมูลแบบโฟลเดอร์
 - [x] AC-68 **P54 / SPEC § 4.37:** หน้า Home ไม่มีกล้องหมุน (ฉากนิ่ง แสงกลางวัน โรงเรือนเยื้องขวา), Mascot โบกมือเด้งเบา ๆ ข้างปุ่ม, reduced-motion นิ่ง, จอแคบซ่อน Mascot; tests + Browser ไม่มี Console error
 - [x] AC-67 **P53 / SPEC § 4.36:** หน้า Home กล้องหมุนรอบโรงเรือนช้า ๆ (โรงเรือนยังอยู่ฝั่งขวา ไม่ทับเมนู), แสงกลางวันสว่าง, reduced-motion ไม่หมุน, Play แล้วกล้องหยุด/มุมปกติ; tests + Browser ไม่มี Console error
 - [x] AC-66 **P52 / SPEC § 4.35:** เปิดเว็บเห็นหน้า Home (ชื่อเกม/คำโปรย/ปุ่ม Play + คู่มือการปลูก) บนฉาก 3D เต็มจอ ไม่มี HUD โรงเรือนเยื้องขวา; Play แล้วเข้า HUD ปกติ; คู่มือเปิด Modal ปิดแล้วกลับ Home; Hover มีผล; tests + Browser ไม่มี Console error

@@ -234,3 +234,8 @@ Green Oak Virtual Plant Lab คือห้องแล็บเสมือน�
 
 ### สถานะเพิ่มเติม 2026-11-24 — ร่างแผน Milestone W (บัญชีผู้เล่น)
 - แผน W1–W7 ใน PHASES (แก้ 2026-11-24): Server ของเราขึ้น Cloud (ไม่ใช้ Supabase), ตรวจคะแนนแบบสมเหตุสมผล (ไม่ Replay), Login บังคับ, ตารางอันดับทุกคนเห็น, Log CSV แยกตามรหัสเชิญ ; D8 = Render (Server) + Neon (Postgres), D9 Log ไม่หมดอายุจนครูลบ — **รอผู้ใช้อนุมัติแผนก่อนเขียนโค้ด**
+
+### สถานะเพิ่มเติม 2026-11-24 — W1 Account Database
+- ผู้ใช้อนุมัติ Milestone W; W1 เสร็จและ commit (ยังไม่ push): `apps/server/src/accounts/` — PostgreSQL อย่างเดียว (PGlite ในเครื่อง/เทสต์ ↔ `pg` กับ Neon), Migration เลขเวอร์ชัน, `AccountStore` (สมัครใช้สิทธิ์รหัสเชิญแบบ atomic) (SPEC § 4.38); tests 347/347
+- ยังไม่ต่อเข้า `app.ts` — ถัดไป W2 สมัคร/Login (บังคับก่อน Play) — รอผู้ใช้ตรวจรับ W1
+
